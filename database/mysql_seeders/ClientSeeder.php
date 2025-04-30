@@ -188,7 +188,7 @@ class ClientSeeder extends Seeder
             (169, 1, '".ClientType::CITY->value."', 'Zogno', 'Piazza Italia, 8', '24019', 'M184', '94000290166', '00276180163', NULL, NULL, NULL, NULL),
             (170, 1, '".ClientType::CITIES_UNION->value."', 'Unione Montana dal Tobbio al Colma', 'Via Umberto I, 37', '15060', 'B080', '02409760069', '02409760069', NULL, NULL, NULL, NULL),
             (171, 1, '".ClientType::CITY->value."', 'Bagnolo Mella', 'Piazza 4 Novembre, 2', '25021', 'A569', '00453990178', '00564140986', NULL, NULL, NULL, NULL),
-            (172, 1, '".ClientType::CITY->value."', 'San Fior', 'Piazza Guglielmo Marconi, 2', '31020', 'h843', '82002790267', '01974550269', NULL, NULL, NULL, NULL),
+            (172, 1, '".ClientType::CITY->value."', 'San Fior', 'Piazza Guglielmo Marconi, 2', '31020', 'H843', '82002790267', '01974550269', NULL, NULL, NULL, NULL),
             (173, 1, '".ClientType::CITY->value."', 'Martinengo', 'Piazza Maggiore, 1', '24057', 'E987', '00683770168', '00683770168', NULL, NULL, NULL, NULL),
             (174, 1, '".ClientType::CITY->value."', 'Anversa degli Abruzzi', 'Via G. Manso , 5', '67030', 'A318', '00161690664', '00161690664', NULL, NULL, NULL, NULL),
             (175, 1, '".ClientType::CITY->value."', 'Dicomano', 'Piazza della Repubblica, 3', '50062', 'D299', ' 80013190485', '03149360483 ', NULL, NULL, NULL, NULL),
