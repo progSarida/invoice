@@ -2764,7 +2764,7 @@ class ClientsTableSeeder extends Seeder
                 'denomination' => 'San Fior',
                 'address' => 'Piazza Guglielmo Marconi, 2',
                 'zip_code' => '31020',
-                'city_code' => 'h843',
+                'city_code' => 'H843',
                 'tax_code' => '82002790267',
                 'vat_code' => '01974550269',
                 'email' => NULL,
