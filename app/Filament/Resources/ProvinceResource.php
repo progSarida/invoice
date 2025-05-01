@@ -29,9 +29,17 @@ class ProvinceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('region_id')
-                    ->required()
-                    ->numeric(),
+                // Forms\Components\TextInput::make('region_id')
+                //     ->required()
+                //     ->numeric(),
+                Forms\Components\Select::make('region_id')->label('Regione')
+                  ->relationship(name: 'region', titleAttribute: 'name')
+                  ,
+                // Forms\Components\Select::make('regions.id')->label('Regione')
+                //       ->relationship(name: 'region', titleAttribute: 'name')
+                //       ->required()
+                //       ->searchable()
+                //       ->preload(),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
@@ -45,12 +53,16 @@ class ProvinceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('region_id')
-                    ->numeric()
+                // Tables\Columns\TextColumn::make('region_id')
+                //     ->numeric()
+                //     ->sortable(),
+                Tables\Columns\TextColumn::make('region.name')->label('Regione')
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('code')
+                Tables\Columns\TextColumn::make('name')->label('Nome')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('code')->label('Sigla')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

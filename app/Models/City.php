@@ -7,8 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class City extends Model
 {
     //
+    protected $fillable = [
+        'name',
+        'code',
+        'province_id',
+        'zip_code'
+    ];
+
 
     public function province(){
-        $this->belongsTo(Province::class);
+        return $this->belongsTo(Province::class);
     }
 }

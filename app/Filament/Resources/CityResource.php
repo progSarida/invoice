@@ -29,16 +29,16 @@ class CityResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('province_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('name')
+                Forms\Components\Select::make('province_id')->label('Provincia')
+                    ->relationship('province', 'name')
+                    ->required(),
+                Forms\Components\TextInput::make('name')->label('Nome')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('code')
+                Forms\Components\TextInput::make('code')->label('Codice Catastale')
                     ->required()
                     ->maxLength(4),
-                Forms\Components\TextInput::make('zip_code')
+                Forms\Components\TextInput::make('zip_code')->label('CAP')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -48,15 +48,18 @@ class CityResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('province_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('province.name')->label('Provincia')
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('code')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('zip_code')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('name')->label('Nome')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('code')->label('Codice Catastale')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('zip_code')->label('CAP')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

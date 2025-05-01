@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Region extends Model
 {
     //
+
+    protected $fillable = [
+        'name',
+    ];
+
     public function provinces(){
-        $this->hasMany(Province::class);
+        return $this->hasMany(Province::class,'region_id');
     }
 }

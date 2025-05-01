@@ -39,8 +39,12 @@ class RegionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('id')->label('Id')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('name')->label('Nome')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
