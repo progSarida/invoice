@@ -19,8 +19,7 @@ return new class extends Migration
             $table->string('denomination');
             $table->string('address');
             $table->string('zip_code');
-            $table->string('city_code',4);
-            $table->foreign('city_code')->references('code')->on('cities');
+            $table->foreignId('city_id')->constrained()->onUpdate('cascade');
             $table->string('tax_code')->nullable();
             $table->string('vat_code')->nullable();
             $table->string('email')->nullable();

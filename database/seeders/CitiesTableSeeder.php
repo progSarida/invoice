@@ -17,9 +17,9 @@ class CitiesTableSeeder extends Seeder
     {
 
 
-        \DB::table('cities')->delete();
+        DB::table('cities')->delete();
 
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 1,
@@ -5021,7 +5021,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 501,
@@ -10023,7 +10023,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 1001,
@@ -15025,7 +15025,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 1501,
@@ -20027,7 +20027,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 2001,
@@ -25029,7 +25029,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 2501,
@@ -30031,7 +30031,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 3001,
@@ -35033,7 +35033,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 3501,
@@ -40035,7 +40035,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 4001,
@@ -45037,7 +45037,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 4501,
@@ -50039,7 +50039,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 5001,
@@ -55041,7 +55041,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 5501,
@@ -60043,7 +60043,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 6001,
@@ -65045,7 +65045,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 6501,
@@ -70047,7 +70047,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 7001,
@@ -75049,7 +75049,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 7501,
@@ -80051,7 +80051,7 @@ class CitiesTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        \DB::table('cities')->insert(array (
+        DB::table('cities')->insert(array (
             0 =>
             array (
                 'id' => 8001,

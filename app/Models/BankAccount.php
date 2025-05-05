@@ -8,7 +8,13 @@ class BankAccount extends Model
 {
     //
 
+    protected $fillable = [
+        'name',
+        'iban',
+        'bic',
+    ];
+
     public function company(){
-        $this->belongsTo(Company::class);
+        return $this->belongsTo(Company::class);
     }
 }
