@@ -10,8 +10,12 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ClientResource extends Resource
@@ -25,6 +29,18 @@ class ClientResource extends Resource
     protected static ?string $navigationIcon = 'govicon-user-suit';
 
     protected static ?string $navigationGroup = 'Gestione';
+
+    protected static ?string $recordTitleAttribute = 'denomination';
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return ["Tipo"=>$record->type->getLabel(), "Codice univoco"=>$record->ipa_code];
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        return ClientResource::getUrl('edit', ['record' => $record]);
+    }
 
     public static function form(Form $form): Form
     {
@@ -108,7 +124,8 @@ class ClientResource extends Resource
             ])
             ->filters([
                 //
-            ])
+                SelectFilter::make('type')->label('Tipo')->options(ClientType::class)->multiple()
+            ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
@@ -133,5 +150,43 @@ class ClientResource extends Resource
             'create' => Pages\CreateClient::route('/create'),
             'edit' => Pages\EditClient::route('/{record}/edit'),
         ];
+    }
+
+    public static function modalForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Section::make('Cliente')->schema([
+                    Forms\Components\Select::make('type')->label('Tipo')
+                    ->options(ClientType::class)
+                    ->required()
+                    ->searchable()
+                    ->preload(),
+                Forms\Components\TextInput::make('denomination')->label('Denominazione')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('address')->label('Indirizzo')
+                    ->required()
+                    ->maxLength(255),
+
+                Forms\Components\Select::make('city_id')->label('Città')
+                  ->relationship(name: 'city', titleAttribute: 'name')
+                  ->searchable()
+                  ->preload(),
+                Forms\Components\TextInput::make('zip_code')->label('Cap')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('tax_code')->label('Codice Fiscale')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('vat_code')->label('Partita Iva')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('email')->label('Email')
+                    ->email()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('ipa_code')->label('Codice univoco')
+                    ->maxLength(255),
+            ])->columns(2)
+        ]);
+                
     }
 }

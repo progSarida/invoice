@@ -3,9 +3,10 @@
 namespace App\Enums;
 
 use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 
-enum ClientType: string implements HasLabel, HasColor
+enum ClientType: string implements HasLabel, HasColor, HasDescription
 {
     //
     case COMPANY = "company";
@@ -16,6 +17,18 @@ enum ClientType: string implements HasLabel, HasColor
     // case REGION = "region";
 
     public function getLabel(): string
+    {
+        return match($this) {
+            self::COMPANY => 'Soggetto privato',
+            self::CITY => 'Comune',
+            self::CITIES_UNION => 'Unione di Comuni',
+            self::CITIES_FEDERATION => 'Federazione di Comuni',
+            self::PROVINCE => 'Provincia'
+            // self::REGION => 'Regione',
+        };
+    }
+
+    public function getDescription(): string
     {
         return match($this) {
             self::COMPANY => 'Committente privato',
@@ -37,6 +50,10 @@ enum ClientType: string implements HasLabel, HasColor
             self::PROVINCE => 'gray'
             // self::REGION => Color::Yellow,
         };
+    }
+
+    public function isCompany(){
+        return $this === self::COMPANY;
     }
 
 }

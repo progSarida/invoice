@@ -13,7 +13,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ContractResource extends Resource
 {
@@ -27,6 +29,28 @@ class ContractResource extends Resource
 
     protected static ?string $navigationGroup = 'Gestione';
 
+    // protected static ?string $recordTitleAttribute = 'client.denomination';
+
+    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    {
+        return $record->client->denomination;
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['number', 'client.denomination','tax_type'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return ["Tipo"=>$record->type->getLabel(),"Numero"=>$record->number ,"Entrata"=>$record->tax_type->getDescription()];
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        return ContractResource::getUrl('edit', ['record' => $record]);
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -36,7 +60,7 @@ class ContractResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload(),
-                Forms\Components\Select::make('tax_type')->label('Tributo')
+                Forms\Components\Select::make('tax_type')->label('Entrata')
                     ->options(TaxType::class)
                     ->required()
                     ->searchable()
@@ -61,7 +85,7 @@ class ContractResource extends Resource
                 Tables\Columns\TextColumn::make('client.denomination')->label('Cliente')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tax_type')->label('Tributo')
+                Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
                     ->searchable()
                     ->badge()
                     ->sortable(),

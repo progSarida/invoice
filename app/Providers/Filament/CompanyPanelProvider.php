@@ -59,9 +59,10 @@ class CompanyPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                 ->label('Amministrazione')
-                ->visible(fn (): bool => auth()->user()->name == "superadmin")
+                ->visible(fn (): bool => Auth::user()->name == "superadmin")
                 ->url('/admin')
                 ->icon('clarity-administrator-line')
-            ]);
+            ])
+            ->globalSearchKeyBindings(['f9']);
     }
 }

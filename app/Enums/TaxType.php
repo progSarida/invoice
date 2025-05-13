@@ -19,6 +19,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
     case TARI = "tari";
     case TEP = "tep";
     case TOSAP = "tosap";
+    case EMPTY = "";
 
     public function getDescription(): ?string
     {
@@ -32,24 +33,24 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
             self::TARI => 'Tassa sui Rifiuti',
             self::TEP => 'TEP',
             self::TOSAP => 'Tassa per l\'Occupazione del Suolo Pubblico',
+            self::EMPTY => '',
         };
     }
 
     public function getLabel(): string
     {
-        return $this->name;
-
-        // return match($this) {
-        //     self::CDS => 'CDS',
-        //     self::ICI => 'ICI',
-        //     self::IMU => 'IMU',
-        //     self::FREE => 'LIBERO',
-        //     self::PARK => 'PARCHEGGIO',
-        //     self::PUB => 'PUBBLICITA\'',
-        //     self::TARI => 'TARI',
-        //     self::TEP => 'TEP',
-        //     self::TOSAP => 'TOSAP',
-        // };
+        return match($this) {
+            self::CDS => 'CDS',
+            self::ICI => 'ICI',
+            self::IMU => 'IMU',
+            self::LIBERO => 'LIBERO',
+            self::PARK => 'PARCHEGGIO',
+            self::PUB => 'PUBBLICITA\'',
+            self::TARI => 'TARI',
+            self::TEP => 'TEP',
+            self::TOSAP => 'TOSAP',
+            self::EMPTY => '',
+        };
     }
 
     public function getColor(): string | array | null
