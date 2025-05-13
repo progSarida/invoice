@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BankAccountResource extends Resource
@@ -24,6 +25,18 @@ class BankAccountResource extends Resource
     protected static ?string $navigationIcon = 'clarity-bank-line';
 
     protected static ?string $navigationGroup = 'Gestione';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return ["Iban"=>$record->iban, "bic"=>$record->bic];
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        return BankAccountResource::getUrl('edit', ['record' => $record]);
+    }
 
     public static function form(Form $form): Form
     {
