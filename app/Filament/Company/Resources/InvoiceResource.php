@@ -121,7 +121,8 @@ class InvoiceResource extends Resource
                         })
                         ->searchable('denomination')
                         ->live()
-                        ->preload()->columns(1),
+                        //->preload()
+                        ->columns(1),
 
                     Forms\Components\Select::make('tax_type')->label('Entrata')
                         ->required()
@@ -132,7 +133,7 @@ class InvoiceResource extends Resource
                         })
                         ->searchable()
                         ->live()
-                        ->preload()
+                        //->preload()
                         ->visible(
                             function(Get $get){
                                 if(filled ( $get('client_id') )){
@@ -158,7 +159,7 @@ class InvoiceResource extends Resource
                         ->disabled(fn(Get $get): bool => ! filled($get('client_id')) || ! filled($get('tax_type')))
                         ->required()
                         ->searchable()
-                        ->preload()
+                        //->preload()
                         ->visible(
                             function(Get $get){
                                 if(filled ( $get('client_id') )){
@@ -206,7 +207,7 @@ class InvoiceResource extends Resource
                             fn (Model $record) => "Fattura n. {$record->getInvoiceNumber()} - Entrata: {$record->tax_type->getLabel()}
                             Destinatario: {$record->client->denomination}"
                         )
-                        ->preload()
+                        //->preload()
                         ->searchable()
                 ]),
 
@@ -224,64 +225,64 @@ class InvoiceResource extends Resource
 
 
                 
-                Forms\Components\TextInput::make('check_validation')
-                    ->maxLength(255),
+                // Forms\Components\TextInput::make('check_validation')
+                //     ->maxLength(255),
 
 
                 
-                Forms\Components\TextInput::make('vat_percentage')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('vat')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\Toggle::make('is_total_with_vat')
-                    ->required(),
-                Forms\Components\TextInput::make('importo')
-                    ->numeric(),
-                Forms\Components\TextInput::make('spese')
-                    ->numeric(),
-                Forms\Components\TextInput::make('rimborsi')
-                    ->numeric(),
-                Forms\Components\TextInput::make('ordinario')
-                    ->numeric(),
-                Forms\Components\TextInput::make('temporaneo')
-                    ->numeric(),
-                Forms\Components\TextInput::make('affissioni')
-                    ->numeric(),
-                Forms\Components\TextInput::make('bollo')
-                    ->numeric(),
-                Forms\Components\TextInput::make('total')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('no_vat_total')
-                    ->numeric(),
-                Forms\Components\TextInput::make('bank_account_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('payment_status')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('waiting'),
-                Forms\Components\TextInput::make('payment_type')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('payment_days')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('total_payment')
-                    ->numeric(),
-                Forms\Components\DatePicker::make('last_payment_date'),
-                Forms\Components\TextInput::make('sdi_code')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('sdi_status')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('da_inviare'),
-                Forms\Components\DatePicker::make('sdi_date'),
-                Forms\Components\TextInput::make('pdf_path')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('xml_path')
-                    ->maxLength(255),
+                // Forms\Components\TextInput::make('vat_percentage')
+                //     ->required()
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('vat')
+                //     ->required()
+                //     ->numeric(),
+                // Forms\Components\Toggle::make('is_total_with_vat')
+                //     ->required(),
+                // Forms\Components\TextInput::make('importo')
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('spese')
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('rimborsi')
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('ordinario')
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('temporaneo')
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('affissioni')
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('bollo')
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('total')
+                //     ->required()
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('no_vat_total')
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('bank_account_id')
+                //     ->numeric(),
+                // Forms\Components\TextInput::make('payment_status')
+                //     ->required()
+                //     ->maxLength(255)
+                //     ->default('waiting'),
+                // Forms\Components\TextInput::make('payment_type')
+                //     ->maxLength(255),
+                // Forms\Components\TextInput::make('payment_days')
+                //     ->required()
+                //     ->numeric()
+                //     ->default(0),
+                // Forms\Components\TextInput::make('total_payment')
+                //     ->numeric(),
+                // Forms\Components\DatePicker::make('last_payment_date'),
+                // Forms\Components\TextInput::make('sdi_code')
+                //     ->maxLength(255),
+                // Forms\Components\TextInput::make('sdi_status')
+                //     ->required()
+                //     ->maxLength(255)
+                //     ->default('da_inviare'),
+                // Forms\Components\DatePicker::make('sdi_date'),
+                // Forms\Components\TextInput::make('pdf_path')
+                //     ->maxLength(255),
+                // Forms\Components\TextInput::make('xml_path')
+                //     ->maxLength(255),
             ])->columns(5);
     }
 

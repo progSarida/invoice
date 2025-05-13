@@ -13,7 +13,7 @@ class ListClients extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->keyBindings(['f3']),
+            Actions\CreateAction::make()->keyBindings(['f6']),
         ];
     }
 }
