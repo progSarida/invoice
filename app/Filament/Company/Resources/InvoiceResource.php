@@ -52,6 +52,7 @@ class InvoiceResource extends Resource
                 Section::make('')
                     ->columns(4)
                     ->columnSpan(3)
+                    ->extraAttributes(['style' => 'background-color:rgba(255, 255, 255, 0);'])
                     ->schema([
 
                     Forms\Components\Select::make('invoice_type')->label('Tipo')
@@ -121,7 +122,8 @@ class InvoiceResource extends Resource
                         })
                         ->searchable('denomination')
                         ->live()
-                        //->preload()
+                        ->preload()
+                        ->optionsLimit(5)
                         ->columns(1),
 
                     Forms\Components\Select::make('tax_type')->label('Entrata')
@@ -133,7 +135,7 @@ class InvoiceResource extends Resource
                         })
                         ->searchable()
                         ->live()
-                        //->preload()
+                        ->preload()
                         ->visible(
                             function(Get $get){
                                 if(filled ( $get('client_id') )){
@@ -159,7 +161,8 @@ class InvoiceResource extends Resource
                         ->disabled(fn(Get $get): bool => ! filled($get('client_id')) || ! filled($get('tax_type')))
                         ->required()
                         ->searchable()
-                        //->preload()
+                        ->preload()
+                        ->optionsLimit(5)
                         ->visible(
                             function(Get $get){
                                 if(filled ( $get('client_id') )){
@@ -198,7 +201,11 @@ class InvoiceResource extends Resource
                             modifyQueryUsing: 
                                 fn (Builder $query, Get $get) 
                                 => 
-                                $query->where('invoice_type',InvoiceType::INVOICE)->with('tender')
+                                $query->where('invoice_type',InvoiceType::INVOICE)
+                                ->where('tax_type',$get('tax_type'))
+                                ->where('client_id',$get('client_id'))
+                                ->where('tender_id',$get('tender_id'))
+                                ->with('tender')
                                 ->orderBy('year','desc')
                                 ->orderBy('section','desc')
                                 ->orderBy('number','desc')
@@ -207,7 +214,8 @@ class InvoiceResource extends Resource
                             fn (Model $record) => "Fattura n. {$record->getInvoiceNumber()} - Entrata: {$record->tax_type->getLabel()}
                             Destinatario: {$record->client->denomination}"
                         )
-                        //->preload()
+                        ->preload()
+                        ->optionsLimit(10)
                         ->searchable()
                 ]),
 
@@ -353,7 +361,8 @@ class InvoiceResource extends Resource
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => strtoupper("{$record->type->getLabel()}")." - $record->denomination"
                     )
-                    ->searchable()->preload(),
+                    ->searchable()->preload()
+                        ->optionsLimit(5),
                 SelectFilter::make('tax_type')->label('Entrata')->options(TaxType::class)
                     ->multiple()->searchable()->preload(),
                 SelectFilter::make('tender_id')->label('Appalto')
@@ -361,7 +370,8 @@ class InvoiceResource extends Resource
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->type->getLabel()} - CIG: {$record->cig_code}"
                     )
-                    ->searchable()->preload(),
+                    ->searchable()->preload()
+                        ->optionsLimit(5),
                 SelectFilter::make('sdi_status')->label('Status')->options(SdiStatus::class)
                     ->multiple()->searchable()->preload(),
                 
