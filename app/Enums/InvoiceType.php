@@ -31,4 +31,8 @@ enum InvoiceType: string implements HasLabel, HasColor
         };
     }
 
+    public function isCreditNote(){
+        return $this === self::CREDIT_NOTE;
+    }
+
 }

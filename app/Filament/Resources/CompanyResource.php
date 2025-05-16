@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\ToggleColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -58,8 +59,7 @@ class CompanyResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('city_code')->label('Codice catastale')
                     ->searchable(),
-                Tables\Columns\IconColumn::make('is_active')->label('Attiva')
-                    ->boolean(),
+                ToggleColumn::make('is_active')->label('Attiva'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

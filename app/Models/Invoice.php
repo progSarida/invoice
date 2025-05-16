@@ -28,9 +28,17 @@ class Invoice extends Model
         return $this->belongsTo(Client::class);
     }
 
-    // public function contract(){
-    //     return $this->belongsTo(Client::class);
-    // }
+    public function bankAccount(){
+        return $this->belongsTo(BankAccount::class);
+    }
+
+    public function invoice_items(){
+        return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function sdi_notifications(){
+        return $this->hasMany(SdiNotification::class);
+    }
 
     public function tender(){
         return $this->belongsTo(Tender::class);
