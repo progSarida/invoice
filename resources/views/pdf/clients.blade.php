@@ -43,7 +43,7 @@
     </style>
 </head>
 <body>
-    <h2><u>Elenco Clienti</u></h2>
+    <h2 style="text-align: center"><u>Elenco Clienti</u></h2>
     @if(!empty($filters))
         <p><strong>Filtri applicati:</strong></p>
         <ul>

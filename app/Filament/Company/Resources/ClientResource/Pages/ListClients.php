@@ -52,6 +52,28 @@ class ListClients extends ListRecords
                         ->send();
                 })
                 ,
+            Actions\Action::make('esporta')
+                ->icon('phosphor-export')
+                ->label('Esporta')
+                ->action(function ($livewire) {
+                    $records = $livewire->getFilteredTableQuery()->get();
+                    $csv = \League\Csv\Writer::createFromString();
+                    $csv->insertOne(['#', 'Tipo', 'Denominazione', 'Città', 'Email', 'Codice univoco']);
+                    foreach ($records as $record) {
+                        $csv->insertOne([
+                            $record->id,
+                            $record->type->getLabel(),
+                            $record->denomination,
+                            $record->city?->name,
+                            $record->email,
+                            $record->ipa_code,
+                        ]);
+                    }
+                    return response()->streamDownload(function () use ($csv) {
+                        echo $csv->toString();
+                    }, 'clienti_diretti.csv');
+                })
+                ,
         ];
     }
 }
