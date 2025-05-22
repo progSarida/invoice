@@ -16,6 +16,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onUpdate('cascade');
             $table->foreignId('client_id')->constrained()->onUpdate('cascade');
+            // $table->bigInteger('container_id')->nullable();
+
+            $table->unsignedBigInteger('container_id')->nullable();
+            $table->foreign('container_id')->references('id')->on('containers');
+            // $table->foreignId('container_id')->constrained()->onUpdate('cascade')->nullable();
             $table->string('tax_type');
             $table->string('type');
             $table->string('office_code');
@@ -36,6 +41,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onUpdate('cascade');
             $table->foreignId('client_id')->constrained()->onUpdate('cascade');
+            // $table->bigInteger('container_id')->nullable();
+
+            $table->unsignedBigInteger('container_id')->nullable();
+            $table->foreign('container_id')->references('id')->on('containers');
+            // $table->foreignId('container_id')->constrained()->onUpdate('cascade');
             $table->string('tax_type');
             $table->string('type')->nullable();
             $table->date('validity_date')->nullable();

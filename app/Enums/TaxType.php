@@ -67,4 +67,19 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
             self::TOSAP => Color::Yellow,
         };
     }
+
+    public static function multiColor($state): string
+    {
+        return match ($state) {
+            "cds" => 'info',
+            "ici" => 'warning',
+            "imu" => 'success',
+            "libero" => 'danger',
+            "park" =>  'info',
+            "pub" => 'info',
+            "tari" =>  'primary',
+            "tep" => 'primary',
+            "tosap" => 'warning'
+        };
+    }
 }

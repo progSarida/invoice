@@ -38,4 +38,8 @@ class Tender extends Model
     public function invoices(){
         return $this->hasMany(Invoice::class);
     }
+
+    public function container(){
+        return $this->belongsTo(Container::class);
+    }
 }

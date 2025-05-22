@@ -30,4 +30,8 @@ class Contract extends Model
     public function client(){
         return $this->belongsTo(Client::class);
     }
+
+    public function container(){
+        return $this->belongsTo(Container::class);
+    }
 }
