@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class TendersTableSeeder extends Seeder
 {
@@ -15,33 +14,35 @@ class TendersTableSeeder extends Seeder
      */
     public function run()
     {
+        
 
-
-        DB::table('tenders')->delete();
-
-        DB::table('tenders')->insert(array (
-            0 =>
+        \DB::table('tenders')->delete();
+        
+        \DB::table('tenders')->insert(array (
+            0 => 
             array (
                 'id' => 1,
                 'company_id' => 1,
                 'client_id' => 2,
+                'container_id' => 1,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFIHNO',
                 'office_name' => 'Uff_eFatturaPA',
                 'date' => NULL,
                 'cig_code' => 'Z990C712DD',
-                'cup_code' => '',
-                'rdo_code' => '',
-                'reference_code' => '',
+                'cup_code' => NULL,
+                'rdo_code' => NULL,
+                'reference_code' => NULL,
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 13:06:19',
             ),
-            1 =>
+            1 => 
             array (
                 'id' => 2,
                 'company_id' => 1,
                 'client_id' => 3,
+                'container_id' => 2,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFC0QM',
@@ -52,13 +53,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            2 =>
+            2 => 
             array (
                 'id' => 3,
                 'company_id' => 1,
                 'client_id' => 4,
+                'container_id' => 3,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFJZ0A',
@@ -69,13 +71,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            3 =>
+            3 => 
             array (
                 'id' => 4,
                 'company_id' => 1,
                 'client_id' => 5,
+                'container_id' => NULL,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFQXX4',
@@ -88,11 +91,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            4 =>
+            4 => 
             array (
                 'id' => 5,
                 'company_id' => 1,
                 'client_id' => 5,
+                'container_id' => 4,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'RD3IER',
@@ -103,13 +107,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            5 =>
+            5 => 
             array (
                 'id' => 6,
                 'company_id' => 1,
                 'client_id' => 6,
+                'container_id' => 5,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UF3B0G',
@@ -120,13 +125,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            6 =>
+            6 => 
             array (
                 'id' => 7,
                 'company_id' => 1,
                 'client_id' => 7,
+                'container_id' => 6,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => '3AA8IZ',
@@ -137,13 +143,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            7 =>
+            7 => 
             array (
                 'id' => 8,
                 'company_id' => 1,
                 'client_id' => 8,
+                'container_id' => 7,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UF4A5J',
@@ -154,13 +161,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            8 =>
+            8 => 
             array (
                 'id' => 9,
                 'company_id' => 1,
                 'client_id' => 9,
+                'container_id' => 8,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'WUW09H',
@@ -171,13 +179,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            9 =>
+            9 => 
             array (
                 'id' => 10,
                 'company_id' => 1,
                 'client_id' => 10,
+                'container_id' => 9,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFPMGV',
@@ -188,13 +197,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            10 =>
+            10 => 
             array (
                 'id' => 11,
                 'company_id' => 1,
                 'client_id' => 11,
+                'container_id' => 10,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UF3Q9T',
@@ -205,13 +215,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            11 =>
+            11 => 
             array (
                 'id' => 12,
                 'company_id' => 1,
                 'client_id' => 12,
+                'container_id' => 11,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFD5TB',
@@ -222,13 +233,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            12 =>
+            12 => 
             array (
                 'id' => 13,
                 'company_id' => 1,
                 'client_id' => 13,
+                'container_id' => 12,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'F104L8',
@@ -239,13 +251,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            13 =>
+            13 => 
             array (
                 'id' => 14,
                 'company_id' => 1,
                 'client_id' => 14,
+                'container_id' => 13,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UF2PEJ',
@@ -256,13 +269,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            14 =>
+            14 => 
             array (
                 'id' => 15,
                 'company_id' => 1,
                 'client_id' => 15,
+                'container_id' => 14,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UF7X7M',
@@ -273,13 +287,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            15 =>
+            15 => 
             array (
                 'id' => 16,
                 'company_id' => 1,
                 'client_id' => 16,
+                'container_id' => 15,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFK01I',
@@ -290,13 +305,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            16 =>
+            16 => 
             array (
                 'id' => 17,
                 'company_id' => 1,
                 'client_id' => 17,
+                'container_id' => 16,
                 'tax_type' => 'tosap',
                 'type' => 'canone',
                 'office_code' => 'UF8GLL',
@@ -307,13 +323,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            17 =>
+            17 => 
             array (
                 'id' => 18,
                 'company_id' => 1,
                 'client_id' => 18,
+                'container_id' => 17,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFLUYB',
@@ -324,13 +341,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            18 =>
+            18 => 
             array (
                 'id' => 19,
                 'company_id' => 1,
                 'client_id' => 19,
+                'container_id' => 18,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UF62QG',
@@ -341,13 +359,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            19 =>
+            19 => 
             array (
                 'id' => 20,
                 'company_id' => 1,
                 'client_id' => 20,
+                'container_id' => 19,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFDC5L',
@@ -358,13 +377,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            20 =>
+            20 => 
             array (
                 'id' => 21,
                 'company_id' => 1,
                 'client_id' => 21,
+                'container_id' => 20,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFERYI',
@@ -375,13 +395,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            21 =>
+            21 => 
             array (
                 'id' => 22,
                 'company_id' => 1,
                 'client_id' => 22,
+                'container_id' => 21,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFA2XV',
@@ -392,13 +413,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            22 =>
+            22 => 
             array (
                 'id' => 23,
                 'company_id' => 1,
                 'client_id' => 23,
+                'container_id' => 22,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFTAU5',
@@ -409,13 +431,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            23 =>
+            23 => 
             array (
                 'id' => 24,
                 'company_id' => 1,
                 'client_id' => 24,
+                'container_id' => 23,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFW5DF',
@@ -426,13 +449,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            24 =>
+            24 => 
             array (
                 'id' => 25,
                 'company_id' => 1,
                 'client_id' => 13,
+                'container_id' => 12,
                 'tax_type' => 'tosap',
                 'type' => 'canone',
                 'office_code' => 'F104L8',
@@ -443,13 +467,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            25 =>
+            25 => 
             array (
                 'id' => 26,
                 'company_id' => 1,
                 'client_id' => 12,
+                'container_id' => 11,
                 'tax_type' => 'tosap',
                 'type' => 'canone',
                 'office_code' => 'UFD5TB',
@@ -460,13 +485,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            26 =>
+            26 => 
             array (
                 'id' => 27,
                 'company_id' => 1,
                 'client_id' => 30,
+                'container_id' => 24,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'L5E6GG',
@@ -477,13 +503,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            27 =>
+            27 => 
             array (
                 'id' => 28,
                 'company_id' => 1,
                 'client_id' => 31,
+                'container_id' => 25,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'GFEOZZ',
@@ -494,13 +521,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**54/2015',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            28 =>
+            28 => 
             array (
                 'id' => 29,
                 'company_id' => 1,
                 'client_id' => 32,
+                'container_id' => 26,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'IO8PW3',
@@ -511,13 +539,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            29 =>
+            29 => 
             array (
                 'id' => 30,
                 'company_id' => 1,
                 'client_id' => 33,
+                'container_id' => 27,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF0WNH',
@@ -528,13 +557,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            30 =>
+            30 => 
             array (
                 'id' => 31,
                 'company_id' => 1,
                 'client_id' => 34,
+                'container_id' => 28,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF1UQ6',
@@ -545,13 +575,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            31 =>
+            31 => 
             array (
                 'id' => 32,
                 'company_id' => 1,
                 'client_id' => 35,
+                'container_id' => 29,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFNKYD',
@@ -562,13 +593,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**13644',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            32 =>
+            32 => 
             array (
                 'id' => 33,
                 'company_id' => 1,
                 'client_id' => 36,
+                'container_id' => 30,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFB82Q',
@@ -579,13 +611,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            33 =>
+            33 => 
             array (
                 'id' => 34,
                 'company_id' => 1,
                 'client_id' => 37,
+                'container_id' => 31,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFJS7M',
@@ -596,13 +629,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            34 =>
+            34 => 
             array (
                 'id' => 35,
                 'company_id' => 1,
                 'client_id' => 38,
+                'container_id' => 32,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF321T',
@@ -613,13 +647,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            35 =>
+            35 => 
             array (
                 'id' => 36,
                 'company_id' => 1,
                 'client_id' => 39,
+                'container_id' => 33,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'RNJ2HE',
@@ -630,13 +665,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**434/2015',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            36 =>
+            36 => 
             array (
                 'id' => 37,
                 'company_id' => 1,
                 'client_id' => 40,
+                'container_id' => 34,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFKL72',
@@ -647,13 +683,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**117/2015',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            37 =>
+            37 => 
             array (
                 'id' => 38,
                 'company_id' => 1,
                 'client_id' => 41,
+                'container_id' => 35,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF7IBI',
@@ -664,13 +701,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            38 =>
+            38 => 
             array (
                 'id' => 39,
                 'company_id' => 1,
                 'client_id' => 42,
+                'container_id' => 36,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'EOPMSF',
@@ -681,13 +719,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            39 =>
+            39 => 
             array (
                 'id' => 40,
                 'company_id' => 1,
                 'client_id' => 43,
+                'container_id' => 37,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFQP49',
@@ -698,13 +737,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**106/2015',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            40 =>
+            40 => 
             array (
                 'id' => 41,
                 'company_id' => 1,
                 'client_id' => 44,
+                'container_id' => 38,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF86SA',
@@ -715,13 +755,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            41 =>
+            41 => 
             array (
                 'id' => 42,
                 'company_id' => 1,
                 'client_id' => 45,
+                'container_id' => 39,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFUP4C',
@@ -732,13 +773,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**84/2015',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            42 =>
+            42 => 
             array (
                 'id' => 43,
                 'company_id' => 1,
                 'client_id' => 46,
+                'container_id' => 40,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'S6HG3E',
@@ -749,13 +791,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**561/2015',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            43 =>
+            43 => 
             array (
                 'id' => 44,
                 'company_id' => 1,
                 'client_id' => 47,
+                'container_id' => 41,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF3IN5',
@@ -766,13 +809,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            44 =>
+            44 => 
             array (
                 'id' => 45,
                 'company_id' => 1,
                 'client_id' => 48,
+                'container_id' => 42,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF39W6',
@@ -783,13 +827,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            45 =>
+            45 => 
             array (
                 'id' => 46,
                 'company_id' => 1,
                 'client_id' => 48,
+                'container_id' => 43,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF39W6',
@@ -800,13 +845,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            46 =>
+            46 => 
             array (
                 'id' => 47,
                 'company_id' => 1,
                 'client_id' => 48,
+                'container_id' => 44,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF39W6',
@@ -817,13 +863,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            47 =>
+            47 => 
             array (
                 'id' => 48,
                 'company_id' => 1,
                 'client_id' => 49,
+                'container_id' => 45,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => '0VMJKW',
@@ -834,13 +881,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**263/2015',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            48 =>
+            48 => 
             array (
                 'id' => 49,
                 'company_id' => 1,
                 'client_id' => 50,
+                'container_id' => 46,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'K26R7H',
@@ -851,13 +899,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            49 =>
+            49 => 
             array (
                 'id' => 50,
                 'company_id' => 1,
                 'client_id' => 51,
+                'container_id' => 47,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFQCH1',
@@ -868,13 +917,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            50 =>
+            50 => 
             array (
                 'id' => 51,
                 'company_id' => 1,
                 'client_id' => 80,
+                'container_id' => NULL,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFRXQ3',
@@ -887,11 +937,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            51 =>
+            51 => 
             array (
                 'id' => 52,
                 'company_id' => 1,
                 'client_id' => 52,
+                'container_id' => 48,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF86SD',
@@ -902,13 +953,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            52 =>
+            52 => 
             array (
                 'id' => 53,
                 'company_id' => 1,
                 'client_id' => 53,
+                'container_id' => 49,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFJ8AE',
@@ -919,13 +971,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            53 =>
+            53 => 
             array (
                 'id' => 54,
                 'company_id' => 1,
                 'client_id' => 54,
+                'container_id' => 50,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => '0D33K9',
@@ -936,13 +989,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            54 =>
+            54 => 
             array (
                 'id' => 55,
                 'company_id' => 1,
                 'client_id' => 55,
+                'container_id' => 51,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF52WF',
@@ -953,13 +1007,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            55 =>
+            55 => 
             array (
                 'id' => 56,
                 'company_id' => 1,
                 'client_id' => 56,
+                'container_id' => 52,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFI284',
@@ -970,13 +1025,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            56 =>
+            56 => 
             array (
                 'id' => 57,
                 'company_id' => 1,
                 'client_id' => 57,
+                'container_id' => NULL,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF991S',
@@ -989,11 +1045,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            57 =>
+            57 => 
             array (
                 'id' => 58,
                 'company_id' => 1,
                 'client_id' => 57,
+                'container_id' => 53,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => '5JJEZG',
@@ -1004,13 +1061,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            58 =>
+            58 => 
             array (
                 'id' => 59,
                 'company_id' => 1,
                 'client_id' => 17,
+                'container_id' => 54,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF8GLL',
@@ -1021,13 +1079,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            59 =>
+            59 => 
             array (
                 'id' => 60,
                 'company_id' => 1,
                 'client_id' => 58,
+                'container_id' => 55,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'QZ08BI',
@@ -1038,13 +1097,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            60 =>
+            60 => 
             array (
                 'id' => 61,
                 'company_id' => 1,
                 'client_id' => 58,
+                'container_id' => NULL,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => '5FWKSD',
@@ -1057,11 +1117,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            61 =>
+            61 => 
             array (
                 'id' => 62,
                 'company_id' => 1,
                 'client_id' => 58,
+                'container_id' => 56,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'QZ08BI',
@@ -1072,13 +1133,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**245/2015',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            62 =>
+            62 => 
             array (
                 'id' => 63,
                 'company_id' => 1,
                 'client_id' => 59,
+                'container_id' => 57,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFYF2D',
@@ -1089,13 +1151,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            63 =>
+            63 => 
             array (
                 'id' => 64,
                 'company_id' => 1,
                 'client_id' => 59,
+                'container_id' => 58,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFYF2D',
@@ -1106,13 +1169,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            64 =>
+            64 => 
             array (
                 'id' => 65,
                 'company_id' => 1,
                 'client_id' => 60,
+                'container_id' => 59,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFHXJA',
@@ -1123,13 +1187,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            65 =>
+            65 => 
             array (
                 'id' => 66,
                 'company_id' => 1,
                 'client_id' => 61,
+                'container_id' => 60,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'HYTZJS',
@@ -1140,13 +1205,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**295/2015',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            66 =>
+            66 => 
             array (
                 'id' => 67,
                 'company_id' => 1,
                 'client_id' => 62,
+                'container_id' => 61,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFASY9',
@@ -1157,13 +1223,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            67 =>
+            67 => 
             array (
                 'id' => 68,
                 'company_id' => 1,
                 'client_id' => 63,
+                'container_id' => NULL,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFWRQZ',
@@ -1176,11 +1243,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            68 =>
+            68 => 
             array (
                 'id' => 71,
                 'company_id' => 1,
                 'client_id' => 64,
+                'container_id' => 62,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFNEET',
@@ -1191,13 +1259,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            69 =>
+            69 => 
             array (
                 'id' => 72,
                 'company_id' => 1,
                 'client_id' => 65,
+                'container_id' => 63,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFM7GH',
@@ -1208,13 +1277,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            70 =>
+            70 => 
             array (
                 'id' => 73,
                 'company_id' => 1,
                 'client_id' => 66,
+                'container_id' => 64,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFB4YC',
@@ -1225,13 +1295,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:31',
             ),
-            71 =>
+            71 => 
             array (
                 'id' => 74,
                 'company_id' => 1,
                 'client_id' => 26,
+                'container_id' => 65,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'CUZCKT',
@@ -1242,13 +1313,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            72 =>
+            72 => 
             array (
                 'id' => 75,
                 'company_id' => 1,
                 'client_id' => 30,
+                'container_id' => 66,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'L5E6GG',
@@ -1259,13 +1331,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            73 =>
+            73 => 
             array (
                 'id' => 76,
                 'company_id' => 1,
                 'client_id' => 38,
+                'container_id' => 67,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF321T',
@@ -1276,13 +1349,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            74 =>
+            74 => 
             array (
                 'id' => 77,
                 'company_id' => 1,
                 'client_id' => 68,
+                'container_id' => 68,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'JMNEXL',
@@ -1293,13 +1367,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            75 =>
+            75 => 
             array (
                 'id' => 78,
                 'company_id' => 1,
                 'client_id' => 69,
+                'container_id' => 69,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF5ZSH',
@@ -1310,13 +1385,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            76 =>
+            76 => 
             array (
                 'id' => 79,
                 'company_id' => 1,
                 'client_id' => 11,
+                'container_id' => 70,
                 'tax_type' => 'tari',
                 'type' => 'aggio',
                 'office_code' => 'UF3Q9T',
@@ -1327,13 +1403,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            77 =>
+            77 => 
             array (
                 'id' => 82,
                 'company_id' => 1,
                 'client_id' => 11,
+                'container_id' => 71,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UF3Q9T',
@@ -1344,13 +1421,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            78 =>
+            78 => 
             array (
                 'id' => 83,
                 'company_id' => 1,
                 'client_id' => 1,
+                'container_id' => 72,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFAT8Q',
@@ -1361,13 +1439,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            79 =>
+            79 => 
             array (
                 'id' => 84,
                 'company_id' => 1,
                 'client_id' => 71,
+                'container_id' => 73,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFZW1F',
@@ -1378,13 +1457,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            80 =>
+            80 => 
             array (
                 'id' => 85,
                 'company_id' => 1,
                 'client_id' => 71,
+                'container_id' => 74,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFZW1F',
@@ -1395,13 +1475,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            81 =>
+            81 => 
             array (
                 'id' => 86,
                 'company_id' => 1,
                 'client_id' => 25,
+                'container_id' => 75,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFHN78',
@@ -1412,13 +1493,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            82 =>
+            82 => 
             array (
                 'id' => 87,
                 'company_id' => 1,
                 'client_id' => 72,
+                'container_id' => 76,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF77ML',
@@ -1429,13 +1511,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            83 =>
+            83 => 
             array (
                 'id' => 88,
                 'company_id' => 1,
                 'client_id' => 72,
+                'container_id' => 76,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF77ML',
@@ -1446,13 +1529,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            84 =>
+            84 => 
             array (
                 'id' => 89,
                 'company_id' => 1,
                 'client_id' => 12,
+                'container_id' => 77,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFD5TB',
@@ -1463,13 +1547,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            85 =>
+            85 => 
             array (
                 'id' => 90,
                 'company_id' => 1,
                 'client_id' => 73,
+                'container_id' => 78,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF32E6',
@@ -1480,13 +1565,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            86 =>
+            86 => 
             array (
                 'id' => 91,
                 'company_id' => 1,
                 'client_id' => 70,
+                'container_id' => 79,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF3UQ6',
@@ -1497,13 +1583,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            87 =>
+            87 => 
             array (
                 'id' => 92,
                 'company_id' => 1,
                 'client_id' => 74,
+                'container_id' => 80,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFYJEM',
@@ -1514,13 +1601,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            88 =>
+            88 => 
             array (
                 'id' => 93,
                 'company_id' => 1,
                 'client_id' => 75,
+                'container_id' => 81,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'BVE1I9',
@@ -1531,13 +1619,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            89 =>
+            89 => 
             array (
                 'id' => 94,
                 'company_id' => 1,
                 'client_id' => 75,
+                'container_id' => 82,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'BVE1I9',
@@ -1548,13 +1637,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            90 =>
+            90 => 
             array (
                 'id' => 95,
                 'company_id' => 1,
                 'client_id' => 49,
+                'container_id' => 83,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => '0VMJKW',
@@ -1565,13 +1655,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**781/2015',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            91 =>
+            91 => 
             array (
                 'id' => 96,
                 'company_id' => 1,
                 'client_id' => 1,
+                'container_id' => 72,
                 'tax_type' => 'tari',
                 'type' => 'aggio',
                 'office_code' => 'UFAT8Q',
@@ -1582,13 +1673,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            92 =>
+            92 => 
             array (
                 'id' => 97,
                 'company_id' => 1,
                 'client_id' => 74,
+                'container_id' => 84,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFYJEM',
@@ -1599,13 +1691,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            93 =>
+            93 => 
             array (
                 'id' => 98,
                 'company_id' => 1,
                 'client_id' => 77,
+                'container_id' => 85,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'UFVAKD',
@@ -1616,13 +1709,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            94 =>
+            94 => 
             array (
                 'id' => 99,
                 'company_id' => 1,
                 'client_id' => 76,
+                'container_id' => 86,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'UFBETY',
@@ -1633,13 +1727,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**15/885',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            95 =>
+            95 => 
             array (
                 'id' => 100,
                 'company_id' => 1,
                 'client_id' => 25,
+                'container_id' => 87,
                 'tax_type' => 'ici',
                 'type' => 'servizio',
                 'office_code' => 'UFHN78',
@@ -1650,13 +1745,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            96 =>
+            96 => 
             array (
                 'id' => 101,
                 'company_id' => 1,
                 'client_id' => 25,
+                'container_id' => 87,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UFHN78',
@@ -1667,13 +1763,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            97 =>
+            97 => 
             array (
                 'id' => 102,
                 'company_id' => 1,
                 'client_id' => 9,
+                'container_id' => NULL,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'WUW09H',
@@ -1686,11 +1783,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            98 =>
+            98 => 
             array (
                 'id' => 103,
                 'company_id' => 1,
                 'client_id' => 11,
+                'container_id' => 88,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF3Q9T',
@@ -1701,13 +1799,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            99 =>
+            99 => 
             array (
                 'id' => 104,
                 'company_id' => 1,
                 'client_id' => 58,
+                'container_id' => 89,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => '5FWKSD',
@@ -1718,13 +1817,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            100 =>
+            100 => 
             array (
                 'id' => 105,
                 'company_id' => 1,
                 'client_id' => 1,
+                'container_id' => 90,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UFAT8Q',
@@ -1735,13 +1835,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            101 =>
+            101 => 
             array (
                 'id' => 106,
                 'company_id' => 1,
                 'client_id' => 50,
+                'container_id' => 91,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'K26R7H',
@@ -1752,13 +1853,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            102 =>
+            102 => 
             array (
                 'id' => 107,
                 'company_id' => 1,
                 'client_id' => 78,
+                'container_id' => 92,
                 'tax_type' => 'ici',
                 'type' => 'servizio',
                 'office_code' => 'UFGZN0',
@@ -1769,13 +1871,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            103 =>
+            103 => 
             array (
                 'id' => 108,
                 'company_id' => 1,
                 'client_id' => 46,
+                'container_id' => NULL,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'S6HG3E',
@@ -1788,11 +1891,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            104 =>
+            104 => 
             array (
                 'id' => 109,
                 'company_id' => 1,
                 'client_id' => 79,
+                'container_id' => 93,
                 'tax_type' => 'ici',
                 'type' => 'aggio',
                 'office_code' => 'UFG2LC',
@@ -1803,13 +1907,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            105 =>
+            105 => 
             array (
                 'id' => 110,
                 'company_id' => 1,
                 'client_id' => 1,
+                'container_id' => 72,
                 'tax_type' => 'ici',
                 'type' => 'aggio',
                 'office_code' => 'UFAT8Q',
@@ -1820,13 +1925,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            106 =>
+            106 => 
             array (
                 'id' => 111,
                 'company_id' => 1,
                 'client_id' => 1,
+                'container_id' => 90,
                 'tax_type' => 'ici',
                 'type' => 'servizio',
                 'office_code' => 'UFAT8Q',
@@ -1837,13 +1943,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            107 =>
+            107 => 
             array (
                 'id' => 112,
                 'company_id' => 1,
                 'client_id' => 70,
+                'container_id' => 79,
                 'tax_type' => 'ici',
                 'type' => 'aggio',
                 'office_code' => 'UF3UQ6',
@@ -1854,13 +1961,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            108 =>
+            108 => 
             array (
                 'id' => 113,
                 'company_id' => 1,
                 'client_id' => 1,
+                'container_id' => 90,
                 'tax_type' => 'tari',
                 'type' => 'servizio',
                 'office_code' => 'UFAT8Q',
@@ -1871,13 +1979,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            109 =>
+            109 => 
             array (
                 'id' => 114,
                 'company_id' => 1,
                 'client_id' => 80,
+                'container_id' => 94,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF1ZTK',
@@ -1888,13 +1997,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            110 =>
+            110 => 
             array (
                 'id' => 115,
                 'company_id' => 1,
                 'client_id' => 28,
+                'container_id' => 95,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFCKYB',
@@ -1905,13 +2015,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            111 =>
+            111 => 
             array (
                 'id' => 116,
                 'company_id' => 1,
                 'client_id' => 81,
+                'container_id' => 96,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFVRO9',
@@ -1922,13 +2033,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            112 =>
+            112 => 
             array (
                 'id' => 118,
                 'company_id' => 1,
                 'client_id' => 29,
+                'container_id' => 97,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'KN12T9',
@@ -1939,13 +2051,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            113 =>
+            113 => 
             array (
                 'id' => 119,
                 'company_id' => 1,
                 'client_id' => 63,
+                'container_id' => 98,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFWRQZ',
@@ -1956,13 +2069,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            114 =>
+            114 => 
             array (
                 'id' => 120,
                 'company_id' => 1,
                 'client_id' => 25,
+                'container_id' => 87,
                 'tax_type' => 'tari',
                 'type' => 'servizio',
                 'office_code' => 'UFHN78',
@@ -1973,13 +2087,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            115 =>
+            115 => 
             array (
                 'id' => 121,
                 'company_id' => 1,
                 'client_id' => 82,
+                'container_id' => 99,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF4736',
@@ -1990,13 +2105,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            116 =>
+            116 => 
             array (
                 'id' => 122,
                 'company_id' => 1,
                 'client_id' => 67,
+                'container_id' => 100,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UFTVEJ',
@@ -2007,13 +2123,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            117 =>
+            117 => 
             array (
                 'id' => 123,
                 'company_id' => 1,
                 'client_id' => 83,
+                'container_id' => 101,
                 'tax_type' => 'ici',
                 'type' => 'aggio',
                 'office_code' => 'UF2MR3',
@@ -2024,13 +2141,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            118 =>
+            118 => 
             array (
                 'id' => 124,
                 'company_id' => 1,
                 'client_id' => 2,
+                'container_id' => 102,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFIHNO',
@@ -2041,13 +2159,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**2248',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            119 =>
+            119 => 
             array (
                 'id' => 125,
                 'company_id' => 1,
                 'client_id' => 4,
+                'container_id' => 103,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFJZ0A',
@@ -2058,13 +2177,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            120 =>
+            120 => 
             array (
                 'id' => 126,
                 'company_id' => 1,
                 'client_id' => 8,
+                'container_id' => 104,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UF4A5J',
@@ -2075,13 +2195,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            121 =>
+            121 => 
             array (
                 'id' => 127,
                 'company_id' => 1,
                 'client_id' => 9,
+                'container_id' => 105,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'WUW09H',
@@ -2092,13 +2213,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            122 =>
+            122 => 
             array (
                 'id' => 128,
                 'company_id' => 1,
                 'client_id' => 17,
+                'container_id' => 106,
                 'tax_type' => 'tosap',
                 'type' => 'canone',
                 'office_code' => 'UF8GLL',
@@ -2109,13 +2231,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            123 =>
+            123 => 
             array (
                 'id' => 129,
                 'company_id' => 1,
                 'client_id' => 58,
+                'container_id' => 107,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'QZ08BI',
@@ -2126,13 +2249,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            124 =>
+            124 => 
             array (
                 'id' => 130,
                 'company_id' => 1,
                 'client_id' => 58,
+                'container_id' => 107,
                 'tax_type' => 'tosap',
                 'type' => 'canone',
                 'office_code' => 'QZ08BI',
@@ -2143,13 +2267,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            125 =>
+            125 => 
             array (
                 'id' => 131,
                 'company_id' => 1,
                 'client_id' => 21,
+                'container_id' => 108,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFERYI',
@@ -2160,13 +2285,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            126 =>
+            126 => 
             array (
                 'id' => 132,
                 'company_id' => 1,
                 'client_id' => 88,
+                'container_id' => 109,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'QX8MHE',
@@ -2177,13 +2303,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            127 =>
+            127 => 
             array (
                 'id' => 133,
                 'company_id' => 1,
                 'client_id' => 77,
+                'container_id' => 110,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'UFVAKD',
@@ -2194,13 +2321,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            128 =>
+            128 => 
             array (
                 'id' => 134,
                 'company_id' => 1,
                 'client_id' => 76,
+                'container_id' => 111,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'UFBETY',
@@ -2211,13 +2339,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            129 =>
+            129 => 
             array (
                 'id' => 135,
                 'company_id' => 1,
                 'client_id' => 32,
+                'container_id' => 112,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => '4LOQ4E',
@@ -2228,13 +2357,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            130 =>
+            130 => 
             array (
                 'id' => 136,
                 'company_id' => 1,
                 'client_id' => 68,
+                'container_id' => 113,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'JMNEXL',
@@ -2245,13 +2375,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            131 =>
+            131 => 
             array (
                 'id' => 137,
                 'company_id' => 1,
                 'client_id' => 89,
+                'container_id' => 114,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF7LNI',
@@ -2262,13 +2393,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            132 =>
+            132 => 
             array (
                 'id' => 138,
                 'company_id' => 1,
                 'client_id' => 90,
+                'container_id' => 115,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFLE29',
@@ -2279,13 +2411,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            133 =>
+            133 => 
             array (
                 'id' => 139,
                 'company_id' => 1,
                 'client_id' => 86,
+                'container_id' => 116,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => '0E0FJG',
@@ -2296,13 +2429,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            134 =>
+            134 => 
             array (
                 'id' => 140,
                 'company_id' => 1,
                 'client_id' => 27,
+                'container_id' => 117,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => '5UAK16',
@@ -2313,13 +2447,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            135 =>
+            135 => 
             array (
                 'id' => 141,
                 'company_id' => 1,
                 'client_id' => 6,
+                'container_id' => 118,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF3B0G',
@@ -2330,13 +2465,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            136 =>
+            136 => 
             array (
                 'id' => 142,
                 'company_id' => 1,
                 'client_id' => 77,
+                'container_id' => 119,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFVAKD',
@@ -2347,13 +2483,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            137 =>
+            137 => 
             array (
                 'id' => 143,
                 'company_id' => 1,
                 'client_id' => 91,
+                'container_id' => 120,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFB4YC',
@@ -2364,13 +2501,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            138 =>
+            138 => 
             array (
                 'id' => 144,
                 'company_id' => 1,
                 'client_id' => 92,
+                'container_id' => 121,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'RIJNG0',
@@ -2381,13 +2519,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            139 =>
+            139 => 
             array (
                 'id' => 145,
                 'company_id' => 1,
                 'client_id' => 87,
+                'container_id' => 122,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => 'H7OVH4',
@@ -2398,13 +2537,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            140 =>
+            140 => 
             array (
                 'id' => 147,
                 'company_id' => 1,
                 'client_id' => 45,
+                'container_id' => 123,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFUP4C',
@@ -2415,13 +2555,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => 'IMPSPESA**476/2016',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            141 =>
+            141 => 
             array (
                 'id' => 148,
                 'company_id' => 1,
                 'client_id' => 85,
+                'container_id' => 124,
                 'tax_type' => 'imu',
                 'type' => 'aggio',
                 'office_code' => 'UF3ZR6',
@@ -2432,13 +2573,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            142 =>
+            142 => 
             array (
                 'id' => 149,
                 'company_id' => 1,
                 'client_id' => 95,
+                'container_id' => 125,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => 'UFPTY1',
@@ -2449,13 +2591,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            143 =>
+            143 => 
             array (
                 'id' => 151,
                 'company_id' => 1,
                 'client_id' => 93,
+                'container_id' => 126,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFQOKA',
@@ -2466,13 +2609,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            144 =>
+            144 => 
             array (
                 'id' => 152,
                 'company_id' => 1,
                 'client_id' => 76,
+                'container_id' => 127,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'W6Z8DW',
@@ -2483,13 +2627,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            145 =>
+            145 => 
             array (
                 'id' => 153,
                 'company_id' => 1,
                 'client_id' => 94,
+                'container_id' => 128,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'RP63UV',
@@ -2500,13 +2645,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            146 =>
+            146 => 
             array (
                 'id' => 154,
                 'company_id' => 1,
                 'client_id' => 29,
+                'container_id' => 129,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'KN12T9',
@@ -2517,13 +2663,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            147 =>
+            147 => 
             array (
                 'id' => 155,
                 'company_id' => 1,
                 'client_id' => 77,
+                'container_id' => 130,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFVAKD',
@@ -2534,13 +2681,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            148 =>
+            148 => 
             array (
                 'id' => 156,
                 'company_id' => 1,
                 'client_id' => 32,
+                'container_id' => 131,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => '4LOQ4E',
@@ -2551,13 +2699,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            149 =>
+            149 => 
             array (
                 'id' => 157,
                 'company_id' => 1,
                 'client_id' => 10,
+                'container_id' => 132,
                 'tax_type' => 'ici',
                 'type' => 'aggio',
                 'office_code' => 'UFPMGV',
@@ -2568,13 +2717,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            150 =>
+            150 => 
             array (
                 'id' => 158,
                 'company_id' => 1,
                 'client_id' => 12,
+                'container_id' => 77,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => 'UFD5TB',
@@ -2585,13 +2735,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            151 =>
+            151 => 
             array (
                 'id' => 159,
                 'company_id' => 1,
                 'client_id' => 96,
+                'container_id' => 133,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => '9EVL3C',
@@ -2602,13 +2753,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            152 =>
+            152 => 
             array (
                 'id' => 160,
                 'company_id' => 1,
                 'client_id' => 9,
+                'container_id' => 134,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'WUW09H',
@@ -2619,13 +2771,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            153 =>
+            153 => 
             array (
                 'id' => 161,
                 'company_id' => 1,
                 'client_id' => 97,
+                'container_id' => 135,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'GKSDFG',
@@ -2636,13 +2789,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            154 =>
+            154 => 
             array (
                 'id' => 162,
                 'company_id' => 1,
                 'client_id' => 98,
+                'container_id' => 136,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFP2OW',
@@ -2653,13 +2807,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            155 =>
+            155 => 
             array (
                 'id' => 163,
                 'company_id' => 1,
                 'client_id' => 99,
+                'container_id' => 137,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'G7YD4H',
@@ -2670,13 +2825,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            156 =>
+            156 => 
             array (
                 'id' => 164,
                 'company_id' => 1,
                 'client_id' => 100,
+                'container_id' => 138,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF3ZSO',
@@ -2687,13 +2843,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            157 =>
+            157 => 
             array (
                 'id' => 165,
                 'company_id' => 1,
                 'client_id' => 101,
+                'container_id' => 139,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFBCHL',
@@ -2704,13 +2861,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            158 =>
+            158 => 
             array (
                 'id' => 166,
                 'company_id' => 1,
                 'client_id' => 90,
+                'container_id' => 140,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFLE29',
@@ -2721,13 +2879,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            159 =>
+            159 => 
             array (
                 'id' => 167,
                 'company_id' => 1,
                 'client_id' => 102,
+                'container_id' => 141,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'KW5EIS',
@@ -2738,13 +2897,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            160 =>
+            160 => 
             array (
                 'id' => 168,
                 'company_id' => 1,
                 'client_id' => 103,
+                'container_id' => 142,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFD0HK',
@@ -2755,13 +2915,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            161 =>
+            161 => 
             array (
                 'id' => 169,
                 'company_id' => 1,
                 'client_id' => 94,
+                'container_id' => 128,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'RP63UV',
@@ -2772,13 +2933,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:32',
             ),
-            162 =>
+            162 => 
             array (
                 'id' => 170,
                 'company_id' => 1,
                 'client_id' => 20,
+                'container_id' => 143,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFDC5L',
@@ -2789,13 +2951,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            163 =>
+            163 => 
             array (
                 'id' => 171,
                 'company_id' => 1,
                 'client_id' => 61,
+                'container_id' => 144,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'HYTZJS',
@@ -2806,13 +2969,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            164 =>
+            164 => 
             array (
                 'id' => 172,
                 'company_id' => 1,
                 'client_id' => 105,
+                'container_id' => 145,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFTLLB',
@@ -2823,13 +2987,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            165 =>
+            165 => 
             array (
                 'id' => 173,
                 'company_id' => 1,
                 'client_id' => 104,
+                'container_id' => 146,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFK857',
@@ -2840,13 +3005,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            166 =>
+            166 => 
             array (
                 'id' => 174,
                 'company_id' => 1,
                 'client_id' => 97,
+                'container_id' => 147,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF8WCA',
@@ -2857,13 +3023,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            167 =>
+            167 => 
             array (
                 'id' => 175,
                 'company_id' => 1,
                 'client_id' => 106,
+                'container_id' => 148,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFJHES',
@@ -2874,13 +3041,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            168 =>
+            168 => 
             array (
                 'id' => 176,
                 'company_id' => 1,
                 'client_id' => 84,
+                'container_id' => 149,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFCMLJ',
@@ -2891,13 +3059,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            169 =>
+            169 => 
             array (
                 'id' => 177,
                 'company_id' => 1,
                 'client_id' => 76,
+                'container_id' => 150,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'W6Z8DW',
@@ -2908,13 +3077,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            170 =>
+            170 => 
             array (
                 'id' => 178,
                 'company_id' => 1,
                 'client_id' => 107,
+                'container_id' => 151,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFPDZ6',
@@ -2925,13 +3095,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            171 =>
+            171 => 
             array (
                 'id' => 179,
                 'company_id' => 1,
                 'client_id' => 108,
+                'container_id' => 152,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFETBA',
@@ -2942,13 +3113,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            172 =>
+            172 => 
             array (
                 'id' => 180,
                 'company_id' => 1,
                 'client_id' => 84,
+                'container_id' => 149,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => 'UFCMLJ',
@@ -2959,13 +3131,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            173 =>
+            173 => 
             array (
                 'id' => 181,
                 'company_id' => 1,
                 'client_id' => 109,
+                'container_id' => 153,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF9J0S',
@@ -2976,13 +3149,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            174 =>
+            174 => 
             array (
                 'id' => 182,
                 'company_id' => 1,
                 'client_id' => 77,
+                'container_id' => 154,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'UFVAKD',
@@ -2993,13 +3167,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            175 =>
+            175 => 
             array (
                 'id' => 183,
                 'company_id' => 1,
                 'client_id' => 17,
+                'container_id' => 155,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF8GLL',
@@ -3010,13 +3185,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            176 =>
+            176 => 
             array (
                 'id' => 184,
                 'company_id' => 1,
                 'client_id' => 110,
+                'container_id' => 156,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFNG7B',
@@ -3027,13 +3203,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            177 =>
+            177 => 
             array (
                 'id' => 185,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 157,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -3044,13 +3221,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            178 =>
+            178 => 
             array (
                 'id' => 186,
                 'company_id' => 1,
                 'client_id' => 112,
+                'container_id' => 158,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => '50M1DE',
@@ -3061,13 +3239,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            179 =>
+            179 => 
             array (
                 'id' => 187,
                 'company_id' => 1,
                 'client_id' => 6,
+                'container_id' => 159,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF3B0G',
@@ -3078,13 +3257,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            180 =>
+            180 => 
             array (
                 'id' => 188,
                 'company_id' => 1,
                 'client_id' => 113,
+                'container_id' => 160,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => '90ZO5H',
@@ -3095,13 +3275,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            181 =>
+            181 => 
             array (
                 'id' => 189,
                 'company_id' => 1,
                 'client_id' => 1,
+                'container_id' => 161,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'XRGZUP',
@@ -3112,13 +3293,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            182 =>
+            182 => 
             array (
                 'id' => 190,
                 'company_id' => 1,
                 'client_id' => 74,
+                'container_id' => 162,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFYJEM',
@@ -3129,13 +3311,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            183 =>
+            183 => 
             array (
                 'id' => 191,
                 'company_id' => 1,
                 'client_id' => 114,
+                'container_id' => 163,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFYGOS',
@@ -3146,13 +3329,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            184 =>
+            184 => 
             array (
                 'id' => 194,
                 'company_id' => 1,
                 'client_id' => 115,
+                'container_id' => 164,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF6QCV',
@@ -3163,13 +3347,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            185 =>
+            185 => 
             array (
                 'id' => 195,
                 'company_id' => 1,
                 'client_id' => 88,
+                'container_id' => 165,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => 'QX8MHE',
@@ -3180,13 +3365,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            186 =>
+            186 => 
             array (
                 'id' => 196,
                 'company_id' => 1,
                 'client_id' => 94,
+                'container_id' => 166,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFMXYV',
@@ -3197,13 +3383,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            187 =>
+            187 => 
             array (
                 'id' => 197,
                 'company_id' => 1,
                 'client_id' => 116,
+                'container_id' => 167,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UF1H0T',
@@ -3214,13 +3401,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            188 =>
+            188 => 
             array (
                 'id' => 198,
                 'company_id' => 1,
                 'client_id' => 117,
+                'container_id' => 168,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'DM41RN',
@@ -3231,13 +3419,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            189 =>
+            189 => 
             array (
                 'id' => 199,
                 'company_id' => 1,
                 'client_id' => 118,
+                'container_id' => 169,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFXUS8',
@@ -3248,13 +3437,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            190 =>
+            190 => 
             array (
                 'id' => 200,
                 'company_id' => 1,
                 'client_id' => 41,
+                'container_id' => 170,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UF7IBI',
@@ -3265,13 +3455,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            191 =>
+            191 => 
             array (
                 'id' => 201,
                 'company_id' => 1,
                 'client_id' => 161,
+                'container_id' => 171,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFYZFI',
@@ -3282,13 +3473,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            192 =>
+            192 => 
             array (
                 'id' => 202,
                 'company_id' => 1,
                 'client_id' => 102,
+                'container_id' => 172,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'KW5EIS',
@@ -3299,13 +3491,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            193 =>
+            193 => 
             array (
                 'id' => 203,
                 'company_id' => 1,
                 'client_id' => 6,
+                'container_id' => 173,
                 'tax_type' => 'libero',
                 'type' => 'servizio',
                 'office_code' => 'UF3B0G',
@@ -3316,13 +3509,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            194 =>
+            194 => 
             array (
                 'id' => 204,
                 'company_id' => 1,
                 'client_id' => 119,
+                'container_id' => 174,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'CTLIAG',
@@ -3333,13 +3527,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            195 =>
+            195 => 
             array (
                 'id' => 205,
                 'company_id' => 1,
                 'client_id' => 120,
+                'container_id' => 175,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFJXD8',
@@ -3350,13 +3545,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            196 =>
+            196 => 
             array (
                 'id' => 206,
                 'company_id' => 1,
                 'client_id' => 121,
+                'container_id' => 176,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF7IF5',
@@ -3367,13 +3563,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            197 =>
+            197 => 
             array (
                 'id' => 207,
                 'company_id' => 1,
                 'client_id' => 122,
+                'container_id' => 177,
                 'tax_type' => 'tep',
                 'type' => 'canone',
                 'office_code' => 'UFKD98',
@@ -3384,13 +3581,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            198 =>
+            198 => 
             array (
                 'id' => 208,
                 'company_id' => 1,
                 'client_id' => 102,
+                'container_id' => 178,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'KW5EIS',
@@ -3401,13 +3599,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            199 =>
+            199 => 
             array (
                 'id' => 209,
                 'company_id' => 1,
                 'client_id' => 123,
+                'container_id' => 179,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFW9P1',
@@ -3418,13 +3617,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            200 =>
+            200 => 
             array (
                 'id' => 210,
                 'company_id' => 1,
                 'client_id' => 76,
+                'container_id' => 180,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'W6Z8DW',
@@ -3435,13 +3635,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            201 =>
+            201 => 
             array (
                 'id' => 211,
                 'company_id' => 1,
                 'client_id' => 124,
+                'container_id' => 181,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF60SY',
@@ -3452,13 +3653,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            202 =>
+            202 => 
             array (
                 'id' => 212,
                 'company_id' => 1,
                 'client_id' => 125,
+                'container_id' => 182,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF42XO',
@@ -3469,13 +3671,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            203 =>
+            203 => 
             array (
                 'id' => 213,
                 'company_id' => 1,
                 'client_id' => 70,
+                'container_id' => 183,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UF3UQ6',
@@ -3486,13 +3689,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            204 =>
+            204 => 
             array (
                 'id' => 214,
                 'company_id' => 1,
                 'client_id' => 126,
+                'container_id' => 184,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF98PA',
@@ -3503,13 +3707,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            205 =>
+            205 => 
             array (
                 'id' => 215,
                 'company_id' => 1,
                 'client_id' => 127,
+                'container_id' => 185,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => '3XIHQZ',
@@ -3520,13 +3725,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            206 =>
+            206 => 
             array (
                 'id' => 216,
                 'company_id' => 1,
                 'client_id' => 83,
+                'container_id' => 186,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => 'UF2MR3',
@@ -3537,13 +3743,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            207 =>
+            207 => 
             array (
                 'id' => 217,
                 'company_id' => 1,
                 'client_id' => 128,
+                'container_id' => 187,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'AXIO77',
@@ -3554,13 +3761,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            208 =>
+            208 => 
             array (
                 'id' => 218,
                 'company_id' => 1,
                 'client_id' => 129,
+                'container_id' => 188,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'M2IC2C',
@@ -3571,13 +3779,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            209 =>
+            209 => 
             array (
                 'id' => 219,
                 'company_id' => 1,
                 'client_id' => 130,
+                'container_id' => 189,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFB1NF',
@@ -3588,13 +3797,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            210 =>
+            210 => 
             array (
                 'id' => 220,
                 'company_id' => 1,
                 'client_id' => 87,
+                'container_id' => 190,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'H7OVH4',
@@ -3605,13 +3815,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            211 =>
+            211 => 
             array (
                 'id' => 221,
                 'company_id' => 1,
                 'client_id' => 131,
+                'container_id' => 191,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFQO8N',
@@ -3622,13 +3833,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            212 =>
+            212 => 
             array (
                 'id' => 222,
                 'company_id' => 1,
                 'client_id' => 90,
+                'container_id' => 192,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFLE29',
@@ -3639,13 +3851,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            213 =>
+            213 => 
             array (
                 'id' => 223,
                 'company_id' => 1,
                 'client_id' => 132,
+                'container_id' => 193,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFLCRZ',
@@ -3656,13 +3869,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            214 =>
+            214 => 
             array (
                 'id' => 224,
                 'company_id' => 1,
                 'client_id' => 102,
+                'container_id' => 194,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'KW5EIS',
@@ -3673,13 +3887,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            215 =>
+            215 => 
             array (
                 'id' => 225,
                 'company_id' => 1,
                 'client_id' => 61,
+                'container_id' => 195,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'HYTZJS',
@@ -3690,13 +3905,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            216 =>
+            216 => 
             array (
                 'id' => 226,
                 'company_id' => 1,
                 'client_id' => 71,
+                'container_id' => 196,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFZW1F',
@@ -3707,13 +3923,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            217 =>
+            217 => 
             array (
                 'id' => 227,
                 'company_id' => 1,
                 'client_id' => 26,
+                'container_id' => 197,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'CUZCKT',
@@ -3724,13 +3941,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            218 =>
+            218 => 
             array (
                 'id' => 229,
                 'company_id' => 1,
                 'client_id' => 118,
+                'container_id' => 198,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFXUS8',
@@ -3741,13 +3959,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            219 =>
+            219 => 
             array (
                 'id' => 230,
                 'company_id' => 1,
                 'client_id' => 133,
+                'container_id' => 199,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFS0UW',
@@ -3758,13 +3977,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            220 =>
+            220 => 
             array (
                 'id' => 231,
                 'company_id' => 1,
                 'client_id' => 102,
+                'container_id' => 200,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'KW5EIS',
@@ -3775,13 +3995,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            221 =>
+            221 => 
             array (
                 'id' => 232,
                 'company_id' => 1,
                 'client_id' => 17,
+                'container_id' => 201,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UF8GLL',
@@ -3792,13 +4013,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            222 =>
+            222 => 
             array (
                 'id' => 233,
                 'company_id' => 1,
                 'client_id' => 104,
+                'container_id' => 202,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFK857',
@@ -3809,13 +4031,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            223 =>
+            223 => 
             array (
                 'id' => 234,
                 'company_id' => 1,
                 'client_id' => 134,
+                'container_id' => 203,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'S4EEDY',
@@ -3826,13 +4049,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            224 =>
+            224 => 
             array (
                 'id' => 235,
                 'company_id' => 1,
                 'client_id' => 108,
+                'container_id' => 204,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFETBA',
@@ -3843,13 +4067,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            225 =>
+            225 => 
             array (
                 'id' => 236,
                 'company_id' => 1,
                 'client_id' => 135,
+                'container_id' => 205,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFUAUW',
@@ -3860,13 +4085,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            226 =>
+            226 => 
             array (
                 'id' => 237,
                 'company_id' => 1,
                 'client_id' => 108,
+                'container_id' => 206,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFETBA',
@@ -3877,13 +4103,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            227 =>
+            227 => 
             array (
                 'id' => 238,
                 'company_id' => 1,
                 'client_id' => 114,
+                'container_id' => 207,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFYGOS',
@@ -3894,13 +4121,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            228 =>
+            228 => 
             array (
                 'id' => 239,
                 'company_id' => 1,
                 'client_id' => 56,
+                'container_id' => 208,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFI284',
@@ -3911,13 +4139,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            229 =>
+            229 => 
             array (
                 'id' => 240,
                 'company_id' => 1,
                 'client_id' => 136,
+                'container_id' => 209,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF5QDU',
@@ -3928,13 +4157,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            230 =>
+            230 => 
             array (
                 'id' => 241,
                 'company_id' => 1,
                 'client_id' => 137,
+                'container_id' => 210,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => '7HI4R4',
@@ -3945,13 +4175,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            231 =>
+            231 => 
             array (
                 'id' => 242,
                 'company_id' => 1,
                 'client_id' => 138,
+                'container_id' => 211,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF1U8R',
@@ -3962,13 +4193,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            232 =>
+            232 => 
             array (
                 'id' => 243,
                 'company_id' => 1,
                 'client_id' => 139,
+                'container_id' => 212,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFT6OD',
@@ -3979,13 +4211,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            233 =>
+            233 => 
             array (
                 'id' => 244,
                 'company_id' => 1,
                 'client_id' => 139,
+                'container_id' => 213,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFT6OD',
@@ -3996,13 +4229,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            234 =>
+            234 => 
             array (
                 'id' => 245,
                 'company_id' => 1,
                 'client_id' => 140,
+                'container_id' => 214,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'ZG8KLQ',
@@ -4013,13 +4247,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            235 =>
+            235 => 
             array (
                 'id' => 246,
                 'company_id' => 1,
                 'client_id' => 141,
+                'container_id' => 215,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UFLLB1',
@@ -4030,13 +4265,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            236 =>
+            236 => 
             array (
                 'id' => 247,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 216,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -4047,13 +4283,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            237 =>
+            237 => 
             array (
                 'id' => 248,
                 'company_id' => 1,
                 'client_id' => 59,
+                'container_id' => 217,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFYF2D',
@@ -4064,13 +4301,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            238 =>
+            238 => 
             array (
                 'id' => 249,
                 'company_id' => 1,
                 'client_id' => 105,
+                'container_id' => 218,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFTLLB',
@@ -4081,13 +4319,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            239 =>
+            239 => 
             array (
                 'id' => 250,
                 'company_id' => 1,
                 'client_id' => 142,
+                'container_id' => 219,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFUX4O',
@@ -4098,13 +4337,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            240 =>
+            240 => 
             array (
                 'id' => 251,
                 'company_id' => 1,
                 'client_id' => 142,
+                'container_id' => 219,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFUX4O',
@@ -4115,13 +4355,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            241 =>
+            241 => 
             array (
                 'id' => 252,
                 'company_id' => 1,
                 'client_id' => 77,
+                'container_id' => 220,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'UFVAKD',
@@ -4132,13 +4373,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            242 =>
+            242 => 
             array (
                 'id' => 253,
                 'company_id' => 1,
                 'client_id' => 143,
+                'container_id' => 221,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UF98J3',
@@ -4149,13 +4391,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            243 =>
+            243 => 
             array (
                 'id' => 254,
                 'company_id' => 1,
                 'client_id' => 144,
+                'container_id' => 222,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFPZBU',
@@ -4166,13 +4409,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            244 =>
+            244 => 
             array (
                 'id' => 255,
                 'company_id' => 1,
                 'client_id' => 145,
+                'container_id' => 223,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFI9UC',
@@ -4183,13 +4427,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            245 =>
+            245 => 
             array (
                 'id' => 256,
                 'company_id' => 1,
                 'client_id' => 25,
+                'container_id' => 224,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFHN78',
@@ -4200,13 +4445,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            246 =>
+            246 => 
             array (
                 'id' => 257,
                 'company_id' => 1,
                 'client_id' => 114,
+                'container_id' => 225,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFYGOS',
@@ -4217,13 +4463,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            247 =>
+            247 => 
             array (
                 'id' => 258,
                 'company_id' => 1,
                 'client_id' => 67,
+                'container_id' => 226,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UFTVEJ',
@@ -4234,13 +4481,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            248 =>
+            248 => 
             array (
                 'id' => 259,
                 'company_id' => 1,
                 'client_id' => 146,
+                'container_id' => 227,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFMN03',
@@ -4251,13 +4499,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            249 =>
+            249 => 
             array (
                 'id' => 260,
                 'company_id' => 1,
                 'client_id' => 87,
+                'container_id' => 190,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'H7OVH4',
@@ -4268,13 +4517,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            250 =>
+            250 => 
             array (
                 'id' => 261,
                 'company_id' => 1,
                 'client_id' => 17,
+                'container_id' => 201,
                 'tax_type' => 'tosap',
                 'type' => 'canone',
                 'office_code' => 'UF8GLL',
@@ -4285,13 +4535,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            251 =>
+            251 => 
             array (
                 'id' => 262,
                 'company_id' => 1,
                 'client_id' => 147,
+                'container_id' => 228,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF5CRS',
@@ -4302,13 +4553,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            252 =>
+            252 => 
             array (
                 'id' => 263,
                 'company_id' => 1,
                 'client_id' => 148,
+                'container_id' => 229,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFV2WG',
@@ -4319,13 +4571,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            253 =>
+            253 => 
             array (
                 'id' => 264,
                 'company_id' => 1,
                 'client_id' => 149,
+                'container_id' => 230,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFHWQ7',
@@ -4336,13 +4589,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            254 =>
+            254 => 
             array (
                 'id' => 265,
                 'company_id' => 1,
                 'client_id' => 83,
+                'container_id' => 231,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UF2MR3',
@@ -4353,13 +4607,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            255 =>
+            255 => 
             array (
                 'id' => 266,
                 'company_id' => 1,
                 'client_id' => 55,
+                'container_id' => 232,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF52WF',
@@ -4370,13 +4625,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            256 =>
+            256 => 
             array (
                 'id' => 267,
                 'company_id' => 1,
                 'client_id' => 150,
+                'container_id' => 233,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'R6YPVS',
@@ -4387,13 +4643,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            257 =>
+            257 => 
             array (
                 'id' => 268,
                 'company_id' => 1,
                 'client_id' => 151,
+                'container_id' => 234,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => '1517H6',
@@ -4404,13 +4661,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            258 =>
+            258 => 
             array (
                 'id' => 269,
                 'company_id' => 1,
                 'client_id' => 119,
+                'container_id' => 235,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'BSVD74',
@@ -4421,13 +4679,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            259 =>
+            259 => 
             array (
                 'id' => 270,
                 'company_id' => 1,
                 'client_id' => 131,
+                'container_id' => 236,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFQO8N',
@@ -4438,13 +4697,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            260 =>
+            260 => 
             array (
                 'id' => 271,
                 'company_id' => 1,
                 'client_id' => 152,
+                'container_id' => 237,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => '4R17RL',
@@ -4455,13 +4715,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            261 =>
+            261 => 
             array (
                 'id' => 272,
                 'company_id' => 1,
                 'client_id' => 26,
+                'container_id' => 238,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'CUZCKT',
@@ -4472,13 +4733,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            262 =>
+            262 => 
             array (
                 'id' => 273,
                 'company_id' => 1,
                 'client_id' => 142,
+                'container_id' => 219,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFUX4O',
@@ -4489,13 +4751,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            263 =>
+            263 => 
             array (
                 'id' => 274,
                 'company_id' => 1,
                 'client_id' => 142,
+                'container_id' => 219,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFUX4O',
@@ -4506,13 +4769,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            264 =>
+            264 => 
             array (
                 'id' => 275,
                 'company_id' => 1,
                 'client_id' => 153,
+                'container_id' => 239,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UF6XS8',
@@ -4523,13 +4787,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            265 =>
+            265 => 
             array (
                 'id' => 276,
                 'company_id' => 1,
                 'client_id' => 69,
+                'container_id' => 240,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF5ZSH',
@@ -4540,13 +4805,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            266 =>
+            266 => 
             array (
                 'id' => 277,
                 'company_id' => 1,
                 'client_id' => 154,
+                'container_id' => 241,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UF6SNA',
@@ -4557,13 +4823,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            267 =>
+            267 => 
             array (
                 'id' => 278,
                 'company_id' => 1,
                 'client_id' => 155,
+                'container_id' => 242,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF7O4J',
@@ -4574,13 +4841,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            268 =>
+            268 => 
             array (
                 'id' => 279,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 243,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -4591,13 +4859,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            269 =>
+            269 => 
             array (
                 'id' => 280,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 244,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -4608,13 +4877,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            270 =>
+            270 => 
             array (
                 'id' => 281,
                 'company_id' => 1,
                 'client_id' => 28,
+                'container_id' => 245,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFCKYB',
@@ -4625,13 +4895,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            271 =>
+            271 => 
             array (
                 'id' => 282,
                 'company_id' => 1,
                 'client_id' => 59,
+                'container_id' => 246,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFYF2D',
@@ -4642,13 +4913,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            272 =>
+            272 => 
             array (
                 'id' => 283,
                 'company_id' => 1,
                 'client_id' => 59,
+                'container_id' => 246,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFYF2D',
@@ -4659,13 +4931,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            273 =>
+            273 => 
             array (
                 'id' => 284,
                 'company_id' => 1,
                 'client_id' => 59,
+                'container_id' => 246,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFYF2D',
@@ -4676,13 +4949,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            274 =>
+            274 => 
             array (
                 'id' => 285,
                 'company_id' => 1,
                 'client_id' => 59,
+                'container_id' => 246,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFYF2D',
@@ -4693,13 +4967,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            275 =>
+            275 => 
             array (
                 'id' => 286,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 247,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -4710,13 +4985,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            276 =>
+            276 => 
             array (
                 'id' => 287,
                 'company_id' => 1,
                 'client_id' => 156,
+                'container_id' => 248,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFXJMM',
@@ -4727,13 +5003,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            277 =>
+            277 => 
             array (
                 'id' => 288,
                 'company_id' => 1,
                 'client_id' => 157,
+                'container_id' => 249,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFGDM7',
@@ -4744,13 +5021,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            278 =>
+            278 => 
             array (
                 'id' => 289,
                 'company_id' => 1,
                 'client_id' => 138,
+                'container_id' => 250,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF1U8R',
@@ -4761,13 +5039,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            279 =>
+            279 => 
             array (
                 'id' => 290,
                 'company_id' => 1,
                 'client_id' => 132,
+                'container_id' => 251,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFLCRZ',
@@ -4778,13 +5057,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            280 =>
+            280 => 
             array (
                 'id' => 291,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 252,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -4795,13 +5075,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            281 =>
+            281 => 
             array (
                 'id' => 292,
                 'company_id' => 1,
                 'client_id' => 141,
+                'container_id' => NULL,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFLLB1',
@@ -4814,11 +5095,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            282 =>
+            282 => 
             array (
                 'id' => 293,
                 'company_id' => 1,
                 'client_id' => 128,
+                'container_id' => 253,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'AXIO77',
@@ -4829,13 +5111,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            283 =>
+            283 => 
             array (
                 'id' => 294,
                 'company_id' => 1,
                 'client_id' => 158,
+                'container_id' => 254,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFSCSF',
@@ -4846,13 +5129,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            284 =>
+            284 => 
             array (
                 'id' => 295,
                 'company_id' => 1,
                 'client_id' => 159,
+                'container_id' => 255,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF52UR',
@@ -4863,13 +5147,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            285 =>
+            285 => 
             array (
                 'id' => 296,
                 'company_id' => 1,
                 'client_id' => 142,
+                'container_id' => 256,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFUX4O',
@@ -4880,13 +5165,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            286 =>
+            286 => 
             array (
                 'id' => 297,
                 'company_id' => 1,
                 'client_id' => 139,
+                'container_id' => 257,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFT6OD',
@@ -4897,13 +5183,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            287 =>
+            287 => 
             array (
                 'id' => 298,
                 'company_id' => 1,
                 'client_id' => 160,
+                'container_id' => 258,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'GGQMRR',
@@ -4914,13 +5201,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            288 =>
+            288 => 
             array (
                 'id' => 299,
                 'company_id' => 1,
                 'client_id' => 161,
+                'container_id' => 259,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFYZFI',
@@ -4931,13 +5219,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            289 =>
+            289 => 
             array (
                 'id' => 300,
                 'company_id' => 1,
                 'client_id' => 61,
+                'container_id' => 260,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'HYTZJS',
@@ -4948,13 +5237,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            290 =>
+            290 => 
             array (
                 'id' => 301,
                 'company_id' => 1,
                 'client_id' => 88,
+                'container_id' => 261,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'QX8MHE',
@@ -4965,13 +5255,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            291 =>
+            291 => 
             array (
                 'id' => 302,
                 'company_id' => 1,
                 'client_id' => 88,
+                'container_id' => 262,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'QX8MHE',
@@ -4982,13 +5273,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            292 =>
+            292 => 
             array (
                 'id' => 303,
                 'company_id' => 1,
                 'client_id' => 124,
+                'container_id' => 263,
                 'tax_type' => 'imu',
                 'type' => 'aggio',
                 'office_code' => 'UF60SY',
@@ -4999,13 +5291,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            293 =>
+            293 => 
             array (
                 'id' => 304,
                 'company_id' => 1,
                 'client_id' => 151,
+                'container_id' => 264,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => '1517H6',
@@ -5016,13 +5309,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            294 =>
+            294 => 
             array (
                 'id' => 305,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 265,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -5033,13 +5327,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            295 =>
+            295 => 
             array (
                 'id' => 306,
                 'company_id' => 1,
                 'client_id' => 162,
+                'container_id' => 266,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFLG9M',
@@ -5050,13 +5345,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            296 =>
+            296 => 
             array (
                 'id' => 307,
                 'company_id' => 1,
                 'client_id' => 119,
+                'container_id' => 267,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'CTLIAG',
@@ -5067,13 +5363,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            297 =>
+            297 => 
             array (
                 'id' => 308,
                 'company_id' => 1,
                 'client_id' => 1,
+                'container_id' => 268,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'MI3E4E',
@@ -5084,13 +5381,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            298 =>
+            298 => 
             array (
                 'id' => 309,
                 'company_id' => 1,
                 'client_id' => 157,
+                'container_id' => 269,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFGDM7',
@@ -5101,13 +5399,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            299 =>
+            299 => 
             array (
                 'id' => 310,
                 'company_id' => 1,
                 'client_id' => 122,
+                'container_id' => 270,
                 'tax_type' => 'imu',
                 'type' => 'canone',
                 'office_code' => 'UFKD98',
@@ -5118,13 +5417,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            300 =>
+            300 => 
             array (
                 'id' => 311,
                 'company_id' => 1,
                 'client_id' => 47,
+                'container_id' => 271,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF3IN5',
@@ -5135,13 +5435,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            301 =>
+            301 => 
             array (
                 'id' => 312,
                 'company_id' => 1,
                 'client_id' => 47,
+                'container_id' => NULL,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF3IN5',
@@ -5154,11 +5455,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            302 =>
+            302 => 
             array (
                 'id' => 313,
                 'company_id' => 1,
                 'client_id' => 8,
+                'container_id' => 272,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF4A5J',
@@ -5169,13 +5471,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            303 =>
+            303 => 
             array (
                 'id' => 314,
                 'company_id' => 1,
                 'client_id' => 157,
+                'container_id' => 273,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFGDM7',
@@ -5186,13 +5489,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            304 =>
+            304 => 
             array (
                 'id' => 315,
                 'company_id' => 1,
                 'client_id' => 132,
+                'container_id' => 274,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFLCRZ',
@@ -5203,13 +5507,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            305 =>
+            305 => 
             array (
                 'id' => 316,
                 'company_id' => 1,
                 'client_id' => 163,
+                'container_id' => 275,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'ITK8WD',
@@ -5220,13 +5525,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            306 =>
+            306 => 
             array (
                 'id' => 317,
                 'company_id' => 1,
                 'client_id' => 130,
+                'container_id' => 276,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFB1NF',
@@ -5237,13 +5543,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            307 =>
+            307 => 
             array (
                 'id' => 318,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 277,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -5254,13 +5561,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            308 =>
+            308 => 
             array (
                 'id' => 319,
                 'company_id' => 1,
                 'client_id' => 162,
+                'container_id' => 278,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFLG9M',
@@ -5271,13 +5579,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            309 =>
+            309 => 
             array (
                 'id' => 320,
                 'company_id' => 1,
                 'client_id' => 164,
+                'container_id' => 279,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'EVDQ57',
@@ -5288,13 +5597,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            310 =>
+            310 => 
             array (
                 'id' => 321,
                 'company_id' => 1,
                 'client_id' => 130,
+                'container_id' => 280,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UFB1NF',
@@ -5305,13 +5615,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            311 =>
+            311 => 
             array (
                 'id' => 322,
                 'company_id' => 1,
                 'client_id' => 165,
+                'container_id' => 281,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFWTJC',
@@ -5322,13 +5633,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            312 =>
+            312 => 
             array (
                 'id' => 323,
                 'company_id' => 1,
                 'client_id' => 166,
+                'container_id' => NULL,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFUCKN',
@@ -5341,11 +5653,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            313 =>
+            313 => 
             array (
                 'id' => 324,
                 'company_id' => 1,
                 'client_id' => 167,
+                'container_id' => 282,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFNYYG',
@@ -5356,13 +5669,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            314 =>
+            314 => 
             array (
                 'id' => 325,
                 'company_id' => 1,
                 'client_id' => 169,
+                'container_id' => 283,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFM1QT',
@@ -5373,13 +5687,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            315 =>
+            315 => 
             array (
                 'id' => 326,
                 'company_id' => 1,
                 'client_id' => 86,
+                'container_id' => 284,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => '0E0FJG',
@@ -5390,13 +5705,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            316 =>
+            316 => 
             array (
                 'id' => 327,
                 'company_id' => 1,
                 'client_id' => 141,
+                'container_id' => 285,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFLLB1',
@@ -5407,13 +5723,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            317 =>
+            317 => 
             array (
                 'id' => 328,
                 'company_id' => 1,
                 'client_id' => 137,
+                'container_id' => 286,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => '7HI4R4',
@@ -5424,13 +5741,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            318 =>
+            318 => 
             array (
                 'id' => 329,
                 'company_id' => 1,
                 'client_id' => 138,
+                'container_id' => 287,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF1U8R',
@@ -5441,13 +5759,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            319 =>
+            319 => 
             array (
                 'id' => 330,
                 'company_id' => 1,
                 'client_id' => 130,
+                'container_id' => 288,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFB1NF',
@@ -5458,13 +5777,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            320 =>
+            320 => 
             array (
                 'id' => 331,
                 'company_id' => 1,
                 'client_id' => 170,
+                'container_id' => 289,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFOWX5',
@@ -5475,13 +5795,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            321 =>
+            321 => 
             array (
                 'id' => 332,
                 'company_id' => 1,
                 'client_id' => 170,
+                'container_id' => 290,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFOWX5',
@@ -5492,13 +5813,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            322 =>
+            322 => 
             array (
                 'id' => 333,
                 'company_id' => 1,
                 'client_id' => 171,
+                'container_id' => 291,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFSQHR',
@@ -5509,13 +5831,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            323 =>
+            323 => 
             array (
                 'id' => 334,
                 'company_id' => 1,
                 'client_id' => 172,
+                'container_id' => 292,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFPXI7',
@@ -5526,13 +5849,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            324 =>
+            324 => 
             array (
                 'id' => 335,
                 'company_id' => 1,
                 'client_id' => 92,
+                'container_id' => 293,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'RIJNG0',
@@ -5543,13 +5867,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            325 =>
+            325 => 
             array (
                 'id' => 336,
                 'company_id' => 1,
                 'client_id' => 168,
+                'container_id' => 294,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFJNCP',
@@ -5560,13 +5885,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            326 =>
+            326 => 
             array (
                 'id' => 337,
                 'company_id' => 1,
                 'client_id' => 74,
+                'container_id' => 295,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFYJEM',
@@ -5577,13 +5903,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            327 =>
+            327 => 
             array (
                 'id' => 338,
                 'company_id' => 1,
                 'client_id' => 8,
+                'container_id' => 296,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF4A5J',
@@ -5594,13 +5921,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            328 =>
+            328 => 
             array (
                 'id' => 339,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 297,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFRFUJ',
@@ -5611,13 +5939,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            329 =>
+            329 => 
             array (
                 'id' => 340,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 298,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -5628,13 +5957,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            330 =>
+            330 => 
             array (
                 'id' => 341,
                 'company_id' => 1,
                 'client_id' => 83,
+                'container_id' => 299,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF2MR3',
@@ -5645,13 +5975,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            331 =>
+            331 => 
             array (
                 'id' => 342,
                 'company_id' => 1,
                 'client_id' => 173,
+                'container_id' => 300,
                 'tax_type' => 'tari',
                 'type' => 'servizio',
                 'office_code' => 'KVU8Z5',
@@ -5662,13 +5993,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            332 =>
+            332 => 
             array (
                 'id' => 343,
                 'company_id' => 1,
                 'client_id' => 77,
+                'container_id' => 301,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'UFVAKD',
@@ -5679,13 +6011,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            333 =>
+            333 => 
             array (
                 'id' => 344,
                 'company_id' => 1,
                 'client_id' => 41,
+                'container_id' => 302,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => '94HD1W',
@@ -5696,13 +6029,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            334 =>
+            334 => 
             array (
                 'id' => 345,
                 'company_id' => 1,
                 'client_id' => 47,
+                'container_id' => 303,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF3IN5',
@@ -5713,13 +6047,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            335 =>
+            335 => 
             array (
                 'id' => 346,
                 'company_id' => 1,
                 'client_id' => 77,
+                'container_id' => 304,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFVAKD',
@@ -5730,13 +6065,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            336 =>
+            336 => 
             array (
                 'id' => 347,
                 'company_id' => 1,
                 'client_id' => 88,
+                'container_id' => 305,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'QX8MHE',
@@ -5747,13 +6083,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            337 =>
+            337 => 
             array (
                 'id' => 348,
                 'company_id' => 1,
                 'client_id' => 120,
+                'container_id' => 306,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFJXD8',
@@ -5764,13 +6101,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            338 =>
+            338 => 
             array (
                 'id' => 349,
                 'company_id' => 1,
                 'client_id' => 120,
+                'container_id' => 307,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UFJXD8',
@@ -5781,13 +6119,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            339 =>
+            339 => 
             array (
                 'id' => 350,
                 'company_id' => 1,
                 'client_id' => 174,
+                'container_id' => 308,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'UF45MI',
@@ -5798,13 +6137,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            340 =>
+            340 => 
             array (
                 'id' => 351,
                 'company_id' => 1,
                 'client_id' => 75,
+                'container_id' => 309,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'BVE1I9',
@@ -5815,13 +6155,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            341 =>
+            341 => 
             array (
                 'id' => 352,
                 'company_id' => 1,
                 'client_id' => 151,
+                'container_id' => 310,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => '1517H6',
@@ -5832,13 +6173,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            342 =>
+            342 => 
             array (
                 'id' => 353,
                 'company_id' => 1,
                 'client_id' => 26,
+                'container_id' => 311,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'CUZCKT',
@@ -5849,13 +6191,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            343 =>
+            343 => 
             array (
                 'id' => 354,
                 'company_id' => 1,
                 'client_id' => 28,
+                'container_id' => 312,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFCKYB',
@@ -5866,13 +6209,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            344 =>
+            344 => 
             array (
                 'id' => 355,
                 'company_id' => 1,
                 'client_id' => 115,
+                'container_id' => 313,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF6QCV',
@@ -5883,13 +6227,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            345 =>
+            345 => 
             array (
                 'id' => 356,
                 'company_id' => 1,
                 'client_id' => 73,
+                'container_id' => 314,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UF32E6',
@@ -5900,13 +6245,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            346 =>
+            346 => 
             array (
                 'id' => 357,
                 'company_id' => 1,
                 'client_id' => 175,
+                'container_id' => 315,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UFFU0I',
@@ -5917,13 +6263,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            347 =>
+            347 => 
             array (
                 'id' => 358,
                 'company_id' => 1,
                 'client_id' => 176,
+                'container_id' => 316,
                 'tax_type' => 'cds',
                 'type' => 'aggio',
                 'office_code' => 'YB0P00',
@@ -5934,13 +6281,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            348 =>
+            348 => 
             array (
                 'id' => 359,
                 'company_id' => 1,
                 'client_id' => 153,
+                'container_id' => 239,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UF6XS8',
@@ -5951,13 +6299,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:34',
             ),
-            349 =>
+            349 => 
             array (
                 'id' => 360,
                 'company_id' => 1,
                 'client_id' => 71,
+                'container_id' => 317,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFZW1F',
@@ -5968,13 +6317,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            350 =>
+            350 => 
             array (
                 'id' => 361,
                 'company_id' => 1,
                 'client_id' => 71,
+                'container_id' => 317,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFZW1F',
@@ -5985,13 +6335,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            351 =>
+            351 => 
             array (
                 'id' => 362,
                 'company_id' => 1,
                 'client_id' => 177,
+                'container_id' => 318,
                 'tax_type' => 'pub',
                 'type' => 'canone',
                 'office_code' => 'UF73RI',
@@ -6002,13 +6353,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            352 =>
+            352 => 
             array (
                 'id' => 363,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 319,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -6019,13 +6371,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            353 =>
+            353 => 
             array (
                 'id' => 364,
                 'company_id' => 1,
                 'client_id' => 98,
+                'container_id' => 320,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFP2OW',
@@ -6036,13 +6389,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            354 =>
+            354 => 
             array (
                 'id' => 365,
                 'company_id' => 1,
                 'client_id' => 98,
+                'container_id' => 321,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFP2OW',
@@ -6053,13 +6407,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            355 =>
+            355 => 
             array (
                 'id' => 366,
                 'company_id' => 1,
                 'client_id' => 85,
+                'container_id' => 322,
                 'tax_type' => 'imu',
                 'type' => 'aggio',
                 'office_code' => 'UF3ZR6',
@@ -6070,13 +6425,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            356 =>
+            356 => 
             array (
                 'id' => 367,
                 'company_id' => 1,
                 'client_id' => 85,
+                'container_id' => 323,
                 'tax_type' => 'imu',
                 'type' => 'aggio',
                 'office_code' => 'UF3ZR6',
@@ -6087,13 +6443,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            357 =>
+            357 => 
             array (
                 'id' => 368,
                 'company_id' => 1,
                 'client_id' => 20,
+                'container_id' => 324,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFDC5L',
@@ -6104,13 +6461,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            358 =>
+            358 => 
             array (
                 'id' => 369,
                 'company_id' => 1,
                 'client_id' => 157,
+                'container_id' => 325,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'V8VRT6',
@@ -6121,13 +6479,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            359 =>
+            359 => 
             array (
                 'id' => 370,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 326,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -6138,13 +6497,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            360 =>
+            360 => 
             array (
                 'id' => 371,
                 'company_id' => 1,
                 'client_id' => 162,
+                'container_id' => 327,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFLG9M',
@@ -6155,13 +6515,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            361 =>
+            361 => 
             array (
                 'id' => 372,
                 'company_id' => 1,
                 'client_id' => 162,
+                'container_id' => 328,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFLG9M',
@@ -6172,13 +6533,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            362 =>
+            362 => 
             array (
                 'id' => 373,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 329,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -6189,13 +6551,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            363 =>
+            363 => 
             array (
                 'id' => 374,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 329,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -6206,13 +6569,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            364 =>
+            364 => 
             array (
                 'id' => 375,
                 'company_id' => 1,
                 'client_id' => 170,
+                'container_id' => 330,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFOWX5',
@@ -6223,13 +6587,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            365 =>
+            365 => 
             array (
                 'id' => 376,
                 'company_id' => 1,
                 'client_id' => 157,
+                'container_id' => 331,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'V8VRT6',
@@ -6240,13 +6605,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            366 =>
+            366 => 
             array (
                 'id' => 377,
                 'company_id' => 1,
                 'client_id' => 20,
+                'container_id' => 332,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFDC5L',
@@ -6257,13 +6623,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            367 =>
+            367 => 
             array (
                 'id' => 378,
                 'company_id' => 1,
                 'client_id' => 178,
+                'container_id' => 333,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UFH75I',
@@ -6274,13 +6641,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            368 =>
+            368 => 
             array (
                 'id' => 379,
                 'company_id' => 1,
                 'client_id' => 154,
+                'container_id' => 334,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UF6SNA',
@@ -6291,13 +6659,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            369 =>
+            369 => 
             array (
                 'id' => 380,
                 'company_id' => 1,
                 'client_id' => 18,
+                'container_id' => 335,
                 'tax_type' => 'imu',
                 'type' => 'servizio',
                 'office_code' => 'UFLUYB',
@@ -6308,13 +6677,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            370 =>
+            370 => 
             array (
                 'id' => 381,
                 'company_id' => 1,
                 'client_id' => 170,
+                'container_id' => 336,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFOWX5',
@@ -6325,13 +6695,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            371 =>
+            371 => 
             array (
                 'id' => 382,
                 'company_id' => 1,
                 'client_id' => 116,
+                'container_id' => 337,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UF1H0T',
@@ -6342,13 +6713,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            372 =>
+            372 => 
             array (
                 'id' => 383,
                 'company_id' => 1,
                 'client_id' => 26,
+                'container_id' => 338,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => 'CUZCKT',
@@ -6359,13 +6731,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            373 =>
+            373 => 
             array (
                 'id' => 384,
                 'company_id' => 1,
                 'client_id' => 47,
+                'container_id' => 339,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF3IN5',
@@ -6376,13 +6749,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            374 =>
+            374 => 
             array (
                 'id' => 385,
                 'company_id' => 1,
                 'client_id' => 119,
+                'container_id' => 340,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'CTLIAG',
@@ -6393,13 +6767,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            375 =>
+            375 => 
             array (
                 'id' => 386,
                 'company_id' => 1,
                 'client_id' => 26,
+                'container_id' => 341,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => 'CUZCKT',
@@ -6410,13 +6785,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            376 =>
+            376 => 
             array (
                 'id' => 387,
                 'company_id' => 1,
                 'client_id' => 179,
+                'container_id' => 342,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'UF53I5',
@@ -6427,13 +6803,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            377 =>
+            377 => 
             array (
                 'id' => 388,
                 'company_id' => 1,
                 'client_id' => 5,
+                'container_id' => 343,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'RD3IER',
@@ -6444,13 +6821,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            378 =>
+            378 => 
             array (
                 'id' => 389,
                 'company_id' => 1,
                 'client_id' => 17,
+                'container_id' => 344,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF8GLL',
@@ -6461,13 +6839,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            379 =>
+            379 => 
             array (
                 'id' => 390,
                 'company_id' => 1,
                 'client_id' => 15,
+                'container_id' => 345,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF7X7M',
@@ -6478,13 +6857,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            380 =>
+            380 => 
             array (
                 'id' => 391,
                 'company_id' => 1,
                 'client_id' => 150,
+                'container_id' => 346,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'R6YPVS',
@@ -6495,13 +6875,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            381 =>
+            381 => 
             array (
                 'id' => 392,
                 'company_id' => 1,
                 'client_id' => 126,
+                'container_id' => 347,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UF98PA',
@@ -6512,13 +6893,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            382 =>
+            382 => 
             array (
                 'id' => 393,
                 'company_id' => 1,
                 'client_id' => 177,
+                'container_id' => 348,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF73RI',
@@ -6529,13 +6911,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:35',
             ),
-            383 =>
+            383 => 
             array (
                 'id' => 394,
                 'company_id' => 1,
                 'client_id' => 115,
+                'container_id' => 164,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'UF6QCV',
@@ -6546,13 +6929,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:33',
             ),
-            384 =>
+            384 => 
             array (
                 'id' => 395,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 349,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -6563,13 +6947,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            385 =>
+            385 => 
             array (
                 'id' => 396,
                 'company_id' => 1,
                 'client_id' => 166,
+                'container_id' => 350,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFUCKN',
@@ -6580,13 +6965,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            386 =>
+            386 => 
             array (
                 'id' => 397,
                 'company_id' => 1,
                 'client_id' => 121,
+                'container_id' => 351,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'UF7IF5',
@@ -6597,13 +6983,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            387 =>
+            387 => 
             array (
                 'id' => 398,
                 'company_id' => 1,
                 'client_id' => 13,
+                'container_id' => 352,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'F104L8',
@@ -6614,13 +7001,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            388 =>
+            388 => 
             array (
                 'id' => 399,
                 'company_id' => 1,
                 'client_id' => 166,
+                'container_id' => 353,
                 'tax_type' => 'libero',
                 'type' => 'servizio',
                 'office_code' => '0B6NT8',
@@ -6631,13 +7019,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            389 =>
+            389 => 
             array (
                 'id' => 400,
                 'company_id' => 1,
                 'client_id' => 180,
+                'container_id' => 354,
                 'tax_type' => 'tep',
                 'type' => 'aggio',
                 'office_code' => 'UF57RM',
@@ -6648,13 +7037,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            390 =>
+            390 => 
             array (
                 'id' => 401,
                 'company_id' => 1,
                 'client_id' => 119,
+                'container_id' => 355,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'CTLIAG',
@@ -6665,13 +7055,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            391 =>
+            391 => 
             array (
                 'id' => 402,
                 'company_id' => 1,
                 'client_id' => 119,
+                'container_id' => NULL,
                 'tax_type' => 'pub',
                 'type' => 'aggio',
                 'office_code' => 'CTLIAG',
@@ -6684,11 +7075,12 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            392 =>
+            392 => 
             array (
                 'id' => 403,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 356,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -6699,13 +7091,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            393 =>
+            393 => 
             array (
                 'id' => 404,
                 'company_id' => 1,
                 'client_id' => 111,
+                'container_id' => 356,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFRFUJ',
@@ -6716,13 +7109,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            394 =>
+            394 => 
             array (
                 'id' => 405,
                 'company_id' => 1,
                 'client_id' => 163,
+                'container_id' => 357,
                 'tax_type' => 'pub',
                 'type' => 'servizio',
                 'office_code' => 'ITK8WD',
@@ -6733,13 +7127,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            395 =>
+            395 => 
             array (
                 'id' => 406,
                 'company_id' => 1,
                 'client_id' => 181,
+                'container_id' => 358,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFQG6A',
@@ -6750,13 +7145,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            396 =>
+            396 => 
             array (
                 'id' => 407,
                 'company_id' => 1,
                 'client_id' => 179,
+                'container_id' => 359,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'UF53I5',
@@ -6767,13 +7163,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            397 =>
+            397 => 
             array (
                 'id' => 408,
                 'company_id' => 1,
                 'client_id' => 10,
+                'container_id' => 360,
                 'tax_type' => 'ici',
                 'type' => 'servizio',
                 'office_code' => 'UFPMGV',
@@ -6784,13 +7181,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            398 =>
+            398 => 
             array (
                 'id' => 409,
                 'company_id' => 1,
                 'client_id' => 145,
+                'container_id' => 361,
                 'tax_type' => 'tep',
                 'type' => 'servizio',
                 'office_code' => 'UFI9UC',
@@ -6801,13 +7199,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            399 =>
+            399 => 
             array (
                 'id' => 410,
                 'company_id' => 1,
                 'client_id' => 77,
+                'container_id' => 362,
                 'tax_type' => 'park',
                 'type' => 'servizio',
                 'office_code' => 'UFVAKD',
@@ -6818,13 +7217,14 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
-            400 =>
+            400 => 
             array (
                 'id' => 411,
                 'company_id' => 1,
                 'client_id' => 129,
+                'container_id' => 363,
                 'tax_type' => 'cds',
                 'type' => 'servizio',
                 'office_code' => 'M2IC2C',
@@ -6835,10 +7235,10 @@ class TendersTableSeeder extends Seeder
                 'rdo_code' => '',
                 'reference_code' => '',
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-05-21 06:41:36',
             ),
         ));
-
-
+        
+        
     }
 }

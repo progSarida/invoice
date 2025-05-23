@@ -18,6 +18,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onUpdate('cascade');
             $table->foreignId('client_id')->constrained()->onUpdate('cascade');
+            // $table->bigInteger('container_id')->nullable();
+
+            $table->unsignedBigInteger('container_id')->nullable();
+            $table->foreign('container_id')->references('id')->on('containers');
+            // $table->foreignId('container_id')->constrained()->onUpdate('cascade');
+
             // $table->foreign('client_id')->references('id')->on('clients');
             $table->foreignId('tender_id')->nullable()->constrained();
 
