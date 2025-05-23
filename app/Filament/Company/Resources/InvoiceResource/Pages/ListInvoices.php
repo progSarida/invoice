@@ -2,12 +2,14 @@
 
 namespace App\Filament\Company\Resources\InvoiceResource\Pages;
 
-use App\Filament\Company\Resources\InvoiceResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Blade;
 use Filament\Notifications\Notification;
+use App\Filament\Exports\InvoiceExporter;
+use Filament\Resources\Pages\ListRecords;
+use App\Filament\Company\Resources\InvoiceResource;
+use Filament\Actions\ExportAction;
 
 class ListInvoices extends ListRecords
 {
@@ -53,6 +55,11 @@ class ListInvoices extends ListRecords
                         ->success()
                         ->send();
                 }),
+            ExportAction::make('esporta')
+                ->icon('phosphor-export')
+                ->label('Esporta')
+                ->color('primary')
+                ->exporter(InvoiceExporter::class)
         ];
     }
 }

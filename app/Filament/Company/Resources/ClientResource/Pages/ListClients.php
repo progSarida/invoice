@@ -2,15 +2,17 @@
 
 namespace App\Filament\Company\Resources\ClientResource\Pages;
 
-use App\Filament\Company\Resources\ClientResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Notifications\Notification;
-use Filament\Support\Enums\MaxWidth;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Actions\ExportAction;
 use Illuminate\Support\Collection;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Support\Facades\Blade;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Company\Resources\ClientResource;
+use App\Filament\Exports\ClientExporter;
 
 class ListClients extends ListRecords
 {
@@ -52,28 +54,11 @@ class ListClients extends ListRecords
                         ->send();
                 })
                 ,
-            Actions\Action::make('esporta')
+            ExportAction::make('esporta')
                 ->icon('phosphor-export')
                 ->label('Esporta')
-                ->action(function ($livewire) {
-                    $records = $livewire->getFilteredTableQuery()->get();
-                    $csv = \League\Csv\Writer::createFromString();
-                    $csv->insertOne(['#', 'Tipo', 'Denominazione', 'Città', 'Email', 'Codice univoco']);
-                    foreach ($records as $record) {
-                        $csv->insertOne([
-                            $record->id,
-                            $record->type->getLabel(),
-                            $record->denomination,
-                            $record->city?->name,
-                            $record->email,
-                            $record->ipa_code,
-                        ]);
-                    }
-                    return response()->streamDownload(function () use ($csv) {
-                        echo $csv->toString();
-                    }, 'clienti_diretti.csv');
-                })
-                ,
+                ->color('primary')
+                ->exporter(ClientExporter::class)
         ];
     }
 }

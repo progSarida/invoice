@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Enums\TaxType;
-use App\Enums\InvoiceType;
 use App\Enums\SdiStatus;
+use App\Enums\AccrualType;
+use App\Enums\InvoiceType;
+use App\Enums\PaymentStatus;
+use App\Enums\PaymentType;
+use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
@@ -17,6 +20,9 @@ class Invoice extends Model
     protected $casts = [
         'tax_type' =>  TaxType::class,
         'invoice_type' => InvoiceType::class,
+        'accrual_type' => AccrualType::class,
+        'payment_status' => PaymentStatus::class,
+        'payment_type' => PaymentType::class,
         'sdi_status' => SdiStatus::class
     ];
 
