@@ -23,7 +23,7 @@ class CityResource extends Resource
 
     protected static ?string $navigationIcon = 'phosphor-city';
 
-    protected static ?string $navigationGroup = 'Gestione città';
+    // protected static ?string $navigationGroup = 'Gestione città';
 
     public static function form(Form $form): Form
     {
@@ -96,5 +96,15 @@ class CityResource extends Resource
             'create' => Pages\CreateCity::route('/create'),
             'edit' => Pages\EditCity::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Gestione città';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 3;
     }
 }

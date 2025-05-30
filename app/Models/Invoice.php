@@ -4,10 +4,11 @@ namespace App\Models;
 
 use App\Enums\TaxType;
 use App\Enums\SdiStatus;
-use App\Enums\AccrualType;
+// use App\Enums\AccrualType;
 use App\Enums\InvoiceType;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentType;
+use App\Models\AccrualType;
 use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
@@ -20,7 +21,7 @@ class Invoice extends Model
     protected $casts = [
         'tax_type' =>  TaxType::class,
         'invoice_type' => InvoiceType::class,
-        'accrual_type' => AccrualType::class,
+        // 'accrual_type' => AccrualType::class,
         'payment_status' => PaymentStatus::class,
         'payment_type' => PaymentType::class,
         'sdi_status' => SdiStatus::class
@@ -66,5 +67,13 @@ class Invoice extends Model
         }
         $number = $number.$this->number;
         return $number." / 0".$this->section." / ".$this->year;
+    }
+
+    public function accrualType(){
+        return $this->belongsTo(AccrualType::class,'accrual_type_id');
+    }
+
+    public function manageType(){
+        return $this->belongsTo(ManageType::class,'manage_type_id');
     }
 }

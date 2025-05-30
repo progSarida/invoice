@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RegionResource\Pages;
-use App\Filament\Resources\RegionResource\RelationManagers;
-use App\Models\Region;
+use App\Filament\Resources\ManageTypeResource\Pages;
+use App\Filament\Resources\ManageTypeResource\RelationManagers;
+use App\Models\ManageType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,25 +13,31 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class RegionResource extends Resource
+class ManageTypeResource extends Resource
 {
-    protected static ?string $model = Region::class;
+    protected static ?string $model = ManageType::class;
 
-    public static ?string $pluralModelLabel = 'Regioni';
+    public static ?string $pluralModelLabel = 'Gestioni';
 
-    public static ?string $modelLabel = 'Regione';
+    public static ?string $modelLabel = 'Gestioni';
 
-    protected static ?string $navigationIcon = 'phosphor-map-pin-simple-fill';
-
-    // protected static ?string $navigationGroup = 'Gestione città';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(6)
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('name')->label('Nome')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->columnspan(2),
+                Forms\Components\TextInput::make('order')->label('Posizione')
+                    ->required()
+                    ->columnspan(1),
+                Forms\Components\TextInput::make('description')->label('Descrizione')
+                    ->maxLength(255)
+                    ->columnspan(3),
             ]);
     }
 
@@ -39,12 +45,12 @@ class RegionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->label('Id')
-                    ->searchable()
+                Tables\Columns\TextColumn::make('order')->label('Posizione')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')->label('Nome')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('description')->label('Descrizione')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -59,6 +65,7 @@ class RegionResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -77,19 +84,19 @@ class RegionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRegions::route('/'),
-            'create' => Pages\CreateRegion::route('/create'),
-            'edit' => Pages\EditRegion::route('/{record}/edit'),
+            'index' => Pages\ListManageTypes::route('/'),
+            'create' => Pages\CreateManageType::route('/create'),
+            'edit' => Pages\EditManageType::route('/{record}/edit'),
         ];
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Gestione città';
+        return 'Parametri';
     }
 
     public static function getNavigationSort(): ?int
     {
-        return 1;
+        return 4;
     }
 }

@@ -25,7 +25,7 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationGroup = 'Parametri';
+    // protected static ?string $navigationGroup = 'Parametri';
 
     public static function form(Form $form): Form
     {
@@ -98,5 +98,15 @@ class UserResource extends Resource
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Parametri';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
     }
 }

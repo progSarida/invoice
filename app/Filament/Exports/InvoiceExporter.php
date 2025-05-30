@@ -44,9 +44,10 @@ class InvoiceExporter extends Exporter
                 ->label('Data'),
             ExportColumn::make('budget_year')
                 ->label('Anno bilancio'),
-            ExportColumn::make('accrual_type')
+            ExportColumn::make('accrual_type_id')
                 ->label('Competenza')
-                ->formatStateUsing(fn ($state) => $state?->getLabel() ?? null),
+                // ->formatStateUsing(fn ($state) => $state?->getLabel() ?? null),
+                ->formatStateUsing(fn ($state, $record) => $record->accrualType?->name ?? '-'),
             ExportColumn::make('accrual_year')
                 ->label('Anno competenza'),
             ExportColumn::make('description')

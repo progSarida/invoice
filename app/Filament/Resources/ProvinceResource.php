@@ -23,7 +23,7 @@ class ProvinceResource extends Resource
 
     protected static ?string $navigationIcon = 'phosphor-map-pin-simple-light';
 
-    protected static ?string $navigationGroup = 'Gestione città';
+    // protected static ?string $navigationGroup = 'Gestione città';
 
     public static function form(Form $form): Form
     {
@@ -100,5 +100,15 @@ class ProvinceResource extends Resource
             'create' => Pages\CreateProvince::route('/create'),
             'edit' => Pages\EditProvince::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Gestione città';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
     }
 }
