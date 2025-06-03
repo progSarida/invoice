@@ -2,15 +2,25 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\LiquidationType;
-use App\Enums\ShareholderType;
+use App\Enums\FundType;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Company;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Enums\TaxRegimeType;
+use App\Enums\VatEnforceType;
+use App\Enums\LiquidationType;
+use App\Enums\ShareholderType;
+use App\Enums\VatCodeType;
 use Filament\Resources\Resource;
+use App\Models\SocialContribution;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Tabs\Tab;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ToggleColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
@@ -39,99 +49,267 @@ class CompanyResource extends Resource
                     ->content('')
                     ->columnSpan(11),
                 Forms\Components\Toggle::make('is_active')->label('Attiva')
-                            ->columnspan(1),
-                Fieldset::make('Informazioni')
-                    ->schema([
-                        Forms\Components\TextInput::make('name')->label('Nome')                             //
-                            ->required()
-                            ->maxLength(255)
-                            ->columnspan(6),
-                        Forms\Components\TextInput::make('vat_number')->label('Partita Iva')
-                            ->required()
-                            ->maxLength(255)
-                            ->columnspan(3),
-                        Forms\Components\TextInput::make('tax_number')->label('Codice fiscale')
-                            ->required()
-                            ->maxLength(255)
-                            ->columnspan(3),
-                        Forms\Components\TextInput::make('city_code')->label('Codice catastale')            //
-                            ->required()
-                            ->maxLength(4)
-                            ->columnspan(2),
-                        Forms\Components\TextInput::make('address')->label('Indirizzo')
-                            ->maxLength(255)
-                            ->columnspan(6),
-                        Forms\Components\Select::make('city_code')->label('Città')
-                            ->relationship(name: 'city', titleAttribute: 'name')
-                            ->searchable()
-                            ->preload()
-                            ->columnspan(4),
-                        Forms\Components\TextInput::make('email')->label('Email')                           //
-                            ->required()
-                            ->maxLength(255)
-                            ->columnspan(6),
-                        Forms\Components\TextInput::make('phone')->label('Telefono')
-                            ->required()
-                            ->maxLength(255)
-                            ->columnspan(3),
-                        Forms\Components\TextInput::make('fax')->label('Fax')
-                            ->required()
-                            ->maxLength(255)
-                            ->columnspan(3),
+                    ->columnSpan(1),
+                Tabs::make('')
+                    ->tabs([
+                        Tabs\Tab::make('Informazioni')
+                            ->schema([
+                                Forms\Components\TextInput::make('name')->label('Nome')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(6),
+                                Forms\Components\TextInput::make('vat_number')->label('Partita Iva')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('tax_number')->label('Codice fiscale')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('city_code')->label('Codice catastale')
+                                    ->required()
+                                    ->maxLength(4)
+                                    ->columnSpan(2),
+                                Forms\Components\TextInput::make('address')->label('Indirizzo')
+                                    ->maxLength(255)
+                                    ->columnSpan(6),
+                                Forms\Components\Select::make('city_code')->label('Città')
+                                    ->relationship(name: 'city', titleAttribute: 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(4),
+                                Forms\Components\TextInput::make('email')->label('Email')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(6),
+                                Forms\Components\TextInput::make('phone')->label('Telefono')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('fax')->label('Fax')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
+                            ])
+                            ->columns(12),
+                        Tabs\Tab::make('Albo professionale')
+                            ->schema([
+                                Forms\Components\TextInput::make('register')->label('Albo professionale')
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
+                                Forms\Components\Select::make('register_province_id')->label('Provincia Albo')
+                                    ->relationship(name: 'registerProvince', titleAttribute: 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('register_number')->label('Numero')
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('register_date')->label('Data iscrizione')
+                                    ->columnSpan(3),
+                            ])
+                            ->columns(12),
+                        Tabs\Tab::make('REA')
+                            ->schema([
+                                Forms\Components\Select::make('rea_province_id')->label('Ufficio')
+                                    ->relationship(name: 'reaProvince', titleAttribute: 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(5),
+                                Placeholder::make('')
+                                    ->label('')
+                                    ->content('')
+                                    ->columnSpan(1),
+                                Forms\Components\TextInput::make('rea_number')->label('Numero')
+                                    ->maxLength(255)
+                                    ->columnSpan(2),
+                                Placeholder::make('')
+                                    ->label('')
+                                    ->content('')
+                                    ->columnSpan(1),
+                                Forms\Components\TextInput::make('nominal_capital')->label('Capitale sociale')
+                                    ->maxLength(255)
+                                    ->columnSpan(2),
+                                Placeholder::make('')
+                                    ->label('')
+                                    ->content('')
+                                    ->columnSpan(6),
+                                Forms\Components\Select::make('shareholders')
+                                    ->label('Socio unico')
+                                    ->options(ShareholderType::options())
+                                    ->columnSpan(3),
+                                Forms\Components\Select::make('liquidation')
+                                    ->label('Stato liquidazione')
+                                    ->options(LiquidationType::options())
+                                    ->columnSpan(3),
+                            ])
+                            ->columns(12),
+                        Tabs\Tab::make('Resp. conservazione')
+                            ->schema([
+                                TextInput::make('curator.name')
+                                    ->label('Nome')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(4),
+                                TextInput::make('curator.surname')
+                                    ->label('Cognome')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(4),
+                                TextInput::make('curator.tax_code')
+                                    ->label('Codice fiscale')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(4),
+                                TextInput::make('curator.email')
+                                    ->label('Email')
+                                    ->email()
+                                    ->maxLength(255)
+                                    ->columnSpan(6),
+                                TextInput::make('curator.pec')
+                                    ->label('Pec')
+                                    ->maxLength(255)
+                                    ->columnSpan(6),
+                            ])
+                            ->columns(12),
+                        Tabs\Tab::make('Resp. produttore')
+                            ->schema([
+                                TextInput::make('productor.name')
+                                    ->label('Nome')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(4),
+                                TextInput::make('productor.surname')
+                                    ->label('Cognome')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(4),
+                                TextInput::make('productor.tax_code')
+                                    ->label('Codice fiscale')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(4),
+                                TextInput::make('productor.email')
+                                    ->label('Email')
+                                    ->email()
+                                    ->maxLength(255)
+                                    ->columnSpan(6),
+                                TextInput::make('productor.pec')
+                                    ->label('Pec')
+                                    ->maxLength(255)
+                                    ->columnSpan(6),
+                            ])
+                            ->columns(12),
+                        Tabs\Tab::make('Regime fiscale')
+                            ->schema([
+                                    Select::make('fiscalProfile.tax_regime')
+                                        ->label('')
+                                        ->options(
+                                            collect(TaxRegimeType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                        )
+                                        ->columnSpan(8)
+                                ])
+                            ->columns(12),
+                        Tabs\Tab::make('Esigibilità IVA')
+                            ->schema([
+                                Forms\Components\Toggle::make('fiscalProfile.vat_enforce')
+                                    ->label('Attiva')
+                                    ->reactive()
+                                    ->columnSpan(1),
+                                Placeholder::make('')
+                                    ->content('')
+                                    ->columnSpan(1),
+                                Select::make('fiscalProfile.vat_enforce_type')
+                                    ->label('')
+                                    ->options(
+                                        collect(VatEnforceType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                    )
+                                    ->visible(fn ($get) => $get('fiscalProfile.vat_enforce'))
+                                    ->columnSpan(8),
+                            ])
+                            ->columns(12),
+                        Tabs\Tab::make('Previdenza')
+                            ->schema([
+                                Forms\Components\Repeater::make('socialContributions')
+                                    ->label('Cassa previdenziale')
+                                    ->relationship('socialContributions') // Define the relationship method in the Company model
+                                    ->schema([
+                                        Forms\Components\Select::make('fund')
+                                            ->label('Tipo cassa')
+                                            ->options(
+                                                collect(FundType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                            )
+                                            ->required()
+                                            ->columnSpan(7),
+                                        Placeholder::make('')
+                                            ->label('')
+                                            ->content('')
+                                            ->columnSpan(5),
+                                        Forms\Components\TextInput::make('rate')
+                                            ->label('Aliquota cassa')
+                                            ->maxLength(255)
+                                            ->suffix('%')
+                                            ->columnSpan(2),
+                                        Forms\Components\TextInput::make('taxable_perc')
+                                            ->label('su')
+                                            ->maxLength(255)
+                                            ->suffix("% dell'imponibile")
+                                            ->columnSpan(3),
+                                        Forms\Components\Select::make('vat_code')
+                                            ->label('Codice IVA')
+                                            ->options(
+                                                collect(VatCodeType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                            )
+                                            ->required()
+                                            ->columnSpan(7),
+                                    ])
+                                    ->columns(12)
+                                    ->maxItems(3) // Enforce the limit of 3 social contributions
+                                    ->addActionLabel('Aggiungi Cassa previdenziale')
+                                    ->deleteAction(
+                                        fn ($action) => $action->label('Rimuovi Cassa previdenziale')
+                                    )
+                                    ->columnSpan(12),
+                            ])
+                            ->columns(12),
+                        Tabs\Tab::make('Ritenute')
+                            ->schema([
+                                Forms\Components\Toggle::make('fiscalProfile.vat_enforce')
+                                    ->label('Attiva')
+                                    ->reactive()
+                                    ->columnSpan(1),
+                                Placeholder::make('')
+                                    ->content('')
+                                    ->columnSpan(1),
+                                Select::make('fiscalProfile.vat_enforce_type')
+                                    ->label('')
+                                    ->options(
+                                        collect(VatEnforceType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                    )
+                                    ->visible(fn ($get) => $get('fiscalProfile.vat_enforce'))
+                                    ->columnSpan(8),
+                            ])
+                            ->columns(12),
+                        Tabs\Tab::make('Bollo automatico')
+                            ->schema([
+                                Forms\Components\Toggle::make('fiscalProfile.vat_enforce')
+                                    ->label('Attiva')
+                                    ->reactive()
+                                    ->columnSpan(1),
+                                Placeholder::make('')
+                                    ->content('')
+                                    ->columnSpan(1),
+                                Select::make('fiscalProfile.vat_enforce_type')
+                                    ->label('')
+                                    ->options(
+                                        collect(VatEnforceType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                    )
+                                    ->visible(fn ($get) => $get('fiscalProfile.vat_enforce'))
+                                    ->columnSpan(8),
+                            ])
+                            ->columns(12),
                     ])
-                    ->columns(12),
-                Fieldset::make('Iscrizione Albo professionale')
-                    ->schema([
-                        Forms\Components\TextInput::make('register')->label('Albo professionale')           //
-                            ->maxLength(255)
-                            ->columnspan(3),
-                        Forms\Components\Select::make('register_province_id')->label('Provincia Albo')
-                            ->relationship(name: 'registerProvince', titleAttribute: 'name')
-                            ->searchable()
-                            ->preload()
-                            ->columnspan(3),
-                        Forms\Components\TextInput::make('register_number')->label('Numero')
-                            ->maxLength(255)
-                            ->columnspan(3),
-                        Forms\Components\DatePicker::make('register_date')->label('Data iscrizione')
-                                ->columnSpan(3),
-                    ])
-                    ->columns(12),
-                Fieldset::make('Iscrizione REA')
-                    ->schema([
-                        Forms\Components\Select::make('rea_province_id')->label('Ufficio')
-                            ->relationship(name: 'reaProvince', titleAttribute: 'name')
-                            ->searchable()
-                            ->preload()
-                            ->columnspan(4),
-                        Placeholder::make('')
-                            ->label('')
-                            ->content('')
-                            ->columnSpan(2),
-                        Forms\Components\TextInput::make('rea_number')->label('Numero')
-                            ->maxLength(255)
-                            ->columnspan(2),
-                        Placeholder::make('')
-                            ->label('')
-                            ->content('')
-                            ->columnSpan(1),
-                        Forms\Components\TextInput::make('nominal_capital')->label('Capitale sociale')
-                            ->maxLength(255)
-                            ->columnspan(2),
-                        Placeholder::make('')
-                            ->label('')
-                            ->content('')
-                            ->columnSpan(6),
-                        Forms\Components\Select::make('shareholders')
-                            ->label('Socio unico')
-                            ->options(ShareholderType::options())
-                            ->columnspan(3),
-                        Forms\Components\Select::make('liquidation')
-                            ->label('Stato liquidazione')
-                            ->options(LiquidationType::options())
-                            ->columnspan(3),
-                    ])
-                    ->columns(12)
+                    ->columnSpan(12),
             ]);
     }
 

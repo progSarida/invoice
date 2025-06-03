@@ -37,6 +37,26 @@ class Company extends Model
         return $this->belongsTo(City::class, 'city_code', 'code');
     }
 
+    public function curator()
+    {
+        return $this->hasOne(Curator::class);
+    }
+
+    public function productor()
+    {
+        return $this->hasOne(Productor::class);
+    }
+
+    public function fiscalProfile()
+    {
+        return $this->hasOne(FiscalProfile::class);
+    }
+
+    public function socialContributions()
+    {
+        return $this->hasMany(SocialContribution::class);
+    }
+
     public function bankAccounts(){
         return $this->hasMany(BankAccount::class);
     }
