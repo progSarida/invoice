@@ -11,7 +11,7 @@ class Withholding extends Model
     protected $fillable = [
         'withholding_type',
         'rate',
-        'taxable_perc ',
+        'taxable_perc',
         'payment_reason'
     ];
 

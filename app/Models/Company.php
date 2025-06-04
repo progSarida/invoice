@@ -67,6 +67,11 @@ class Company extends Model
         return $this->hasOne(StampDuty::class);
     }
 
+    public function sectionals()
+    {
+        return $this->hasMany(Sectional::class);
+    }
+
     public function bankAccounts(){
         return $this->hasMany(BankAccount::class);
     }

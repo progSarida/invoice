@@ -29,6 +29,7 @@ use Filament\Forms\Components\Placeholder;
 use App\Filament\Resources\CompanyResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CompanyResource\RelationManagers;
+use App\Models\City;
 
 class CompanyResource extends Resource
 {
@@ -68,14 +69,25 @@ class CompanyResource extends Resource
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpan(3),
-                                Forms\Components\TextInput::make('city_code')->label('Codice catastale')
+                                Forms\Components\TextInput::make('city_code')
+                                    ->label('Codice catastale')
                                     ->required()
                                     ->maxLength(4)
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $city = City::where('code', $state)->first();
+                                        if ($city) {
+                                            $set('city', $city->code);
+                                        } else {
+                                            $set('city', null);
+                                        }
+                                    })
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('address')->label('Indirizzo')
                                     ->maxLength(255)
+                                    ->required()
                                     ->columnSpan(6),
-                                Forms\Components\Select::make('city_code')->label('Città')
+                                Forms\Components\Select::make('city')->label('Città')
                                     ->relationship(name: 'city', titleAttribute: 'name')
                                     ->searchable()
                                     ->preload()
@@ -146,50 +158,52 @@ class CompanyResource extends Resource
                         Tabs\Tab::make('Responsabili')
                             ->schema([
                                 Fieldset::make('Responsabile conservazione')
+                                    ->relationship('curator')
                                     ->schema([
-                                        TextInput::make('curator.name')
+                                        TextInput::make('name')
                                             ->label('Nome')
                                             ->maxLength(255)
                                             ->columnSpan(4),
-                                        TextInput::make('curator.surname')
+                                        TextInput::make('surname')
                                             ->label('Cognome')
                                             ->maxLength(255)
                                             ->columnSpan(4),
-                                        TextInput::make('curator.tax_code')
+                                        TextInput::make('tax_code')
                                             ->label('Codice fiscale')
                                             ->maxLength(255)
                                             ->columnSpan(4),
-                                        TextInput::make('curator.email')
+                                        TextInput::make('email')
                                             ->label('Email')
                                             ->email()
                                             ->maxLength(255)
                                             ->columnSpan(6),
-                                        TextInput::make('curator.pec')
+                                        TextInput::make('pec')
                                             ->label('Pec')
                                             ->maxLength(255)
                                             ->columnSpan(6),
                                     ])
                                     ->columns(12),
                                 Fieldset::make('Responsabile produttore')
+                                    ->relationship('productor')
                                     ->schema([
-                                        TextInput::make('productor.name')
+                                        TextInput::make('name')
                                             ->label('Nome')
                                             ->maxLength(255)
                                             ->columnSpan(4),
-                                        TextInput::make('productor.surname')
+                                        TextInput::make('surname')
                                             ->label('Cognome')
                                             ->maxLength(255)
                                             ->columnSpan(4),
-                                        TextInput::make('productor.tax_code')
+                                        TextInput::make('tax_code')
                                             ->label('Codice fiscale')
                                             ->maxLength(255)
                                             ->columnSpan(4),
-                                        TextInput::make('productor.email')
+                                        TextInput::make('email')
                                             ->label('Email')
                                             ->email()
                                             ->maxLength(255)
                                             ->columnSpan(6),
-                                        TextInput::make('productor.pec')
+                                        TextInput::make('pec')
                                             ->label('Pec')
                                             ->maxLength(255)
                                             ->columnSpan(6),
@@ -197,32 +211,36 @@ class CompanyResource extends Resource
                                     ->columns(12)
                             ])
                             ->columns(12),
-                        Tabs\Tab::make('Regime fiscale')
+                        Tabs\Tab::make('Profilo fiscale')
                             ->schema([
-                                    Select::make('fiscalProfile.tax_regime')
-                                        ->label('')
-                                        ->options(
-                                            collect(TaxRegimeType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                                        )
-                                        ->columnSpan(8)
-                                ])
-                            ->columns(12),
-                        Tabs\Tab::make('Esigibilità IVA')
-                            ->schema([
-                                Forms\Components\Toggle::make('fiscalProfile.vat_enforce')
-                                    ->label('Attiva')
-                                    ->reactive()
-                                    ->columnSpan(1),
-                                Placeholder::make('')
-                                    ->content('')
-                                    ->columnSpan(1),
-                                Select::make('fiscalProfile.vat_enforce_type')
-                                    ->label('')
-                                    ->options(
-                                        collect(VatEnforceType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                                    )
-                                    ->visible(fn ($get) => $get('fiscalProfile.vat_enforce'))
-                                    ->columnSpan(8),
+                                Fieldset::make('Regime fiscale')
+                                    ->relationship('fiscalProfile')
+                                    ->schema([
+                                        Select::make('tax_regime')
+                                            ->label('')
+                                            ->options(
+                                                collect(TaxRegimeType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                            )
+                                            ->columnSpan(8)
+                                    ])
+                                    ->columns(12),
+                                Fieldset::make('Esigibilità IVA')
+                                    ->relationship('fiscalProfile')
+                                    ->schema([
+                                        Forms\Components\Toggle::make('vat_enforce')
+                                            ->label('Attiva')
+                                            ->reactive()
+                                            ->columnSpan(1),
+                                        Placeholder::make('')->content('')->columnSpan(1),
+                                        Select::make('vat_enforce_type')
+                                            ->label('')
+                                            ->options(
+                                                collect(VatEnforceType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                            )
+                                            ->visible(fn ($get) => $get('vat_enforce'))
+                                            ->columnSpan(6),
+                                    ])
+                                    ->columns(12)
                             ])
                             ->columns(12),
                         Tabs\Tab::make('Previdenza')
@@ -264,6 +282,7 @@ class CompanyResource extends Resource
                                     ])
                                     ->columns(12)
                                     ->maxItems(3)
+                                    ->defaultItems(0)
                                     ->addActionLabel('Aggiungi Cassa previdenziale')
                                     ->deleteAction(
                                         fn ($action) => $action->label('Rimuovi Cassa previdenziale')
@@ -314,6 +333,7 @@ class CompanyResource extends Resource
                                     ])
                                     ->columns(12)
                                     ->maxItems(4)
+                                    ->defaultItems(0)
                                     ->addActionLabel('Aggiungi Ritenuta')
                                     ->deleteAction(
                                         fn ($action) => $action->label('Rimuovi Ritenuta')
@@ -323,45 +343,57 @@ class CompanyResource extends Resource
                             ->columns(12),
                         Tabs\Tab::make('Bollo automatico')
                             ->schema([
-                                Placeholder::make('')
-                                    ->content("Aggiungi automaticamente l'imposta di bollo nella fatture quando gli importi esenti IVA sono uguali o superiori a 77,47€")
-                                    ->columnSpan(12),
-                                Placeholder::make('')
-                                    ->content("Fatture elettroniche")
-                                    ->columnSpan(12)->extraAttributes([
-                                        'style' => 'font-weight: bold; font-size: 1.25rem;',
-                                    ]),
-                                Forms\Components\Toggle::make('stampDuty.active')
-                                    ->label('Attiva')
-                                    ->reactive()
-                                    ->columnSpan(1),
-                                Placeholder::make('')
-                                    ->content("")
-                                    ->columnSpan(11),
-                                Placeholder::make('')
-                                    ->content("Addebita il costo del bollo al cliente aggiungendo una riga nella fattura elettronica")
-                                    ->visible(fn ($get) => $get('stampDuty.active'))
-                                    ->columnSpan(12)->extraAttributes([
-                                        'style' => 'font-weight: bold; font-size: 1.25rem;',
-                                    ]),
-                                Forms\Components\Toggle::make('stampDuty.add_row')
-                                    ->label('Attiva')
-                                    ->reactive()
-                                    ->visible(fn ($get) => $get('stampDuty.active'))
-                                    ->columnSpan(1),
-                                Placeholder::make('')
-                                    ->content('')
-                                    ->columnSpan(11),
-                                Placeholder::make('')
-                                    ->content("Descrizione riga da aggiungere nella fattura elettronica")
-                                    ->visible(fn ($get) => $get('stampDuty.add_row'))
-                                    ->columnSpan(12)->extraAttributes([
-                                        'style' => 'font-weight: bold;',
-                                    ]),
-                                TextInput::make('stampDuty.row_description')
-                                    ->label('')
-                                    ->visible(fn ($get) => $get('stampDuty.add_row'))
-                                    ->columnSpan(8),
+                                Section::make("Aggiungi automaticamente l'imposta di bollo nella fatture quando gli importi esenti IVA sono uguali o superiori al valore indicato.")
+                                    ->relationship('stampDuty')
+                                    ->extraAttributes(['style' => 'font-weight: normal;'])
+                                    ->schema([
+                                        Placeholder::make('')
+                                            ->content("Fatture elettroniche")
+                                            ->columnSpan(12)->extraAttributes(['style' => 'font-weight: bold; font-size: 1.25rem;']),
+                                        Forms\Components\Toggle::make('active')
+                                            ->label('Attiva')
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                if (!$state) {
+                                                    $set('add_row', false);
+                                                    $set('row_description', null);
+                                                }
+                                            })
+                                            ->columnSpan(1),
+                                        Placeholder::make('')->content('')->columnSpan(11),
+                                        Placeholder::make('')
+                                            ->content("Importo")
+                                            ->visible(fn ($get) => $get('active'))
+                                            ->columnSpan(1)->extraAttributes(['style' => 'font-weight: bold;']),
+                                        TextInput::make('value')
+                                            ->label('')
+                                            ->visible(fn ($get) => $get('active'))
+                                            ->columnSpan(3),
+                                        Placeholder::make('')
+                                            ->content("Addebita il costo del bollo al cliente aggiungendo una riga nella fattura elettronica")
+                                            ->visible(fn ($get) => $get('active'))
+                                            ->columnSpan(12)->extraAttributes(['style' => 'font-weight: bold; font-size: 1.25rem;']),
+                                        Forms\Components\Toggle::make('add_row')
+                                            ->label('Attiva')
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                if (!$state) {
+                                                    $set('row_description', null);
+                                                }
+                                            })
+                                            ->visible(fn ($get) => $get('active'))
+                                            ->columnSpan(1),
+                                        Placeholder::make('')->content('')->columnSpan(11),
+                                        Placeholder::make('')
+                                            ->content("Descrizione riga da aggiungere nella fattura elettronica")
+                                            ->visible(fn ($get) => $get('add_row'))
+                                            ->columnSpan(12)->extraAttributes(['style' => 'font-weight: bold;']),
+                                        TextInput::make('row_description')
+                                            ->label('')
+                                            ->visible(fn ($get) => $get('add_row'))
+                                            ->columnSpan(8),
+                                    ])
+                                    ->columns(12)
                             ])
                             ->columns(12),
                     ])

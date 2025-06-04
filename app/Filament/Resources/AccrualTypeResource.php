@@ -99,6 +99,6 @@ class AccrualTypeResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 3;
+        return 4;
     }
 }

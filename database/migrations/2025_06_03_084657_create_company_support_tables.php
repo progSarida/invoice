@@ -42,7 +42,7 @@ return new class extends Migration
             $table->string('description');                                       // descrizione (sigla)
             $table->string('client_type');                                       // tipo cliente (Enum)
             $table->string('doc_type');                                          // tipo documento (Enum)
-            $table->string('numeration');                                        // numerazione (Enum)
+            $table->string('numeration_type');                                   // numerazione (Enum)
             $table->string('progressive');                                       // numero progressivo nella numerazione
             $table->timestamps();
         });
@@ -73,7 +73,7 @@ return new class extends Migration
             $table->foreignId('company_id')->constrained('companies')            // id azienda per multi-tenancy
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->string('withholding_type');                                  // tipo ritenuta (Enum)
-            $table->string('rate');                                              // aliquota fiscale
+            $table->integer('rate');                                             // aliquota fiscale
             $table->integer('taxable_perc ');                                    // percentuale imponibile
             $table->string('payment_reason');                                    // causale pagamento (Enum)
             $table->timestamps();
@@ -81,11 +81,12 @@ return new class extends Migration
 
         Schema::create('stamp_duties', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companies')            // id azienda per multi-tenancy
+            $table->foreignId('company_id')->constrained('companies')             // id azienda per multi-tenancy
                 ->onUpdate('cascade')->onDelete('cascade');
-            $table->string('active');                                            // imposta di bollo automatica in fattura
-            $table->string('add_row');                                           // addebito al cliente con riga aggiuntiva in fattura
-            $table->string('row_description');                                   // descrizione riga da aggiungere
+            $table->boolean('active')->default(false);                            // imposta di bollo automatica in fattura
+            $table->decimal('value',10,2)->nullable();                            // aliquota fiscale
+            $table->boolean('add_row')->default(false);                           // addebito al cliente con riga aggiuntiva in fattura
+            $table->string('row_description')->nullable();                        // descrizione riga da aggiungere
             $table->timestamps();
         });
     }

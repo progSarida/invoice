@@ -97,6 +97,6 @@ class ManageTypeResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 4;
+        return 5;
     }
 }
