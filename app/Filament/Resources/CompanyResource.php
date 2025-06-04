@@ -11,8 +11,10 @@ use Filament\Tables\Table;
 use App\Enums\TaxRegimeType;
 use App\Enums\VatEnforceType;
 use App\Enums\LiquidationType;
+use App\Enums\PaymentReasonType;
 use App\Enums\ShareholderType;
 use App\Enums\VatCodeType;
+use App\Enums\WithholdingType;
 use Filament\Resources\Resource;
 use App\Models\SocialContribution;
 use Filament\Forms\Components\Tabs;
@@ -79,15 +81,12 @@ class CompanyResource extends Resource
                                     ->preload()
                                     ->columnSpan(4),
                                 Forms\Components\TextInput::make('email')->label('Email')
-                                    ->required()
                                     ->maxLength(255)
                                     ->columnSpan(6),
                                 Forms\Components\TextInput::make('phone')->label('Telefono')
-                                    ->required()
                                     ->maxLength(255)
                                     ->columnSpan(3),
                                 Forms\Components\TextInput::make('fax')->label('Fax')
-                                    ->required()
                                     ->maxLength(255)
                                     ->columnSpan(3),
                             ])
@@ -144,60 +143,58 @@ class CompanyResource extends Resource
                                     ->columnSpan(3),
                             ])
                             ->columns(12),
-                        Tabs\Tab::make('Resp. conservazione')
+                        Tabs\Tab::make('Responsabili')
                             ->schema([
-                                TextInput::make('curator.name')
-                                    ->label('Nome')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->columnSpan(4),
-                                TextInput::make('curator.surname')
-                                    ->label('Cognome')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->columnSpan(4),
-                                TextInput::make('curator.tax_code')
-                                    ->label('Codice fiscale')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->columnSpan(4),
-                                TextInput::make('curator.email')
-                                    ->label('Email')
-                                    ->email()
-                                    ->maxLength(255)
-                                    ->columnSpan(6),
-                                TextInput::make('curator.pec')
-                                    ->label('Pec')
-                                    ->maxLength(255)
-                                    ->columnSpan(6),
-                            ])
-                            ->columns(12),
-                        Tabs\Tab::make('Resp. produttore')
-                            ->schema([
-                                TextInput::make('productor.name')
-                                    ->label('Nome')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->columnSpan(4),
-                                TextInput::make('productor.surname')
-                                    ->label('Cognome')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->columnSpan(4),
-                                TextInput::make('productor.tax_code')
-                                    ->label('Codice fiscale')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->columnSpan(4),
-                                TextInput::make('productor.email')
-                                    ->label('Email')
-                                    ->email()
-                                    ->maxLength(255)
-                                    ->columnSpan(6),
-                                TextInput::make('productor.pec')
-                                    ->label('Pec')
-                                    ->maxLength(255)
-                                    ->columnSpan(6),
+                                Fieldset::make('Responsabile conservazione')
+                                    ->schema([
+                                        TextInput::make('curator.name')
+                                            ->label('Nome')
+                                            ->maxLength(255)
+                                            ->columnSpan(4),
+                                        TextInput::make('curator.surname')
+                                            ->label('Cognome')
+                                            ->maxLength(255)
+                                            ->columnSpan(4),
+                                        TextInput::make('curator.tax_code')
+                                            ->label('Codice fiscale')
+                                            ->maxLength(255)
+                                            ->columnSpan(4),
+                                        TextInput::make('curator.email')
+                                            ->label('Email')
+                                            ->email()
+                                            ->maxLength(255)
+                                            ->columnSpan(6),
+                                        TextInput::make('curator.pec')
+                                            ->label('Pec')
+                                            ->maxLength(255)
+                                            ->columnSpan(6),
+                                    ])
+                                    ->columns(12),
+                                Fieldset::make('Responsabile produttore')
+                                    ->schema([
+                                        TextInput::make('productor.name')
+                                            ->label('Nome')
+                                            ->maxLength(255)
+                                            ->columnSpan(4),
+                                        TextInput::make('productor.surname')
+                                            ->label('Cognome')
+                                            ->maxLength(255)
+                                            ->columnSpan(4),
+                                        TextInput::make('productor.tax_code')
+                                            ->label('Codice fiscale')
+                                            ->maxLength(255)
+                                            ->columnSpan(4),
+                                        TextInput::make('productor.email')
+                                            ->label('Email')
+                                            ->email()
+                                            ->maxLength(255)
+                                            ->columnSpan(6),
+                                        TextInput::make('productor.pec')
+                                            ->label('Pec')
+                                            ->maxLength(255)
+                                            ->columnSpan(6),
+                                    ])
+                                    ->columns(12)
                             ])
                             ->columns(12),
                         Tabs\Tab::make('Regime fiscale')
@@ -232,7 +229,7 @@ class CompanyResource extends Resource
                             ->schema([
                                 Forms\Components\Repeater::make('socialContributions')
                                     ->label('Cassa previdenziale')
-                                    ->relationship('socialContributions') // Define the relationship method in the Company model
+                                    ->relationship('socialContributions')
                                     ->schema([
                                         Forms\Components\Select::make('fund')
                                             ->label('Tipo cassa')
@@ -247,11 +244,13 @@ class CompanyResource extends Resource
                                             ->columnSpan(5),
                                         Forms\Components\TextInput::make('rate')
                                             ->label('Aliquota cassa')
+                                            ->required()
                                             ->maxLength(255)
                                             ->suffix('%')
                                             ->columnSpan(2),
                                         Forms\Components\TextInput::make('taxable_perc')
                                             ->label('su')
+                                            ->required()
                                             ->maxLength(255)
                                             ->suffix("% dell'imponibile")
                                             ->columnSpan(3),
@@ -264,7 +263,7 @@ class CompanyResource extends Resource
                                             ->columnSpan(7),
                                     ])
                                     ->columns(12)
-                                    ->maxItems(3) // Enforce the limit of 3 social contributions
+                                    ->maxItems(3)
                                     ->addActionLabel('Aggiungi Cassa previdenziale')
                                     ->deleteAction(
                                         fn ($action) => $action->label('Rimuovi Cassa previdenziale')
@@ -274,37 +273,94 @@ class CompanyResource extends Resource
                             ->columns(12),
                         Tabs\Tab::make('Ritenute')
                             ->schema([
-                                Forms\Components\Toggle::make('fiscalProfile.vat_enforce')
-                                    ->label('Attiva')
-                                    ->reactive()
-                                    ->columnSpan(1),
                                 Placeholder::make('')
-                                    ->content('')
-                                    ->columnSpan(1),
-                                Select::make('fiscalProfile.vat_enforce_type')
-                                    ->label('')
-                                    ->options(
-                                        collect(VatEnforceType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                    ->content("Inserisci in questa sezione i dati relativi alla ritenuta d'acconto ed alle ritenute previdenziali da applicare di default alle tue fatture, nel caso in cui la tua cassa previdenziale di appartenenza vi sia soggetta.")
+                                    ->columnSpan(12),
+                                Forms\Components\Repeater::make('withholdings')
+                                    ->label('Ritenuta')
+                                    ->relationship('withholdings')
+                                    ->schema([
+                                        Forms\Components\Select::make('withholding_type')
+                                            ->label('Tipo ritenuta')
+                                            ->options(
+                                                collect(WithholdingType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                            )
+                                            ->required()
+                                            ->columnSpan(7),
+                                        Placeholder::make('')
+                                            ->label('')
+                                            ->content('')
+                                            ->columnSpan(5),
+                                        Forms\Components\TextInput::make('rate')
+                                            ->label('Aliquota ritenuta')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->suffix('%')
+                                            ->columnSpan(2),
+                                        Forms\Components\TextInput::make('taxable_perc')
+                                            ->label('su')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->suffix("% dell'imponibile")
+                                            ->columnSpan(3),
+                                        Forms\Components\Select::make('payment_reason')
+                                            ->label('Causale pagamento')
+                                            ->options(
+                                                collect(PaymentReasonType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                            )
+                                            ->required()
+                                            ->searchable()
+                                            ->columnSpan(7),
+                                    ])
+                                    ->columns(12)
+                                    ->maxItems(4)
+                                    ->addActionLabel('Aggiungi Ritenuta')
+                                    ->deleteAction(
+                                        fn ($action) => $action->label('Rimuovi Ritenuta')
                                     )
-                                    ->visible(fn ($get) => $get('fiscalProfile.vat_enforce'))
-                                    ->columnSpan(8),
+                                    ->columnSpan(12),
                             ])
                             ->columns(12),
                         Tabs\Tab::make('Bollo automatico')
                             ->schema([
-                                Forms\Components\Toggle::make('fiscalProfile.vat_enforce')
+                                Placeholder::make('')
+                                    ->content("Aggiungi automaticamente l'imposta di bollo nella fatture quando gli importi esenti IVA sono uguali o superiori a 77,47€")
+                                    ->columnSpan(12),
+                                Placeholder::make('')
+                                    ->content("Fatture elettroniche")
+                                    ->columnSpan(12)->extraAttributes([
+                                        'style' => 'font-weight: bold; font-size: 1.25rem;',
+                                    ]),
+                                Forms\Components\Toggle::make('stampDuty.active')
                                     ->label('Attiva')
                                     ->reactive()
                                     ->columnSpan(1),
                                 Placeholder::make('')
-                                    ->content('')
+                                    ->content("")
+                                    ->columnSpan(11),
+                                Placeholder::make('')
+                                    ->content("Addebita il costo del bollo al cliente aggiungendo una riga nella fattura elettronica")
+                                    ->visible(fn ($get) => $get('stampDuty.active'))
+                                    ->columnSpan(12)->extraAttributes([
+                                        'style' => 'font-weight: bold; font-size: 1.25rem;',
+                                    ]),
+                                Forms\Components\Toggle::make('stampDuty.add_row')
+                                    ->label('Attiva')
+                                    ->reactive()
+                                    ->visible(fn ($get) => $get('stampDuty.active'))
                                     ->columnSpan(1),
-                                Select::make('fiscalProfile.vat_enforce_type')
+                                Placeholder::make('')
+                                    ->content('')
+                                    ->columnSpan(11),
+                                Placeholder::make('')
+                                    ->content("Descrizione riga da aggiungere nella fattura elettronica")
+                                    ->visible(fn ($get) => $get('stampDuty.add_row'))
+                                    ->columnSpan(12)->extraAttributes([
+                                        'style' => 'font-weight: bold;',
+                                    ]),
+                                TextInput::make('stampDuty.row_description')
                                     ->label('')
-                                    ->options(
-                                        collect(VatEnforceType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                                    )
-                                    ->visible(fn ($get) => $get('fiscalProfile.vat_enforce'))
+                                    ->visible(fn ($get) => $get('stampDuty.add_row'))
                                     ->columnSpan(8),
                             ])
                             ->columns(12),

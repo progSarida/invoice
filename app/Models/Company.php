@@ -57,6 +57,16 @@ class Company extends Model
         return $this->hasMany(SocialContribution::class);
     }
 
+    public function withholdings()
+    {
+        return $this->hasMany(Withholding::class);
+    }
+
+    public function stampDuty()
+    {
+        return $this->hasOne(StampDuty::class);
+    }
+
     public function bankAccounts(){
         return $this->hasMany(BankAccount::class);
     }

@@ -9,11 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 class SocialContribution extends Model
 {
     protected $fillable = [
-        'name',
-        'surname',
-        'tax_code',
-        'email',
-        'pec'
+        'fund',
+        'rate',
+        'taxable_perc',
+        'vat_code'
     ];
 
     protected $casts = [
