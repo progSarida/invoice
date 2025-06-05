@@ -355,7 +355,7 @@ class CompanyResource extends Resource
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if (!$state) {
-                                                    $set('value', null);
+                                                    $set('value', '77.47');
                                                     $set('add_row', false);
                                                     $set('row_description', null);
                                                 }
@@ -370,6 +370,7 @@ class CompanyResource extends Resource
                                             ->suffix('€')
                                             ->disabled(fn ($get) => !$get('active'))
                                             ->dehydrated(true)
+                                            ->default('77.47')
                                             ->columnSpan(3),
                                         Placeholder::make('')
                                             ->content("Addebita il costo del bollo al cliente aggiungendo una riga nella fattura elettronica")
