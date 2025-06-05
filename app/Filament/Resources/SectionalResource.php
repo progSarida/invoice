@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
+use App\Enums\DocType;
 use Filament\Forms\Form;
 use App\Enums\ClientType;
 use App\Models\Sectional;
@@ -44,16 +45,7 @@ class SectionalResource extends Resource
                     ->columnSpan(4),
                 Select::make('doc_type')
                     ->label('Tipo documento')
-                    ->options([
-                        'Fattura' => [
-                            '1' => 'Fattura 1',
-                            '2' => 'Fattura 2',
-                        ],
-                        'Nota di credito' => [
-                            '3' => 'Nota 1',
-                            '4' => 'nota 2',
-                        ],
-                    ])
+                    ->options(DocType::groupedOptions())
                     ->columnSpan(6),
                 TextInput::make('progressive')
                     ->label('Numero progressivo')
