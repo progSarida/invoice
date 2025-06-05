@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call(RegionsTableSeeder::class);
         $this->call(ProvincesTableSeeder::class);
         $this->call(CitiesTableSeeder::class);
+        $this->call(DocGroupsTableSeeder::class);
+        $this->call(DocTypesTableSeeder::class);
         $this->call(CompaniesTableSeeder::class);
         $this->call(BankAccountsTableSeeder::class);
         $this->call(ClientsTableSeeder::class);
@@ -29,5 +31,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SdiNotificationsTableSeeder::class);
         $this->call(CompanyUserTableSeeder::class);
         $this->call(InvoiceItemsTableSeeder::class);
+        $this->call(DocGroupsTableSeeder::class);
     }
 }
