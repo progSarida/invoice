@@ -84,7 +84,7 @@ return new class extends Migration
             $table->foreignId('company_id')->constrained('companies')             // id azienda per multi-tenancy
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->boolean('active')->default(false);                            // imposta di bollo automatica in fattura
-            $table->decimal('value',10,2)->nullable();                            // aliquota fiscale
+            $table->decimal('value',8,2)->nullable();                            // aliquota fiscale
             $table->boolean('add_row')->default(false);                           // addebito al cliente con riga aggiuntiva in fattura
             $table->string('row_description')->nullable();                        // descrizione riga da aggiungere
             $table->timestamps();

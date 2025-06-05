@@ -8,6 +8,7 @@ class StampDuty extends Model
 {
     protected $fillable = [
         'active',
+        'value',
         'add_row',
         'row_description'
     ];

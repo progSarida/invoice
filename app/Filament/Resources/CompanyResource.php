@@ -355,6 +355,7 @@ class CompanyResource extends Resource
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if (!$state) {
+                                                    $set('value', null);
                                                     $set('add_row', false);
                                                     $set('row_description', null);
                                                 }
@@ -363,15 +364,15 @@ class CompanyResource extends Resource
                                         Placeholder::make('')->content('')->columnSpan(11),
                                         Placeholder::make('')
                                             ->content("Importo")
-                                            ->visible(fn ($get) => $get('active'))
                                             ->columnSpan(1)->extraAttributes(['style' => 'font-weight: bold;']),
                                         TextInput::make('value')
                                             ->label('')
-                                            ->visible(fn ($get) => $get('active'))
+                                            ->suffix('€')
+                                            ->disabled(fn ($get) => !$get('active'))
+                                            ->dehydrated(true)
                                             ->columnSpan(3),
                                         Placeholder::make('')
                                             ->content("Addebita il costo del bollo al cliente aggiungendo una riga nella fattura elettronica")
-                                            ->visible(fn ($get) => $get('active'))
                                             ->columnSpan(12)->extraAttributes(['style' => 'font-weight: bold; font-size: 1.25rem;']),
                                         Forms\Components\Toggle::make('add_row')
                                             ->label('Attiva')
@@ -381,16 +382,17 @@ class CompanyResource extends Resource
                                                     $set('row_description', null);
                                                 }
                                             })
-                                            ->visible(fn ($get) => $get('active'))
+                                            ->disabled(fn ($get) => !$get('active'))
+                                            ->dehydrated(true)
                                             ->columnSpan(1),
                                         Placeholder::make('')->content('')->columnSpan(11),
                                         Placeholder::make('')
                                             ->content("Descrizione riga da aggiungere nella fattura elettronica")
-                                            ->visible(fn ($get) => $get('add_row'))
                                             ->columnSpan(12)->extraAttributes(['style' => 'font-weight: bold;']),
                                         TextInput::make('row_description')
                                             ->label('')
-                                            ->visible(fn ($get) => $get('add_row'))
+                                            ->disabled(fn ($get) => !$get('add_row'))
+                                            ->dehydrated(true)
                                             ->columnSpan(8),
                                     ])
                                     ->columns(12)
