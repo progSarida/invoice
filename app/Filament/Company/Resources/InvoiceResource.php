@@ -122,7 +122,7 @@ class InvoiceResource extends Resource
                                 ->columnSpanFull(),
                         ]),
 
-                    
+
 
                 ]),//FIRST GRID
 
@@ -231,7 +231,7 @@ class InvoiceResource extends Resource
                                 ->live()
                                 ->relationship(
                                     name: 'invoice',
-                                    modifyQueryUsing: 
+                                    modifyQueryUsing:
                                         function (Builder $query, Get $get){
                                             $query->where('invoice_type',InvoiceType::INVOICE)
                                                 ->where('client_id',$get('client_id'))
@@ -246,7 +246,7 @@ class InvoiceResource extends Resource
                                         }
                                 )
                                 ->getOptionLabelFromRecordUsing(
-                                    
+
                                     function (Model $record) {
                                         $return = "Fattura n. {$record->getInvoiceNumber()}";
                                         if(!$record->client->type->isCompany())
@@ -275,8 +275,8 @@ class InvoiceResource extends Resource
                         ->schema([
                             Forms\Components\Select::make('bank_account_id')->label('IBAN')
                                 ->relationship(
-                                    name: 'bankAccount', 
-                                    modifyQueryUsing: fn (Builder $query) => 
+                                    name: 'bankAccount',
+                                    modifyQueryUsing: fn (Builder $query) =>
                                     $query->where('company_id',Filament::getTenant()->id)
                                 )
                                 ->getOptionLabelFromRecordUsing(
@@ -295,32 +295,32 @@ class InvoiceResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('payment_status')->label('Status')
                                     ->options(PaymentStatus::class)->disabled()->columnSpan(2),
-                                
+
                                 Forms\Components\DatePicker::make('last_payment_date')->label('Data ultimo pagamento')
                                 ->native(false)
                                 ->displayFormat('d F Y')->columnSpan(1)->disabled(),
                                 Forms\Components\TextInput::make('total_payment')->label('Totale pagamenti')
                                     ->extraInputAttributes(['style' => 'text-align: right;'])
                                     ->numeric()->suffix('€')->columnSpan(1)->disabled(),
-                                
+
                             ])
 
                 ]),
 
-            
 
 
 
-                
 
 
 
-                
+
+
+
                 // Forms\Components\TextInput::make('check_validation')
                 //     ->maxLength(255),
 
 
-                
+
                 // Forms\Components\TextInput::make('vat_percentage')
                 //     ->required()
                 //     ->numeric(),
@@ -348,7 +348,7 @@ class InvoiceResource extends Resource
                 //     ->numeric(),
                 // Forms\Components\TextInput::make('no_vat_total')
                 //     ->numeric(),
-                
+
 
                 // Forms\Components\TextInput::make('pdf_path')
                 //     ->maxLength(255),
@@ -465,7 +465,7 @@ class InvoiceResource extends Resource
                         ->optionsLimit(5),
                 SelectFilter::make('sdi_status')->label('Status')->options(SdiStatus::class)
                     ->multiple()->searchable()->preload(),
-                
+
 
             ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
             ->persistFiltersInSession()

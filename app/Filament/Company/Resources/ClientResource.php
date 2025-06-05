@@ -187,6 +187,6 @@ class ClientResource extends Resource
                     ->maxLength(255),
             ])->columns(2)
         ]);
-                
+
     }
 }
