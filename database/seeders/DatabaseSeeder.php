@@ -27,5 +27,6 @@ class DatabaseSeeder extends Seeder
         $this->call(InvoicesTableSeeder::class);
         $this->call(SdiNotificationsTableSeeder::class);
         $this->call(CompanyUserTableSeeder::class);
+        $this->call(InvoiceItemsTableSeeder::class);
     }
 }
