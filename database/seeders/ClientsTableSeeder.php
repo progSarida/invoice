@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class ClientsTableSeeder extends Seeder
 {
@@ -14,20 +15,21 @@ class ClientsTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
-        \DB::table('clients')->delete();
-        
-        \DB::table('clients')->insert(array (
-            0 => 
+
+        DB::table('clients')->delete();
+
+        DB::table('clients')->insert(array (
+            0 =>
             array (
                 'id' => 1,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Bargagli',
                 'address' => 'Via Martini Aimone, 257',
-                'city_id' => 530,
                 'zip_code' => '16021',
+                'city_id' => 530,
                 'tax_code' => '00859380107',
                 'vat_code' => '00859380107',
                 'email' => NULL,
@@ -35,15 +37,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            1 => 
+            1 =>
             array (
                 'id' => 2,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Bordighera',
                 'address' => 'Via XX Settembre, 32',
-                'city_id' => 779,
                 'zip_code' => '18012',
+                'city_id' => 779,
                 'tax_code' => '00081170086',
                 'vat_code' => '00260750088',
                 'email' => NULL,
@@ -51,15 +54,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            2 => 
+            2 =>
             array (
                 'id' => 3,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Borgo Pace',
                 'address' => 'Piazza Del Pino, 3',
-                'city_id' => 798,
                 'zip_code' => '61040',
+                'city_id' => 798,
                 'tax_code' => '00360660419',
                 'vat_code' => '00360660419',
                 'email' => NULL,
@@ -67,15 +71,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            3 => 
+            3 =>
             array (
                 'id' => 4,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Brenzone Sul Garda',
                 'address' => 'Via XX Settembre, 8',
-                'city_id' => 904,
                 'zip_code' => '37010',
+                'city_id' => 904,
                 'tax_code' => '00661110239',
                 'vat_code' => '00661110239',
                 'email' => NULL,
@@ -83,15 +88,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            4 => 
+            4 =>
             array (
                 'id' => 5,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Campo Ligure',
                 'address' => 'Piazza Matteotti, 3',
-                'city_id' => 1171,
                 'zip_code' => '16013',
+                'city_id' => 1171,
                 'tax_code' => '00867140105',
                 'vat_code' => '00867140105',
                 'email' => NULL,
@@ -99,15 +105,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            5 => 
+            5 =>
             array (
                 'id' => 6,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Castiglione Chiavarese',
                 'address' => 'Via Canzio, 26',
-                'city_id' => 1785,
                 'zip_code' => '16030',
+                'city_id' => 1785,
                 'tax_code' => '00465390102',
                 'vat_code' => '00169000999',
                 'email' => NULL,
@@ -115,15 +122,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            6 => 
+            6 =>
             array (
                 'id' => 7,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cicagna',
                 'address' => 'Viale Italia, 25',
-                'city_id' => 2087,
                 'zip_code' => '16044',
+                'city_id' => 2087,
                 'tax_code' => '00945110104',
                 'vat_code' => '00174060996',
                 'email' => NULL,
@@ -131,15 +139,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            7 => 
+            7 =>
             array (
                 'id' => 8,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Corio',
                 'address' => 'Piazza Municipio, 5',
-                'city_id' => 2341,
                 'zip_code' => '10070',
+                'city_id' => 2341,
                 'tax_code' => '83002510010',
                 'vat_code' => '03802700017',
                 'email' => NULL,
@@ -147,15 +156,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            8 => 
+            8 =>
             array (
                 'id' => 9,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Grassobbio',
                 'address' => 'Via Amerigo Vespucci, 6',
-                'city_id' => 3233,
                 'zip_code' => '24050',
+                'city_id' => 3233,
                 'tax_code' => '80027490160',
                 'vat_code' => '00722500162',
                 'email' => NULL,
@@ -163,15 +173,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            9 => 
+            9 =>
             array (
                 'id' => 10,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Leivi',
                 'address' => 'Via IV Novembre, 1',
-                'city_id' => 3531,
                 'zip_code' => '16040',
+                'city_id' => 3531,
                 'tax_code' => '00650430101',
                 'vat_code' => '00170730998',
                 'email' => NULL,
@@ -179,15 +190,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            10 => 
+            10 =>
             array (
                 'id' => 11,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Lumarzo',
                 'address' => 'Frazione Ferriere, 15 D',
-                'city_id' => 3696,
                 'zip_code' => '16024',
+                'city_id' => 3696,
                 'tax_code' => '83004430100',
                 'vat_code' => '00209950997',
                 'email' => NULL,
@@ -195,15 +207,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            11 => 
+            11 =>
             array (
                 'id' => 12,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Maissana',
                 'address' => 'Piazza Municipio, 1',
-                'city_id' => 3777,
                 'zip_code' => '19010',
+                'city_id' => 3777,
                 'tax_code' => '00108010117',
                 'vat_code' => '00108010117',
                 'email' => NULL,
@@ -211,15 +224,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            12 => 
+            12 =>
             array (
                 'id' => 13,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Orero',
                 'address' => 'Via Isolona, 11',
-                'city_id' => 4778,
                 'zip_code' => '16040',
+                'city_id' => 4778,
                 'tax_code' => '00928960103',
                 'vat_code' => '00173750993',
                 'email' => NULL,
@@ -227,15 +241,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            13 => 
+            13 =>
             array (
                 'id' => 14,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Ponderano',
                 'address' => 'Via E. De Amicis, 7',
-                'city_id' => 5378,
                 'zip_code' => '13875',
+                'city_id' => 5378,
                 'tax_code' => '00373340025',
                 'vat_code' => '00373340025',
                 'email' => NULL,
@@ -243,15 +258,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            14 => 
+            14 =>
             array (
                 'id' => 15,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Pontevico',
                 'address' => 'Piazzetta Del Comune, 5',
-                'city_id' => 5413,
                 'zip_code' => '25026',
+                'city_id' => 5413,
                 'tax_code' => '00453890170',
                 'vat_code' => '00564120988',
                 'email' => NULL,
@@ -259,15 +275,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            15 => 
+            15 =>
             array (
                 'id' => 16,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Roccabianca',
                 'address' => 'Viale Rimembranze, 3',
-                'city_id' => 5833,
                 'zip_code' => '43010',
+                'city_id' => 5833,
                 'tax_code' => '00427670344',
                 'vat_code' => '00427670344',
                 'email' => NULL,
@@ -275,15 +292,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            16 => 
+            16 =>
             array (
                 'id' => 17,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Salerano Sul Lambro',
                 'address' => 'Via Vittorio Veneto, 6',
-                'city_id' => 6066,
                 'zip_code' => '26857',
+                'city_id' => 6066,
                 'tax_code' => '84503000154',
                 'vat_code' => '05050540151',
                 'email' => NULL,
@@ -291,15 +309,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            17 => 
+            17 =>
             array (
                 'id' => 18,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Sant\'Omobono Terme',
                 'address' => 'Viale Vittorio Veneto, 90',
-                'city_id' => 6542,
                 'zip_code' => '24038',
+                'city_id' => 6542,
                 'tax_code' => '03990160164',
                 'vat_code' => '03990160164',
                 'email' => NULL,
@@ -307,15 +326,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            18 => 
+            18 =>
             array (
                 'id' => 19,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Serina',
                 'address' => 'Viale Papa Giovanni XXIII, 1',
-                'city_id' => 6806,
                 'zip_code' => '24017',
+                'city_id' => 6806,
                 'tax_code' => '00342670163',
                 'vat_code' => '00342670163',
                 'email' => NULL,
@@ -323,15 +343,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            19 => 
+            19 =>
             array (
                 'id' => 20,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Somaglia',
                 'address' => 'Via Giacomo Matteotti, 10',
-                'city_id' => 6959,
                 'zip_code' => '26867',
+                'city_id' => 6959,
                 'tax_code' => '00970030151',
                 'vat_code' => '00970030151',
                 'email' => NULL,
@@ -339,15 +360,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            20 => 
+            20 =>
             array (
                 'id' => 21,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Torri Del Benaco',
                 'address' => 'Viale Fratelli Lavanda, 3',
-                'city_id' => 7346,
                 'zip_code' => '37010',
+                'city_id' => 7346,
                 'tax_code' => '00661030239',
                 'vat_code' => '00661030239',
                 'email' => NULL,
@@ -355,15 +377,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            21 => 
+            21 =>
             array (
                 'id' => 22,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Valdisotto',
                 'address' => 'Via E. De Gasperi, 1',
-                'city_id' => 7578,
                 'zip_code' => '23030',
+                'city_id' => 7578,
                 'tax_code' => '83000910147',
                 'vat_code' => '00073290140',
                 'email' => NULL,
@@ -371,15 +394,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            22 => 
+            22 =>
             array (
                 'id' => 23,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Varsi',
                 'address' => 'Via Roma, 13',
-                'city_id' => 7680,
                 'zip_code' => '43049',
+                'city_id' => 7680,
                 'tax_code' => '00427030341',
                 'vat_code' => '00427030341',
                 'email' => NULL,
@@ -387,15 +411,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            23 => 
+            23 =>
             array (
                 'id' => 24,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Zibello',
                 'address' => 'Via Matteotti, 10',
-                'city_id' => 8068,
                 'zip_code' => '43010',
+                'city_id' => 8068,
                 'tax_code' => '00217170349',
                 'vat_code' => '00217170349',
                 'email' => NULL,
@@ -403,15 +428,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            24 => 
+            24 =>
             array (
                 'id' => 25,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Davagna',
                 'address' => 'Via Bombrini, 14',
-                'city_id' => 2526,
                 'zip_code' => '16022',
+                'city_id' => 2526,
                 'tax_code' => '00905900106',
                 'vat_code' => '00905900106',
                 'email' => NULL,
@@ -419,15 +445,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            25 => 
+            25 =>
             array (
                 'id' => 26,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cogorno',
                 'address' => 'Piazza Aldo Moro, 1',
-                'city_id' => 2207,
                 'zip_code' => '16030',
+                'city_id' => 2207,
                 'tax_code' => '00412900102',
                 'vat_code' => '00168110997',
                 'email' => NULL,
@@ -435,15 +462,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            26 => 
+            26 =>
             array (
                 'id' => 27,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Casella',
                 'address' => 'Via Municipio, 1',
-                'city_id' => 1524,
                 'zip_code' => '16015',
+                'city_id' => 1524,
                 'tax_code' => '00734460108',
                 'vat_code' => '00734460108',
                 'email' => NULL,
@@ -451,15 +479,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            27 => 
+            27 =>
             array (
                 'id' => 28,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Campiglia Marittima',
                 'address' => 'Via Roma, 5',
-                'city_id' => 1163,
                 'zip_code' => '57021',
+                'city_id' => 1163,
                 'tax_code' => '81000450494',
                 'vat_code' => '00345300495',
                 'email' => NULL,
@@ -467,15 +496,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            28 => 
+            28 =>
             array (
                 'id' => 29,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Como',
                 'address' => 'Viale Innocenzo XI, 18',
-                'city_id' => 2283,
                 'zip_code' => '22100',
+                'city_id' => 2283,
                 'tax_code' => '80005370137',
                 'vat_code' => '00417480134',
                 'email' => NULL,
@@ -483,15 +513,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            29 => 
+            29 =>
             array (
                 'id' => 30,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Antegnate',
                 'address' => 'Via Castello, 12',
-                'city_id' => 250,
                 'zip_code' => '24051',
+                'city_id' => 250,
                 'tax_code' => '83000250163',
                 'vat_code' => '00373090166',
                 'email' => NULL,
@@ -499,15 +530,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            30 => 
+            30 =>
             array (
                 'id' => 31,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Canonica D\'Adda',
                 'address' => 'Piazza Municipio, 3',
-                'city_id' => 1251,
                 'zip_code' => '24040',
+                'city_id' => 1251,
                 'tax_code' => '00342890167',
                 'vat_code' => '00342890167',
                 'email' => NULL,
@@ -515,15 +547,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            31 => 
+            31 =>
             array (
                 'id' => 32,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Casarza Ligure',
                 'address' => 'Piazza Mazzini, 1',
-                'city_id' => 1510,
                 'zip_code' => '16030',
+                'city_id' => 1510,
                 'tax_code' => '00465640100',
                 'vat_code' => '01101320990',
                 'email' => NULL,
@@ -531,15 +564,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            32 => 
+            32 =>
             array (
                 'id' => 33,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Casatisma',
                 'address' => 'Viale Liberta\', 10',
-                'city_id' => 1514,
                 'zip_code' => '27040',
+                'city_id' => 1514,
                 'tax_code' => '00473900181',
                 'vat_code' => '00473900181',
                 'email' => NULL,
@@ -547,15 +581,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            33 => 
+            33 =>
             array (
                 'id' => 34,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Castel Goffredo',
                 'address' => 'Piazza Mazzini, 1',
-                'city_id' => 1610,
                 'zip_code' => '46042',
+                'city_id' => 1610,
                 'tax_code' => '81001030204',
                 'vat_code' => '00521810200',
                 'email' => NULL,
@@ -563,15 +598,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            34 => 
+            34 =>
             array (
                 'id' => 35,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Castelverde',
                 'address' => 'Piazza Municipio, 23',
-                'city_id' => 1771,
                 'zip_code' => '26022',
+                'city_id' => 1771,
                 'tax_code' => '00299440198',
                 'vat_code' => '00299440198',
                 'email' => NULL,
@@ -579,15 +615,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            35 => 
+            35 =>
             array (
                 'id' => 36,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Castiglione D\'Adda',
                 'address' => 'Via Roma, 130',
-                'city_id' => 1787,
                 'zip_code' => '26823',
+                'city_id' => 1787,
                 'tax_code' => '82502070152',
                 'vat_code' => '07862160152',
                 'email' => NULL,
@@ -595,15 +632,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            36 => 
+            36 =>
             array (
                 'id' => 37,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cigognola',
                 'address' => 'Piazza Castello, 7',
-                'city_id' => 2096,
                 'zip_code' => '27040',
+                'city_id' => 2096,
                 'tax_code' => '84000590186',
                 'vat_code' => '00475090189',
                 'email' => NULL,
@@ -611,15 +649,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            37 => 
+            37 =>
             array (
                 'id' => 38,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cortenuova',
                 'address' => 'Piazza Aldo Moro, 2',
-                'city_id' => 2384,
                 'zip_code' => '24050',
+                'city_id' => 2384,
                 'tax_code' => '00710830167',
                 'vat_code' => '00710830167',
                 'email' => NULL,
@@ -627,15 +666,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            38 => 
+            38 =>
             array (
                 'id' => 39,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Dalmine',
                 'address' => 'Piazza Liberta\', 1',
-                'city_id' => 2519,
                 'zip_code' => '24044',
+                'city_id' => 2519,
                 'tax_code' => '00232910166',
                 'vat_code' => '00232910166',
                 'email' => NULL,
@@ -643,15 +683,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            39 => 
+            39 =>
             array (
                 'id' => 40,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Dolce\'',
                 'address' => 'Via Trento, 698',
-                'city_id' => 2570,
                 'zip_code' => '37020',
+                'city_id' => 2570,
                 'tax_code' => '00661130237',
                 'vat_code' => '00661130237',
                 'email' => NULL,
@@ -659,15 +700,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            40 => 
+            40 =>
             array (
                 'id' => 41,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Filago',
                 'address' => 'Piazza Dante, 12',
-                'city_id' => 2777,
                 'zip_code' => '24040',
+                'city_id' => 2777,
                 'tax_code' => '00286540166',
                 'vat_code' => '00286540166',
                 'email' => NULL,
@@ -675,15 +717,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            41 => 
+            41 =>
             array (
                 'id' => 42,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Flero',
                 'address' => 'Piazza IV Novembre, 4',
-                'city_id' => 2813,
                 'zip_code' => '25020',
+                'city_id' => 2813,
                 'tax_code' => '00869010173',
                 'vat_code' => '00869010173',
                 'email' => NULL,
@@ -691,15 +734,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            42 => 
+            42 =>
             array (
                 'id' => 43,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Fumane',
                 'address' => 'Viale Roma, 2',
-                'city_id' => 2963,
                 'zip_code' => '37022',
+                'city_id' => 2963,
                 'tax_code' => '00658150230',
                 'vat_code' => '00658150230',
                 'email' => NULL,
@@ -707,15 +751,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            43 => 
+            43 =>
             array (
                 'id' => 44,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Gabbioneta Binanuova',
                 'address' => 'Via Della Liberta\', 5',
-                'city_id' => 2975,
                 'zip_code' => '26030',
+                'city_id' => 2975,
                 'tax_code' => '00325740199',
                 'vat_code' => '00325740199',
                 'email' => NULL,
@@ -723,15 +768,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            44 => 
+            44 =>
             array (
                 'id' => 45,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Garda',
                 'address' => 'Lungolago Regina Adelaide, 15',
-                'city_id' => 3042,
                 'zip_code' => '37016',
+                'city_id' => 3042,
                 'tax_code' => '00419930235',
                 'vat_code' => '00419930235',
                 'email' => NULL,
@@ -739,15 +785,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            45 => 
+            45 =>
             array (
                 'id' => 46,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Gardone Riviera',
                 'address' => 'Via Carere, 5',
-                'city_id' => 3043,
                 'zip_code' => '25083',
+                'city_id' => 3043,
                 'tax_code' => '00368800173',
                 'vat_code' => '00557820982',
                 'email' => NULL,
@@ -755,15 +802,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            46 => 
+            46 =>
             array (
                 'id' => 47,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Gargnano',
                 'address' => 'Via Roma, 47',
-                'city_id' => 3048,
                 'zip_code' => '25084',
+                'city_id' => 3048,
                 'tax_code' => '00553860172',
                 'vat_code' => '00570180984',
                 'email' => NULL,
@@ -771,15 +819,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            47 => 
+            47 =>
             array (
                 'id' => 48,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Lodi Vecchio',
                 'address' => 'Piazza Vittorio Emanuele II, 25',
-                'city_id' => 3630,
                 'zip_code' => '26855',
+                'city_id' => 3630,
                 'tax_code' => '84502880150',
                 'vat_code' => '05040110156',
                 'email' => NULL,
@@ -787,15 +836,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            48 => 
+            48 =>
             array (
                 'id' => 49,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Osio Sopra',
                 'address' => 'Piazza Giuseppe Garibaldi, 1',
-                'city_id' => 4834,
                 'zip_code' => '24040',
+                'city_id' => 4834,
                 'tax_code' => '00240870162',
                 'vat_code' => '00240870162',
                 'email' => NULL,
@@ -803,15 +853,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            49 => 
+            49 =>
             array (
                 'id' => 50,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Padenghe Sul Garda',
                 'address' => 'Via Italo Barbieri, 3',
-                'city_id' => 4885,
                 'zip_code' => '25080',
+                'city_id' => 4885,
                 'tax_code' => '00855780177',
                 'vat_code' => '00583110986',
                 'email' => NULL,
@@ -819,15 +870,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            50 => 
+            50 =>
             array (
                 'id' => 51,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Persico Dosimo',
                 'address' => 'Piazza Roma, 4',
-                'city_id' => 5086,
                 'zip_code' => '26043',
+                'city_id' => 5086,
                 'tax_code' => '00323920199',
                 'vat_code' => '00323920199',
                 'email' => NULL,
@@ -835,15 +887,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            51 => 
+            51 =>
             array (
                 'id' => 52,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Pognano',
                 'address' => 'Via Leonardo Da Vinci, 12/A',
-                'city_id' => 5336,
                 'zip_code' => '24040',
+                'city_id' => 5336,
                 'tax_code' => '84002150161',
                 'vat_code' => '00719460164',
                 'email' => NULL,
@@ -851,15 +904,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            52 => 
+            52 =>
             array (
                 'id' => 53,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Polpenazze Del Garda',
                 'address' => 'Piazza Biolchi, 1',
-                'city_id' => 5361,
                 'zip_code' => '25080',
+                'city_id' => 5361,
                 'tax_code' => '00839700176',
                 'vat_code' => '00581050986',
                 'email' => NULL,
@@ -867,15 +921,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            53 => 
+            53 =>
             array (
                 'id' => 54,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Poncarale',
                 'address' => 'Piazza Caduti, 1',
-                'city_id' => 5377,
                 'zip_code' => '25020',
+                'city_id' => 5377,
                 'tax_code' => '80018630170',
                 'vat_code' => '01806080170',
                 'email' => NULL,
@@ -883,15 +938,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            54 => 
+            54 =>
             array (
                 'id' => 55,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Pontida',
                 'address' => 'Via Lega Lombarda, 30',
-                'city_id' => 5417,
                 'zip_code' => '24030',
+                'city_id' => 5417,
                 'tax_code' => '82000590164',
                 'vat_code' => '00655980167',
                 'email' => NULL,
@@ -899,15 +955,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            55 => 
+            55 =>
             array (
                 'id' => 56,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Redavalle',
                 'address' => 'Via Garibaldi, 14',
-                'city_id' => 5676,
                 'zip_code' => '27050',
+                'city_id' => 5676,
                 'tax_code' => '00459830188',
                 'vat_code' => '00459830188',
                 'email' => NULL,
@@ -915,15 +972,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            56 => 
+            56 =>
             array (
                 'id' => 57,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Rose',
                 'address' => 'Via Castello, 6',
-                'city_id' => 5958,
                 'zip_code' => '87040',
+                'city_id' => 5958,
                 'tax_code' => '80001170788',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -931,15 +989,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            57 => 
+            57 =>
             array (
                 'id' => 58,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'San Colombano Certenoli',
                 'address' => 'Piazza Roberto Lucifredi, 2',
-                'city_id' => 6149,
                 'zip_code' => '16040',
+                'city_id' => 6149,
                 'tax_code' => '82002530101',
                 'vat_code' => '00209440999',
                 'email' => NULL,
@@ -947,15 +1006,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            58 => 
+            58 =>
             array (
                 'id' => 59,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'San Felice Del Benaco',
                 'address' => 'Via XX Settembre, 11',
-                'city_id' => 6175,
                 'zip_code' => '25010',
+                'city_id' => 6175,
                 'tax_code' => '00843000175',
                 'vat_code' => '00581440989',
                 'email' => NULL,
@@ -963,15 +1023,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            59 => 
+            59 =>
             array (
                 'id' => 60,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'San Gervasio Bresciano',
                 'address' => 'Piazza Donatori Di Sangue, 1',
-                'city_id' => 6197,
                 'zip_code' => '25020',
+                'city_id' => 6197,
                 'tax_code' => '00854930179',
                 'vat_code' => '00582930988',
                 'email' => NULL,
@@ -979,15 +1040,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            60 => 
+            60 =>
             array (
                 'id' => 61,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'San Pietro In Cariano',
                 'address' => 'Via Chopin, 3',
-                'city_id' => 6374,
                 'zip_code' => '37029',
+                'city_id' => 6374,
                 'tax_code' => '00261520233',
                 'vat_code' => '00261520233',
                 'email' => NULL,
@@ -995,15 +1057,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            61 => 
+            61 =>
             array (
                 'id' => 62,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Sant\'Anna D\'Alfaedo',
                 'address' => 'Via Roma, 4',
-                'city_id' => 6515,
                 'zip_code' => '37020',
+                'city_id' => 6515,
                 'tax_code' => '00796760239',
                 'vat_code' => '00796760239',
                 'email' => NULL,
@@ -1011,15 +1074,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            62 => 
+            62 =>
             array (
                 'id' => 63,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Santa Giuletta',
                 'address' => 'Via Martiri Della Liberta\', 7',
-                'city_id' => 6565,
                 'zip_code' => '27046',
+                'city_id' => 6565,
                 'tax_code' => '00240820183',
                 'vat_code' => '00240820183',
                 'email' => NULL,
@@ -1027,15 +1091,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            63 => 
+            63 =>
             array (
                 'id' => 64,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Torbole Casaglia',
                 'address' => 'Piazza della Repubblica, 15',
-                'city_id' => 7284,
                 'zip_code' => '25030',
+                'city_id' => 7284,
                 'tax_code' => '00855080172',
                 'vat_code' => '00855080172',
                 'email' => NULL,
@@ -1043,15 +1108,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            64 => 
+            64 =>
             array (
                 'id' => 65,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Torrazza Coste',
                 'address' => 'Piazza Vittorio Emanuele II, 11',
-                'city_id' => 7306,
                 'zip_code' => '27050',
+                'city_id' => 7306,
                 'tax_code' => '00485150189',
                 'vat_code' => '00485150189',
                 'email' => NULL,
@@ -1059,15 +1125,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            65 => 
+            65 =>
             array (
                 'id' => 66,
                 'company_id' => 1,
-                'type' => 'cities_union',
+                'type' => 'public',
+                'subtype' => 'union',
                 'denomination' => 'Unione Oltre Adda Lodigiano',
                 'address' => 'Piazza Terraverde, 2',
-                'city_id' => 2379,
                 'zip_code' => '26834',
+                'city_id' => 2379,
                 'tax_code' => '92539460151',
                 'vat_code' => '03485390961',
                 'email' => NULL,
@@ -1075,15 +1142,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            66 => 
+            66 =>
             array (
                 'id' => 67,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Quiliano',
                 'address' => 'Località Massapé, 21',
-                'city_id' => 5614,
                 'zip_code' => '17047',
+                'city_id' => 5614,
                 'tax_code' => '00212370092',
                 'vat_code' => '00212370092',
                 'email' => NULL,
@@ -1091,15 +1159,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            67 => 
+            67 =>
             array (
                 'id' => 68,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Mezzanego',
                 'address' => 'Via Cap. Fr. Gandolfo, 115',
-                'city_id' => 4047,
                 'zip_code' => '16046',
+                'city_id' => 4047,
                 'tax_code' => '82002550109',
                 'vat_code' => '00209450998',
                 'email' => NULL,
@@ -1107,15 +1176,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            68 => 
+            68 =>
             array (
                 'id' => 69,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Corte Brugnatella',
                 'address' => 'Piazza Severino Balletti, 2',
-                'city_id' => 2375,
                 'zip_code' => '29020',
+                'city_id' => 2375,
                 'tax_code' => '80004220333',
                 'vat_code' => '00777240334',
                 'email' => NULL,
@@ -1123,15 +1193,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            69 => 
+            69 =>
             array (
                 'id' => 70,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Rovegno',
                 'address' => 'Via Capoluogo, 1',
-                'city_id' => 5987,
                 'zip_code' => '16028',
+                'city_id' => 5987,
                 'tax_code' => '00860890102',
                 'vat_code' => '00860890102',
                 'email' => NULL,
@@ -1139,15 +1210,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            70 => 
+            70 =>
             array (
                 'id' => 71,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Carro',
                 'address' => 'Via Guglielmo Marconi, 12',
-                'city_id' => 1424,
                 'zip_code' => '19012',
+                'city_id' => 1424,
                 'tax_code' => '00213300114',
                 'vat_code' => '00213300114',
                 'email' => NULL,
@@ -1155,15 +1227,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            71 => 
+            71 =>
             array (
                 'id' => 72,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Ferriere',
                 'address' => 'Piazza delle miniere, 1',
-                'city_id' => 2752,
                 'zip_code' => '29024',
+                'city_id' => 2752,
                 'tax_code' => '80011530336',
                 'vat_code' => '00878080332',
                 'email' => NULL,
@@ -1171,15 +1244,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            72 => 
+            72 =>
             array (
                 'id' => 73,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Montoggio',
                 'address' => 'Via IV Novembre, 18',
-                'city_id' => 4455,
                 'zip_code' => '16026',
+                'city_id' => 4455,
                 'tax_code' => '80007310107',
                 'vat_code' => '00912760105',
                 'email' => NULL,
@@ -1187,15 +1261,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            73 => 
+            73 =>
             array (
                 'id' => 74,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Torriglia',
                 'address' => 'Via Municipio, 16',
-                'city_id' => 7357,
                 'zip_code' => '16029',
+                'city_id' => 7357,
                 'tax_code' => '80007330105',
                 'vat_code' => '00864610100',
                 'email' => NULL,
@@ -1203,15 +1278,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            74 => 
+            74 =>
             array (
                 'id' => 75,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Carasco',
                 'address' => 'Via IV Novembre, 28',
-                'city_id' => 1339,
                 'zip_code' => '16042',
+                'city_id' => 1339,
                 'tax_code' => '00432840106',
                 'vat_code' => '00168500999',
                 'email' => NULL,
@@ -1219,15 +1295,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            75 => 
+            75 =>
             array (
                 'id' => 76,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Spotorno',
                 'address' => 'Via Aurelia, 60',
-                'city_id' => 7052,
                 'zip_code' => '17028',
+                'city_id' => 7052,
                 'tax_code' => '00232910091',
                 'vat_code' => '00232910091',
                 'email' => NULL,
@@ -1235,15 +1312,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            76 => 
+            76 =>
             array (
                 'id' => 77,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Laigueglia',
                 'address' => 'Via Genova, 2',
-                'city_id' => 3447,
                 'zip_code' => '17053',
+                'city_id' => 3447,
                 'tax_code' => '81001590090',
                 'vat_code' => '00338430093',
                 'email' => NULL,
@@ -1251,15 +1329,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            77 => 
+            77 =>
             array (
                 'id' => 78,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Sordio',
                 'address' => 'Piazza della Liberazione, 2',
-                'city_id' => 6984,
                 'zip_code' => '26858',
+                'city_id' => 6984,
                 'tax_code' => '09456750158',
                 'vat_code' => '09456750158',
                 'email' => NULL,
@@ -1267,15 +1346,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            78 => 
+            78 =>
             array (
                 'id' => 79,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Ottone',
                 'address' => 'Piazza Municipio, 1',
-                'city_id' => 4866,
                 'zip_code' => '29026',
+                'city_id' => 4866,
                 'tax_code' => '00231170333',
                 'vat_code' => '00231170333',
                 'email' => NULL,
@@ -1283,15 +1363,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            79 => 
+            79 =>
             array (
                 'id' => 80,
                 'company_id' => 1,
-                'type' => 'cities_union',
+                'type' => 'public',
+                'subtype' => 'union',
                 'denomination' => 'Unione di Comuni Lombarda Colline D\'Oltrepo',
                 'address' => 'Piazza Don Valentino Arpesella, 2',
-                'city_id' => 5192,
                 'zip_code' => '27040',
+                'city_id' => 5192,
                 'tax_code' => '02340990189',
                 'vat_code' => '02340990189',
                 'email' => NULL,
@@ -1299,15 +1380,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            80 => 
+            80 =>
             array (
                 'id' => 81,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Rocca Imperiale',
                 'address' => 'Via Castello Aragona, 69',
-                'city_id' => 5819,
                 'zip_code' => '87074',
+                'city_id' => 5819,
                 'tax_code' => '81000250787',
                 'vat_code' => '01498550787',
                 'email' => NULL,
@@ -1315,15 +1397,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            81 => 
+            81 =>
             array (
                 'id' => 82,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Arsoli',
                 'address' => 'Via Cesare Battisti, 6',
-                'city_id' => 358,
                 'zip_code' => '00023',
+                'city_id' => 358,
                 'tax_code' => '86001750586',
                 'vat_code' => '02145941007',
                 'email' => NULL,
@@ -1331,15 +1414,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            82 => 
+            82 =>
             array (
                 'id' => 83,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Dego',
                 'address' => 'Via Municipio, 10',
-                'city_id' => 2533,
                 'zip_code' => '17058',
+                'city_id' => 2533,
                 'tax_code' => '00296440092',
                 'vat_code' => '00296440092',
                 'email' => NULL,
@@ -1347,15 +1431,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            83 => 
+            83 =>
             array (
                 'id' => 84,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Settala',
                 'address' => 'Via Giuseppe Verdi, 8/c',
-                'city_id' => 6863,
                 'zip_code' => '20090',
+                'city_id' => 6863,
                 'tax_code' => '83503490159',
                 'vat_code' => '04999560156',
                 'email' => NULL,
@@ -1363,15 +1448,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            84 => 
+            84 =>
             array (
                 'id' => 85,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Murialdo',
                 'address' => 'Borgata Piano, 37',
-                'city_id' => 4557,
                 'zip_code' => '17013',
+                'city_id' => 4557,
                 'tax_code' => '00338310097',
                 'vat_code' => '00338310097',
                 'email' => NULL,
@@ -1379,15 +1465,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            85 => 
+            85 =>
             array (
                 'id' => 86,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Basiglio',
                 'address' => 'Piazza Leonardo Da Vinci, 1',
-                'city_id' => 561,
                 'zip_code' => '20080',
+                'city_id' => 561,
                 'tax_code' => '80109890154',
                 'vat_code' => '04181870157',
                 'email' => NULL,
@@ -1395,15 +1482,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            86 => 
+            86 =>
             array (
                 'id' => 87,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cipressa',
                 'address' => 'Via Matteotti, 41',
-                'city_id' => 2122,
                 'zip_code' => '18017',
+                'city_id' => 2122,
                 'tax_code' => '00244820080',
                 'vat_code' => '00244820080',
                 'email' => NULL,
@@ -1411,15 +1499,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            87 => 
+            87 =>
             array (
                 'id' => 88,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Camporosso',
                 'address' => 'Piazza Garibaldi, 35',
-                'city_id' => 1206,
                 'zip_code' => '18033',
+                'city_id' => 1206,
                 'tax_code' => '00246620082',
                 'vat_code' => '00246620082',
                 'email' => NULL,
@@ -1427,15 +1516,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            88 => 
+            88 =>
             array (
                 'id' => 89,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Letojanni',
                 'address' => 'Via V. Emanuele, 115',
-                'city_id' => 3562,
                 'zip_code' => '98037',
+                'city_id' => 3562,
                 'tax_code' => '00390050839',
                 'vat_code' => '00390050839',
                 'email' => NULL,
@@ -1443,15 +1533,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            89 => 
+            89 =>
             array (
                 'id' => 90,
                 'company_id' => 1,
-                'type' => 'province',
+                'type' => 'public',
+                'subtype' => 'province',
                 'denomination' => 'Savona',
                 'address' => 'Via Sormano, 12',
-                'city_id' => 6691,
                 'zip_code' => '17100',
+                'city_id' => 6691,
                 'tax_code' => '00311260095',
                 'vat_code' => '00311260095',
                 'email' => NULL,
@@ -1459,15 +1550,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            90 => 
+            90 =>
             array (
                 'id' => 91,
                 'company_id' => 1,
-                'type' => 'cities_union',
+                'type' => 'public',
+                'subtype' => 'union',
                 'denomination' => 'Lombarda Oltre Adda Lodigiano',
                 'address' => 'Piazza Terraverde, 2',
-                'city_id' => 2379,
                 'zip_code' => '26834',
+                'city_id' => 2379,
                 'tax_code' => '92539460151',
                 'vat_code' => '03485390961',
                 'email' => NULL,
@@ -1475,15 +1567,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            91 => 
+            91 =>
             array (
                 'id' => 92,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Piombino',
                 'address' => 'Via Ferruccio, 4',
-                'city_id' => 5266,
                 'zip_code' => '57025',
+                'city_id' => 5266,
                 'tax_code' => '00290280494',
                 'vat_code' => '00290280494',
                 'email' => NULL,
@@ -1491,15 +1584,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            92 => 
+            92 =>
             array (
                 'id' => 93,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Bogliasco',
                 'address' => 'Via Giuseppe Mazzini, 122',
-                'city_id' => 734,
                 'zip_code' => '16031',
+                'city_id' => 734,
                 'tax_code' => '83011520109',
                 'vat_code' => '00300940103',
                 'email' => NULL,
@@ -1507,15 +1601,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            93 => 
+            93 =>
             array (
                 'id' => 94,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'San Bartolomeo al Mare',
                 'address' => 'Via XX Settembre, 1',
-                'city_id' => 6106,
                 'zip_code' => '18016',
+                'city_id' => 6106,
                 'tax_code' => '00088020086',
                 'vat_code' => '00088020086',
                 'email' => NULL,
@@ -1523,15 +1618,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            94 => 
+            94 =>
             array (
                 'id' => 95,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Rialto',
                 'address' => 'Via Melogno, 34',
-                'city_id' => 5711,
                 'zip_code' => '17020',
+                'city_id' => 5711,
                 'tax_code' => NULL,
                 'vat_code' => '00361130099',
                 'email' => NULL,
@@ -1539,15 +1635,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            95 => 
+            95 =>
             array (
                 'id' => 96,
                 'company_id' => 1,
-                'type' => 'cities_union',
+                'type' => 'public',
+                'subtype' => 'union',
                 'denomination' => 'Unione dei Comuni Montani Le Valli dell\'Entella',
                 'address' => 'Via Cap. Fr. Gandolfo, 115',
-                'city_id' => 4047,
                 'zip_code' => '16046',
+                'city_id' => 4047,
                 'tax_code' => '90068070102',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -1555,15 +1652,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            96 => 
+            96 =>
             array (
                 'id' => 97,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Garlasco',
                 'address' => 'piazza Repubblica, 11',
-                'city_id' => 3049,
                 'zip_code' => '27026',
+                'city_id' => 3049,
                 'tax_code' => '85001810184',
                 'vat_code' => '00465640183',
                 'email' => NULL,
@@ -1571,15 +1669,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            97 => 
+            97 =>
             array (
                 'id' => 98,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Varano de Melegari',
                 'address' => 'Via Martiri della LibertÃ , 14',
-                'city_id' => 7668,
                 'zip_code' => '43040',
+                'city_id' => 7668,
                 'tax_code' => '00436140347',
                 'vat_code' => '00436140347 ',
                 'email' => NULL,
@@ -1587,15 +1686,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            98 => 
+            98 =>
             array (
                 'id' => 99,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Tursi',
                 'address' => 'Piazza Maria SS. d\'Anglona, 6',
-                'city_id' => 7506,
                 'zip_code' => '75028',
+                'city_id' => 7506,
                 'tax_code' => '82000970770',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -1603,15 +1703,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            99 => 
+            99 =>
             array (
                 'id' => 100,
                 'company_id' => 1,
-                'type' => 'cities_union',
+                'type' => 'public',
+                'subtype' => 'union',
                 'denomination' => 'Medaniene',
                 'address' => 'Piazza della Repubblica, 4',
-                'city_id' => 5999,
                 'zip_code' => '00027',
+                'city_id' => 5999,
                 'tax_code' => '07249491007',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -1619,15 +1720,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            100 => 
+            100 =>
             array (
                 'id' => 101,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Noli',
                 'address' => 'Piazza Milite Ignoto, 6',
-                'city_id' => 4647,
                 'zip_code' => '17026',
+                'city_id' => 4647,
                 'tax_code' => '00296990096',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -1635,15 +1737,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            101 => 
+            101 =>
             array (
                 'id' => 102,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Mozzo',
                 'address' => 'Piazza Costituzione, 5',
-                'city_id' => 4545,
                 'zip_code' => '24030',
+                'city_id' => 4545,
                 'tax_code' => NULL,
                 'vat_code' => '00707040168',
                 'email' => NULL,
@@ -1651,15 +1754,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            102 => 
+            102 =>
             array (
                 'id' => 103,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Azzano San Paolo',
                 'address' => 'Piazza IV Novembre, 23',
-                'city_id' => 433,
                 'zip_code' => '24052',
+                'city_id' => 433,
                 'tax_code' => '00681530168',
                 'vat_code' => '00681530168',
                 'email' => NULL,
@@ -1667,15 +1771,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            103 => 
+            103 =>
             array (
                 'id' => 104,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Ranica',
                 'address' => 'Via Gavazzeni, 1',
-                'city_id' => 5647,
                 'zip_code' => '24020',
+                'city_id' => 5647,
                 'tax_code' => '00330380163',
                 'vat_code' => '00330380163',
                 'email' => NULL,
@@ -1683,15 +1788,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            104 => 
+            104 =>
             array (
                 'id' => 105,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cogliate',
                 'address' => 'Via Cardinal Minoretti, 19',
-                'city_id' => 2203,
                 'zip_code' => '20815',
+                'city_id' => 2203,
                 'tax_code' => '01566130157',
                 'vat_code' => '00717740963',
                 'email' => NULL,
@@ -1699,15 +1805,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            105 => 
+            105 =>
             array (
                 'id' => 106,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Besano',
                 'address' => 'Piazza della Chiesa, 2',
-                'city_id' => 662,
                 'zip_code' => '21050',
+                'city_id' => 662,
                 'tax_code' => '00561660127',
                 'vat_code' => '00561660127',
                 'email' => NULL,
@@ -1715,15 +1822,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            106 => 
+            106 =>
             array (
                 'id' => 107,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Isso',
                 'address' => 'Piazza Sant\'Andrea, 32',
-                'city_id' => 3398,
                 'zip_code' => '24040',
+                'city_id' => 3398,
                 'tax_code' => '83001820162',
                 'vat_code' => '02733610162',
                 'email' => NULL,
@@ -1731,15 +1839,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            107 => 
+            107 =>
             array (
                 'id' => 108,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cene',
                 'address' => 'Piazza Italia, 14',
-                'city_id' => 1914,
                 'zip_code' => '24020',
+                'city_id' => 1914,
                 'tax_code' => '00240600163',
                 'vat_code' => '00240600163',
                 'email' => NULL,
@@ -1747,15 +1856,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            108 => 
+            108 =>
             array (
                 'id' => 109,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Sesto Fiorentino',
                 'address' => 'Piazza Vittorio Veneto, 1',
-                'city_id' => 6857,
                 'zip_code' => '50019',
+                'city_id' => 6857,
                 'tax_code' => '00420010480',
                 'vat_code' => '00420010480',
                 'email' => 'b.scotti@comune.sesto-fiorentino.fi.it',
@@ -1763,15 +1873,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            109 => 
+            109 =>
             array (
                 'id' => 110,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Bonavigo',
                 'address' => 'Piazza Aquilina Lugo, 26',
-                'city_id' => 763,
                 'zip_code' => '37040',
+                'city_id' => 763,
                 'tax_code' => '00663500239',
                 'vat_code' => '00663500239',
                 'email' => NULL,
@@ -1779,15 +1890,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            110 => 
+            110 =>
             array (
                 'id' => 111,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Albonese',
                 'address' => 'Via Negrone Manara, 21',
-                'city_id' => 135,
                 'zip_code' => '27020',
+                'city_id' => 135,
                 'tax_code' => '83000470183',
                 'vat_code' => '00470790189',
                 'email' => NULL,
@@ -1795,15 +1907,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            111 => 
+            111 =>
             array (
                 'id' => 112,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cassano allo Ionio',
                 'address' => 'Via Giovanni Amendola, 1',
-                'city_id' => 1552,
                 'zip_code' => '87011',
+                'city_id' => 1552,
                 'tax_code' => '88000230784',
                 'vat_code' => '00529360786',
                 'email' => NULL,
@@ -1811,15 +1924,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            112 => 
+            112 =>
             array (
                 'id' => 113,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Grisolia',
                 'address' => 'Via Santa Sofia, 69',
-                'city_id' => 3262,
                 'zip_code' => '87020',
+                'city_id' => 3262,
                 'tax_code' => '00431430784',
                 'vat_code' => '00431430784',
                 'email' => NULL,
@@ -1827,15 +1941,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            113 => 
+            113 =>
             array (
                 'id' => 114,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Villanova d\'Albenga',
                 'address' => 'Via Albenga, 46',
-                'city_id' => 7923,
                 'zip_code' => '17038',
+                'city_id' => 7923,
                 'tax_code' => '00297750093',
                 'vat_code' => '00297750093',
                 'email' => NULL,
@@ -1843,15 +1958,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            114 => 
+            114 =>
             array (
                 'id' => 115,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Albizzate',
                 'address' => 'Piazza IV novembre, 2',
-                'city_id' => 134,
                 'zip_code' => '21041',
+                'city_id' => 134,
                 'tax_code' => '82006930125',
                 'vat_code' => '00308200120',
                 'email' => NULL,
@@ -1859,15 +1975,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            115 => 
+            115 =>
             array (
                 'id' => 116,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Gromo',
                 'address' => 'Piazza Dante, 8',
-                'city_id' => 3265,
                 'zip_code' => '24020',
+                'city_id' => 3265,
                 'tax_code' => '00666340161',
                 'vat_code' => '00666340161',
                 'email' => NULL,
@@ -1875,15 +1992,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            116 => 
+            116 =>
             array (
                 'id' => 117,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Rottofreno',
                 'address' => 'Piazza Marconi, 4',
-                'city_id' => 5981,
                 'zip_code' => '29010',
+                'city_id' => 5981,
                 'tax_code' => '00228700332',
                 'vat_code' => '00228700332',
                 'email' => NULL,
@@ -1891,15 +2009,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            117 => 
+            117 =>
             array (
                 'id' => 118,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Castel San Giovanni',
                 'address' => 'Piazza XX Settembre, 2',
-                'city_id' => 1620,
                 'zip_code' => '29015',
+                'city_id' => 1620,
                 'tax_code' => '00232420331',
                 'vat_code' => '00232420331',
                 'email' => NULL,
@@ -1907,15 +2026,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            118 => 
+            118 =>
             array (
                 'id' => 119,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Serra RiccÃ²',
                 'address' => 'Via A. Medicina, 88',
-                'city_id' => 6817,
                 'zip_code' => '16010',
+                'city_id' => 6817,
                 'tax_code' => '00853850105',
                 'vat_code' => '00853850105',
                 'email' => NULL,
@@ -1923,15 +2043,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            119 => 
+            119 =>
             array (
                 'id' => 120,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Albuzzano',
                 'address' => 'Piazza Venco, 1',
-                'city_id' => 138,
                 'zip_code' => '27010',
+                'city_id' => 138,
                 'tax_code' => '00467340188',
                 'vat_code' => '00467340188',
                 'email' => NULL,
@@ -1939,15 +2060,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            120 => 
+            120 =>
             array (
                 'id' => 121,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Piario',
                 'address' => 'Via Mons. Luigi Speranza, 25',
-                'city_id' => 5169,
                 'zip_code' => '24020',
+                'city_id' => 5169,
                 'tax_code' => '00640710166',
                 'vat_code' => '00640710166',
                 'email' => NULL,
@@ -1955,15 +2077,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            121 => 
+            121 =>
             array (
                 'id' => 122,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Vilminore di Scalve',
                 'address' => 'Piazza Papa Giovanni XXIII, 1',
-                'city_id' => 7973,
                 'zip_code' => '24020',
+                'city_id' => 7973,
                 'tax_code' => '00663280162',
                 'vat_code' => '00663280162',
                 'email' => NULL,
@@ -1971,15 +2094,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            122 => 
+            122 =>
             array (
                 'id' => 123,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Trebisacce',
                 'address' => 'Piazza della Repubblica,  ',
-                'city_id' => 7402,
                 'zip_code' => '87075',
+                'city_id' => 7402,
                 'tax_code' => '00378820781',
                 'vat_code' => '00378820781',
                 'email' => NULL,
@@ -1987,15 +2111,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            123 => 
+            123 =>
             array (
                 'id' => 124,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Gandellino',
                 'address' => 'Via Vittorio Emanuele, 20',
-                'city_id' => 3033,
                 'zip_code' => '24020',
+                'city_id' => 3033,
                 'tax_code' => '00722280161',
                 'vat_code' => '01657210165',
                 'email' => 'segreteria@comune.gandellino.bg.it',
@@ -2003,15 +2128,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            124 => 
+            124 =>
             array (
                 'id' => 125,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Valbondione',
                 'address' => 'Via Beltrame, 34',
-                'city_id' => 7565,
                 'zip_code' => '24020',
+                'city_id' => 7565,
                 'tax_code' => '81001640168',
                 'vat_code' => '01657200166',
                 'email' => NULL,
@@ -2019,15 +2145,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            125 => 
+            125 =>
             array (
                 'id' => 126,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Ciserano',
                 'address' => 'Piazza Giovanni XXIII, 29',
-                'city_id' => 2132,
                 'zip_code' => '24040',
+                'city_id' => 2132,
                 'tax_code' => '00335130167',
                 'vat_code' => '00335130167',
                 'email' => NULL,
@@ -2035,15 +2162,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            126 => 
+            126 =>
             array (
                 'id' => 127,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Varazze',
                 'address' => 'Viale Nazioni Unite, 5',
-                'city_id' => 7670,
                 'zip_code' => '17019',
+                'city_id' => 7670,
                 'tax_code' => '00318100096',
                 'vat_code' => '00318100096',
                 'email' => NULL,
@@ -2051,15 +2179,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            127 => 
+            127 =>
             array (
                 'id' => 128,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Sarego',
                 'address' => 'Piazza Umberto I, 8',
-                'city_id' => 6643,
                 'zip_code' => '36040',
+                'city_id' => 6643,
                 'tax_code' => '80005610243',
                 'vat_code' => '00605690247',
                 'email' => NULL,
@@ -2067,15 +2196,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            128 => 
+            128 =>
             array (
                 'id' => 129,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Valenza',
                 'address' => 'Via Pellizzari, 2',
-                'city_id' => 7584,
                 'zip_code' => '15048',
+                'city_id' => 7584,
                 'tax_code' => '00314770066',
                 'vat_code' => '00314770066',
                 'email' => NULL,
@@ -2083,15 +2213,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            129 => 
+            129 =>
             array (
                 'id' => 130,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Scaldasole',
                 'address' => 'Via XI febbraio, 7',
-                'city_id' => 6697,
                 'zip_code' => '27020',
+                'city_id' => 6697,
                 'tax_code' => '00482750189',
                 'vat_code' => '00482750189',
                 'email' => NULL,
@@ -2099,15 +2230,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            130 => 
+            130 =>
             array (
                 'id' => 131,
                 'company_id' => 1,
-                'type' => 'cities_federation',
+                'type' => 'public',
+                'subtype' => 'federation',
                 'denomination' => 'Camposampierese',
                 'address' => 'Via Cordenons, 17',
-                'city_id' => 1209,
                 'zip_code' => '35012',
+                'city_id' => 1209,
                 'tax_code' => '92142960282',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -2115,15 +2247,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            131 => 
+            131 =>
             array (
                 'id' => 132,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Borgo San Siro',
                 'address' => 'Via Roma, 30',
-                'city_id' => 805,
                 'zip_code' => '27020',
+                'city_id' => 805,
                 'tax_code' => '85001770180',
                 'vat_code' => '00463070185',
                 'email' => NULL,
@@ -2131,15 +2264,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            132 => 
+            132 =>
             array (
                 'id' => 133,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Rodano',
                 'address' => 'Via Turati, 9',
-                'city_id' => 5884,
                 'zip_code' => '20090',
+                'city_id' => 5884,
                 'tax_code' => '83503550150',
                 'vat_code' => '09179860151',
                 'email' => NULL,
@@ -2147,15 +2281,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            133 => 
+            133 =>
             array (
                 'id' => 134,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Figline e Incisa Valdarno',
                 'address' => 'Piazza Del Municipio, 5',
-                'city_id' => 8093,
                 'zip_code' => '50063',
+                'city_id' => 8093,
                 'tax_code' => '06396970482',
                 'vat_code' => '06396970482',
                 'email' => NULL,
@@ -2163,15 +2298,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            134 => 
+            134 =>
             array (
                 'id' => 135,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Fontaniva',
                 'address' => 'Piazza Umberto I, 4',
-                'city_id' => 2850,
                 'zip_code' => '35014',
+                'city_id' => 2850,
                 'tax_code' => '81000430280',
                 'vat_code' => '01545800284',
                 'email' => 'protocollo@comune.fontaniva.pd.it',
@@ -2179,15 +2315,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            135 => 
+            135 =>
             array (
                 'id' => 136,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Carmignano di Brenta',
                 'address' => 'Piazza Marconi, 1',
-                'city_id' => 1393,
                 'zip_code' => '35010',
+                'city_id' => 1393,
                 'tax_code' => '81000410282',
                 'vat_code' => '01573490289',
                 'email' => NULL,
@@ -2195,15 +2332,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            136 => 
+            136 =>
             array (
                 'id' => 137,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cervo',
                 'address' => 'Salita al Castello, 15',
-                'city_id' => 2000,
                 'zip_code' => '18010',
+                'city_id' => 2000,
                 'tax_code' => '00246280085',
                 'vat_code' => '00246280085',
                 'email' => NULL,
@@ -2211,15 +2349,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            137 => 
+            137 =>
             array (
                 'id' => 138,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Sanremo',
                 'address' => 'Corso Cavallotti, 59',
-                'city_id' => 6467,
                 'zip_code' => '18038',
+                'city_id' => 6467,
                 'tax_code' => '00253750087',
                 'vat_code' => '00253750087',
                 'email' => 'p.m.sanremo@comunedisanremo.it',
@@ -2227,15 +2366,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            138 => 
+            138 =>
             array (
                 'id' => 139,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Roccavignale',
                 'address' => 'Via Roma, 20',
-                'city_id' => 5870,
                 'zip_code' => '17017',
+                'city_id' => 5870,
                 'tax_code' => '00341340099',
                 'vat_code' => '00341340099',
                 'email' => 'ragioneria@comune.roccavignale.sv.it',
@@ -2243,15 +2383,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            139 => 
+            139 =>
             array (
                 'id' => 140,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Arcola',
                 'address' => 'Piazza Muccini, 1',
-                'city_id' => 301,
                 'zip_code' => '19021',
+                'city_id' => 301,
                 'tax_code' => '80004690113',
                 'vat_code' => '00213620115',
                 'email' => NULL,
@@ -2259,15 +2400,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            140 => 
+            140 =>
             array (
                 'id' => 141,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Fontanella',
                 'address' => 'Piazza XXVI Aprile, 75',
-                'city_id' => 2843,
                 'zip_code' => '24056',
+                'city_id' => 2843,
                 'tax_code' => '83000990164',
                 'vat_code' => '00714450160',
                 'email' => NULL,
@@ -2275,15 +2417,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            141 => 
+            141 =>
             array (
                 'id' => 142,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Manerba del Garda',
                 'address' => 'Piazza Garibaldi, 25',
-                'city_id' => 3812,
                 'zip_code' => '25080',
+                'city_id' => 3812,
                 'tax_code' => '00866400179',
                 'vat_code' => '00583980982',
                 'email' => NULL,
@@ -2291,15 +2434,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            142 => 
+            142 =>
             array (
                 'id' => 143,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Gandino',
                 'address' => 'Piazza Vittorio Veneto, 7',
-                'city_id' => 3034,
                 'zip_code' => '24024',
+                'city_id' => 3034,
                 'tax_code' => '00246270169',
                 'vat_code' => '00246270169',
                 'email' => NULL,
@@ -2307,15 +2451,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            143 => 
+            143 =>
             array (
                 'id' => 144,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Serravalle Sesia',
                 'address' => 'Corso Matteotti, 184',
-                'city_id' => 6838,
                 'zip_code' => '13037',
+                'city_id' => 6838,
                 'tax_code' => '82002190021',
                 'vat_code' => '00210440020',
                 'email' => NULL,
@@ -2323,15 +2468,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            144 => 
+            144 =>
             array (
                 'id' => 145,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Pradalunga',
                 'address' => 'Via San Martino, 24',
-                'city_id' => 5500,
                 'zip_code' => '24020',
+                'city_id' => 5500,
                 'tax_code' => '80006370169',
                 'vat_code' => '00239780166',
                 'email' => NULL,
@@ -2339,15 +2485,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            145 => 
+            145 =>
             array (
                 'id' => 146,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Torre Beretti e Castellaro',
                 'address' => 'Via Frascarolo, 4',
-                'city_id' => 7310,
                 'zip_code' => '27030',
+                'city_id' => 7310,
                 'tax_code' => '91000280189',
                 'vat_code' => '01394200180',
                 'email' => NULL,
@@ -2355,15 +2502,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            146 => 
+            146 =>
             array (
                 'id' => 147,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cairate',
                 'address' => 'Via Monastero, 10',
-                'city_id' => 1050,
                 'zip_code' => '21050',
+                'city_id' => 1050,
                 'tax_code' => '00309270122',
                 'vat_code' => '00309270122',
                 'email' => NULL,
@@ -2371,15 +2519,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            147 => 
+            147 =>
             array (
                 'id' => 148,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Portalbera',
                 'address' => 'Via G. Mazzini, 1',
-                'city_id' => 5440,
                 'zip_code' => '27040',
+                'city_id' => 5440,
                 'tax_code' => '84000830186',
                 'vat_code' => '00475500187',
                 'email' => 'ragioneria@comune.portalbera.pv.it',
@@ -2387,15 +2536,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            148 => 
+            148 =>
             array (
                 'id' => 149,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'San Zeno Naviglio',
                 'address' => 'Piazza Marconi, 3',
-                'city_id' => 6450,
                 'zip_code' => '25010',
+                'city_id' => 6450,
                 'tax_code' => '00376030177',
                 'vat_code' => '00376030177',
                 'email' => NULL,
@@ -2403,15 +2553,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            149 => 
+            149 =>
             array (
                 'id' => 150,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Selva di Cadore',
                 'address' => 'Piazza San Lorenzo, 2',
-                'city_id' => 6773,
                 'zip_code' => '32020',
+                'city_id' => 6773,
                 'tax_code' => '00207470253',
                 'vat_code' => '00207470253',
                 'email' => NULL,
@@ -2419,15 +2570,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            150 => 
+            150 =>
             array (
                 'id' => 151,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Impruneta',
                 'address' => 'Piazza Buondelmonti, 41',
-                'city_id' => 3343,
                 'zip_code' => '50023',
+                'city_id' => 3343,
                 'tax_code' => '80011430487',
                 'vat_code' => '00628510489',
                 'email' => NULL,
@@ -2435,15 +2587,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            151 => 
+            151 =>
             array (
                 'id' => 152,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Villapiana',
                 'address' => 'Via Campo della LibertÃ ,  ',
-                'city_id' => 7943,
                 'zip_code' => '87076',
+                'city_id' => 7943,
                 'tax_code' => '81000090787',
                 'vat_code' => '01468070782',
                 'email' => NULL,
@@ -2451,15 +2604,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            152 => 
+            152 =>
             array (
                 'id' => 153,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cazzano Sant\'Andrea',
                 'address' => 'Via Torre, 2',
-                'city_id' => 1878,
                 'zip_code' => '24026',
+                'city_id' => 1878,
                 'tax_code' => '00722510161',
                 'vat_code' => '00722510161',
                 'email' => NULL,
@@ -2467,15 +2621,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            153 => 
+            153 =>
             array (
                 'id' => 154,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Colere',
                 'address' => 'Via Tortola, 54',
-                'city_id' => 2210,
                 'zip_code' => '24020',
+                'city_id' => 2210,
                 'tax_code' => '81002410165',
                 'vat_code' => '00771900164 ',
                 'email' => 'elena.bettoni@comune.colere.bg.it',
@@ -2483,15 +2638,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            154 => 
+            154 =>
             array (
                 'id' => 155,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Canale',
                 'address' => 'Piazza Italia, 18',
-                'city_id' => 1216,
                 'zip_code' => '12043',
+                'city_id' => 1216,
                 'tax_code' => '00412270043',
                 'vat_code' => '00412270043',
                 'email' => 'protocollo@comune.canale.cn.it',
@@ -2499,15 +2655,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            155 => 
+            155 =>
             array (
                 'id' => 156,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Confienza',
                 'address' => 'Corso V. Emanuele, 24',
-                'city_id' => 2303,
                 'zip_code' => '27030',
+                'city_id' => 2303,
                 'tax_code' => '83000950184',
                 'vat_code' => '00488410184',
                 'email' => NULL,
@@ -2515,15 +2672,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            156 => 
+            156 =>
             array (
                 'id' => 157,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'MIGNANEGO',
                 'address' => 'PIAZZA GIACOMO MATTEOTTI , 1',
-                'city_id' => 4069,
                 'zip_code' => '16018',
+                'city_id' => 4069,
                 'tax_code' => '00576500102',
                 'vat_code' => '00576500102',
                 'email' => NULL,
@@ -2531,15 +2689,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            157 => 
+            157 =>
             array (
                 'id' => 158,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Nave',
                 'address' => 'Via Paolo VI, 17',
-                'city_id' => 4586,
                 'zip_code' => '25075',
+                'city_id' => 4586,
                 'tax_code' => '80008790174',
                 'vat_code' => '00360880173',
                 'email' => NULL,
@@ -2547,15 +2706,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            158 => 
+            158 =>
             array (
                 'id' => 159,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Pontassieve',
                 'address' => 'Via Tanzini, 30',
-                'city_id' => 5384,
                 'zip_code' => '50065',
+                'city_id' => 5384,
                 'tax_code' => '01011320486',
                 'vat_code' => '00492810486',
                 'email' => NULL,
@@ -2563,15 +2723,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            159 => 
+            159 =>
             array (
                 'id' => 160,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Formigine',
                 'address' => 'Via UnitÃ  d\'Italia, 26',
-                'city_id' => 2878,
                 'zip_code' => '41043',
+                'city_id' => 2878,
                 'tax_code' => '00603990367',
                 'vat_code' => '00292430360',
                 'email' => NULL,
@@ -2579,15 +2740,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            160 => 
+            160 =>
             array (
                 'id' => 161,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cengio',
                 'address' => 'Piazza Martiri Partigiani, 8, 17056 Cengio SV, 8',
-                'city_id' => 1916,
                 'zip_code' => '17056',
+                'city_id' => 1916,
                 'tax_code' => '00338220098',
                 'vat_code' => '00338220098',
                 'email' => NULL,
@@ -2595,15 +2757,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            161 => 
+            161 =>
             array (
                 'id' => 162,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Avegno',
                 'address' => 'Passo Marinai d\'Italia , 1',
-                'city_id' => 409,
                 'zip_code' => '16036',
+                'city_id' => 409,
                 'tax_code' => '00888570108',
                 'vat_code' => '00888570108',
                 'email' => NULL,
@@ -2611,15 +2774,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            162 => 
+            162 =>
             array (
                 'id' => 163,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Pavone del Mella',
                 'address' => 'Via G. Marconi, 5',
-                'city_id' => 5024,
                 'zip_code' => '25020',
+                'city_id' => 5024,
                 'tax_code' => '00759970171',
                 'vat_code' => '00577190986',
                 'email' => 'gatti.caterina@pavonemella.it',
@@ -2627,15 +2791,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            163 => 
+            163 =>
             array (
                 'id' => 164,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Busalla',
                 'address' => 'Piazza Enrico Maccio\', 1',
-                'city_id' => 999,
                 'zip_code' => '16012',
+                'city_id' => 999,
                 'tax_code' => '80007490107',
                 'vat_code' => '00867000101',
                 'email' => NULL,
@@ -2643,15 +2808,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            164 => 
+            164 =>
             array (
                 'id' => 165,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Cariati',
                 'address' => 'Piazza R. Trento, 3',
-                'city_id' => 1375,
                 'zip_code' => '87062',
+                'city_id' => 1375,
                 'tax_code' => '87000210788',
                 'vat_code' => '01079800783',
                 'email' => NULL,
@@ -2659,15 +2825,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            165 => 
+            165 =>
             array (
                 'id' => 166,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Castel Guelfo di Bologna',
                 'address' => 'Via A. Gramsci , 10',
-                'city_id' => 1611,
                 'zip_code' => '40023',
+                'city_id' => 1611,
                 'tax_code' => '01021480379',
                 'vat_code' => '00529031205',
                 'email' => NULL,
@@ -2675,15 +2842,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            166 => 
+            166 =>
             array (
                 'id' => 167,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Darfo Boario Terme',
                 'address' => 'Piazza Col. Lorenzini, 6',
-                'city_id' => 2524,
                 'zip_code' => '25047',
+                'city_id' => 2524,
                 'tax_code' => '00290170174',
                 'vat_code' => '00550530984',
                 'email' => NULL,
@@ -2691,15 +2859,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            167 => 
+            167 =>
             array (
                 'id' => 168,
                 'company_id' => 1,
-                'type' => 'province',
+                'type' => 'public',
+                'subtype' => 'province',
                 'denomination' => 'Siena',
                 'address' => 'Piazza Duomo, 9',
-                'city_id' => 6889,
                 'zip_code' => '53100',
+                'city_id' => 6889,
                 'tax_code' => '80001130527',
                 'vat_code' => '00166340521',
                 'email' => NULL,
@@ -2707,15 +2876,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            168 => 
+            168 =>
             array (
                 'id' => 169,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Zogno',
                 'address' => 'Piazza Italia, 8',
-                'city_id' => 8076,
                 'zip_code' => '24019',
+                'city_id' => 8076,
                 'tax_code' => '94000290166',
                 'vat_code' => '00276180163',
                 'email' => NULL,
@@ -2723,15 +2893,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            169 => 
+            169 =>
             array (
                 'id' => 170,
                 'company_id' => 1,
-                'type' => 'cities_union',
+                'type' => 'public',
+                'subtype' => 'union',
                 'denomination' => 'Unione Montana dal Tobbio al Colma',
                 'address' => 'Via Umberto I, 37',
-                'city_id' => 851,
                 'zip_code' => '15060',
+                'city_id' => 851,
                 'tax_code' => '02409760069',
                 'vat_code' => '02409760069',
                 'email' => NULL,
@@ -2739,15 +2910,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            170 => 
+            170 =>
             array (
                 'id' => 171,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Bagnolo Mella',
                 'address' => 'Piazza 4 Novembre, 2',
-                'city_id' => 466,
                 'zip_code' => '25021',
+                'city_id' => 466,
                 'tax_code' => '00453990178',
                 'vat_code' => '00564140986',
                 'email' => NULL,
@@ -2755,15 +2927,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            171 => 
+            171 =>
             array (
                 'id' => 172,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'San Fior',
                 'address' => 'Piazza Guglielmo Marconi, 2',
-                'city_id' => 6183,
                 'zip_code' => '31020',
+                'city_id' => 6183,
                 'tax_code' => '82002790267',
                 'vat_code' => '01974550269',
                 'email' => NULL,
@@ -2771,15 +2944,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            172 => 
+            172 =>
             array (
                 'id' => 173,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Martinengo',
                 'address' => 'Piazza Maggiore, 1',
-                'city_id' => 3897,
                 'zip_code' => '24057',
+                'city_id' => 3897,
                 'tax_code' => '00683770168',
                 'vat_code' => '00683770168',
                 'email' => NULL,
@@ -2787,15 +2961,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            173 => 
+            173 =>
             array (
                 'id' => 174,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Anversa degli Abruzzi',
                 'address' => 'Via G. Manso , 5',
-                'city_id' => 259,
                 'zip_code' => '67030',
+                'city_id' => 259,
                 'tax_code' => '00161690664',
                 'vat_code' => '00161690664',
                 'email' => NULL,
@@ -2803,15 +2978,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            174 => 
+            174 =>
             array (
                 'id' => 175,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Dicomano',
                 'address' => 'Piazza della Repubblica, 3',
-                'city_id' => 2557,
                 'zip_code' => '50062',
+                'city_id' => 2557,
                 'tax_code' => ' 80013190485',
                 'vat_code' => '03149360483 ',
                 'email' => NULL,
@@ -2819,15 +2995,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            175 => 
+            175 =>
             array (
                 'id' => 176,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Guardiagrele',
                 'address' => 'Largo S. Francesco, 4',
-                'city_id' => 3313,
                 'zip_code' => '66016',
+                'city_id' => 3313,
                 'tax_code' => '00239980691',
                 'vat_code' => '00239980691',
                 'email' => NULL,
@@ -2835,15 +3012,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            176 => 
+            176 =>
             array (
                 'id' => 177,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Moniga Del Garda',
                 'address' => 'Piazza San Martino , 1',
-                'city_id' => 4199,
                 'zip_code' => '25080',
+                'city_id' => 4199,
                 'tax_code' => '00842990178',
                 'vat_code' => '00581430980',
                 'email' => NULL,
@@ -2851,15 +3029,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            177 => 
+            177 =>
             array (
                 'id' => 178,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Torre Pallavicina',
                 'address' => 'Via S.S. Nazario e Celso,  29/B',
-                'city_id' => 7329,
                 'zip_code' => '24050',
+                'city_id' => 7329,
                 'tax_code' => '83001630165',
                 'vat_code' => '01580610168',
                 'email' => NULL,
@@ -2867,15 +3046,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            178 => 
+            178 =>
             array (
                 'id' => 179,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Verdellino',
                 'address' => 'Piazza Don Martinelli , 1',
-                'city_id' => 7736,
                 'zip_code' => '24040',
+                'city_id' => 7736,
                 'tax_code' => '00321950164',
                 'vat_code' => '00321950164',
                 'email' => NULL,
@@ -2883,15 +3063,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            179 => 
+            179 =>
             array (
                 'id' => 180,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Strozza',
                 'address' => 'VIA ROMA, 7',
-                'city_id' => 7102,
                 'zip_code' => '24030',
+                'city_id' => 7102,
                 'tax_code' => '00727670168',
                 'vat_code' => '00727670168',
                 'email' => NULL,
@@ -2899,15 +3080,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            180 => 
+            180 =>
             array (
                 'id' => 181,
                 'company_id' => 1,
-                'type' => 'city',
+                'type' => 'public',
+                'subtype' => 'city',
                 'denomination' => 'Bugnara',
                 'address' => 'PIAZZA VITTORIO CLEMENTE, 1',
-                'city_id' => 980,
                 'zip_code' => '67030',
+                'city_id' => 980,
                 'tax_code' => NULL,
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -2915,15 +3097,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            181 => 
+            181 =>
             array (
                 'id' => 182,
                 'company_id' => 2,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'Sarida s.r.l.',
                 'address' => 'via Monsignor Vattuone, 9/6',
-                'city_id' => 6860,
                 'zip_code' => '16039',
+                'city_id' => 6860,
                 'tax_code' => '01338160995',
                 'vat_code' => '01338160995',
                 'email' => NULL,
@@ -2931,15 +3114,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            182 => 
+            182 =>
             array (
                 'id' => 183,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'I-CAR s.r.l.',
                 'address' => 'via Bonini, 9',
-                'city_id' => 6691,
                 'zip_code' => '17100',
+                'city_id' => 6691,
                 'tax_code' => NULL,
                 'vat_code' => '02077390991',
                 'email' => NULL,
@@ -2947,15 +3131,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            183 => 
+            183 =>
             array (
                 'id' => 184,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'BONTEMPI SCUOLA GUIDA',
                 'address' => 'Via Cantore, 76/R',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => '00988530101',
                 'vat_code' => '00988530101',
                 'email' => 'info@bontempiscuolaguida.it',
@@ -2963,15 +3148,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            184 => 
+            184 =>
             array (
                 'id' => 185,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'GARBARINO RICCARDO',
                 'address' => 'Via Melegari, 8/6',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'GRBRCR56R08D969M',
                 'vat_code' => NULL,
                 'email' => 'riccardo.garbarino@gmail.com',
@@ -2979,15 +3165,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            185 => 
+            185 =>
             array (
                 'id' => 186,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'FABBRI MARIA GRAZIA',
                 'address' => 'Via Barbareschi, 209/19',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'FBBMGR54E53D969R',
                 'vat_code' => NULL,
                 'email' => 'fu.marino@libero.it',
@@ -2995,15 +3182,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            186 => 
+            186 =>
             array (
                 'id' => 187,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'MELI ELEONORA MARIA',
                 'address' => 'Via Melegari, 10',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'MLELRM48P68D969J',
                 'vat_code' => NULL,
                 'email' => 'norita2658@yahoo.it',
@@ -3011,15 +3199,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            187 => 
+            187 =>
             array (
                 'id' => 188,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'BARONCHELLI ROBERTO',
                 'address' => 'Via Barbareschi, 211/15',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'BRNRRT55B28D969P',
                 'vat_code' => NULL,
                 'email' => 'marfa2285@gmail.com',
@@ -3027,15 +3216,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            188 => 
+            188 =>
             array (
                 'id' => 189,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'TRAVERSO GIANCARLO',
                 'address' => 'Via Rigola, 38/11',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'TRVGCR46L12D969P',
                 'vat_code' => NULL,
                 'email' => 'gc.traverso@virgilio.it',
@@ -3043,15 +3233,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            189 => 
+            189 =>
             array (
                 'id' => 190,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'DORNA PIETRO MARIA',
                 'address' => 'Via Rigola, 2/23',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'DRNPRM43E22D969C',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3059,15 +3250,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            190 => 
+            190 =>
             array (
                 'id' => 191,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'GIACCHERO VITTORIO',
                 'address' => 'Via Barbareschi, 211/32',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'GCCVTR52A23H581X',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3075,15 +3267,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            191 => 
+            191 =>
             array (
                 'id' => 192,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'STRANIERI UGO',
                 'address' => 'Via Rigola, 38/5',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'STRGUO43E19D969N',
                 'vat_code' => NULL,
                 'email' => 'ugostra@hotmail.com',
@@ -3091,15 +3284,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            192 => 
+            192 =>
             array (
                 'id' => 193,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'CANU MARIO',
                 'address' => 'Via Barbareschi, 205/9',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'CNAMRP34P25G924R',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3107,15 +3301,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            193 => 
+            193 =>
             array (
                 'id' => 194,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'TORKI ALIREZA',
                 'address' => 'Via Barbareschi, 209/5',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'TRKLRZ59S14Z224G',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3123,15 +3318,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            194 => 
+            194 =>
             array (
                 'id' => 195,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'ROBERTI CORRADO',
                 'address' => 'Via Barbareschi, 211/21',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'RBRCRD70C02D969E',
                 'vat_code' => NULL,
                 'email' => 'corsa1400v@libero.it',
@@ -3139,15 +3335,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            195 => 
+            195 =>
             array (
                 'id' => 196,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'BIANCARDI RINALDO EUGENIO',
                 'address' => 'Via Rigola, 38/8',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'BNCRLD49C04D969V',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3155,15 +3352,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            196 => 
+            196 =>
             array (
                 'id' => 197,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'SPEZZANO MARIO',
                 'address' => 'Via Rigola, 13/29',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'SPZMRA65M30D969H',
                 'vat_code' => '02814380107',
                 'email' => 'spezzanomario@gmail.com',
@@ -3171,15 +3369,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            197 => 
+            197 =>
             array (
                 'id' => 198,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'EURA FOOD SRL',
                 'address' => 'Via Campoligure, 20/22R',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => '01395770991',
                 'vat_code' => '01395770991',
                 'email' => NULL,
@@ -3187,15 +3386,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            198 => 
+            198 =>
             array (
                 'id' => 199,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'TEDONE ALBERTO',
                 'address' => 'Via Melegari, 8/8',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'TDNLRT71B16D969E',
                 'vat_code' => NULL,
                 'email' => 'alberto.tedone@gmail.com',
@@ -3203,15 +3403,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            199 => 
+            199 =>
             array (
                 'id' => 200,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'GEANESI PAOLO',
                 'address' => 'Via Marconi, 23/5',
-                'city_id' => 3086,
                 'zip_code' => '16011',
+                'city_id' => 3086,
                 'tax_code' => 'GNSPLA68P09D969B',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3219,15 +3420,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            200 => 
+            200 =>
             array (
                 'id' => 201,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'MANISCALCO ANTONINO',
                 'address' => 'Via degli Angeli, 7A/10',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'MNSNNN50A19G273U',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3235,15 +3437,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            201 => 
+            201 =>
             array (
                 'id' => 202,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'PARISI CRISTINA',
                 'address' => 'Salita degli Angeli, 34/12',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'PRSCST66M63D969M',
                 'vat_code' => NULL,
                 'email' => 'parisic252@gmail.com',
@@ -3251,15 +3454,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            202 => 
+            202 =>
             array (
                 'id' => 203,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'FERRARI MARIA TERESA',
                 'address' => 'Via Rigola, 2/29',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'FRRMTR59L49D969B',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3267,15 +3471,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            203 => 
+            203 =>
             array (
                 'id' => 204,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'SANTAMARIA GAETANO',
                 'address' => 'via G. Barbareschi, 224/12',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'SNTGTN52P12E573X',
                 'vat_code' => NULL,
                 'email' => 'santamaria.gaetano@gmail.com',
@@ -3283,15 +3488,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            204 => 
+            204 =>
             array (
                 'id' => 205,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'TEDONE ALBERTO',
                 'address' => 'via Melegari , 8/8',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'TDNLRT71B16D969E',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3299,15 +3505,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            205 => 
+            205 =>
             array (
                 'id' => 206,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'TRAVERSO BRUNO',
                 'address' => 'via Barbareschi, 211/28',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'TRVBRN72D12D969Q',
                 'vat_code' => NULL,
                 'email' => 'brunotraverso72@gmail.com',
@@ -3315,15 +3522,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            206 => 
+            206 =>
             array (
                 'id' => 207,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'MIRABELLI BADANIER GINO',
                 'address' => 'via San Fermo, 1/3',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'MRBGNI58R14Z603Z',
                 'vat_code' => NULL,
                 'email' => 'ginobad@inwind.it',
@@ -3331,15 +3539,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            207 => 
+            207 =>
             array (
                 'id' => 208,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'CIRISANO ANTONELLA',
                 'address' => 'via G. Barbareschi, 209/11',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'CRSNNL78B67D969V',
                 'vat_code' => '01875650994',
                 'email' => 'antoste2008@libero.it',
@@ -3347,15 +3556,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            208 => 
+            208 =>
             array (
                 'id' => 209,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'BIGGI LORENZO',
                 'address' => 'via Strada degli Angeli, 34/11',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'BGGLNZ74H22D969R',
                 'vat_code' => NULL,
                 'email' => 'lo.bgg@libero.it',
@@ -3363,15 +3573,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            209 => 
+            209 =>
             array (
                 'id' => 210,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'EURODATA S.R.L.',
                 'address' => 'Via Monte Baldo, 10',
-                'city_id' => 7901,
                 'zip_code' => '37069',
+                'city_id' => 7901,
                 'tax_code' => NULL,
                 'vat_code' => '04027720236',
                 'email' => NULL,
@@ -3379,15 +3590,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            210 => 
+            210 =>
             array (
                 'id' => 211,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'ZANETTI S.R.L.',
                 'address' => 'Via Emilio Visconti Venosta, 7',
-                'city_id' => 4071,
                 'zip_code' => '20122',
+                'city_id' => 4071,
                 'tax_code' => NULL,
                 'vat_code' => '01238040180',
                 'email' => NULL,
@@ -3395,15 +3607,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            211 => 
+            211 =>
             array (
                 'id' => 212,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'SAVOLDELLI SARA',
                 'address' => 'Piazza Matteotti, 2/3B',
-                'city_id' => 3086,
                 'zip_code' => '16123',
+                'city_id' => 3086,
                 'tax_code' => 'SVLSRA77H69D969A',
                 'vat_code' => '01549660999',
                 'email' => 'sara.savo77@gmail.com',
@@ -3411,15 +3624,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            212 => 
+            212 =>
             array (
                 'id' => 213,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'SOBRERO DONATELLA',
                 'address' => 'via Barbareschi, 230/19',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'SBRDTL61S42D969H',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3427,15 +3641,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            213 => 
+            213 =>
             array (
                 'id' => 214,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'CORSIGLIA CARLO',
                 'address' => 'Fraz. Ognio Acqua, 58/1',
-                'city_id' => 3086,
                 'zip_code' => '16040',
+                'city_id' => 3086,
                 'tax_code' => 'CRSCRL83T22D969T',
                 'vat_code' => NULL,
                 'email' => 'carlo.corsiglia@hotmail.it',
@@ -3443,15 +3658,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            214 => 
+            214 =>
             array (
                 'id' => 215,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'VARAGLIOTI MAURIZIO',
                 'address' => 'via San Bartolomeo del Fossato, 125/11',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'VRGMRZ56R03D969Q',
                 'vat_code' => NULL,
                 'email' => 'mvaraglioti@gmail.com',
@@ -3459,15 +3675,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            215 => 
+            215 =>
             array (
                 'id' => 216,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'ALESSI ROSA MARIA',
                 'address' => 'Via Rigola, 13/45',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'LSSRMR62M48D969N',
                 'vat_code' => NULL,
                 'email' => 'rosamaria_alessi@fastwebnet.it',
@@ -3475,15 +3692,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            216 => 
+            216 =>
             array (
                 'id' => 217,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'SOLUZIONI RETAIL SRL',
                 'address' => 'piazza Barabino, 48R',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => NULL,
                 'vat_code' => '02289020998',
                 'email' => 'soluzioniretail2015@gmail.com',
@@ -3491,15 +3709,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            217 => 
+            217 =>
             array (
                 'id' => 218,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'VELLA ENZO',
                 'address' => 'Via Rigola, 4/9',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'VLLNZE64C13D969S',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -3507,15 +3726,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            218 => 
+            218 =>
             array (
                 'id' => 219,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'FINARADI MARCELLO',
                 'address' => 'Via Rigola, 2/10',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'FNRMCL84E02Z602O',
                 'vat_code' => NULL,
                 'email' => 'marcellofinardi@84gmail.com',
@@ -3523,15 +3743,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            219 => 
+            219 =>
             array (
                 'id' => 220,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'AIELLO ALICE',
                 'address' => 'via Rigola, 13/7',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'LLALCA87L52D969T',
                 'vat_code' => NULL,
                 'email' => 'aieali@hotmail.it',
@@ -3539,15 +3760,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            220 => 
+            220 =>
             array (
                 'id' => 221,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'SBRESCIA PASQUALE',
                 'address' => 'via Barbareschi, 211/20',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'SBRPQL58H03F839Q',
                 'vat_code' => '02502000991',
                 'email' => 'pasqualesbrescia@libero.it',
@@ -3555,15 +3777,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            221 => 
+            221 =>
             array (
                 'id' => 222,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'PICCHI ENRICO',
                 'address' => 'Salita degli Angeli, 1',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'PCCNRC76B19D969Z',
                 'vat_code' => NULL,
                 'email' => 'enryp07@gmail.com',
@@ -3571,15 +3794,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            222 => 
+            222 =>
             array (
                 'id' => 223,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'EFFECI SRL',
                 'address' => 'via Milano, 146R',
-                'city_id' => 3086,
                 'zip_code' => '16126',
+                'city_id' => 3086,
                 'tax_code' => '02475620999',
                 'vat_code' => '02475620999',
                 'email' => 'effeci1service@gmail.com',
@@ -3587,15 +3811,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            223 => 
+            223 =>
             array (
                 'id' => 224,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'BERTOLA MASSIMO',
                 'address' => 'Via Barbereschi, 224/33',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'BRTMSM74T28D969S',
                 'vat_code' => NULL,
                 'email' => 'massimo.bertola@amt.genova.it',
@@ -3603,15 +3828,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            224 => 
+            224 =>
             array (
                 'id' => 225,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'ENERGY SERVICE DI FEROLETO STEFANO',
                 'address' => 'salita Superiore Montaldo, 1',
-                'city_id' => 3086,
                 'zip_code' => '16137',
+                'city_id' => 3086,
                 'tax_code' => 'FRLSFN63T18D969Z',
                 'vat_code' => '02415910997',
                 'email' => 'serviceenergygenova@libero.it',
@@ -3619,15 +3845,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            225 => 
+            225 =>
             array (
                 'id' => 226,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'PATELLI MARCO',
                 'address' => 'Via Barbareschi , 230/12',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'PTLMRC53L12B025N',
                 'vat_code' => NULL,
                 'email' => 'ila83@libero.it',
@@ -3635,15 +3862,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            226 => 
+            226 =>
             array (
                 'id' => 227,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'PILOTTO ANTONIO',
                 'address' => 'Via Rigola , 48/4',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'PLTNTN50E21D969N',
                 'vat_code' => NULL,
                 'email' => 'pilocl1950@hotmail.it',
@@ -3651,15 +3879,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            227 => 
+            227 =>
             array (
                 'id' => 228,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'IMMOBILIARE GANDOLFO',
                 'address' => 'via Nazionale, 13',
-                'city_id' => 6860,
                 'zip_code' => '16039',
+                'city_id' => 6860,
                 'tax_code' => NULL,
                 'vat_code' => '01038370993',
                 'email' => 'immobiliaregandolfo@gmail.com',
@@ -3667,15 +3896,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            228 => 
+            228 =>
             array (
                 'id' => 229,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'PALMERINI MARCO',
                 'address' => 'via Mura degli Angeli, 9/16',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'PLMMRC65P26D969P',
                 'vat_code' => NULL,
                 'email' => 'marchino366@gmail.com',
@@ -3683,15 +3913,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            229 => 
+            229 =>
             array (
                 'id' => 230,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'SANTAMARIA GIUSEPPE',
                 'address' => 'via Barbareschi, 224/14',
-                'city_id' => 3086,
                 'zip_code' => '16151',
+                'city_id' => 3086,
                 'tax_code' => 'SNTGPP67H30D969B',
                 'vat_code' => NULL,
                 'email' => 'sangiusedan@libero.it',
@@ -3699,15 +3930,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            230 => 
+            230 =>
             array (
                 'id' => 231,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'NOSENGO ANNA',
                 'address' => 'via Rigola, 27/8',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'NSNNNA64L68D969I',
                 'vat_code' => NULL,
                 'email' => 'annanosengo@gmail.com',
@@ -3715,15 +3947,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            231 => 
+            231 =>
             array (
                 'id' => 232,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'NEBIOLO SECONDINO',
                 'address' => 'corso Alessandria, 450',
-                'city_id' => 144,
                 'zip_code' => '14100',
+                'city_id' => 144,
                 'tax_code' => 'NBLSND94L31A479F',
                 'vat_code' => '01562830057',
                 'email' => NULL,
@@ -3731,15 +3964,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            232 => 
+            232 =>
             array (
                 'id' => 233,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'I.R.T.E.L. srl',
                 'address' => 'Viale Partigiani, 8',
-                'city_id' => 4627,
                 'zip_code' => '14049',
+                'city_id' => 4627,
                 'tax_code' => '00873440051',
                 'vat_code' => '00873440051',
                 'email' => 'irtel.srl@virgilio.it',
@@ -3747,15 +3981,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            233 => 
+            233 =>
             array (
                 'id' => 234,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'PIRAS MARIO',
                 'address' => 'via G. Barbareschi, 211/8',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'PRSMRA60R07D969N',
                 'vat_code' => NULL,
                 'email' => 'marietto60@gmail.com',
@@ -3763,15 +3998,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            234 => 
+            234 =>
             array (
                 'id' => 235,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'ANZALONE ALESSIO',
                 'address' => 'via Barbareschi, 224/35',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'NZLLSS82E30D969T',
                 'vat_code' => NULL,
                 'email' => 'alessioanzalone82@gmail.com',
@@ -3779,15 +4015,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            235 => 
+            235 =>
             array (
                 'id' => 236,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'FERRARI CLAUDIO',
                 'address' => 'via Melegari, 8/2',
-                'city_id' => 3086,
                 'zip_code' => '16147',
+                'city_id' => 3086,
                 'tax_code' => 'FRRCLD63C31D969U',
                 'vat_code' => NULL,
                 'email' => 'rotvit@tiscalinet.it',
@@ -3795,15 +4032,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            236 => 
+            236 =>
             array (
                 'id' => 237,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'MASI DAVIDE GIUSEPPE',
                 'address' => 'Salita degli Angeli, 1',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'MSADDG70A13D969A',
                 'vat_code' => NULL,
                 'email' => 'davidemasi1970@gmail.com',
@@ -3811,15 +4049,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            237 => 
+            237 =>
             array (
                 'id' => 238,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'LUIGI CARDINALE',
                 'address' => 'Via San Fermo, 7/10',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'CRDLGU55C10D969V',
                 'vat_code' => NULL,
                 'email' => 'luigicrd@gmail.com',
@@ -3827,15 +4066,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            238 => 
+            238 =>
             array (
                 'id' => 239,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'STC s.r.l.',
                 'address' => 'Via Mons. Vattuone, 9/6',
-                'city_id' => 6860,
                 'zip_code' => '16039',
+                'city_id' => 6860,
                 'tax_code' => '01704070992',
                 'vat_code' => '01704070992',
                 'email' => NULL,
@@ -3843,15 +4083,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            239 => 
+            239 =>
             array (
                 'id' => 240,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'LOMBARDO PAOLA MARIA',
                 'address' => 'via G. Barbareschi, 211/5',
-                'city_id' => 3086,
                 'zip_code' => '16129',
+                'city_id' => 3086,
                 'tax_code' => 'LMBPMR71D67D969J',
                 'vat_code' => NULL,
                 'email' => 'machiapa@alice.it',
@@ -3859,15 +4100,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            240 => 
+            240 =>
             array (
                 'id' => 241,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'LOMBARDI MASSIMO',
                 'address' => 'via Rigola, 2/15',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'LMBMSM50D04D969C',
                 'vat_code' => NULL,
                 'email' => 'maximodue@alice.it',
@@ -3875,15 +4117,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            241 => 
+            241 =>
             array (
                 'id' => 242,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'BLASI MARCO',
                 'address' => 'via Rigola, 2/5',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'BLSMRC54E02A182L',
                 'vat_code' => NULL,
                 'email' => 'markstar58@libero.it',
@@ -3891,15 +4134,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            242 => 
+            242 =>
             array (
                 'id' => 243,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'TRUSCELLO FRANCO',
                 'address' => 'Via Rigola , 26/13',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'TRSFNC62E05D969E',
                 'vat_code' => NULL,
                 'email' => 'mrosascardigno@gmail.com',
@@ -3907,15 +4151,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            243 => 
+            243 =>
             array (
                 'id' => 244,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'CARBONE ANNA',
                 'address' => 'Via Calvari, 13 C',
-                'city_id' => 2526,
                 'zip_code' => '16022',
+                'city_id' => 2526,
                 'tax_code' => 'CRBNNA59C64D969S',
                 'vat_code' => NULL,
                 'email' => 'carboneanna959@gmail.com',
@@ -3923,15 +4168,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            244 => 
+            244 =>
             array (
                 'id' => 245,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'SANTINI LUCA',
                 'address' => 'Via San Fermo, 5/1',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'SNTLCU69M31D969P',
                 'vat_code' => NULL,
                 'email' => 'l.santini69@gmail.com',
@@ -3939,15 +4185,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            245 => 
+            245 =>
             array (
                 'id' => 246,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'TEMP JOB - TRABALHO TEMPORARIO LDA',
                 'address' => 'via Bergamo, 32',
-                'city_id' => 2499,
                 'zip_code' => '24035',
+                'city_id' => 2499,
                 'tax_code' => '03928170988',
                 'vat_code' => '03928170988',
                 'email' => NULL,
@@ -3955,15 +4202,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            246 => 
+            246 =>
             array (
                 'id' => 247,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'MINETTI ANDREA',
                 'address' => 'Via Rigola, 27/46',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'MNTNDR71S17D969Z',
                 'vat_code' => NULL,
                 'email' => 'andreaminetti@alice.it',
@@ -3971,15 +4219,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            247 => 
+            247 =>
             array (
                 'id' => 248,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'SALVADÃ¨ ALDO',
                 'address' => 'via Rigola, 27/14',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'SLVLDA52R15D969J',
                 'vat_code' => '01551170994',
                 'email' => 'aldo.salvade@gmail.com',
@@ -3987,15 +4236,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            248 => 
+            248 =>
             array (
                 'id' => 249,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'CLEMENTE GIOVANNI',
                 'address' => 'via Rigola, 27/24',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'CLMGNN41L13B142B',
                 'vat_code' => NULL,
                 'email' => 'gianniclemente@hotmail.it',
@@ -4003,15 +4253,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            249 => 
+            249 =>
             array (
                 'id' => 250,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'TAVAROLI FABRIZIO',
                 'address' => 'via Rigola, 13',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'TVRFRZ74S12D969P',
                 'vat_code' => NULL,
                 'email' => 'ft3004@icloud.com',
@@ -4019,15 +4270,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            250 => 
+            250 =>
             array (
                 'id' => 251,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'IMBERGAMO MARCO',
                 'address' => 'Via San Bartolomeo del Fossato, 72/3',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'MBRMRC67M07D969B',
                 'vat_code' => NULL,
                 'email' => 'marcoimbergamo@yahoo.it',
@@ -4035,15 +4287,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            251 => 
+            251 =>
             array (
                 'id' => 252,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'GRAFFIGNA FRANCESCO',
                 'address' => 'Via Barbareschi, 211/25',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'GRFFNC86S04D969N',
                 'vat_code' => NULL,
                 'email' => 'graffigna@tiscali.it',
@@ -4051,15 +4304,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            252 => 
+            252 =>
             array (
                 'id' => 253,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'ALESSANDRO GAMBINO',
                 'address' => 'Via Rinaldo Rigola, 2/10',
-                'city_id' => 3086,
                 'zip_code' => '16121',
+                'city_id' => 3086,
                 'tax_code' => 'GMBLSN95S28D969R',
                 'vat_code' => NULL,
                 'email' => 'Alex.Gambino95@hotmail.it',
@@ -4067,15 +4321,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            253 => 
+            253 =>
             array (
                 'id' => 254,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'FERRARI LEONARDO',
                 'address' => 'Via Melegari , 8/2',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'FRRLRD96C31D969Q',
                 'vat_code' => NULL,
                 'email' => 'ferrarileonardo96@gmail.com',
@@ -4083,15 +4338,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            254 => 
+            254 =>
             array (
                 'id' => 255,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'BENZI DARIO',
                 'address' => 'Via Rinaldo Rigola, 13/39',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'BNZDRA56C02E785O',
                 'vat_code' => NULL,
                 'email' => 'Dario.Benzi2005@libero.it',
@@ -4099,15 +4355,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            255 => 
+            255 =>
             array (
                 'id' => 256,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'QUERZOLA LUIGI',
                 'address' => 'VIA SALITA AL CASTELLO, 1',
-                'city_id' => 760,
                 'zip_code' => '19011',
+                'city_id' => 760,
                 'tax_code' => 'QRZLGU83B17E560A',
                 'vat_code' => NULL,
                 'email' => 'querzolaluigi@gmail.com',
@@ -4115,15 +4372,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            256 => 
+            256 =>
             array (
                 'id' => 257,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'AFFATIGATO LUCA',
                 'address' => 'Via Bologna, 2/9',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'FFTLCU76T27D969T',
                 'vat_code' => NULL,
                 'email' => 'luca.affatigato@libero.it',
@@ -4131,15 +4389,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            257 => 
+            257 =>
             array (
                 'id' => 258,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'DANIELE CINZIA',
                 'address' => 'Via Barbareschi, 211/37',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'DNLCNZ68M51D969M',
                 'vat_code' => NULL,
                 'email' => 'cinziadaniele68@gmail.com',
@@ -4147,15 +4406,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            258 => 
+            258 =>
             array (
                 'id' => 259,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'PERNICIARO FABIO',
                 'address' => 'Via S. B. Fossato, 96/11',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'PRNFBA84P14D969C',
                 'vat_code' => NULL,
                 'email' => 'pernyf84@gmail.com',
@@ -4163,15 +4423,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            259 => 
+            259 =>
             array (
                 'id' => 260,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'Gestopark s.r.l.',
                 'address' => 'Via delle Industrie, 226/E',
-                'city_id' => 133,
                 'zip_code' => '17012',
+                'city_id' => 133,
                 'tax_code' => '00507860096',
                 'vat_code' => '00507860096',
                 'email' => 'amministrazione@gestopark.it',
@@ -4179,15 +4440,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            260 => 
+            260 =>
             array (
                 'id' => 261,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'BARTOLI MASSIMO MARIA',
                 'address' => 'VIA RIGOLA , 4/13',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'BRTMSM57H21D969B',
                 'vat_code' => NULL,
                 'email' => 'massimo.maria.bartoli@gmail.com',
@@ -4195,15 +4457,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            261 => 
+            261 =>
             array (
                 'id' => 262,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'TRIMBOLI ROCCO',
                 'address' => 'Via Rigola, 38/10',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'TRMRCC82S27D969U',
                 'vat_code' => NULL,
                 'email' => 'ro.trimb@gmail.com',
@@ -4211,15 +4474,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            262 => 
+            262 =>
             array (
                 'id' => 263,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'BORDONI GIANCARLO',
                 'address' => 'VIA RINALDO RIGOLA , 48/9',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'BRDGCR57S09F524E',
                 'vat_code' => NULL,
                 'email' => 'giancarlo.bordoni2@tin.it',
@@ -4227,15 +4491,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            263 => 
+            263 =>
             array (
                 'id' => 264,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'IPPOLITO GIUSEPPA',
                 'address' => 'VIA GAETANO BARBARESCHI , 233/ 31',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'PPLGPP51P56C356I',
                 'vat_code' => NULL,
                 'email' => 'giusy.ippolito@yahoo.it',
@@ -4243,15 +4508,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            264 => 
+            264 =>
             array (
                 'id' => 265,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'Maggioli SPA',
                 'address' => 'Via del Carpino, 8',
-                'city_id' => 6607,
                 'zip_code' => '47822',
+                'city_id' => 6607,
                 'tax_code' => '06188330150',
                 'vat_code' => '02066400405',
                 'email' => ' fornitori-maggioli@legalmail.it',
@@ -4259,15 +4525,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            265 => 
+            265 =>
             array (
                 'id' => 266,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'CELLI MICHELA',
                 'address' => 'VIA RIGOLA, 38/11',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'CLLMHL62M57D969M',
                 'vat_code' => NULL,
                 'email' => 'michela.celli@gmail.com',
@@ -4275,15 +4542,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            266 => 
+            266 =>
             array (
                 'id' => 267,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'DOMENICHELLI FRANCESCA',
                 'address' => 'VIA STA ANGELI , 37 ROSSO',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'DMNFNC64B45D969X',
                 'vat_code' => NULL,
                 'email' => 'FRADOMENICHELLI@LIBERO.IT',
@@ -4291,15 +4559,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            267 => 
+            267 =>
             array (
                 'id' => 268,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'BRIATORE FRANCO',
                 'address' => 'VIA DEI CAMPI 5D1/1, 5D1/1',
-                'city_id' => 3045,
                 'zip_code' => '12075',
+                'city_id' => 3045,
                 'tax_code' => 'BRTFNC46L12D920G',
                 'vat_code' => NULL,
                 'email' => 'TOFRAISE@LIBERO.IT',
@@ -4307,15 +4576,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            268 => 
+            268 =>
             array (
                 'id' => 269,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'BUBBI MARCO',
                 'address' => 'VIA RINALDO RIGOLA 27/8, 27/8',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'BBBMRC84S19D969B',
                 'vat_code' => NULL,
                 'email' => 'BUBBIMARCO@GMAIL.COM',
@@ -4323,15 +4593,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            269 => 
+            269 =>
             array (
                 'id' => 270,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'CIPOLLA GRAZIA MARIA',
                 'address' => 'VIA SAN FERMO 7, 7',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'CPLGZM58R71E573C',
                 'vat_code' => NULL,
                 'email' => 'GRACIPO58@GMAIL.COM',
@@ -4339,15 +4610,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            270 => 
+            270 =>
             array (
                 'id' => 271,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'CAMPODONICO MAURIZIO',
                 'address' => 'VIA NINO RONCO, 39/54',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'CMPMRZ62D10D969M',
                 'vat_code' => NULL,
                 'email' => 'MAURIZIOCAMPODONICO@GMAIL.COM',
@@ -4355,15 +4627,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            271 => 
+            271 =>
             array (
                 'id' => 272,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'DISPARI SocietÃ  Cooperativa Sociale ONLUS',
                 'address' => 'Via Enrico Mattei, snc',
-                'city_id' => 2378,
                 'zip_code' => '25040',
+                'city_id' => 2378,
                 'tax_code' => '01805510987',
                 'vat_code' => '01805510987',
                 'email' => 'stefano.dorazio@cascinaclarabella.it',
@@ -4371,15 +4644,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            272 => 
+            272 =>
             array (
                 'id' => 273,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'PARODI PAOLO',
                 'address' => 'VIA PIANDILUCCO, 7/1A',
-                'city_id' => 3086,
                 'zip_code' => '16155',
+                'city_id' => 3086,
                 'tax_code' => 'PRDPLA64D23D969C',
                 'vat_code' => NULL,
                 'email' => 'PARODI.P2011@LIBERO.IT',
@@ -4387,15 +4661,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            273 => 
+            273 =>
             array (
                 'id' => 274,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'LaB Consulenze srl',
                 'address' => 'Via Angelo Brunetti, 60',
-                'city_id' => 5908,
                 'zip_code' => '00186',
+                'city_id' => 5908,
                 'tax_code' => '03033940788',
                 'vat_code' => '03033940788',
                 'email' => 'info@pec.labconsulenze.it',
@@ -4403,15 +4678,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            274 => 
+            274 =>
             array (
                 'id' => 275,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'CRESCENTE GIOVANNI',
                 'address' => 'VIA SAN FERMO , 5',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'CRSGNN76R14D969J',
                 'vat_code' => NULL,
                 'email' => 'CRESCENTE76@LIBERO.IT',
@@ -4419,15 +4695,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            275 => 
+            275 =>
             array (
                 'id' => 276,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'FAZZARI ANNUNZIATA',
                 'address' => 'VIA SAN FERMO, 7/4',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'FZZNNZ57S60E873N',
                 'vat_code' => NULL,
                 'email' => 'VFAZZARI54@GMAIL.COM',
@@ -4435,15 +4712,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            276 => 
+            276 =>
             array (
                 'id' => 277,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'CARLARINO SILVIA',
                 'address' => 'VIA BARBARESCHI, 205',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'CRLSLV77D47D969Q',
                 'vat_code' => NULL,
                 'email' => 'SILVIA.CARLARINO@GMAIL.COM',
@@ -4451,15 +4729,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            277 => 
+            277 =>
             array (
                 'id' => 278,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'PASCALUCCI CHIARA',
                 'address' => 'VIA RIGOLA , 13/13',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'PSCCHR87R42B519L',
                 'vat_code' => NULL,
                 'email' => 'CHIARAPASCALUCCI@GMAIL.COM',
@@ -4467,15 +4746,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            278 => 
+            278 =>
             array (
                 'id' => 279,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'VITA GIUSEPPE',
                 'address' => 'Via C. Da Fegotto , snc',
-                'city_id' => 74,
                 'zip_code' => '92100',
+                'city_id' => 74,
                 'tax_code' => 'VTIGPP53E22D514A',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -4483,15 +4763,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            279 => 
+            279 =>
             array (
                 'id' => 280,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'CELESTINO CORRADO',
                 'address' => 'SALITA DEGLI ANGELI , 19',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'CLSCRD55E16F839C',
                 'vat_code' => NULL,
                 'email' => 'corrado.celestino@gmail.com',
@@ -4499,15 +4780,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            280 => 
+            280 =>
             array (
                 'id' => 281,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'GUTIERREZ GARCES KEVIN ANDRES',
                 'address' => 'VIA SAN FERMO, 5/14',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'GTRKNN96L04Z605W',
                 'vat_code' => NULL,
                 'email' => 'roll3134@gmail.com',
@@ -4515,15 +4797,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            281 => 
+            281 =>
             array (
                 'id' => 282,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'KATAEVA IRINA',
                 'address' => 'VIA MELEGARI, 18/8',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'KTVRNI79H58Z154A',
                 'vat_code' => NULL,
                 'email' => 'MARKPERM@LIVE.IT',
@@ -4531,15 +4814,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            282 => 
+            282 =>
             array (
                 'id' => 283,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'SCUDERI PAOLA',
                 'address' => 'VIA RIGOLA , 27/15',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'SCDPLA75L68D969M',
                 'vat_code' => NULL,
                 'email' => '30SOFIA05.PS@GMAIL.COM',
@@ -4547,15 +4831,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            283 => 
+            283 =>
             array (
                 'id' => 284,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'FLORIS MANUEL',
                 'address' => 'VIA MURA DEGLI ANGELI, 7C/22',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'FLRMNL75E07D969S',
                 'vat_code' => NULL,
                 'email' => 'FLORISMANUEL@GMAIL.COM',
@@ -4563,15 +4848,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            284 => 
+            284 =>
             array (
                 'id' => 285,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'KATAEVA IRINA',
                 'address' => 'VIA MELEGARI, 18/8',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'KTVRNI79H58Z154A',
                 'vat_code' => NULL,
                 'email' => 'MARKPERM@LIVE.IT',
@@ -4579,15 +4865,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            285 => 
+            285 =>
             array (
                 'id' => 286,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'FLORIS MANUEL',
                 'address' => 'VIA MURA DEGLI ANGELI, 7C/22',
-                'city_id' => 3086,
                 'zip_code' => '16127',
+                'city_id' => 3086,
                 'tax_code' => 'FLRMNL75E07D969S',
                 'vat_code' => NULL,
                 'email' => 'FLORISMANUEL@GMAIL.COM',
@@ -4595,15 +4882,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            286 => 
+            286 =>
             array (
                 'id' => 287,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'SCUDERI PAOLA',
                 'address' => 'VIA RIGOLA, 27/15',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'SCDPLA75L68D969M',
                 'vat_code' => NULL,
                 'email' => '30SOFIA05.PS@GMAIL.COM',
@@ -4611,15 +4899,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            287 => 
+            287 =>
             array (
                 'id' => 288,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'MINNITI SIMONA',
                 'address' => 'VIA LINNEO , 304/26',
-                'city_id' => 3086,
                 'zip_code' => '16159',
+                'city_id' => 3086,
                 'tax_code' => 'MNNSMN84S66H224X',
                 'vat_code' => NULL,
                 'email' => 'SIMISM@LIBERO.IT',
@@ -4627,15 +4916,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            288 => 
+            288 =>
             array (
                 'id' => 289,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'woman',
                 'denomination' => 'MINNITI SIMONA',
                 'address' => 'VIA LINNEO, 304/26',
-                'city_id' => 3086,
                 'zip_code' => '16159',
+                'city_id' => 3086,
                 'tax_code' => 'MNNSMN84S66H224X',
                 'vat_code' => NULL,
                 'email' => 'SIMISM@LIBERO.IT',
@@ -4643,15 +4933,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            289 => 
+            289 =>
             array (
                 'id' => 290,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'GUIDUCCI MICHEL',
                 'address' => 'VIA BARBARESCHI, 211/16',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'GDCMHL83S04D969B',
                 'vat_code' => NULL,
                 'email' => 'M.GUIDUCCI@HOTMAIL.COM',
@@ -4659,15 +4950,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            290 => 
+            290 =>
             array (
                 'id' => 291,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'GUIDUCCI MICHEL',
                 'address' => 'VIA BARBARESCHI, 211/16',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'GDCMHL83S04D969B',
                 'vat_code' => NULL,
                 'email' => 'M.GUIDUCCI@HOTMAIL.COM',
@@ -4675,15 +4967,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            291 => 
+            291 =>
             array (
                 'id' => 292,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'CIALVI ITALO',
                 'address' => 'VIA GIGLIOLI, 104/1',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'CLVTLI50D22D969F',
                 'vat_code' => NULL,
                 'email' => NULL,
@@ -4691,15 +4984,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            292 => 
+            292 =>
             array (
                 'id' => 293,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'CIALVI ITALO',
                 'address' => 'VIA RIGOLA, 27/29',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'CLVTLI50D22D969F',
                 'vat_code' => NULL,
                 'email' => 'CHIARA1305@LIBERO.IT',
@@ -4707,15 +5001,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            293 => 
+            293 =>
             array (
                 'id' => 294,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'MAZZU\' ANDREA',
                 'address' => 'VIA RIGOLA, 26',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'MZZNDR88A14D969K',
                 'vat_code' => NULL,
                 'email' => 'ANDREA.MAZZU.1988@GMAIL.COM',
@@ -4723,15 +5018,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            294 => 
+            294 =>
             array (
                 'id' => 295,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'Ditech srl',
                 'address' => 'Via Vecchia della Stazione, 41,43,45',
-                'city_id' => 7154,
                 'zip_code' => '01016',
+                'city_id' => 7154,
                 'tax_code' => NULL,
                 'vat_code' => '01477940678',
                 'email' => NULL,
@@ -4739,15 +5035,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            295 => 
+            295 =>
             array (
                 'id' => 296,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'Ditech srl',
                 'address' => 'Via Vecchia della Stazione, 41,43,45',
-                'city_id' => 7154,
                 'zip_code' => '01016',
+                'city_id' => 7154,
                 'tax_code' => NULL,
                 'vat_code' => '09043181008',
                 'email' => NULL,
@@ -4755,15 +5052,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            296 => 
+            296 =>
             array (
                 'id' => 297,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'Speed & Traffic Control S.r.l',
                 'address' => 'Via Mons. Vattuone, 9/6',
-                'city_id' => 6860,
                 'zip_code' => '16039',
+                'city_id' => 6860,
                 'tax_code' => NULL,
                 'vat_code' => '01704070992',
                 'email' => NULL,
@@ -4771,15 +5069,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            297 => 
+            297 =>
             array (
                 'id' => 298,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'company',
                 'denomination' => 'SPEED & TRAFFIC CONTROL s.r.l.',
                 'address' => 'Via Mons. Vattuone, 9/6',
-                'city_id' => 6860,
                 'zip_code' => '16039',
+                'city_id' => 6860,
                 'tax_code' => NULL,
                 'vat_code' => '01704070992',
                 'email' => NULL,
@@ -4787,15 +5086,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            298 => 
+            298 =>
             array (
                 'id' => 299,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'DE GREGORIO FRANCESCO',
                 'address' => 'VIA PITTALUGA , 1/2',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'DGRFNC75C10L331U',
                 'vat_code' => NULL,
                 'email' => 'FRENKGREGORITP@GMAIL.COM',
@@ -4803,15 +5103,16 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            299 => 
+            299 =>
             array (
                 'id' => 300,
                 'company_id' => 1,
-                'type' => 'company',
+                'type' => 'private',
+                'subtype' => 'man',
                 'denomination' => 'ALBERTI ALESSANDRO',
                 'address' => 'Via San Bartolomeo del Fossato, 68/6',
-                'city_id' => 3086,
                 'zip_code' => '16149',
+                'city_id' => 3086,
                 'tax_code' => 'LBRLSN81H22D969O',
                 'vat_code' => NULL,
                 'email' => 'Alessandrino1981@gmail.com',
@@ -4820,7 +5121,7 @@ class ClientsTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        
-        
+
+
     }
 }

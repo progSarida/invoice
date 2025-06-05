@@ -85,16 +85,15 @@ return new class extends Migration
             $table->foreign('parent_id')->references('id')->on('invoices');
         });
 
-
         Schema::create('sdi_notifications', function (Blueprint $table) {
 
             $table->id();
             $table->foreignId('invoice_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
 
-            $table->string('code')->nullable();
-            $table->string('status')->nullable();
-            $table->date('date')->nullable();
-            $table->string('description')->nullable();
+            $table->string('code')->nullable();                                     // codice sdi
+            $table->string('status')->nullable();                                   // stato sdi (Enum)
+            $table->date('date')->nullable();                                       // data
+            $table->string('description')->nullable();                              // descrizione
 
             $table->timestamps();
 

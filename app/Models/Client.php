@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ClientType;
+use App\Enums\ClientSubType;
 use Illuminate\Database\Eloquent\Model;
 
 class Client extends Model
@@ -11,6 +12,7 @@ class Client extends Model
     protected $fillable = [
         'client_id',
         'type',
+        'subtype',
         'denomination',
         'address',
         'zip_code',
@@ -22,7 +24,8 @@ class Client extends Model
     ];
 
     protected $casts = [
-        'type' => ClientType::class
+        'type' => ClientType::class,
+        'subtype' => ClientSubType::class
     ];
 
 

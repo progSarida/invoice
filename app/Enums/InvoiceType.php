@@ -9,9 +9,9 @@ enum InvoiceType: string implements HasLabel, HasColor
 {
     //
 
-    case INVOICE = "invoice";
-    case CREDIT_NOTE = "credit_note";
-    case INVOICE_NOTICE = "invoice_notice";
+    case INVOICE = "invoice";                           // TD01
+    case CREDIT_NOTE = "credit_note";                   // TD04
+    case INVOICE_NOTICE = "invoice_notice";             // TD00
 
     public function getLabel(): string
     {

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('type');
             $table->string('denomination');
             $table->string('address');
-            $table->string('zip_code');
+            $table->string('zip_code');                                 // se ho l'id de comune a cosa serve?
             $table->foreignId('city_id')->constrained()->onUpdate('cascade');
             $table->string('tax_code')->nullable();
             $table->string('vat_code')->nullable();

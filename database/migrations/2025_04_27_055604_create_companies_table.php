@@ -24,16 +24,14 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
-
         Schema::create('bank_accounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained(
+            $table->foreignId('company_id')->constrained(                        // id azienda per multi-tenancy
                 table: 'companies', indexName: 'id'
             )->onUpdate('cascade')->onDelete('cascade');
-            $table->string('name');
-            $table->string('iban');
-            $table->string('bic');
+            $table->string('name');                                              // nome banca
+            $table->string('iban');                                              // iban conto
+            $table->string('bic');                                               // codice bic (swift)
             $table->timestamps();
         });
 

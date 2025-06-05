@@ -4,7 +4,7 @@ namespace App\Filament\Company\Resources;
 
 use App\Enums\InvoiceType;
 
-use App\Enums\AccrualType;
+// use App\Enums\AccrualType;
 use App\Enums\TaxType;
 use App\Enums\SdiStatus;
 use App\Enums\PaymentStatus;
@@ -15,8 +15,10 @@ use App\Filament\Company\Resources\InvoiceResource\Pages;
 use App\Filament\Company\Resources\TenderResource;
 use App\Filament\Company\Resources\InvoiceResource\RelationManagers;
 
+use App\Models\AccrualType;
 use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\ManageType;
 use App\Models\Tender;
 use Closure;
 use Filament\Facades\Filament;
@@ -60,7 +62,7 @@ class InvoiceResource extends Resource
                 Grid::make('GRID')->columnSpan(3)->schema([
 
                     Section::make('')
-                        ->columns(4)
+                        ->columns(6)
                         ->schema([
 
                             Forms\Components\Select::make('invoice_type')->label('Tipo')
@@ -70,12 +72,13 @@ class InvoiceResource extends Resource
                                     if($get('client_id')!==InvoiceType::CREDIT_NOTE)
                                         $set('parent_id', null);
                                 })
-                                ->options(InvoiceType::class)->columnSpan(2),
+                                ->options(InvoiceType::class)->columnSpan(3),
 
                             Forms\Components\TextInput::make('invoice_uid')->label('Identificativo')
-                                ->disabled()->columnSpan(2),
+                                ->disabled()->columnSpan(3),
 
                             Forms\Components\TextInput::make('number')->label('Numero')
+                                ->columnSpan(2)
                                 ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
                                 ->live()
                                 ->required()
@@ -89,6 +92,7 @@ class InvoiceResource extends Resource
                                 ->numeric(),
 
                             Forms\Components\TextInput::make('year')->label('Anno')
+                                ->columnSpan(2)
                                 ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
                                 ->live()
                                 ->required()
@@ -106,10 +110,17 @@ class InvoiceResource extends Resource
                                 ->numeric()
                                 ->required()->columnSpan(2),
 
-                            Forms\Components\Select::make('accrual_type')->label('Tipo di competenza')
+                            Forms\Components\Select::make('accrual_type_id')->label('Tipo di competenza')
                                 ->required()
-                                ->options(AccrualType::class)->columnSpan(2),
-
+                                ->options(function () {
+                                    return AccrualType::orderBy('order')->pluck('name', 'id');
+                                })
+                                ->columnSpan(3),
+                            Forms\Components\Select::make('manage_type_id')->label('Tipo di gestione')
+                                ->options(function () {
+                                    return ManageType::orderBy('order')->pluck('name', 'id');
+                                })
+                                ->columnSpan(3),
                         ]),
 
                     Section::make('Descrizioni')
@@ -142,7 +153,7 @@ class InvoiceResource extends Resource
                                 )
                                 ->relationship(name: 'client', titleAttribute: 'denomination')
                                 ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => strtoupper("{$record->type->getLabel()}")." - $record->denomination"
+                                    fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
                                 )
                                 ->required()
                                 ->afterStateUpdated(function (Get $get, Set $set) {
@@ -168,7 +179,7 @@ class InvoiceResource extends Resource
                                 ->visible(
                                     function(Get $get){
                                         if(filled ( $get('client_id') )){
-                                            if(Client::find($get('client_id'))->type->isCompany())
+                                            if(Client::find($get('client_id'))->subtype->isCompany())
                                                 return false;
                                             else
                                                 return true;
@@ -195,7 +206,7 @@ class InvoiceResource extends Resource
                                 ->visible(
                                     function(Get $get){
                                         if(filled ( $get('client_id') )){
-                                            if(Client::find($get('client_id'))->type->isCompany())
+                                            if(Client::find($get('client_id'))->subtype->isCompany())
                                                 return false;
                                             else
                                                 return true;
@@ -450,7 +461,7 @@ class InvoiceResource extends Resource
                 SelectFilter::make('client_id')->label('Cliente')
                     ->relationship(name: 'client', titleAttribute: 'denomination')
                     ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => strtoupper("{$record->type->getLabel()}")." - $record->denomination"
+                        fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
                     )
                     ->searchable()->preload()
                         ->optionsLimit(5),

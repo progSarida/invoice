@@ -84,7 +84,9 @@ class ContainerResource extends Resource
                     ->options(
                         [
                             "ordinary" => "Competenza ordinaria",
-                            "coercive" => "Competenza coattiva"
+                            "coercive" => "Competenza coattiva",
+                            "verification" => "Accertamenti",
+                            "service" => "Servizi"
                         ])
                 ])->columns(2),
                 Section::make('')->visible()->schema([
@@ -157,7 +159,7 @@ class ContainerResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                
+
             ])
             ->filters([
                 //
