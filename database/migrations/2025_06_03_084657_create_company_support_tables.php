@@ -63,7 +63,7 @@ return new class extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->string('fund');                                              // tipo cassa previdenziale (Enum)
             $table->integer('rate');                                             // aliquota cassa
-            $table->integer('taxable_perc ');                                    // percentuale imponibile
+            $table->integer('taxable_perc');                                    // percentuale imponibile
             $table->string('vat_code');                                          // codice iva (Enum)
             $table->timestamps();
         });
@@ -74,7 +74,7 @@ return new class extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->string('withholding_type');                                  // tipo ritenuta (Enum)
             $table->integer('rate');                                             // aliquota fiscale
-            $table->integer('taxable_perc ');                                    // percentuale imponibile
+            $table->integer('taxable_perc');                                    // percentuale imponibile
             $table->string('payment_reason');                                    // causale pagamento (Enum)
             $table->timestamps();
         });
@@ -96,6 +96,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('curators');
         Schema::dropIfExists('productors');
         Schema::dropIfExists('sectionals');
@@ -103,5 +104,6 @@ return new class extends Migration
         Schema::dropIfExists('social_contributions');
         Schema::dropIfExists('withholdings');
         Schema::dropIfExists('stamp_duties');
+        Schema::enableForeignKeyConstraints();
     }
 };

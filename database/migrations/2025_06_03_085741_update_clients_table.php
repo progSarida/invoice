@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('companies',function (Blueprint $table){
-            $table->string('subtype');                                          // sottotipo cliente per intestazione fattura (Enum)
+        Schema::table('clients',function (Blueprint $table){
+            $table->string('subtype')->after('type');                                          // sottotipo cliente per intestazione fattura (Enum)
         });
     }
 

@@ -16,14 +16,18 @@ return new class extends Migration
             $table->string('fax')->nullable();                                              // fax
             $table->string('tax_number')->nullable();                                       // codice fiscale
             $table->string('register')->nullable();                                         // albo professionale di iscrizione
-            $table->foreignId('register_province_id')->constrained(                         // id provincia albo professionale
-                table: 'provinces', indexName: 'id'
-            )->onUpdate('cascade')->onDelete('cascade')->nullable();
+            
+            $table->unsignedBigInteger('register_province_id')->nullable();
+            $table->foreign('register_province_id')->references('id')->on('provinces')      // id provincia albo professionale
+            ->onUpdate('cascade')->onDelete('cascade');
+
             $table->string('register_number')->nullable();                                  // numero iscrizione albo professionale
             $table->date('register_date')->nullable();                                      // data iscrizione albo professionale
-            $table->foreignId('rea_province_id')->constrained(                              // id provincia ufficio rea
-                table: 'provinces', indexName: 'id'
-            )->onUpdate('cascade')->onDelete('cascade')->nullable();
+
+            $table->unsignedBigInteger('rea_province_id')->nullable();
+            $table->foreign('rea_province_id')->references('id')->on('provinces')           // id provincia ufficio rea
+            ->onUpdate('cascade')->onDelete('cascade');
+
             $table->string('rea_number')->nullable();                                       // numero iscrizione REA
             $table->string('nominal_capital')->nullable();                                  // capitale sociale
             $table->string('shareholders')->nullable();                                     // situazione soci (Enum)
