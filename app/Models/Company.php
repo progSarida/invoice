@@ -94,4 +94,9 @@ class Company extends Model
         return $this->belongsToMany(DocType::class, 'company_docs', 'company_id', 'doc_type_id')
                     ->withTimestamps();
     }
+
+    public function newContracts()
+    {
+        return $this->hasMany(NewContract::class);
+    }
 }
