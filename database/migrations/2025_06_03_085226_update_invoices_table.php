@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices',function (Blueprint $table){
-            $table->string('flow');                                                 // tipo fattura: in => passiva, out => attiva (Enum)
-            $table->string('accrual_type_id');                                      // id tipo di competenza
+            $table->string('flow')->nullable();                                                 // tipo fattura: in => passiva, out => attiva (Enum)
+            $table->string('accrual_type_id')->nullable();                                      // id tipo di competenza
             $table->string('manage_type_id')->nullable();                           // id tipo di gestione
         });
     }
