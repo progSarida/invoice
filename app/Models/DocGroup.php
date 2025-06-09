@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DocGroup extends Model
 {
@@ -10,4 +11,9 @@ class DocGroup extends Model
         'name',
         'description'
     ];
+
+    public function docTypes(): HasMany
+    {
+        return $this->hasMany(DocType::class, 'doc_group_id');
+    }
 }

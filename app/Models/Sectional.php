@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\DocType;
 // use App\Enums\DocType;
 use App\Enums\ClientType;
 use App\Enums\NumerationType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Sectional extends Model
 {
@@ -26,17 +27,22 @@ class Sectional extends Model
         'numeration_type' => NumerationType::class
     ];
 
-    public function company()
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     public function getNumber(){
         return $this->progressive." / 0".$this->description." / ".date('Y');
     }
 
-    public function docType()
+    // public function docType(): BelongsTo
+    // {
+    //     return $this->belongsTo(DocType::class, 'doc_type_id');
+    // }
+
+    public function docTypes(): BelongsToMany
     {
-        return $this->belongsTo(DocType::class);
+        return $this->belongsToMany(DocType::class, 'doc_type_sectional', 'sectional_id', 'doc_type_id');
     }
 }

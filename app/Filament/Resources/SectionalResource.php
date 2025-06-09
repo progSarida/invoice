@@ -39,9 +39,11 @@ class SectionalResource extends Resource
                 Select::make('company_id')
                     ->label('Azienda')
                     ->required()
-                    ->options(
-                        Company::all()->pluck('name', 'id')
-                    )
+                    ->options(Company::all()->pluck('name', 'id'))
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $set('doc_type_id', null);
+                    })
                     ->columnSpan(3),
                 TextInput::make('description')
                     ->label('Descrizione')
@@ -54,16 +56,6 @@ class SectionalResource extends Resource
                         collect(ClientType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                     )
                     ->columnSpan(2),
-                // Select::make('doc_type')
-                //     ->label('Tipo documento')
-                //     ->options(DocType::groupedOptions())
-                //     ->columnSpan(6),
-                Select::make('doc_type_id')
-                    ->label('Tipo documento')
-                    ->options(DocType::groupedOptions())
-                    ->columnSpan(6)
-                    ->searchable()
-                    ->required(),
                 TextInput::make('progressive')
                     ->label('Numero progressivo')
                     ->maxLength(255)
@@ -74,7 +66,47 @@ class SectionalResource extends Resource
                     ->options(
                         collect(NumerationType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                     )
-                    ->columnSpan(4)
+                    ->columnSpan(2),
+                Placeholder::make('doc_type_placeholder')
+                    ->label('')
+                    ->content('Seleziona un’azienda per vedere i documenti disponibili')
+                    ->visible(function (callable $get) {
+                        return empty($get('company_id'));
+                    })
+                    ->columnSpan(12),
+                Forms\Components\CheckboxList::make('doc_type_ids')
+                    ->label('Tipi documento')
+                    ->options(function (callable $get) {
+                        $companyId = $get('company_id');
+                        if ($companyId) {
+                            return DocType::groupedOptions($companyId);
+                        }
+                        return [];
+                    })
+                    ->relationship(
+                        name: 'docTypes',
+                        titleAttribute: null,
+                        modifyQueryUsing: function ($query, callable $get) {
+                            $companyId = $get('company_id');
+                            if ($companyId) {
+                                $query->whereIn('doc_types.id', function ($subQuery) use ($companyId) {
+                                    $subQuery->select('doc_type_id')
+                                        ->from('company_docs')
+                                        ->where('company_id', $companyId);
+                                })->orderBy('doc_types.name', 'asc');
+                            }
+                        }
+                    )
+                    ->getOptionLabelFromRecordUsing(function ($record) {
+                        $groupName = $record->docGroup ? $record->docGroup->name : 'Senza gruppo';
+                        return "{$record->name} - {$record->description} ({$groupName})";
+                    })
+                    ->visible(function (callable $get) {
+                        return !empty($get('company_id'));
+                    })
+                    ->required()
+                    ->columnSpan(6),
+
             ])->columns(12);
     }
 
@@ -86,12 +118,16 @@ class SectionalResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('client_type')->label('Tipo')
                     ->searchable(),
-                // Tables\Columns\TextColumn::make('doc_type')->label('Tipo documento')
+                // Tables\Columns\TextColumn::make('docType')
+                //     ->label('Tipo documento')
+                //     ->formatStateUsing(fn($state, $record) =>
+                //         $record->docType ? "{$record->docType->name} - {$record->docType->description}" : '-'
+                //     )
                 //     ->searchable(),
-                Tables\Columns\TextColumn::make('docType')
-                    ->label('Tipo documento')
+                Tables\Columns\TextColumn::make('docTypes')
+                    ->label('Tipi documento')
                     ->formatStateUsing(fn($state, $record) =>
-                        $record->docType ? "{$record->docType->name} - {$record->docType->description}" : '-'
+                        $record->docTypes->pluck('name')->implode(', ') ?: '-'
                     )
                     ->searchable(),
                 Tables\Columns\TextColumn::make('progressive')->label('Numero successivo')

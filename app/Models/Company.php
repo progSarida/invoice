@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Company extends Model
 {
@@ -86,5 +87,11 @@ class Company extends Model
 
     public function reaProvince(){
         return $this->belongsTo(Province::class, 'rea_province_id');
+    }
+
+    public function docTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(DocType::class, 'company_docs', 'company_id', 'doc_type_id')
+                    ->withTimestamps();
     }
 }
