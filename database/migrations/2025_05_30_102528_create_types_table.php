@@ -34,7 +34,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('accrual_types');
         Schema::dropIfExists('manage_types');
+        Schema::enableForeignKeyConstraints();
     }
 };
