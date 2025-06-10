@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\ManageTypeResource\Pages;
+namespace App\Filament\Resources\DocTypeResource\Pages;
 
-use App\Filament\Resources\ManageTypeResource;
+use App\Filament\Resources\DocTypeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListManageTypes extends ListRecords
+class ListDocTypes extends ListRecords
 {
-    protected static string $resource = ManageTypeResource::class;
+    protected static string $resource = DocTypeResource::class;
 
     protected function getHeaderActions(): array
     {

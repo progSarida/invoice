@@ -200,38 +200,79 @@ class ClientResource extends Resource
     public static function modalForm(Form $form): Form
     {
         return $form
+            ->columns(12)
             ->schema([
-                Forms\Components\Section::make('Cliente')->schema([
-                    Forms\Components\Select::make('type')->label('Tipo')
+                Forms\Components\Select::make('type')->label('Tipo')
                     ->options(ClientType::class)
                     ->required()
                     ->searchable()
-                    ->preload(),
-                Forms\Components\TextInput::make('denomination')->label('Denominazione')
+                    ->preload()
+                    ->reactive()
+                    ->columnspan(3),
+                Forms\Components\Select::make('subtype')->label('Sottotipo')
+                    ->options(function (callable $get) {
+                        $type = $get('type');
+                        return ClientSubType::optionsForType($type);
+                    })
                     ->required()
-                    ->maxLength(255),
+                    ->searchable()
+                    ->preload()
+                    ->columnspan(3)
+                    ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        if (! $state) {
+                            $set('type', null);
+                            return;
+                        }
+                        $enum = ClientSubType::tryFrom($state);
+                        if (! $enum) {
+                            $set('type', null);
+                            return;
+                        }
+                        $set('type', $enum->getType());
+                    }),
+                Forms\Components\TextInput::make('denomination')->label('Denominazione')
+                    ->label(function (callable $get) {
+                        $subtype = $get('subtype');
+                        if (in_array($subtype, ['man', 'woman'])) {
+                            return 'Cognome e Nome';
+                        }
+                        return 'Denominazione';
+                    })
+                    ->required()
+                    ->maxLength(255)
+                    ->columnspan(6),
                 Forms\Components\TextInput::make('address')->label('Indirizzo')
                     ->required()
-                    ->maxLength(255),
-
+                    ->maxLength(255)
+                    ->columnspan(9),
                 Forms\Components\Select::make('city_id')->label('Città')
-                  ->relationship(name: 'city', titleAttribute: 'name')
-                  ->searchable()
-                  ->preload(),
-                Forms\Components\TextInput::make('zip_code')->label('Cap')
-                    ->required()
-                    ->maxLength(255),
+                    ->relationship(name: 'city', titleAttribute: 'name')
+                    ->searchable()
+                    ->preload()
+                    ->columnspan(3),
                 Forms\Components\TextInput::make('tax_code')->label('Codice Fiscale')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->columnspan(2),
                 Forms\Components\TextInput::make('vat_code')->label('Partita Iva')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->columnspan(2),
+                Forms\Components\TextInput::make('ipa_code')
+                    ->label('Codice univoco')
+                    ->maxLength(255)
+                    ->visible(fn (callable $get) => $get('type') === 'private')
+                    ->required(fn (callable $get) => $get('type') === 'private')
+                    ->columnspan(2),
+                Forms\Components\Placeholder::make('ipa_code')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => $get('type') !== 'private')
+                    ->columnspan(2),
                 Forms\Components\TextInput::make('email')->label('Email')
                     ->email()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('ipa_code')->label('Codice univoco')
-                    ->maxLength(255),
-            ])->columns(2)
-        ]);
+                    ->maxLength(255)
+                    ->columnspan(6),
+            ]);
 
     }
 }

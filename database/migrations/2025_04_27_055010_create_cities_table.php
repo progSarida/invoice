@@ -21,7 +21,7 @@ return new class extends Migration
 
         Schema::create('provinces', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('region_id')->constrained();
+            $table->foreignId('region_id')->constrained('regions');
             $table->string('name');
             $table->string('code');
             $table->timestamps();
@@ -31,7 +31,7 @@ return new class extends Migration
 
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('province_id')->constrained();
+            $table->foreignId('province_id')->constrained('provinces');
             $table->string('name');
             $table->string('code',4)->unique();
             $table->string('zip_code');
