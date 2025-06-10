@@ -41,7 +41,8 @@ class InvoiceExporter extends Exporter
             ExportColumn::make('year')
                 ->label('Anno'),
             ExportColumn::make('invoice_date')
-                ->label('Data'),
+                ->label('Data')
+                ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : null),
             ExportColumn::make('budget_year')
                 ->label('Anno bilancio'),
             ExportColumn::make('accrual_type_id')
@@ -92,20 +93,22 @@ class InvoiceExporter extends Exporter
             ExportColumn::make('total_payment')
                 ->label('Totale pagamenti'),
             ExportColumn::make('last_payment_date')
-                ->label('Data ultimo pagamento'),
+                ->label('Data ultimo pagamento')
+                ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : null),
             ExportColumn::make('sdi_code')
                 ->label('Codice SDI'),
             ExportColumn::make('sdi_status')
                 ->label('Stato')
                 ->formatStateUsing(fn ($state) => $state?->getLabel() ?? null),
             ExportColumn::make('sdi_date')
-                ->label('Data'),
+                ->label('Data')
+                ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : null),
             ExportColumn::make('pdf_path')
                 ->label('Pdf'),
             ExportColumn::make('xml_path')
                 ->label('Xml'),
-            ExportColumn::make('created_at'),
-            ExportColumn::make('updated_at'),
+            ExportColumn::make('created_at')->enabledByDefault(false),
+            ExportColumn::make('updated_at')->enabledByDefault(false),
         ];
     }
 

@@ -86,7 +86,7 @@
         <p><strong>Filtri applicati:</strong></p>
         <ul>
             @if($search)
-                <li>Ricerca: {{ $search }}</li>
+                <li> Ricerca: {{ $search }} </li>
             @endif
             @php
                 $fieldTranslations = [

@@ -19,7 +19,9 @@ use Filament\Resources\Resource;
 use Filament\Forms\Components\View;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Actions\Action;
@@ -131,12 +133,17 @@ class NewContractResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('client.denomination')
                     ->label('Cliente')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('tax_type')
                     ->label('Entrata')
                     ->searchable()
                     ->badge()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('accrualType.name')
+                    ->label('Competenza')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('payment_type')
                     ->label('Tipo pagamento')
                     ->searchable()
@@ -155,10 +162,21 @@ class NewContractResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
-            ])
+                SelectFilter::make('client_id')->label('Cliente')
+                    ->relationship(name: 'client', titleAttribute: 'denomination')
+                    ->getOptionLabelFromRecordUsing(
+                        fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
+                    )
+                    ->searchable()->preload()
+                    ->optionsLimit(5),
+                SelectFilter::make('tax_type')->label('Entrata')->options(TaxType::class)
+                    ->multiple()->preload(),
+                SelectFilter::make('accrual_type_id')->label('Competenza')->relationship('accrualType', 'name'),
+                SelectFilter::make('payment_type')->label('Tipo pagamento')->options(TenderPaymentType::class)
+                    ->multiple()->preload(),
+            ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
