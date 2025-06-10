@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('new_contracts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->onUpdate('cascade');    // id azienda per multi-tenancy
-            $table->foreignId('client_id')->constrained()->onUpdate('cascade');     // id cliente
+            $table->foreignId('company_id')->constrained()                          // id azienda per multi-tenancy
+                ->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('client_id')->constrained()                           // id cliente
+                ->onUpdate('cascade')->onDelete('cascade');
             $table->string('tax_type');                                             // tipo entrata (Enum)
             $table->date('start_validity_date')->nullable();                        // data inizio validità contratto
             $table->date('end_validity_date')->nullable();                          // data fine validità contratto
@@ -31,7 +33,8 @@ return new class extends Migration
         Schema::create('contract_details', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('contract_id')->nullable();                  // id contratto
-            $table->foreign('contract_id')->references('id')->on('new_contracts');  //
+            $table->foreign('contract_id')->references('id')->on('new_contracts')   //
+                ->onUpdate('cascade')->onDelete('cascade');                         //
             $table->string('number');                                               // numero del contratto
             $table->string('contract_type');                                        // tipo contratto (Enum)
             $table->date('date')->nullable();                                       // data contratto
@@ -47,7 +50,7 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('contract_details');
-        Schema::dropIfExists('contracts');
+        Schema::dropIfExists('new_contracts');
         Schema::enableForeignKeyConstraints();
     }
 };

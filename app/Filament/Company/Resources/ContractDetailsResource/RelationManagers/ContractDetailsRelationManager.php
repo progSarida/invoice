@@ -25,7 +25,7 @@ class ContractDetailsRelationManager extends RelationManager
             ->columns(6)
             ->schema([
                 TextInput::make('number')
-                    ->label('numero contratto')
+                    ->label('Numero contratto')
                     ->required()
                     ->columnSpan(2),
                 Forms\Components\Select::make('contract_type')
@@ -52,20 +52,25 @@ class ContractDetailsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('description')
             ->columns([
-                Tables\Columns\TextColumn::make('number')->label('Numero'),
+                Tables\Columns\TextColumn::make('number')
+                    ->label('Numero'),
                 Tables\Columns\TextColumn::make('contract_type')
                     ->label('Tipo')
                     ->searchable()
                     ->badge()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('date')->label('Data'),
-                Tables\Columns\TextColumn::make('description')->label('Descrizione'),
+                Tables\Columns\TextColumn::make('date')
+                    ->label('Data')
+                    ->date('d/m/Y'),
+                Tables\Columns\TextColumn::make('description')
+                    ->label('Descrizione'),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->icon('heroicon-o-plus-circle'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

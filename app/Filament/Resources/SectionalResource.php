@@ -55,7 +55,7 @@ class SectionalResource extends Resource
                     ->options(
                         collect(ClientType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                     )
-                    ->columnSpan(2),
+                    ->columnSpan(3),
                 TextInput::make('progressive')
                     ->label('Numero progressivo')
                     ->maxLength(255)
@@ -66,7 +66,7 @@ class SectionalResource extends Resource
                     ->options(
                         collect(NumerationType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                     )
-                    ->columnSpan(2),
+                    ->columnSpan(3),
                 Placeholder::make('doc_type_placeholder')
                     ->label('')
                     ->content('Seleziona un’azienda per vedere i documenti disponibili')
