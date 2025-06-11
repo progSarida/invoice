@@ -189,7 +189,8 @@ class NewContractResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('start_validity_date', 'asc');
     }
 
     public static function getRelations(): array
