@@ -101,7 +101,12 @@ class NewContractResource extends Resource
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
-                    ->columnSpan(3),
+                    ->columnSpan(3)
+                    ->inputMode('decimal')
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    ->rules(['numeric', 'min:0'])
+                    ->suffix('€'),
                 Placeholder::make('')
                     ->content('')
                     ->columnSpan(3),
@@ -159,7 +164,8 @@ class NewContractResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Importo')
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . " €"),
             ])
             ->filters([
                 SelectFilter::make('client_id')->label('Cliente')

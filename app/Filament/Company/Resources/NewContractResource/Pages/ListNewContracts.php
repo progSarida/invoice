@@ -20,35 +20,37 @@ class ListNewContracts extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->icon('heroicon-o-plus-circle'),
-            // Actions\Action::make('stampa')
-            //     ->icon('heroicon-o-printer')
-            //     ->label('Stampa')
-            //     ->tooltip('Stampa elenco contratti')
-            //     ->color('primary')
-            //     ->action(function ($livewire) {
-            //         $records = $livewire->getFilteredTableQuery()->get();                       // recupero risultato della query
-            //         $filters = $livewire->tableFilters ?? [];                                   // recupero i filtri
-            //         $search = $livewire->tableSearch ?? null;                                   // recupero la ricerca
+            Actions\Action::make('stampa')
+                ->icon('heroicon-o-printer')
+                ->label('Stampa')
+                ->tooltip('Stampa elenco contratti')
+                ->color('primary')
+                ->action(function ($livewire) {
+                    $records = $livewire->getFilteredTableQuery()->get();                           // Recupero risultato della query
+                    $filters = $livewire->tableFilters ?? [];                                       // Recupero i filtri
+                    $search = $livewire->tableSearch ?? null;                                       // Recupero la ricerca
 
-            //         return response()
-            //             ->streamDownload(function () use ($records, $search, $filters) {
-            //                 echo Pdf::loadHTML(
-            //                     Blade::render('pdf.new_contracts', [
-            //                         'clients' => $records,
-            //                         'search' => $search,
-            //                         'filters' => $filters,
-            //                     ])
-            //                 )
-            //                     ->setPaper('A4', 'landscape')
-            //                     ->stream();
-            //             }, 'Contratti.pdf');
+                    $fileName = 'Contratti_' . \Carbon\Carbon::today()->format('d-m-Y') . '.pdf';
 
-            //         Notification::make()
-            //             ->title('Stampa avviata')
-            //             ->success()
-            //             ->send();
-            //     })
-            //     ,
+                    return response()
+                        ->streamDownload(function () use ($records, $search, $filters) {
+                            echo Pdf::loadHTML(
+                                Blade::render('pdf.new_contracts', [
+                                    'contracts' => $records,
+                                    'search' => $search,
+                                    'filters' => $filters,
+                                ])
+                            )
+                                ->setPaper('A4', 'landscape')
+                                ->stream();
+                        }, $fileName);
+
+                    Notification::make()
+                        ->title('Stampa avviata')
+                        ->success()
+                        ->send();
+                })
+                ,
             ExportAction::make('esporta')
                 ->icon('phosphor-export')
                 ->label('Esporta')
