@@ -55,6 +55,7 @@ class NewContractResource extends Resource
                             ->modalWidth('7xl')
                             ->modalHeading('')
                             ->action(fn (array $data, Client $client, Set $set) => NewContractResource::saveClient($data, $client, $set))
+                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Company\Resources\NewContractResource\Pages\EditNewContract)
                     )
                     ->relationship(name: 'client', titleAttribute: 'denomination')
                     ->getOptionLabelFromRecordUsing(
