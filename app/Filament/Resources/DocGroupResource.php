@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AccrualTypeResource\Pages;
-use App\Filament\Resources\AccrualTypeResource\RelationManagers;
-use App\Models\AccrualType;
+use App\Filament\Resources\DocGroupResource\Pages;
+use App\Filament\Resources\DocGroupResource\RelationManagers;
+use App\Models\DocGroup;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,17 +13,15 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class AccrualTypeResource extends Resource
+class DocGroupResource extends Resource
 {
-    protected static ?string $model = AccrualType::class;
+    protected static ?string $model = DocGroup::class;
 
-    public static ?string $pluralModelLabel = 'Competenze';
+    public static ?string $pluralModelLabel = 'Gruppi documenti';
 
-    public static ?string $modelLabel = 'Competenze';
+    public static ?string $modelLabel = 'Gruppi documenti';
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    // protected static ?string $navigationGroup = 'Parametri';
+    protected static ?string $navigationIcon = 'heroicon-o-folder';
 
     public static function form(Form $form): Form
     {
@@ -34,9 +32,6 @@ class AccrualTypeResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->columnspan(2),
-                Forms\Components\TextInput::make('order')->label('Posizione')
-                    ->required()
-                    ->columnspan(1),
                 Forms\Components\TextInput::make('description')->label('Descrizione')
                     ->maxLength(255)
                     ->columnspan(3),
@@ -47,8 +42,8 @@ class AccrualTypeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('order')->label('Posizione')
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('id')->label('#')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')->label('Nome')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')->label('Descrizione')
@@ -86,9 +81,9 @@ class AccrualTypeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAccrualTypes::route('/'),
-            'create' => Pages\CreateAccrualType::route('/create'),
-            'edit' => Pages\EditAccrualType::route('/{record}/edit'),
+            'index' => Pages\ListDocGroups::route('/'),
+            'create' => Pages\CreateDocGroup::route('/create'),
+            'edit' => Pages\EditDocGroup::route('/{record}/edit'),
         ];
     }
 
@@ -99,6 +94,6 @@ class AccrualTypeResource extends Resource
 
     public static function getNavigationSort(): ?int
     {
-        return 4;
+        return 6;
     }
 }

@@ -48,16 +48,45 @@
         <p><strong>Filtri applicati:</strong></p>
         <ul>
             @if($search)
-                <li>
-                    Ricerca:
-                    {{ $search }}
-                </li>
+                <li>Ricerca: {{ $search }}</li>
             @endif
+            @php
+                $fieldTranslations = [
+                    'type' => 'Tipo',
+                    'subtype' => 'Sottotipo',
+                ];
+                $fieldValues = [
+                    'type' => [
+                        'private' => 'Privato',
+                        'public' => 'Pubblica Amministrazione',
+                    ],
+                    'subtype' => [
+                        'man' => 'Persona fisica (Uomo)',
+                        'woman' => 'Persona fisica (Donna)',
+                        'company' => 'Azienda',
+                        'city' => 'Comune',
+                        'union' => 'Unione',
+                        'federation' => 'Federazione',
+                        'province' => 'Provincia',
+                    ],
+                ];
+            @endphp
             @foreach($filters as $field => $data)
                 @if(!empty($data['values']))
                     <li>
-                        {{ ucfirst($field) == 'Type' ? 'Tipo' : ''}}:
-                        {{ implode(', ', array_map(fn($value) => \App\Enums\ClientType::tryFrom($value)?->getLabel(), $data['values'])) }}
+                        {{ $fieldTranslations[$field] ?? ucfirst($field) }}:
+                        @php
+                            $val = [];
+                            foreach($data['values'] as $el) {
+                                if ($field === 'type') {
+                                    $label = \App\Enums\ClientType::tryFrom($el)?->getLabel() ?? $fieldValues[$field][$el] ?? $el;
+                                } else {
+                                    $label = \App\Enums\ClientSubType::tryFrom($el)?->getLabel() ?? $fieldValues[$field][$el] ?? $el;
+                                }
+                                $val[] = $label;
+                            }
+                        @endphp
+                        {{ implode(', ', $val) }}
                     </li>
                 @endif
             @endforeach

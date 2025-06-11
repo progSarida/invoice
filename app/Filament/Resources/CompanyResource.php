@@ -2,19 +2,22 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\FundType;
 use Filament\Forms;
+use App\Models\City;
 use Filament\Tables;
+use App\Enums\FundType;
 use App\Models\Company;
+use App\Models\DocType;
 use Filament\Forms\Form;
+use App\Enums\VatCodeType;
 use Filament\Tables\Table;
 use App\Enums\TaxRegimeType;
 use App\Enums\VatEnforceType;
 use App\Enums\LiquidationType;
-use App\Enums\PaymentReasonType;
 use App\Enums\ShareholderType;
-use App\Enums\VatCodeType;
 use App\Enums\WithholdingType;
+use App\Livewire\DocTypeTable;
+use App\Enums\PaymentReasonType;
 use Filament\Resources\Resource;
 use App\Models\SocialContribution;
 use Filament\Forms\Components\Tabs;
@@ -29,7 +32,6 @@ use Filament\Forms\Components\Placeholder;
 use App\Filament\Resources\CompanyResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CompanyResource\RelationManagers;
-use App\Models\City;
 
 class CompanyResource extends Resource
 {
@@ -397,6 +399,16 @@ class CompanyResource extends Resource
                                             ->columnSpan(8),
                                     ])
                                     ->columns(12)
+                            ])
+                            ->columns(12),
+                        Tabs\Tab::make('Documenti')
+                            ->schema([
+                                Forms\Components\CheckboxList::make('docTypes')
+                                    ->label('')
+                                    ->relationship('docTypes', 'id')
+                                    ->options(fn () => DocType::flatOptions())
+                                    ->bulkToggleable()
+                                    ->columnSpan(12),
                             ])
                             ->columns(12),
                     ])

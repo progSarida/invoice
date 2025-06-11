@@ -12,11 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('companies',function (Blueprint $table){
+            $table->string('email')->nullable();                                            // email
             $table->string('phone')->nullable();                                            // telefono
             $table->string('fax')->nullable();                                              // fax
             $table->string('tax_number')->nullable();                                       // codice fiscale
             $table->string('register')->nullable();                                         // albo professionale di iscrizione
-            
+
             $table->unsignedBigInteger('register_province_id')->nullable();
             $table->foreign('register_province_id')->references('id')->on('provinces')      // id provincia albo professionale
             ->onUpdate('cascade')->onDelete('cascade');
