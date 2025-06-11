@@ -54,7 +54,7 @@ class NewContractResource extends Resource
                             ->form( fn(Form $form) => ClientResource::modalForm($form) )
                             ->modalWidth('7xl')
                             ->modalHeading('')
-                            ->action( fn(array $data, Client $client) => NewContractResource::saveClient($data, $client) )
+                            ->action(fn (array $data, Client $client, Set $set) => NewContractResource::saveClient($data, $client, $set))
                     )
                     ->relationship(name: 'client', titleAttribute: 'denomination')
                     ->getOptionLabelFromRecordUsing(
@@ -210,7 +210,7 @@ class NewContractResource extends Resource
         return 9;
     }
 
-    public static function saveClient(array $data, Client $client): void
+    public static function saveClient(array $data, Client $client, Set $set): void
     {
         $client->company_id = Filament::getTenant()->id;
         $client->type = $data['type'];
@@ -218,12 +218,14 @@ class NewContractResource extends Resource
         $client->denomination = $data['denomination'];
         $client->address = $data['address'];
         $client->city_id = $data['city_id'];
-        // $client->zip_code = $data['zip_code'];
         $client->tax_code = $data['tax_code'];
         $client->vat_code = $data['vat_code'];
         $client->email = $data['email'];
-        // $client->ipa_code = $data['ipa_code'];
         $client->save();
+
+        // Set the newly created client_id in the form
+        $set('client_id', $client->id);
+
         Notification::make()
             ->title('Cliente salvato con successo')
             ->success()
