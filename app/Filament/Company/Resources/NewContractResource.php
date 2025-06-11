@@ -61,10 +61,6 @@ class NewContractResource extends Resource
                         fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
                     )
                     ->required()
-                    ->afterStateUpdated(function (Get $get, Set $set) {
-                        if(empty($get('client_id')) || empty($get('tax_type')))
-                        $set('tender_id', null);
-                    })
                     ->searchable('denomination')
                     ->live()
                     ->preload()
