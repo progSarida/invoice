@@ -260,7 +260,7 @@ class InvoiceResource extends Resource
 
                                     function (Model $record) {
                                         $return = "Fattura n. {$record->getInvoiceNumber()}";
-                                        if(!$record->client->type->isCompany())
+                                        if($record->client->type->isPrivate())
                                             $return.= " - {$record->tax_type->getLabel()}\n{$record->tender->office_name} ({$record->tender->office_code}) - CIG: {$record->tender->cig_code}";
                                         $return.= "\nDestinatario: {$record->client->denomination}";
                                         return $return;
@@ -506,6 +506,7 @@ class InvoiceResource extends Resource
         return [
             //
             RelationManagers\SdiNotificationsRelationManager::class,
+            RelationManagers\InvoiceItemsRelationManager::class,
         ];
     }
 
