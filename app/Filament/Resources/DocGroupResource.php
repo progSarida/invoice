@@ -21,7 +21,7 @@ class DocGroupResource extends Resource
 
     public static ?string $modelLabel = 'Gruppi documenti';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-folder';
 
     public static function form(Form $form): Form
     {

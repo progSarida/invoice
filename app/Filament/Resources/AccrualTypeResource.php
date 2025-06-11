@@ -21,7 +21,7 @@ class AccrualTypeResource extends Resource
 
     public static ?string $modelLabel = 'Competenze';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
     // protected static ?string $navigationGroup = 'Parametri';
 
