@@ -56,6 +56,18 @@ class UsersTableSeeder extends Seeder
                 'created_at' => '2025-04-30 12:58:35',
                 'updated_at' => '2025-04-30 12:58:35',
             ),
+            3 =>
+            array (
+                'id' => 4,
+                'name' => 'davide',
+                'email' => 'contabiita@sarida.it',
+                'email_verified_at' => NULL,
+                'password' => '$2y$12$7MTIkD2FHYDA77oow9tunuqQzD185Z7D34VUpgFcJ3CeR/5m3feHK',
+                'remember_token' => NULL,
+                'is_admin' => 1,
+                'created_at' => '2025-04-30 12:58:35',
+                'updated_at' => '2025-04-30 12:58:35',
+            ),
         ));
 
 

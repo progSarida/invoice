@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('sectionals',function (Blueprint $table){
-            $table->foreignId('doc_type_id')->constrained('companies')           // tipo documento
-                ->onUpdate('cascade')->onDelete('cascade');
-        });
+        // Schema::table('sectionals',function (Blueprint $table){
+        //     $table->foreignId('doc_type_id')->constrained('doc_types')           // tipo documento
+        //         ->onUpdate('cascade')->onDelete('cascade');
+        // });
     }
 
     /**
@@ -22,6 +22,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        // Schema::disableForeignKeyConstraints();
+        // Schema::table('sectionals', function (Blueprint $table) {
+        //     $table->dropColumn('doc_type_id');
+        // });
+        // Schema::enableForeignKeyConstraints();
     }
 };

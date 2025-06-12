@@ -10,8 +10,18 @@ use Filament\Facades\Filament;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
+use App\Filament\Resources\CityResource;
+use App\Filament\Resources\UserResource;
 use Filament\Navigation\NavigationGroup;
+use App\Filament\Resources\RegionResource;
 use Filament\Http\Middleware\Authenticate;
+use App\Filament\Resources\CompanyResource;
+use App\Filament\Resources\ProvinceResource;
+use App\Filament\Resources\ManageTypeResource;
+use App\Filament\Resources\AccrualTypeResource;
+use App\Filament\Resources\DocGroupResource;
+use App\Filament\Resources\DocTypeResource;
+use App\Filament\Resources\SectionalResource;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -42,7 +52,19 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            // ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->resources([
+                RegionResource::class,
+                ProvinceResource::class,
+                CityResource::class,
+                UserResource::class,
+                CompanyResource::class,
+                // SectionalResource::class,
+                AccrualTypeResource::class,
+                ManageTypeResource::class,
+                DocGroupResource::class,
+                DocTypeResource::class,
+            ])
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,

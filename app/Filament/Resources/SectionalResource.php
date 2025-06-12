@@ -26,9 +26,9 @@ class SectionalResource extends Resource
 {
     protected static ?string $model = Sectional::class;
 
-        public static ?string $pluralModelLabel = 'Sezionali';
+        public static ?string $pluralModelLabel = 'Sezionari';
 
-    public static ?string $modelLabel = 'Sezionali';
+    public static ?string $modelLabel = 'Sezionari';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -45,15 +45,21 @@ class SectionalResource extends Resource
                         $set('doc_type_id', null);
                     })
                     ->columnSpan(3),
-                TextInput::make('description')
-                    ->label('Descrizione')
-                    ->maxLength(255)
-                    ->columnSpan(1)
-                    ->extraAttributes(['class' => 'w-1/2 text-center']),
                 Select::make('client_type')
                     ->label('Tipo cliente')
                     ->options(
                         collect(ClientType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                    )
+                    ->columnSpan(3),
+                TextInput::make('description')
+                    ->label('Sezionario')
+                    ->maxLength(255)
+                    ->columnSpan(1),
+                    // ->extraAttributes(['class' => 'w-1/2 text-center']),
+                Select::make('numeration_type')
+                    ->label('Tipo numerazione')
+                    ->options(
+                        collect(NumerationType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                     )
                     ->columnSpan(3),
                 TextInput::make('progressive')
@@ -61,12 +67,6 @@ class SectionalResource extends Resource
                     ->maxLength(255)
                     ->columnSpan(2)
                     ->extraAttributes(['class' => 'w-1/2 text-center']),
-                Select::make('numeration_type')
-                    ->label('Tipo numerazione')
-                    ->options(
-                        collect(NumerationType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                    )
-                    ->columnSpan(3),
                 Placeholder::make('doc_type_placeholder')
                     ->label('')
                     ->content('Seleziona un’azienda per vedere i documenti disponibili')

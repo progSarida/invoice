@@ -94,10 +94,13 @@ class CompanyResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->columnSpan(4),
+                                Forms\Components\TextInput::make('phone')->label('Telefono')
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
                                 Forms\Components\TextInput::make('email')->label('Email')
                                     ->maxLength(255)
-                                    ->columnSpan(6),
-                                Forms\Components\TextInput::make('phone')->label('Telefono')
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('pec')->label('Pec')
                                     ->maxLength(255)
                                     ->columnSpan(3),
                                 Forms\Components\TextInput::make('fax')->label('Fax')
@@ -411,6 +414,93 @@ class CompanyResource extends Resource
                                     ->columnSpan(12),
                             ])
                             ->columns(12),
+                            Tabs\Tab::make('Sezionari')
+                                ->schema([
+                                    Forms\Components\Repeater::make('sectionals')
+                                        ->label('Sezionari')
+                                        ->relationship('sectionals')
+                                        ->schema([
+                                            Forms\Components\Select::make('client_type')
+                                                ->label('Tipo cliente')
+                                                ->options(
+                                                    collect(\App\Enums\ClientType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                                )
+                                                ->required()
+                                                ->columnSpan(3),
+                                            Forms\Components\TextInput::make('description')
+                                                ->label('Sezionario')
+                                                ->maxLength(255)
+                                                ->required()
+                                                ->columnSpan(1),
+                                            Forms\Components\Select::make('numeration_type')
+                                                ->label('Tipo numerazione')
+                                                ->options(
+                                                    collect(\App\Enums\NumerationType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                                )
+                                                ->required()
+                                                ->columnSpan(3),
+                                            Forms\Components\TextInput::make('progressive')
+                                                ->label('Numero progressivo')
+                                                ->maxLength(255)
+                                                ->required()
+                                                ->columnSpan(2),
+                                            Forms\Components\CheckboxList::make('doc_type_ids')
+                                                ->label('Tipi documento')
+                                                ->options(function ($livewire, $record) {
+                                                    $companyId = null;
+                                                    if ($record && $record->company_id) {
+                                                        $companyId = $record->company_id;
+                                                    } elseif ($livewire->getRecord()) {
+                                                        $companyId = $livewire->getRecord()->id;
+                                                    }
+                                                    return $companyId ? \App\Models\DocType::groupedOptions($companyId) : [];
+                                                })
+                                                ->relationship(
+                                                    name: 'docTypes',
+                                                    titleAttribute: null,
+                                                    modifyQueryUsing: function ($query, $record, $livewire) {
+                                                        $companyId = null;
+                                                        if ($record && $record->company_id) {
+                                                            $companyId = $record->company_id;
+                                                        } elseif ($livewire->getRecord()) {
+                                                            $companyId = $livewire->getRecord()->id;
+                                                        }
+                                                        if ($companyId) {
+                                                            $query->whereIn('doc_types.id', function ($subQuery) use ($companyId) {
+                                                                $subQuery->select('doc_type_id')
+                                                                    ->from('company_docs')
+                                                                    ->where('company_id', $companyId);
+                                                            })->orderBy('doc_types.name', 'asc');
+                                                        }
+                                                    }
+                                                )
+                                                ->getOptionLabelFromRecordUsing(function ($record) {
+                                                    $groupName = $record->docGroup ? $record->docGroup->name : 'Senza gruppo';
+                                                    return "{$record->name} - {$record->description} ({$groupName})";
+                                                })
+                                                // ->placeholder('Salva l’azienda per visualizzare i tipi di documento disponibili')
+                                                ->required()
+                                                ->columnSpan(6),
+                                        ])
+                                        ->columns(12)
+                                        ->maxItems(10)
+                                        ->defaultItems(0)
+                                        ->addActionLabel('Aggiungi Sezionario')
+                                        ->deleteAction(
+                                            fn ($action) => $action->label('Rimuovi Sezionario')
+                                        )
+                                        ->collapsible()
+                                        ->collapsed()
+                                        ->itemLabel(function (array $state): ?string {
+                                            $clientTypeLabel = isset($state['client_type']) && $state['client_type'] !== null
+                                                ? \App\Enums\ClientType::tryFrom($state['client_type'])?->getLabel() ?? 'Senza tipo'
+                                                : 'Senza tipo';
+                                            $description = $state['description'] ?? 'Senza descrizione';
+                                            return "$description ($clientTypeLabel)";
+                                        })
+                                        ->columnSpan(12),
+                                ])
+                                ->columns(12),
                     ])
                     ->columnSpan(12),
             ]);

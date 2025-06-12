@@ -16,7 +16,7 @@ enum PaymentType: string implements HasLabel, HasColor, HasDescription
     public function getDescription(): string
     {
         return match($this) {
-            self::BANK_TRANSFER => 'Trasferimento bancario',
+            self::BANK_TRANSFER => 'Bonifico bancario',
             self::CREDIT_CARD => 'Carta di credito',
             self::CASH => 'Contanti',
         };
@@ -25,7 +25,7 @@ enum PaymentType: string implements HasLabel, HasColor, HasDescription
     public function getLabel(): string
     {
         return match($this) {
-            self::BANK_TRANSFER => 'Trasferimento bancario',
+            self::BANK_TRANSFER => 'Bonifico bancario',
             self::CREDIT_CARD => 'Carta di credito',
             self::CASH => 'Contanti',
         };

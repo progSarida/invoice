@@ -15,6 +15,7 @@ class Company extends Model
         'city_code',
         'is_active',
         'email',
+        'pec',
         'phone',
         'fax',
         'tax_number',

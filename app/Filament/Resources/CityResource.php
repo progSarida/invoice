@@ -17,9 +17,9 @@ class CityResource extends Resource
 {
     protected static ?string $model = City::class;
 
-    public static ?string $pluralModelLabel = 'Città';
+    public static ?string $pluralModelLabel = 'Comuni';
 
-    public static ?string $modelLabel = 'Città';
+    public static ?string $modelLabel = 'Comuni';
 
     protected static ?string $navigationIcon = 'phosphor-city';
 
@@ -48,16 +48,16 @@ class CityResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('province.name')->label('Provincia')
+                Tables\Columns\TextColumn::make('name')->label('Comune')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('name')->label('Nome')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('code')->label('Codice Catastale')
+                Tables\Columns\TextColumn::make('province.code')->label('Provincia')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('zip_code')->label('CAP')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('code')->label('Codice Catastale')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
