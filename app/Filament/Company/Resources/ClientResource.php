@@ -56,6 +56,9 @@ class ClientResource extends Resource
                     ->searchable()
                     ->preload()
                     ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        $set('subtype', null);
+                    })
                     ->columnspan(3),
                 Forms\Components\Select::make('subtype')->label('Sottotipo')
                     ->options(function (callable $get) {
@@ -132,11 +135,11 @@ class ClientResource extends Resource
                 DatePicker::make('birth_date')
                     ->label('Data di nascita')
                     ->date()
-                    ->visible(fn (callable $get) => $get('type') === 'private')
+                    ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('birth_place')->label('Luogo di nascita')
                     ->maxLength(255)
-                    ->visible(fn (callable $get) => $get('type') === 'private')
+                    ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
                     ->columnspan(3),
                 Forms\Components\TextInput::make('tax_code')->label('Codice Fiscale')
                     ->maxLength(255)
@@ -153,7 +156,7 @@ class ClientResource extends Resource
                 Forms\Components\Placeholder::make('birth')
                     ->label('')
                     ->content('')
-                    ->visible(fn (callable $get) => $get('type') !== 'private')
+                    ->visible(fn (callable $get) => $get('type') !== 'private' || ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
                     ->columnspan(6),
                 Forms\Components\Placeholder::make('ipa_code')
                     ->label('')
