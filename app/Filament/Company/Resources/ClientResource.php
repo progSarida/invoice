@@ -2,22 +2,24 @@
 
 namespace App\Filament\Company\Resources;
 
+use Filament\Forms;
+use Filament\Tables;
+use App\Models\Client;
+use App\Models\Province;
+use Filament\Forms\Form;
 use App\Enums\ClientType;
+use Filament\Tables\Table;
+use App\Enums\ClientSubType;
+use Filament\Resources\Resource;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\ClientResource\Pages;
 use App\Filament\Company\Resources\ClientResource\RelationManagers;
-use App\Models\Client;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Enums\ClientSubType;
 
 class ClientResource extends Resource
 {
@@ -91,11 +93,50 @@ class ClientResource extends Resource
                 Forms\Components\TextInput::make('address')->label('Indirizzo')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(9),
+                    ->columnspan(6),
+                Forms\Components\TextInput::make('zip_code')->label('Cap')
+                    ->required()
+                    ->maxLength(5)
+                    ->disabled()
+                    ->columnspan(1),
                 Forms\Components\Select::make('city_id')->label('Città')
                     ->relationship(name: 'city', titleAttribute: 'name')
+                    ->required()
                     ->searchable()
                     ->preload()
+                    ->columnSpan(3)
+                    ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        if ($state) {
+                            $city = \App\Models\City::find($state);
+                            $set('zip_code', $city?->zip_code);
+                            $set('province_id', $city?->province_id);
+                        } else {
+                            $set('zip_code', null);
+                            $set('province_id', null);
+                        }
+                    }),
+                Forms\Components\Select::make('province_id')->label('Provincia')
+                    ->options(Province::pluck('code', 'id')->toArray())
+                    ->searchable()
+                    ->preload()
+                    ->disabled()
+                    ->columnSpan(2)
+                    ->reactive()
+                    ->afterStateHydrated(function ($component, $state, $record) {
+                        if ($record && $record->city_id) {
+                            $city = \App\Models\City::find($record->city_id);
+                            $component->state($city?->province_id);
+                        }
+                    }),
+                DatePicker::make('birth_date')
+                    ->label('Data di nascita')
+                    ->date()
+                    ->visible(fn (callable $get) => $get('type') === 'private')
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('birth_place')->label('Luogo di nascita')
+                    ->maxLength(255)
+                    ->visible(fn (callable $get) => $get('type') === 'private')
                     ->columnspan(3),
                 Forms\Components\TextInput::make('tax_code')->label('Codice Fiscale')
                     ->maxLength(255)
@@ -109,15 +150,28 @@ class ClientResource extends Resource
                     ->visible(fn (callable $get) => $get('type') === 'private')
                     ->required(fn (callable $get) => $get('type') === 'private')
                     ->columnspan(2),
+                Forms\Components\Placeholder::make('birth')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => $get('type') !== 'private')
+                    ->columnspan(6),
                 Forms\Components\Placeholder::make('ipa_code')
                     ->label('')
                     ->content('')
                     ->visible(fn (callable $get) => $get('type') !== 'private')
                     ->columnspan(2),
+                Forms\Components\TextInput::make('phone')->label('Tel.')
+                    ->email()
+                    ->maxLength(255)
+                    ->columnspan(2),
                 Forms\Components\TextInput::make('email')->label('Email')
                     ->email()
                     ->maxLength(255)
-                    ->columnspan(6),
+                    ->columnspan(5),
+                Forms\Components\TextInput::make('pec')->label('Pec')
+                    ->email()
+                    ->maxLength(255)
+                    ->columnspan(5),
             ]);
     }
 

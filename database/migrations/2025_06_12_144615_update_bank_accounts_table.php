@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('companies',function (Blueprint $table){
-            $table->string('pec')->nullable()->after('email');
+        Schema::table('bank_accounts',function (Blueprint $table){
+            $table->string('holder')->after('name');
+            $table->string('number')->after('holder');
+            $table->string('swift')->after('bic');
         });
     }
 
@@ -22,8 +24,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::table('companies', function (Blueprint $table) {
-            $table->dropColumn('pec');
+        Schema::table('bank_accounts', function (Blueprint $table) {
+            $table->dropColumn('holder');
+            $table->dropColumn('number');
+            $table->dropColumn('swift');
         });
         Schema::enableForeignKeyConstraints();
     }

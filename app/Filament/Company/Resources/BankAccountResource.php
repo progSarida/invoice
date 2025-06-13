@@ -41,16 +41,40 @@ class BankAccountResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(12)
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Denominazione')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->columnspan(4),
+                Forms\Components\TextInput::make('holder')
+                    ->label('Intestatario')
+                    ->required()
+                    ->maxLength(255)
+                    ->default(fn () => filament()->getTenant()?->name)
+                    ->columnspan(4),
+                Forms\Components\TextInput::make('number')
+                    ->label('Conto corrente')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnspan(4),
                 Forms\Components\TextInput::make('iban')
+                    ->label('IBAN')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(27)
+                    ->hintIcon('heroicon-o-information-circle', tooltip: 'Codice internazionale per identificare il conto bancario')
+                    ->columnSpan(4),
                 Forms\Components\TextInput::make('bic')
+                    ->label('BIC')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->columnspan(4),
+                Forms\Components\TextInput::make('swift')
+                    ->label('SWIFT')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnspan(4),
             ]);
     }
 
@@ -59,11 +83,23 @@ class BankAccountResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Denominazione')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('holder')
+                    ->label('Intestatario')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('iban')
+                    ->label('IBAN')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('bic')
+                Tables\Columns\TextColumn::make('number')
+                    ->label('N. conto')
                     ->searchable(),
+                // Tables\Columns\TextColumn::make('bic')
+                //     ->label('BIC')
+                //     ->searchable(),
+                // Tables\Columns\TextColumn::make('swift')
+                //     ->label('SWIFT')
+                //     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

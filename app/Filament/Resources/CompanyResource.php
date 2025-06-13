@@ -417,7 +417,7 @@ class CompanyResource extends Resource
                             Tabs\Tab::make('Sezionari')
                                 ->schema([
                                     Forms\Components\Repeater::make('sectionals')
-                                        ->label('Sezionari')
+                                        ->label('')
                                         ->relationship('sectionals')
                                         ->schema([
                                             Forms\Components\Select::make('client_type')

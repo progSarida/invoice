@@ -16,10 +16,14 @@ class Client extends Model
         'denomination',
         'address',
         'zip_code',
+        'city_id',
+        'birth_date',
+        'birth_place',
         'tax_code',
         'vat_code',
-        'city_id',
+        'phone',
         'email',
+        'pec',
         'ipa_code',
     ];
 

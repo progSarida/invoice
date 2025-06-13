@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('companies',function (Blueprint $table){
+        Schema::table('clients',function (Blueprint $table){
+            $table->string('phone')->nullable()->after('vat_code');
             $table->string('pec')->nullable()->after('email');
+            $table->date('birth_date')->nullable()->after('city_id');
+            $table->string('birth_place')->nullable()->after('birth_date');
         });
     }
 
@@ -22,8 +25,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::table('companies', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table) {
+            $table->dropColumn('phone');
             $table->dropColumn('pec');
+            $table->dropColumn('birth_date');
+            $table->dropColumn('birth_place');
         });
         Schema::enableForeignKeyConstraints();
     }

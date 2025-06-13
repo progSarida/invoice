@@ -10,8 +10,11 @@ class BankAccount extends Model
 
     protected $fillable = [
         'name',
+        'holder',
+        'number',
         'iban',
         'bic',
+        'swift',
     ];
 
     public function company(){
