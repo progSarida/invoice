@@ -23,13 +23,15 @@ class TenderResource extends Resource
 {
     protected static ?string $model = Tender::class;
 
-    public static ?string $pluralModelLabel = 'Appalti';
+    public static ?string $pluralModelLabel = 'Appalti archiviati';
 
     public static ?string $modelLabel = 'Appalto';
 
     protected static ?string $navigationIcon = 'healthicons-f-construction-worker';
 
-    protected static ?string $navigationGroup = 'Gestione';
+    protected static ?string $navigationParentItem = 'Repertorio';
+
+    protected static ?string $navigationGroup = 'Archivio';
 
     public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
     {

@@ -74,6 +74,12 @@ class AdminPanelProvider extends PanelProvider
                     ->url('/company')
                     ->icon('gmdi-business-center-s'),
                 // ...
+            ])
+            ->NavigationGroups([
+                NavigationGroup::make()
+                ->label('Archivio')
+                ->icon('heroicon-o-cog-6-tooth')
+                ->collapsed()
             ]);
     }
 }

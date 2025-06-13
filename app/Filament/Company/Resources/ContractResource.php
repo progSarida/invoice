@@ -21,13 +21,15 @@ class ContractResource extends Resource
 {
     protected static ?string $model = Contract::class;
 
-    public static ?string $pluralModelLabel = 'Contratti';
+    public static ?string $pluralModelLabel = 'Contratti archiviati';
 
     public static ?string $modelLabel = 'Contratto';
 
     protected static ?string $navigationIcon = 'govicon-file-contract-o';
 
-    protected static ?string $navigationGroup = 'Gestione';
+    protected static ?string $navigationParentItem = 'Repertorio';
+
+    protected static ?string $navigationGroup = 'Archivio';
 
     // protected static ?string $recordTitleAttribute = 'client.denomination';
 

@@ -58,9 +58,9 @@ enum ClientType: string implements HasLabel
     //     };
     // }
 
-    // public function isCompany(){
-    //     return $this === self::COMPANY;
-    // }
+    public function isPublic(){
+        return $this === self::PUBLIC;
+    }
 
     public function isPrivate(){
         return $this === self::PRIVATE;

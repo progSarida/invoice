@@ -34,7 +34,7 @@ class NewContractResource extends Resource
 {
     protected static ?string $model = NewContract::class;
 
-    public static ?string $pluralModelLabel = 'Nuovi Contratti';
+    public static ?string $pluralModelLabel = 'Contratti';
 
     public static ?string $modelLabel = 'Contratto';
 

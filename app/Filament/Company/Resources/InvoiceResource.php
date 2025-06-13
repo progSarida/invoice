@@ -58,85 +58,6 @@ class InvoiceResource extends Resource
     {
         return $form
             ->schema([
-
-                Grid::make('GRID')->columnSpan(3)->schema([
-
-                    Section::make('')
-                        ->columns(6)
-                        ->schema([
-
-                            Forms\Components\Select::make('invoice_type')->label('Tipo')
-                                ->required()
-                                ->live()
-                                ->afterStateUpdated(function (Get $get, Set $set) {
-                                    if($get('client_id')!==InvoiceType::CREDIT_NOTE)
-                                        $set('parent_id', null);
-                                })
-                                ->options(InvoiceType::class)->columnSpan(3),
-
-                            Forms\Components\TextInput::make('invoice_uid')->label('Identificativo')
-                                ->disabled()->columnSpan(3),
-
-                            Forms\Components\TextInput::make('number')->label('Numero')
-                                ->columnSpan(2)
-                                ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
-                                ->live()
-                                ->required()
-                                ->numeric(),
-
-                            Forms\Components\TextInput::make('section')->label('Sezionario')
-                                ->columnSpan(2)
-                                ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
-                                ->live()
-                                ->required()
-                                ->numeric(),
-
-                            Forms\Components\TextInput::make('year')->label('Anno')
-                                ->columnSpan(2)
-                                ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
-                                ->live()
-                                ->required()
-                                ->numeric(),
-
-                            Forms\Components\DatePicker::make('invoice_date')->label('Data')
-                                ->columnSpan(2)
-                                ->required(),
-
-                            Forms\Components\TextInput::make('budget_year')->label('Anno di bilancio')
-                                ->numeric()
-                                ->required()->columnSpan(2),
-
-                            Forms\Components\TextInput::make('accrual_year')->label('Anno di competenza')
-                                ->numeric()
-                                ->required()->columnSpan(2),
-
-                            Forms\Components\Select::make('accrual_type_id')->label('Tipo di competenza')
-                                ->required()
-                                ->options(function () {
-                                    return AccrualType::orderBy('order')->pluck('name', 'id');
-                                })
-                                ->columnSpan(3),
-                            Forms\Components\Select::make('manage_type_id')->label('Tipo di gestione')
-                                ->options(function () {
-                                    return ManageType::orderBy('order')->pluck('name', 'id');
-                                })
-                                ->columnSpan(3),
-                        ]),
-
-                    Section::make('Descrizioni')
-                        ->collapsible()
-                        ->schema([
-                            Forms\Components\Textarea::make('description')->label('Descrizione')
-                                ->required()
-                                ->columnSpanFull(),
-                            Forms\Components\Textarea::make('free_description')->label('Descrizione libera')
-                                ->columnSpanFull(),
-                        ]),
-
-
-
-                ]),//FIRST GRID
-
                 Grid::make('GRID')->columnSpan(2)->schema([
 
                     Section::make('Destinatario')
@@ -231,7 +152,7 @@ class InvoiceResource extends Resource
 
                             Forms\Components\Select::make('parent_id')->label('Fattura da stornare')
                                 ->visible(
-                                    function(Get $get, Model $record){
+                                    function(Get $get){
                                         if( filled( $get('invoice_type') ) && $get('invoice_type')===InvoiceType::CREDIT_NOTE->value )
                                             return true;
                                         else
@@ -317,6 +238,85 @@ class InvoiceResource extends Resource
                             ])
 
                 ]),
+                Grid::make('GRID')->columnSpan(3)->schema([
+
+                    Section::make('')
+                        ->columns(6)
+                        ->schema([
+
+                            Forms\Components\Select::make('invoice_type')->label('Tipo')
+                                ->required()
+                                ->live()
+                                ->afterStateUpdated(function (Get $get, Set $set) {
+                                    if($get('client_id')!==InvoiceType::CREDIT_NOTE)
+                                        $set('parent_id', null);
+                                })
+                                ->options(InvoiceType::class)->columnSpan(3),
+
+                            Forms\Components\TextInput::make('invoice_uid')->label('Identificativo')
+                                ->disabled()->columnSpan(3),
+
+                            Forms\Components\TextInput::make('number')->label('Numero')
+                                ->columnSpan(2)
+                                ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
+                                ->live()
+                                ->required()
+                                ->numeric(),
+
+                            Forms\Components\TextInput::make('section')->label('Sezionario')
+                                ->columnSpan(2)
+                                ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
+                                ->live()
+                                ->required()
+                                ->numeric(),
+
+                            Forms\Components\TextInput::make('year')->label('Anno')
+                                ->columnSpan(2)
+                                ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
+                                ->live()
+                                ->required()
+                                ->numeric(),
+
+                            Forms\Components\DatePicker::make('invoice_date')->label('Data')
+                                ->columnSpan(2)
+                                ->required(),
+
+                            Forms\Components\TextInput::make('budget_year')->label('Anno di bilancio')
+                                ->numeric()
+                                ->required()->columnSpan(2),
+
+                            Forms\Components\TextInput::make('accrual_year')->label('Anno di competenza')
+                                ->numeric()
+                                ->required()->columnSpan(2),
+
+                            Forms\Components\Select::make('accrual_type_id')->label('Tipo di competenza')
+                                ->required()
+                                ->options(function () {
+                                    return AccrualType::orderBy('order')->pluck('name', 'id');
+                                })
+                                ->columnSpan(3),
+                            Forms\Components\Select::make('manage_type_id')->label('Tipo di gestione')
+                                ->options(function () {
+                                    return ManageType::orderBy('order')->pluck('name', 'id');
+                                })
+                                ->columnSpan(3),
+                        ]),
+
+                    Section::make('Descrizioni')
+                        ->collapsible()
+                        ->schema([
+                            Forms\Components\Textarea::make('description')->label('Descrizione')
+                                ->required()
+                                ->columnSpanFull(),
+                            Forms\Components\Textarea::make('free_description')->label('Descrizione libera')
+                                ->columnSpanFull(),
+                        ]),
+
+
+
+                ]),//FIRST GRID
+
+                
 
 
 
@@ -373,7 +373,7 @@ class InvoiceResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Id')
-                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_type')->label('Tipo')
                     ->searchable()->badge()->sortable(),
                 Tables\Columns\TextColumn::make('number')->label('Numero')
@@ -387,7 +387,7 @@ class InvoiceResource extends Resource
                             ->orderBy('number', $direction);
                     }),
                 Tables\Columns\TextColumn::make('description')->label('Descrizione')
-                    ->searchable()->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_date')->label('Data')
                     ->date()
                     ->sortable()
@@ -404,7 +404,7 @@ class InvoiceResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('parent_id')->label('Id fattura stornata')
-                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('tender.cig_code')->label('CIG')
                     ->numeric()
                     ->sortable()
