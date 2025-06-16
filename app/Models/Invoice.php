@@ -15,7 +15,26 @@ class Invoice extends Model
 {
     //
     protected $fillable = [
-        'name'
+        'company_id',
+        'client_id',
+        'container_id',
+        'contract_id',
+        'parent_id',
+        'tax_type',
+        'invoice_type',
+        'number',
+        'section',
+        'year',
+        'invoice_date',
+        'budget_year',
+        'accrual_year',
+        'accrual_type_id',
+        'manage_type_id',
+        'description',
+        'free_description',
+        'bank_account_id',
+        'payment_type',
+        'payment_days',
     ];
 
     protected $casts = [
@@ -55,6 +74,10 @@ class Invoice extends Model
         return $this->belongsTo(Invoice::class,'parent_id');
     }
 
+    public function contract(){
+        return $this->belongsTo(NewContract::class,'contract_id');
+    }
+
     public function credit_notes(){
         return $this->hasMany(Invoice::class,'id','parent_id');
     }
@@ -75,5 +98,15 @@ class Invoice extends Model
 
     public function manageType(){
         return $this->belongsTo(ManageType::class,'manage_type_id');
+    }
+
+    public function scopeOldInvoices($query)
+    {
+        return $query->whereNull('contract_id');
+    }
+
+    public function scopeNewInvoices($query)
+    {
+        return $query->whereNotNull('contract_id');
     }
 }

@@ -24,7 +24,7 @@ class BankAccountResource extends Resource
 
     protected static ?string $navigationIcon = 'clarity-bank-line';
 
-    protected static ?string $navigationGroup = 'Gestione';
+    protected static ?string $navigationGroup = 'Fatturazione attiva';
 
     protected static ?string $recordTitleAttribute = 'name';
 

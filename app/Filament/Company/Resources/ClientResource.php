@@ -31,7 +31,7 @@ class ClientResource extends Resource
 
     protected static ?string $navigationIcon = 'govicon-user-suit';
 
-    protected static ?string $navigationGroup = 'Gestione';
+    protected static ?string $navigationGroup = 'Fatturazione attiva';
 
     protected static ?string $recordTitleAttribute = 'denomination';
 

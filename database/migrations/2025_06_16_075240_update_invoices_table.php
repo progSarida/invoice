@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices',function (Blueprint $table){
-            $table->string('flow')->nullable();                                                 // tipo fattura: in => passiva, out => attiva (Enum)
-            $table->string('accrual_type_id')->nullable();                                      // id tipo di competenza
-            $table->string('manage_type_id')->nullable();                           // id tipo di gestione
+            $table->unsignedBigInteger('contract_id')->nullable()->after('container_id');
+            $table->foreign('contract_id')->references('id')->on('containers')
+                ->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
@@ -24,9 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('flow');
-        Schema::dropIfExists('accrual_type_id');
-        Schema::dropIfExists('manage_type_id');
+        Schema::table('invoices', function (Blueprint $table) {
+            $table->dropColumn('contract_id');
+        });
         Schema::enableForeignKeyConstraints();
     }
 };

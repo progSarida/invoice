@@ -2,59 +2,53 @@
 
 namespace App\Filament\Company\Resources;
 
-use App\Enums\InvoiceType;
-
-// use App\Enums\AccrualType;
-use App\Enums\TaxType;
-use App\Enums\SdiStatus;
-use App\Enums\PaymentStatus;
-use App\Enums\PaymentType;
-use App\Enums\TenderPaymentType;
-
-use App\Filament\Company\Resources\InvoiceResource\Pages;
-use App\Filament\Company\Resources\TenderResource;
-use App\Filament\Company\Resources\InvoiceResource\RelationManagers;
-
-use App\Models\AccrualType;
-use App\Models\Client;
-use App\Models\Invoice;
-use App\Models\ManageType;
-use App\Models\Tender;
-use Closure;
-use Filament\Facades\Filament;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Grid;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Form;
+use Filament\Tables;
+use App\Enums\TaxType;
+use App\Models\Client;
+use App\Models\Tender;
+use App\Models\Invoice;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Resources\Resource;
-use Filament\Tables;
+use App\Enums\SdiStatus;
+use Filament\Forms\Form;
+use App\Enums\InvoiceType;
+use App\Enums\PaymentType;
+use App\Models\ManageType;
+use App\Models\NewInvoice;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\AccrualType;
+use App\Models\NewContract;
+use App\Enums\PaymentStatus;
+use Filament\Facades\Filament;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Resources\Resource;
+use Illuminate\Support\Collection;
+use Filament\Forms\Components\Grid;
+use Illuminate\Support\Facades\Blade;
+use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\Actions\Action;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Company\Resources\NewInvoiceResource\Pages;
+use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\InvoiceItemsRelationManager;
+use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\SdiNotificationsRelationManager;
 
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Blade;
-
-class InvoiceResource extends Resource
+class NewInvoiceResource extends Resource
 {
     protected static ?string $model = Invoice::class;
 
-    public static ?string $pluralModelLabel = 'Fatture archiviate';
+    public static ?string $pluralModelLabel = 'Fatture';
 
     public static ?string $modelLabel = 'Fattura';
 
     protected static ?string $navigationIcon = 'phosphor-invoice-duotone';
 
-    protected static ?string $navigationParentItem = 'Repertorio';
-
-    protected static ?string $navigationGroup = 'Archivio';
+    protected static ?string $navigationGroup = 'Fatturazione attiva';
 
     public static function form(Form $form): Form
     {
@@ -81,7 +75,7 @@ class InvoiceResource extends Resource
                                 ->required()
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     if(empty($get('client_id')) || empty($get('tax_type')))
-                                    $set('tender_id', null);
+                                    $set('contract_id', null);
                                 })
                                 ->searchable('denomination')
                                 ->live()
@@ -94,7 +88,7 @@ class InvoiceResource extends Resource
                                 ->options(TaxType::class)
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     if(empty($get('client_id')) || empty($get('tax_type')))
-                                    $set('tender_id', null);
+                                    $set('contract_id', null);
                                 })
                                 ->searchable()
                                 ->live()
@@ -113,17 +107,18 @@ class InvoiceResource extends Resource
                                     }
                                 ),
 
-                            Forms\Components\Select::make('tender_id')->label('Appalto')
+                            Forms\Components\Select::make('contract_id')->label('Contratto')
                                 ->relationship(
-                                    name: 'tender',
+                                    name: 'contract',
                                     modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$get('client_id'))->where('tax_type',$get('tax_type'))
                                 )
                                 ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->type->getLabel()} - CIG: {$record->cig_code}"
+                                    fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
                                 )
                                 ->disabled(fn(Get $get): bool => ! filled($get('client_id')) || ! filled($get('tax_type')))
                                 ->required()
                                 ->searchable()
+                                ->live()
                                 ->preload()
                                 ->optionsLimit(5)
                                 ->visible(
@@ -139,17 +134,25 @@ class InvoiceResource extends Resource
 
                                     }
                                 )
-
+                                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                    if ($state) {
+                                        $contract = \App\Models\NewContract::find($state);
+                                        $set('accrual_type_id', $contract ? $contract->accrual_type_id : null);
+                                    } else {
+                                        $set('accrual_type_id', null);
+                                    }
+                                })
                                 ->hintAction(
                                     Action::make('Nuovo')
-                                        ->icon('healthicons-f-construction-worker')
+                                        ->icon('govicon-file-contract-o')
                                         ->fillForm(fn (Get $get): array => [
                                             'client_id' => $get('client_id'),
                                             'tax_type' => $get('tax_type'),
                                         ])
-                                        ->form( fn(Form $form) => TenderResource::modalForm($form) )
+                                        ->form( fn(Form $form) => NewContractResource::modalForm($form) )
+                                        ->modalWidth('7xl')
                                         ->modalHeading('')
-                                        ->action( fn(array $data, Tender $tender) => InvoiceResource::saveTender($data, $tender) )
+                                        ->action( fn(array $data, NewContract $contract) => NewContractResource::saveContract($data, $contract) )
                                 ),
 
                             Forms\Components\Select::make('parent_id')->label('Fattura da stornare')
@@ -180,11 +183,10 @@ class InvoiceResource extends Resource
                                         }
                                 )
                                 ->getOptionLabelFromRecordUsing(
-
                                     function (Model $record) {
                                         $return = "Fattura n. {$record->getInvoiceNumber()}";
                                         if($record->client->type->isPrivate())
-                                            $return.= " - {$record->tax_type->getLabel()}\n{$record->tender->office_name} ({$record->tender->office_code}) - CIG: {$record->tender->cig_code}";
+                                            $return.= " - {$record->tax_type->getLabel()}\n{$record->contract->office_name} ({$record->contract->office_code}) - CIG: {$record->contract->cig_code}";
                                         $return.= "\nDestinatario: {$record->client->denomination}";
                                         return $return;
                                     }
@@ -194,15 +196,15 @@ class InvoiceResource extends Resource
                                 ->searchable()
                         ]),
 
-                        Section::make('Status SDI')->columns(2)
-                        ->collapsed()
-                        ->schema([
-                            Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)->disabled()->columnSpanFull(),
-                            Forms\Components\TextInput::make('sdi_code')->label('Codice')->readOnly()->columnSpan(1)->disabled(),
-                            Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(1)->disabled()
-                                ->native(false)
-                                ->displayFormat('d F Y'),
-                        ]),
+                        // Section::make('Status SDI')->columns(2)
+                        // ->collapsed()
+                        // ->schema([
+                        //     Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)->disabled()->columnSpanFull(),
+                        //     Forms\Components\TextInput::make('sdi_code')->label('Codice')->readOnly()->columnSpan(1)->disabled(),
+                        //     Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(1)->disabled()
+                        //         ->native(false)
+                        //         ->displayFormat('d F Y'),
+                        // ]),
 
                         Section::make('Dati per il pagamento')->columns(4)
                         ->collapsed()
@@ -219,10 +221,17 @@ class InvoiceResource extends Resource
                                 ->searchable()
                                 ->columnSpanFull()->preload(),
                             Forms\Components\Select::make('payment_type')->label('Tipo')
-                                ->options(PaymentType::class)->columnSpan(3),
-                            Forms\Components\TextInput::make('payment_days')->label('Giorni')
+                                ->options(PaymentType::class)->columnSpan(2),
+                            Forms\Components\Select::make('payment_days')
+                                ->label('Giorni')
                                 ->required()
-                                ->numeric()->columnSpan(1),
+                                ->options([
+                                    30 => '30',
+                                    60 => '60',
+                                    90 => '90',
+                                    120 => '120',
+                                ])
+                                ->columnSpan(2),
                                 ]),
                         Section::make('Status del pagamento')->columns(2)
                             ->collapsed()
@@ -281,7 +290,8 @@ class InvoiceResource extends Resource
 
                             Forms\Components\DatePicker::make('invoice_date')->label('Data')
                                 ->columnSpan(2)
-                                ->required(),
+                                ->required()
+                                ->default(now()->toDateString()),
 
                             Forms\Components\TextInput::make('budget_year')->label('Anno di bilancio')
                                 ->numeric()
@@ -311,69 +321,20 @@ class InvoiceResource extends Resource
                                 ->required()
                                 ->columnSpanFull(),
                             Forms\Components\Textarea::make('free_description')->label('Descrizione libera')
+                                ->required()
                                 ->columnSpanFull(),
                         ]),
 
 
 
                 ]),//FIRST GRID
-
-
-
-
-
-
-
-
-
-
-
-
-                // Forms\Components\TextInput::make('check_validation')
-                //     ->maxLength(255),
-
-
-
-                // Forms\Components\TextInput::make('vat_percentage')
-                //     ->required()
-                //     ->numeric(),
-                // Forms\Components\TextInput::make('vat')
-                //     ->required()
-                //     ->numeric(),
-                // Forms\Components\Toggle::make('is_total_with_vat')
-                //     ->required(),
-                // Forms\Components\TextInput::make('importo')
-                //     ->numeric(),
-                // Forms\Components\TextInput::make('spese')
-                //     ->numeric(),
-                // Forms\Components\TextInput::make('rimborsi')
-                //     ->numeric(),
-                // Forms\Components\TextInput::make('ordinario')
-                //     ->numeric(),
-                // Forms\Components\TextInput::make('temporaneo')
-                //     ->numeric(),
-                // Forms\Components\TextInput::make('affissioni')
-                //     ->numeric(),
-                // Forms\Components\TextInput::make('bollo')
-                //     ->numeric(),
-                // Forms\Components\TextInput::make('total')
-                //     ->required()
-                //     ->numeric(),
-                // Forms\Components\TextInput::make('no_vat_total')
-                //     ->numeric(),
-
-
-                // Forms\Components\TextInput::make('pdf_path')
-                //     ->maxLength(255),
-                // Forms\Components\TextInput::make('xml_path')
-                //     ->maxLength(255),
             ])->columns(5);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->query(Invoice::oldInvoices())
+            ->query(Invoice::newInvoices())
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
@@ -392,7 +353,7 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('description')->label('Descrizione')
                     ->searchable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_date')->label('Data')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                     Tables\Columns\TextColumn::make('client.denomination')->label('Cliente')
@@ -408,15 +369,15 @@ class InvoiceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('parent_id')->label('Id fattura stornata')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('tender.cig_code')->label('CIG')
+                Tables\Columns\TextColumn::make('contract.cig_code')->label('CIG')
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('tender.cup_code')->label('CUP')
+                Tables\Columns\TextColumn::make('contract.cup_code')->label('CUP')
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('tender.rdo_code')->label('RDO')
+                Tables\Columns\TextColumn::make('contract.rdo_code')->label('RDO')
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -470,10 +431,10 @@ class InvoiceResource extends Resource
                         ->optionsLimit(5),
                 SelectFilter::make('tax_type')->label('Entrata')->options(TaxType::class)
                     ->multiple()->searchable()->preload(),
-                SelectFilter::make('tender_id')->label('Appalto')
-                    ->relationship('tender','office_name')
+                SelectFilter::make('contract_id')->label('Contratto')
+                    ->relationship('contract','office_name')
                     ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->type->getLabel()} - CIG: {$record->cig_code}"
+                        fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
                     )
                     ->searchable()->preload()
                         ->optionsLimit(5),
@@ -507,73 +468,60 @@ class InvoiceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
-            RelationManagers\SdiNotificationsRelationManager::class,
-            RelationManagers\InvoiceItemsRelationManager::class,
+            SdiNotificationsRelationManager::class,
+            InvoiceItemsRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListInvoices::route('/'),
-            'create' => Pages\CreateInvoice::route('/create'),
-            'edit' => Pages\EditInvoice::route('/{record}/edit'),
+            'index' => Pages\ListNewInvoices::route('/'),
+            'create' => Pages\CreateNewInvoice::route('/create'),
+            'edit' => Pages\EditNewInvoice::route('/{record}/edit'),
         ];
     }
 
-    public static function saveTender(array $data, Tender $tender): void
-    {
-        $tender->company_id = Filament::getTenant()->id;
-        $tender->client_id = $data['client_id'];
-        $tender->tax_type = $data['tax_type'];
-        $tender->type = $data['type'];
-        $tender->office_name = $data['office_name'];
-        $tender->office_code = $data['office_code'];
-        $tender->date = $data['date'];
-        $tender->cig_code = $data['cig_code'];
-        $tender->cup_code = $data['cup_code'];
-        $tender->rdo_code = $data['rdo_code'];
-        $tender->reference_code = $data['reference_code'];
-        $tender->save();
-        Notification::make()
-            ->title('Appalto salvato con successo')
-            ->success()
-            ->send();
-    }
-
-    public static function saveClient(array $data, Client $client): void
+    public static function saveClient(array $data, Client $client, Set $set): void
     {
         $client->company_id = Filament::getTenant()->id;
         $client->type = $data['type'];
+        $client->subtype = $data['subtype'];
         $client->denomination = $data['denomination'];
         $client->address = $data['address'];
         $client->city_id = $data['city_id'];
-        $client->zip_code = $data['zip_code'];
         $client->tax_code = $data['tax_code'];
         $client->vat_code = $data['vat_code'];
         $client->email = $data['email'];
-        $client->ipa_code = $data['ipa_code'];
         $client->save();
+
+        // Set the newly created client_id in the form
+        $set('client_id', $client->id);
+
         Notification::make()
             ->title('Cliente salvato con successo')
             ->success()
             ->send();
     }
 
-    public static function invoiceNumber(Get $get, Set $set){
-
-        if(empty($get('number')) || empty($get('section')) || empty($get('year')))
-            $set('invoice_uid', null);
-        else{
-            $number = "";
-            for($i=strlen($get('number'));$i<3;$i++)
-            {
-                $number.= "0";
-            }
-            $number = $number.$get('number');
-            $set('invoice_uid', $number."/0".$get('section')."/".$get('year'));
-        }
-
+    public static function saveContract(array $data, NewContract $contract): void
+    {
+        $contract->company_id = Filament::getTenant()->id;
+        $contract->client_id = $data['client_id'];
+        $contract->tax_type = $data['tax_type'];
+        $contract->start_validity_date = $data['start_validity_date'];
+        $contract->end_validity_date = $data['end_validity_date'];
+        $contract->accrual_type_id = $data['accrual_type_id'];
+        $contract->payment_type = $data['payment_type'];
+        $contract->cig_code = $data['cig_code'];
+        $contract->cup_code = $data['cup_code'];
+        $contract->office_code = $data['office_code'];
+        $contract->office_name = $data['office_name'];
+        $contract->amount = $data['amount'];
+        $contract->save();
+        Notification::make()
+            ->title('Contratto salvato con successo')
+            ->success()
+            ->send();
     }
 }

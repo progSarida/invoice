@@ -40,7 +40,7 @@ class NewContractResource extends Resource
 
     protected static ?string $navigationIcon = 'govicon-file-contract-o';
 
-    protected static ?string $navigationGroup = 'Gestione';
+    protected static ?string $navigationGroup = 'Fatturazione attiva';
 
     public static function form(Form $form): Form
     {
@@ -209,6 +209,85 @@ class NewContractResource extends Resource
     public static function getNavigationSort(): ?int
     {
         return 9;
+    }
+
+    public static function modalForm(Form $form): Form
+    {
+        return $form
+            ->columns(12)
+            ->schema([
+                Forms\Components\Select::make('client_id')->label('Cliente')
+                    ->relationship(name: 'client', titleAttribute: 'denomination')
+                    ->getOptionLabelFromRecordUsing(
+                        fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
+                    )
+                    ->required()
+                    ->searchable('denomination')
+                    ->live()
+                    ->preload()
+                    ->optionsLimit(5)
+                    ->columnSpan(5),
+                Forms\Components\Select::make('tax_type')
+                    ->label('Entrata')
+                    ->options(TaxType::class)
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->columnSpan(3),
+                DatePicker::make('start_validity_date')
+                    ->label('Inizio Validità')
+                    ->date()
+                    ->columnSpan(2),
+                DatePicker::make('end_validity_date')
+                    ->label('Fine Validità')
+                    ->date()
+                    ->columnSpan(2),
+                Forms\Components\Select::make('accrual_type_id')
+                    ->label('Competenza')
+                    ->relationship('accrualType', 'name')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->columnSpan(3),
+                Forms\Components\Select::make('payment_type')
+                    ->label('Tipo pagamento')
+                    ->options(TenderPaymentType::class)
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('amount')
+                    ->label('Importo')
+                    ->columnSpan(3)
+                    ->inputMode('decimal')
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    ->rules(['numeric', 'min:0'])
+                    ->suffix('€'),
+                Placeholder::make('')
+                    ->content('')
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('office_name')
+                    ->label('Nome ufficio')
+                    ->required()
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('office_code')
+                    ->label('Codice ufficio')
+                    ->required()
+                    ->columnSpan(3),
+                View::make('links.ipa-link')
+                    ->columnSpan(2),
+                Forms\Components\TextInput::make('cig_code')
+                    ->label('CIG')
+                    ->required()
+                    ->columnSpan(2),
+                Forms\Components\TextInput::make('cup_code')
+                    ->label('CUP')
+                    ->required()
+                    ->columnSpan(2),
+
+            ]);
+
     }
 
     public static function saveClient(array $data, Client $client, Set $set): void
