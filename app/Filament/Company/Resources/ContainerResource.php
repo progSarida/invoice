@@ -32,7 +32,7 @@ class ContainerResource extends Resource
 
     protected static ?string $navigationIcon = 'phosphor-folder-simple-user-duotone';
 
-    protected static ?string $navigationGroup = 'Gestione';
+    protected static ?string $navigationGroup = 'Archivio';
 
     protected static ?string $recordTitleAttribute = 'name';
 
