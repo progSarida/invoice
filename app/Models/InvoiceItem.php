@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SdiStatus;
+use App\Enums\VatCodeType;
 use Illuminate\Database\Eloquent\Model;
 
 class InvoiceItem extends Model
@@ -14,6 +15,12 @@ class InvoiceItem extends Model
         'invoice_element_id',
         'description',
         'amount',
+        'total',
+        'vat_code_type',
+    ];
+
+    protected $casts = [
+        'vat_code_type' =>  VatCodeType::class,
     ];
 
     public function invoice(){

@@ -109,4 +109,11 @@ class Invoice extends Model
     {
         return $query->whereNotNull('contract_id');
     }
+
+    public function updateTotal(): void
+    {
+        $total = $this->invoice_items()->sum('total');
+        $this->total = $total;
+        $this->save();
+    }
 }

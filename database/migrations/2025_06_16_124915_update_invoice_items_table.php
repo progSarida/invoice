@@ -29,6 +29,8 @@ return new class extends Migration
                 ->constrained('invoice_elements')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
+            $table->decimal('total')->after('amount');
+            $table->string('vat_code_type')->after('total');                        // Enum
         });
     }
 
@@ -40,6 +42,8 @@ return new class extends Migration
         Schema::disableForeignKeyConstraints();
         Schema::table('invoice_items', function (Blueprint $table) {
             $table->dropColumn('invoice_element_id');
+            $table->dropColumn('total');
+            $table->dropColumn('vat_code_type');
         });
         Schema::dropIfExists('invoice_elements');
         Schema::enableForeignKeyConstraints();

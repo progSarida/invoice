@@ -9,7 +9,9 @@ use Filament\Forms\Set;
 use Filament\Forms\Form;
 use App\Enums\VatCodeType;
 use Filament\Tables\Table;
+use App\Models\InvoiceItem;
 use App\Models\InvoiceElement;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -41,6 +43,15 @@ class InvoiceItemsRelationManager extends RelationManager
                             $set('description', $el->name);
                             $set('amount', $el->amount);
                             $set('vat_code_type', $el->vat_code_type);
+
+                            // Calcolo importo IVA e totale
+                            $rate = $el->vat_code_type?->getRate() / 100 ?? 0;
+                            $amount = $el->amount ?? 0;
+                            $vatAmount = $amount * $rate;
+                            $total = $amount + $vatAmount;
+
+                            $set('vat_amount', number_format($vatAmount, 2, '.', ''));
+                            $set('total', number_format($total, 2, '.', ''));
                         }
                     })
                     ->columnSpan(4)
@@ -52,14 +63,55 @@ class InvoiceItemsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('amount')->label('Importo')
                     ->required()
                     ->columnSpan(4)
-                    ->maxLength(255),
+                    ->prefix('€')
+                    ->maxLength(255)
+                    ->live()
+                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                        // Calcola importo IVA e totale quando amount cambia
+                        $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
+                        $amount = $state ?? 0;
+                        $vatAmount = $amount * $rate;
+                        $total = $amount + $vatAmount;
+
+                        $set('vat_amount', number_format($vatAmount, 2, '.', ''));
+                        $set('total', number_format($total, 2, '.', ''));
+                    }),
                 Forms\Components\Select::make('vat_code_type')
                     ->label('Aliquota IVA')
                     ->required()
                     ->columnSpan(8)
                     ->options(VatCodeType::class)
-                    ->searchable()
+                    ->searchable()->live()
+                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                        // Calcola importo IVA e totale quando vat_code_type cambia
+                        $rate = $state?->getRate() / 100 ?? 0;
+                        $amount = $get('amount') ?? 0;
+                        $vatAmount = $amount * $rate;
+                        $total = $amount + $vatAmount;
+
+                        $set('vat_amount', number_format($vatAmount, 2, '.', ''));
+                        $set('total', number_format($total, 2, '.', ''));
+                    })
                     ->preload(),
+                Forms\Components\TextInput::make('vat_amount')
+                    ->label('Importo IVA')
+                    ->readOnly()
+                    // ->numeric()
+                    ->prefix('€')
+                    ->columnSpan(4)
+                    ->formatStateUsing(function (Get $get, Set $set) {
+                        $rate = VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
+                        $amount = $get('amount') * $rate;
+                        return number_format($amount, 2, '.', '');
+                    })
+                    ->default(0.00),
+                Forms\Components\TextInput::make('total')
+                    ->label('Totale')
+                    ->readOnly()
+                    // ->numeric()
+                    ->prefix('€')
+                    ->columnSpan(8)
+                    ->default(0.00),
                 // Forms\Components\Toggle::make('is_with_vat')->label('Iva')
                 //     ->required(),
             ]);
@@ -72,13 +124,44 @@ class InvoiceItemsRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('description')->label('Elemento'),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
-                    ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
+                    // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     // ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('invoiceElement.vat_code_type')->label('IVA')
+                    ->money('EUR', true, 'it_IT')
+                    ->sortable()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                            // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €'),
+                    ]),
+                Tables\Columns\TextColumn::make('vat_code_type')
+                    ->label('Aliquota IVA')
                     // ->numeric()
                     ->formatStateUsing(fn ($state) => $state?->getRate() . '%')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('vat_amount')->label('Importo IVA')
+                    ->getStateUsing(function ($record) {
+                        $rate = $record->vat_code_type?->getRate() / 100;
+                        return $record->amount * $rate;
+                    })
+                    ->money('EUR', true, 'it_IT')
+                    ->sortable(),
+                //     ->summarize([
+                //         Tables\Columns\Summarizers\Sum::make()
+                //             ->label('')
+                //             ->money('EUR', true, 'it_IT'),
+                //     ]),
+                Tables\Columns\TextColumn::make('total')->label('Totale')
+                    // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
+                    // ->numeric()
+                    ->money('EUR', true, 'it_IT')
+                    ->sortable()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                            // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €'),
+                    ]),
                 // Tables\Columns\IconColumn::make('is_with_vat')->label('Iva')
                 //     ->boolean(),
             ])
@@ -86,15 +169,51 @@ class InvoiceItemsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->using(function (array $data): InvoiceItem {
+                        $item = new InvoiceItem($data);
+
+                        // Imposto manualmente l'invoice_id
+                        $item->invoice_id = $this->getOwnerRecord()->id;
+
+                        // Calcolo dell'IVA
+                        $rate = $item->vat_code_type->getRate()/100;
+                        $item->total = $item->amount + ($item->amount * $rate);
+
+                        $item->save();
+
+                        return $item;
+                    })
+                    ->after(function (InvoiceItem $record) {
+                        $record->invoice->updateTotal();
+                    }),
             ])
             ->actions([
-                // Tables\Actions\EditAction::make(),
-                // Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->using(function (InvoiceItem $record, array $data): InvoiceItem {
+                        $record->fill($data);
+
+                        $rate = $record->vat_code_type->getRate()/100;
+                        $record->total = $record->amount + ($record->amount * $rate);
+
+                        $record->save();
+
+                        return $record;
+                    })
+                    ->after(function (InvoiceItem $record) {
+                        $record->invoice->updateTotal();
+                    }),
+                Tables\Actions\DeleteAction::make()
+                    ->after(function (Model $record) {
+                        $record->invoice->updateTotal();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->after(function (Model $record) {
+                            $record->invoice->updateTotal();
+                        }),
                 ]),
             ]);
     }

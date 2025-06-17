@@ -387,12 +387,12 @@ class NewInvoiceResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total')->label('Totale a doversi')
-                    ->formatStateUsing(function ( Invoice $invoice) {
-                        if($invoice->is_total_with_vat)
-                            return $invoice->total;
-                        else
-                            return $invoice->no_vat_total;
-                    })
+                    // ->formatStateUsing(function ( Invoice $invoice) {
+                    //     if($invoice->is_total_with_vat)
+                    //         return $invoice->total;
+                    //     else
+                    //         return $invoice->no_vat_total;
+                    // })
                     ->money('EUR')
                     ->sortable()
                     ->alignRight()
