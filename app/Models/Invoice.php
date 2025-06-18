@@ -10,6 +10,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\PaymentType;
 use App\Models\AccrualType;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Facades\Filament;
 
 class Invoice extends Model
 {
@@ -66,6 +67,10 @@ class Invoice extends Model
         return $this->hasMany(SdiNotification::class);
     }
 
+    public function activePayments(){
+        return $this->hasMany(ActivePayments::class);
+    }
+
     public function tender(){
         return $this->belongsTo(Tender::class);
     }
@@ -102,12 +107,16 @@ class Invoice extends Model
 
     public function scopeOldInvoices($query)
     {
-        return $query->whereNull('contract_id');
+        $tenant = Filament::getTenant();
+        return $query->whereNull('contract_id')
+                     ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id));
     }
 
     public function scopeNewInvoices($query)
     {
-        return $query->whereNotNull('contract_id');
+        $tenant = Filament::getTenant();
+        return $query->whereNotNull('contract_id')
+                     ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id));
     }
 
     public function updateTotal(): void

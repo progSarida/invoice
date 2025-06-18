@@ -35,6 +35,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Actions\Action;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\NewInvoiceResource\Pages;
+use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\ActivePaymentsRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\InvoiceItemsRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\SdiNotificationsRelationManager;
 
@@ -470,6 +471,7 @@ class NewInvoiceResource extends Resource
         return [
             SdiNotificationsRelationManager::class,
             InvoiceItemsRelationManager::class,
+            ActivePaymentsRelationManager::class,
         ];
     }
 

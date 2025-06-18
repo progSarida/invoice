@@ -39,6 +39,7 @@ use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
 
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Resources\RelationManagers\RelationManager;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 
@@ -510,6 +511,7 @@ class InvoiceResource extends Resource
             //
             RelationManagers\SdiNotificationsRelationManager::class,
             RelationManagers\InvoiceItemsRelationManager::class,
+            RelationManagers\ActivePaymentsRelationManager::class,
         ];
     }
 
