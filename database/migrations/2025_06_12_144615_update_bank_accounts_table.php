@@ -23,12 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::disableForeignKeyConstraints();
-        Schema::table('bank_accounts', function (Blueprint $table) {
-            $table->dropColumn('holder');
-            $table->dropColumn('number');
-            $table->dropColumn('swift');
-        });
-        Schema::enableForeignKeyConstraints();
+        //
     }
 };

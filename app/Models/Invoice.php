@@ -23,8 +23,10 @@ class Invoice extends Model
         'parent_id',
         'tax_type',
         'invoice_type',
+        'doc_type_id',
         'number',
         'section',
+        'sectional_id',
         'year',
         'invoice_date',
         'budget_year',
@@ -79,6 +81,14 @@ class Invoice extends Model
         return $this->belongsTo(Invoice::class,'parent_id');
     }
 
+    public function docType(){
+        return $this->belongsTo(DocType::class,'doc_type_id');
+    }
+
+    public function sectional(){
+        return $this->belongsTo(Sectional::class,'sectional_id');
+    }
+
     public function contract(){
         return $this->belongsTo(NewContract::class,'contract_id');
     }
@@ -97,6 +107,19 @@ class Invoice extends Model
         return $number." / 0".$this->section." / ".$this->year;
     }
 
+    public function getNewInvoiceNumber(){
+
+        $number = "";
+        $sectional = Sectional::find($this->sectional_id)->description;
+        for($i=strlen($this->number);$i<3;$i++)
+        {
+            $number.= "0";
+        }
+        $number = $number.$this->number;
+        return $number." / ".$sectional." / ".$this->year;
+
+    }
+
     public function accrualType(){
         return $this->belongsTo(AccrualType::class,'accrual_type_id');
     }
@@ -108,14 +131,14 @@ class Invoice extends Model
     public function scopeOldInvoices($query)
     {
         $tenant = Filament::getTenant();
-        return $query->whereNull('contract_id')
+        return $query->whereNull('flow')
                      ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id));
     }
 
     public function scopeNewInvoices($query)
     {
         $tenant = Filament::getTenant();
-        return $query->whereNotNull('contract_id')
+        return $query->where('flow', 'out')
                      ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id));
     }
 
@@ -124,5 +147,16 @@ class Invoice extends Model
         $total = $this->invoice_items()->sum('total');
         $this->total = $total;
         $this->save();
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($invoice) {
+            $invoice->flow = 'out';
+        });
+
+        static::updating(function ($invoice) {
+            //
+        });
     }
 }

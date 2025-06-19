@@ -4,16 +4,17 @@ namespace App\Filament\Company\Resources\NewInvoiceResource\RelationManagers;
 
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
+use App\Models\Invoice;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\Toggle;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\DatePicker;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\RelationManagers\RelationManager;
 
 class ActivePaymentsRelationManager extends RelationManager
 {
@@ -33,26 +34,34 @@ class ActivePaymentsRelationManager extends RelationManager
                 Forms\Components\Select::make('invoice_id')
                     ->label('Fattura')
                     ->placeholder('Seleziona una fattura...')
-                    ->relationship(name: 'invoice', titleAttribute: 'id')
-                    ->getOptionLabelFromRecordUsing(function (Model $record) {
-                        $number = str_pad($record->number, 3, '0', STR_PAD_LEFT);
-                        $cliente = $record->client?->denomination ?? 'Cliente sconosciuto';
-                        return "{$cliente} - {$number}/{$record->section}/{$record->year}";
+                    ->options(function () {
+                        return Invoice::newInvoices()
+                            ->with('client')
+                            ->get()
+                            ->mapWithKeys(function ($invoice) {
+                                $number = str_pad($invoice->number, 3, '0', STR_PAD_LEFT);
+                                $client = $invoice->client?->denomination ?? 'Cliente sconosciuto';
+                                $label = "{$client} - {$number}/{$invoice->section}/{$invoice->year}";
+                                return [$invoice->id => $label];
+                            })
+                            ->toArray();
                     })
                     ->required()
                     ->disabled(fn ($get) => $get('validated'))
-                    ->searchable(['number', 'section', 'year'])
+                    ->searchable()
                     ->live()
                     ->preload()
-                    // ->optionsLimit(20)
                     ->columnSpan(5),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()
                     ->disabled(fn ($get) => $get('validated'))
-                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    ->rules(['numeric', 'min:0'])
+                    ->formatStateUsing(fn ($state): ?string =>
+                        $state !== null ? number_format($state, 2, ',', '.') : null
+                    )
+                    ->dehydrateStateUsing(fn ($state): ?float =>
+                        is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state
+                    )
                     ->suffix('€')
                     ->columnSpan(2),
                 DatePicker::make('payment_date')
@@ -118,8 +127,8 @@ class ActivePaymentsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('payment_date')
                     ->label('Data pagamento')
                     ->getStateUsing(function ($record) {
-                        return $record->registration_date
-                            ? Carbon::parse($record->registration_date)->format('d/m/Y')
+                        return $record->payment_date
+                            ? Carbon::parse($record->payment_date)->format('d/m/Y')
                             : 'Nessuna data';
                     })
                     ->sortable(),

@@ -7,11 +7,13 @@ use Filament\Tables;
 use App\Enums\TaxType;
 use App\Models\Client;
 use App\Models\Tender;
+use App\Models\DocType;
 use App\Models\Invoice;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use App\Enums\SdiStatus;
 use Filament\Forms\Form;
+use App\Models\Sectional;
 use App\Enums\InvoiceType;
 use App\Enums\PaymentType;
 use App\Models\ManageType;
@@ -35,8 +37,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Actions\Action;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\NewInvoiceResource\Pages;
-use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\ActivePaymentsRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\InvoiceItemsRelationManager;
+use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\ActivePaymentsRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\SdiNotificationsRelationManager;
 
 class NewInvoiceResource extends Resource
@@ -65,18 +67,42 @@ class NewInvoiceResource extends Resource
                                 ->hintAction(
                                     Action::make('Nuovo')
                                         ->icon('govicon-user-suit')
-                                        ->form( fn(Form $form) => ClientResource::modalForm($form) )
+                                        ->form(fn (Form $form) => ClientResource::modalForm($form))
                                         ->modalHeading('')
-                                        ->action( fn(array $data, Client $client) => InvoiceResource::saveClient($data, $client) )
+                                        ->action(fn (array $data, Client $client, Set $set) => NewInvoiceResource::saveClient($data, $client, $set))
                                 )
                                 ->relationship(name: 'client', titleAttribute: 'denomination')
                                 ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
+                                    fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
                                 )
                                 ->required()
                                 ->afterStateUpdated(function (Get $get, Set $set) {
-                                    if(empty($get('client_id')) || empty($get('tax_type')))
                                     $set('contract_id', null);
+                                    $set('sectional_id', null);
+                                    $set('tax_type', null);
+                                    $clientId = $get('client_id');
+                                    if ($clientId) {
+                                        $client = \App\Models\Client::find($clientId);
+                                        if ($client && $client->type) {
+                                            $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
+                                                ->where('client_type', $client->type->value)
+                                                ->first();
+                                            if ($sectional) {
+                                                $set('sectional_id', $sectional->id);
+                                                $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                                $set('number', $number);
+                                                NewInvoiceResource::invoiceNumber($get, $set);
+                                            } else {
+                                                $set('sectional_id', null);
+                                                $set('number', null);
+                                                NewInvoiceResource::invoiceNumber($get, $set);
+                                                Notification::make()
+                                                    ->title('Nessun sezionario trovato per il tipo di cliente selezionato.')
+                                                    ->warning()
+                                                    ->send();
+                                            }
+                                        }
+                                    }
                                 })
                                 ->searchable('denomination')
                                 ->live()
@@ -158,12 +184,16 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\Select::make('parent_id')->label('Fattura da stornare')
                                 ->visible(
-                                    function(Get $get){
-                                        if( filled( $get('invoice_type') ) && $get('invoice_type')===InvoiceType::CREDIT_NOTE->value )
-                                            return true;
-                                        else
-                                            return false;
+                                    function (Get $get) {
+                                        $docTypeId = $get('doc_type_id');
 
+                                        if (!filled($docTypeId)) {
+                                            return false;
+                                        }
+
+                                        $docType = DocType::with('docGroup')->find($docTypeId);
+
+                                        return $docType?->docGroup?->name === 'Note di variazione';
                                     }
                                 )
                                 ->live()
@@ -171,11 +201,13 @@ class NewInvoiceResource extends Resource
                                     name: 'invoice',
                                     modifyQueryUsing:
                                         function (Builder $query, Get $get){
-                                            $query->where('invoice_type',InvoiceType::INVOICE)
+                                            $query->whereHas('docType.docGroup', function ($query) {
+                                                    $query->whereIn('name', ['Fatture', 'Autofatture']);
+                                                })
                                                 ->where('client_id',$get('client_id'))
                                                 ->where('year','<=',$get('year'))
                                                 ->orderBy('year','desc')
-                                                ->orderBy('section','desc')
+                                                ->orderBy('sectional_id','desc')
                                                 ->orderBy('number','desc');
                                             if(!empty($get('tax_type')))
                                                 $query->where('tax_type',$get('tax_type'));
@@ -185,7 +217,7 @@ class NewInvoiceResource extends Resource
                                 )
                                 ->getOptionLabelFromRecordUsing(
                                     function (Model $record) {
-                                        $return = "Fattura n. {$record->getInvoiceNumber()}";
+                                        $return = "Fattura n. {$record->getNewInvoiceNumber()}";
                                         if($record->client->type->isPrivate())
                                             $return.= " - {$record->tax_type->getLabel()}\n{$record->contract->office_name} ({$record->contract->office_code}) - CIG: {$record->contract->cig_code}";
                                         $return.= "\nDestinatario: {$record->client->denomination}";
@@ -196,16 +228,6 @@ class NewInvoiceResource extends Resource
                                 // ->optionsLimit(10)
                                 ->searchable()
                         ]),
-
-                        // Section::make('Status SDI')->columns(2)
-                        // ->collapsed()
-                        // ->schema([
-                        //     Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)->disabled()->columnSpanFull(),
-                        //     Forms\Components\TextInput::make('sdi_code')->label('Codice')->readOnly()->columnSpan(1)->disabled(),
-                        //     Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(1)->disabled()
-                        //         ->native(false)
-                        //         ->displayFormat('d F Y'),
-                        // ]),
 
                         Section::make('Dati per il pagamento')->columns(4)
                         ->collapsed()
@@ -256,38 +278,81 @@ class NewInvoiceResource extends Resource
                         ->columns(6)
                         ->schema([
 
-                            Forms\Components\Select::make('invoice_type')->label('Tipo')
+                            Forms\Components\Select::make('doc_type_id')->label('Tipo')
                                 ->required()
                                 ->live()
-                                ->afterStateUpdated(function (Get $get, Set $set) {
-                                    if($get('client_id')!==InvoiceType::CREDIT_NOTE)
+                                ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
+                                    $docType = DocType::with('docGroup')->find($state);
+                                    if (!$docType || $docType->docGroup?->name !== 'Note di variazione') {
                                         $set('parent_id', null);
+                                    }
                                 })
-                                ->options(InvoiceType::class)->columnSpan(3),
+                                ->options(function (Get $get) {
+                                    $sectionalId = $get('sectional_id');
+                                    if (!$sectionalId) {
+                                        return [];
+                                    }
+                                    $sectional = Sectional::with('docTypes')->find($sectionalId);
+                                    return $sectional ? $sectional->docTypes->pluck('description', 'id')->toArray() : [];
+                                })
+                                ->disabled(fn (Get $get) => !filled($get('sectional_id')))
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(3),
 
                             Forms\Components\TextInput::make('invoice_uid')->label('Identificativo')
                                 ->disabled()->columnSpan(3),
 
                             Forms\Components\TextInput::make('number')->label('Numero')
                                 ->columnSpan(2)
-                                ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
+                                ->afterStateUpdated(fn (Get $get, Set $set) => NewInvoiceResource::invoiceNumber($get, $set))
                                 ->live()
-                                ->required()
-                                ->numeric(),
+                                ->dehydrated()
+                                ->required(),
 
-                            Forms\Components\TextInput::make('section')->label('Sezionario')
-                                ->columnSpan(2)
-                                ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
-                                ->live()
+                            Forms\Components\Select::make('sectional_id')->label('Sezionario')
                                 ->required()
-                                ->numeric(),
+                                ->options(function (Get $get) {
+                                    $query = \App\Models\Sectional::where('company_id', Filament::getTenant()->id);
+                                    $clientId = $get('client_id');
+                                    if ($clientId) {
+                                        $client = \App\Models\Client::find($clientId);
+                                        if ($client && $client->type) {
+                                            $query->where('client_type', $client->type->value);
+                                        }
+                                    }
+                                    return $query->pluck('description', 'id');
+                                })
+                                ->afterStateUpdated(function (Get $get, Set $set) {
+                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                    $set('number', $number);
+
+                                    NewInvoiceResource::invoiceNumber($get, $set);
+                                })
+                                ->afterStateHydrated(function (Get $get, Set $set) {
+                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                    $set('number', $number);
+                                    NewInvoiceResource::invoiceNumber($get, $set);
+                                })
+                                ->live()
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(2),
 
                             Forms\Components\TextInput::make('year')->label('Anno')
                                 ->columnSpan(2)
-                                ->afterStateUpdated( fn(Get $get, Set $set) => InvoiceResource::invoiceNumber($get, $set) )
+                                ->afterStateUpdated(function (Get $get, Set $set) {
+                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                    $set('number', $number);
+
+                                    NewInvoiceResource::invoiceNumber($get, $set);
+                                })
                                 ->live()
                                 ->required()
-                                ->numeric(),
+                                ->numeric()
+                                ->minValue(1900)
+                                ->rules(['digits:4'])
+                                ->default(now()->year),
 
                             Forms\Components\DatePicker::make('invoice_date')->label('Data')
                                 ->columnSpan(2)
@@ -296,11 +361,17 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\TextInput::make('budget_year')->label('Anno di bilancio')
                                 ->numeric()
-                                ->required()->columnSpan(2),
+                                ->required()
+                                ->minValue(1900)
+                                ->rules(['digits:4'])
+                                ->columnSpan(2),
 
                             Forms\Components\TextInput::make('accrual_year')->label('Anno di competenza')
                                 ->numeric()
-                                ->required()->columnSpan(2),
+                                ->required()
+                                ->minValue(1900)
+                                ->rules(['digits:4'])
+                                ->columnSpan(2),
 
                             Forms\Components\Select::make('accrual_type_id')->label('Tipo di competenza')
                                 ->required()
@@ -339,16 +410,18 @@ class NewInvoiceResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('invoice_type')->label('Tipo')
-                    ->searchable()->badge()->sortable(),
+                Tables\Columns\TextColumn::make('docType.description')
+                    ->label('Tipo documento')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('number')->label('Numero')
                     ->formatStateUsing(function ( Invoice $invoice) {
-                        return $invoice->getInvoiceNumber();
+                        return $invoice->getNewInvoiceNumber();
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
                             ->orderBy('year', $direction)
-                            ->orderBy('section', $direction)
+                            ->orderBy('sectional_id', $direction)
                             ->orderBy('number', $direction);
                     }),
                 Tables\Columns\TextColumn::make('description')->label('Descrizione')
@@ -388,12 +461,6 @@ class NewInvoiceResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total')->label('Totale a doversi')
-                    // ->formatStateUsing(function ( Invoice $invoice) {
-                    //     if($invoice->is_total_with_vat)
-                    //         return $invoice->total;
-                    //     else
-                    //         return $invoice->no_vat_total;
-                    // })
                     ->money('EUR')
                     ->sortable()
                     ->alignRight()
@@ -420,9 +487,15 @@ class NewInvoiceResource extends Resource
             ])
              ->defaultSort('id', 'desc')
             ->filters([
-                //
-                SelectFilter::make('invoice_type')->label('Tipo')->options(InvoiceType::class)
-                    ->multiple()->searchable()->preload(),
+                SelectFilter::make('doc_type_id')
+                    ->label('Tipo documento')
+                    ->options(function () {
+                        return DocType::orderBy('doc_group_id')->pluck('description', 'id')->toArray();
+                    })
+                    ->multiple()
+                    ->searchable()
+                    ->columnSpan(2)
+                    ->preload(),
                 SelectFilter::make('client_id')->label('Cliente')
                     ->relationship(name: 'client', titleAttribute: 'denomination')
                     ->getOptionLabelFromRecordUsing(
@@ -438,12 +511,12 @@ class NewInvoiceResource extends Resource
                         fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
                     )
                     ->searchable()->preload()
-                        ->optionsLimit(5),
+                    ->optionsLimit(5),
                 SelectFilter::make('sdi_status')->label('Status')->options(SdiStatus::class)
                     ->multiple()->searchable()->preload(),
 
 
-            ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
+            ])->filtersFormColumns(2)
             ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -484,6 +557,12 @@ class NewInvoiceResource extends Resource
         ];
     }
 
+    // public static function mutateFormDataBeforeCreate(array $data): array
+    // {
+    //     $data['flow'] = 'out';
+    //     return $data;
+    // }
+
     public static function saveClient(array $data, Client $client, Set $set): void
     {
         $client->company_id = Filament::getTenant()->id;
@@ -497,7 +576,6 @@ class NewInvoiceResource extends Resource
         $client->email = $data['email'];
         $client->save();
 
-        // Set the newly created client_id in the form
         $set('client_id', $client->id);
 
         Notification::make()
@@ -525,5 +603,44 @@ class NewInvoiceResource extends Resource
             ->title('Contratto salvato con successo')
             ->success()
             ->send();
+    }
+
+    public static function invoiceNumber(Get $get, Set $set){
+
+        if(empty($get('number')) || empty($get('sectional_id')) || empty($get('year')))
+            $set('invoice_uid', null);
+        else{
+            $number = "";
+            $sectional = Sectional::find($get('sectional_id'))->description;
+            for($i=strlen($get('number'));$i<3;$i++)
+            {
+                $number.= "0";
+            }
+            $number = $number.$get('number');
+            $set('invoice_uid', $number."/".$sectional."/".$get('year'));
+        }
+
+    }
+
+    public static function calculateNextInvoiceNumber(Get $get): ?int
+    {
+        $year = $get('year');
+        $sectionalId = $get('sectional_id');
+
+        if ($year && $sectionalId) {
+            $maxNumber = \App\Models\Invoice::where('year', $year)
+                ->where('sectional_id', $sectionalId)
+                ->where('company_id', Filament::getTenant()->id)
+                ->max('number');
+
+            if ($maxNumber !== null) {
+                return $maxNumber + 1;
+            }
+
+            $sectional = \App\Models\Sectional::find($sectionalId);
+            return $sectional?->progressive;
+        }
+
+        return null;
     }
 }

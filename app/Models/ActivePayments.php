@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Model;
 
 class ActivePayments extends Model
 {
@@ -63,5 +64,19 @@ class ActivePayments extends Model
         $tenant = Filament::getTenant();
         return $query->whereNotNull('registration_user_id')
                      ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id));
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($payment) {
+            $payment->company_id = Filament::getTenant()?->id;
+            $payment->registration_date = now()->toDateString();
+            $payment->registration_user_id = auth()->user?->id;
+        });
+
+        static::updating(function ($payment) {
+            $payment->registration_date = now()->toDateString();
+            $payment->registration_user_id = Auth::id();
+        });
     }
 }

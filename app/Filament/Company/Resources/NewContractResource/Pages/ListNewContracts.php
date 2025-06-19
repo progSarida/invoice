@@ -2,14 +2,16 @@
 
 namespace App\Filament\Company\Resources\NewContractResource\Pages;
 
-use Filament\Actions;
+use App\Filament\Company\Resources\NewContractResource;
+use App\Filament\Exports\NewContractExporter;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Actions;
 use Filament\Actions\ExportAction;
-use Illuminate\Support\Facades\Blade;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use App\Filament\Exports\NewContractExporter;
-use App\Filament\Company\Resources\NewContractResource;
+use Illuminate\Support\Facades\Blade;
+
+
 
 class ListNewContracts extends ListRecords
 {

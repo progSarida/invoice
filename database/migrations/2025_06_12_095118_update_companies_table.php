@@ -21,10 +21,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::disableForeignKeyConstraints();
-        Schema::table('companies', function (Blueprint $table) {
-            $table->dropColumn('pec');
-        });
-        Schema::enableForeignKeyConstraints();
+        //
     }
 };

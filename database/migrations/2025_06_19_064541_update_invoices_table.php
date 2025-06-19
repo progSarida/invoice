@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices',function (Blueprint $table){
-            $table->string('flow')->nullable();                                                 // tipo fattura: in => passiva, out => attiva (Enum)
-            $table->string('accrual_type_id')->nullable();                                      // id tipo di competenza
-            $table->string('manage_type_id')->nullable();                           // id tipo di gestione
+            $table->string('invoice_type')->nullable()->change();
+            $table->string('doc_type_id')->nullable()->after('invoice_type');
+            $table->string('section')->nullable()->change();
+            $table->string('sectional_id')->nullable()->after('section');
         });
     }
 

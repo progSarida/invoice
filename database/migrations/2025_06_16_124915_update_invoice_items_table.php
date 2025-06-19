@@ -40,11 +40,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::table('invoice_items', function (Blueprint $table) {
-            $table->dropColumn('invoice_element_id');
-            $table->dropColumn('total');
-            $table->dropColumn('vat_code_type');
-        });
         Schema::dropIfExists('invoice_elements');
         Schema::enableForeignKeyConstraints();
     }
