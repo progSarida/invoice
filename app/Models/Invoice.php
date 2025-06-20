@@ -94,7 +94,7 @@ class Invoice extends Model
     }
 
     public function credit_notes(){
-        return $this->hasMany(Invoice::class,'id','parent_id');
+        return $this->hasMany(Invoice::class, 'parent_id', 'id');
     }
 
     public function getInvoiceNumber(){
@@ -139,7 +139,11 @@ class Invoice extends Model
     {
         $tenant = Filament::getTenant();
         return $query->where('flow', 'out')
-                     ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id));
+                     ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                     ->orderBy('invoice_date', 'desc')
+                     ->orderBy('year', 'desc')
+                     ->orderBy('sectional_id', 'asc')
+                     ->orderBy('number', 'desc');
     }
 
     public function updateTotal(): void

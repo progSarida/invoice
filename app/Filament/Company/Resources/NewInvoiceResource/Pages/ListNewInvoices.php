@@ -22,13 +22,15 @@ class ListNewInvoices extends ListRecords
             Actions\Action::make('stampa')
                 ->icon('heroicon-o-printer')
                 ->label('Stampa')
-                ->tooltip('Stampa elenco clienti')
+                ->tooltip('Stampa elenco fatture')
                 // ->iconButton() // mostro solo icona
                 ->color('primary')
                 ->action(function ($livewire) {
                     $records = $livewire->getFilteredTableQuery()->get(); // recupero risultato della query
                     $filters = $livewire->tableFilters ?? []; // recupero i filtri
                     $search = $livewire->tableSearch ?? null; // recupero la ricerca
+
+                    $fileName = 'Fatture_' . \Carbon\Carbon::today()->format('d-m-Y') . '.pdf';
 
                     return response()
                         ->streamDownload(function () use ($records, $search, $filters) {
@@ -47,7 +49,7 @@ class ListNewInvoices extends ListRecords
                                 ]);
 
                             echo $pdf->stream();
-                        }, 'Clienti.pdf');
+                        }, $fileName);
 
                     Notification::make()
                         ->title('Stampa avviata')

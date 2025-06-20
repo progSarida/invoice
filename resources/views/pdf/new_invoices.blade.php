@@ -105,19 +105,16 @@
                 <li> Ricerca: {{ $search }} </li>
             @endif
             @php
+                // dd($filters);
                 $fieldTranslations = [
-                    'invoice_type' => 'Tipo',
+                    'doc_type_id' => 'Tipo',
                     'tax_type' => 'Entrata',
                     'sdi_status' => 'Status',
                     'client_id' => 'Cliente',
                     'tender_id' => 'Appalto',
                 ];
                 $fieldValues = [
-                    'invoice_type' => [
-                        'invoice' => 'Fattura',
-                        'credit_note' => 'Nota di credito',
-                        'invoice_notice' => 'Preavviso di fattura',
-                    ],
+                    'doc_type_id' => \App\Models\DocType::pluck('description', 'id')->toArray(),
                     'tax_type' => [
                         'cds' => 'Codice della Strada',
                         'ici' => 'Imposta Comunale sugli Immobili',
@@ -153,6 +150,8 @@
                 function euroFormat($value) {
                     return number_format($value, 2, ',', '.') . ' €';
                 }
+
+                $n = [];
             @endphp
             @foreach($filters as $field => $data)
                 @if(!empty($data['values']) || !empty($data['value']))
@@ -163,11 +162,11 @@
                                 $client = !empty($data['value']) ? \App\Models\Client::find($data['value']) : null;
                             @endphp
                             {{ $client->denomination }}
-                        @elseif($field == 'tender_id')
+                        @elseif($field == 'contract_id')
                             @php
-                                $tender = !empty($data['value']) ? \App\Models\Tender::find($data['value']) : null;
+                                $contract = !empty($data['value']) ? \App\Models\NewContract::find($data['value']) : null;
                             @endphp
-                            {{$tender->office_name }} ({{ $tender->office_code }}) TIPO: {{ $tender->type->getLabel() }} - CIG: {{ $tender->cig_code }}
+                            {{$contract->office_name }} ({{ $contract->office_code }}) TIPO: {{ $contract->tax_type->getLabel() }} - CIG: {{ $contract->cig_code }}
                         @else
                             @php
                                 $val = [];
@@ -227,6 +226,7 @@
                     $payments = $invoice->activePayments?->sum('amount') ?? 0;
 
                     $notes = $invoice->credit_notes?->sum('total') ?? 0;
+                    $n[] = $notes;
 
                     $residue = $invoice->total - $payments - $notes;
                 @endphp
@@ -236,7 +236,7 @@
                 </tr>
                 <tr class="record-row-second">
                     <td colspan="2">{{ $invoice->docType?->name }}</td>
-                    <td colspan="2">{{ $invoice->getInvoiceNumber() }}</td>
+                    <td colspan="2">{{ $invoice->getNewInvoiceNumber() }}</td>
                     <td colspan="2">{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</td>
                     <td colspan="2">{{ $invoice->client->denomination }}</td>
                     <td colspan="2">{{ $invoice->tax_type->getLabel() }}</td>
@@ -245,10 +245,10 @@
                     <td colspan="2">{{ $invoice->sdi_status->getLabel() }}</td>
                 </tr>
                 <tr class="record-row-third">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <th>Competenza</th>
+                    <td>{{ $invoice->accrual_year }}</td>
+                    <th>Bilancio</th>
+                    <td>{{ $invoice->budget_year }}</td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -263,6 +263,9 @@
                     <td></td>
                 </tr>
             @endforeach
+            @php
+                // dd($n);
+            @endphp
         </tbody>
     </table>
 </body>
