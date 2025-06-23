@@ -18,7 +18,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 
 class InvoiceItemsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'invoice_items';
+    protected static string $relationship = 'invoiceItems';
 
     protected static ?string $pluralModelLabel = 'Voci in fattura';
 
@@ -170,50 +170,30 @@ class InvoiceItemsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->using(function (array $data): InvoiceItem {
-                        $item = new InvoiceItem($data);
-
-                        // Imposto manualmente l'invoice_id
-                        $item->invoice_id = $this->getOwnerRecord()->id;
-
-                        // Calcolo dell'IVA
-                        $rate = $item->vat_code_type->getRate()/100;
-                        $item->total = $item->amount + ($item->amount * $rate);
-
-                        $item->save();
-
-                        return $item;
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $data['invoice_id'] = $this->getOwnerRecord()->id;
+                        return $data;
                     })
-                    ->after(function (InvoiceItem $record) {
-                        $record->invoice->updateTotal();
+                    ->using(function (array $data): InvoiceItem {
+                        $item = InvoiceItem::create($data);
+                        $item->calculateTotal();
+                        $item->save();
+                        return $item;
                     }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->using(function (InvoiceItem $record, array $data): InvoiceItem {
                         $record->fill($data);
-
-                        $rate = $record->vat_code_type->getRate()/100;
-                        $record->total = $record->amount + ($record->amount * $rate);
-
+                        $record->calculateTotal();
                         $record->save();
-
                         return $record;
-                    })
-                    ->after(function (InvoiceItem $record) {
-                        $record->invoice->updateTotal();
                     }),
-                Tables\Actions\DeleteAction::make()
-                    ->after(function (Model $record) {
-                        $record->invoice->updateTotal();
-                    }),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->after(function (Model $record) {
-                            $record->invoice->updateTotal();
-                        }),
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

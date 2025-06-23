@@ -96,8 +96,21 @@
     </style>
 </head>
 <body>
+    @php
+        $client = '';
+        $clientId = $filters['client_id']['value'] ?? null;
+
+        if ($clientId) {
+            $client = \App\Models\Client::find($clientId)?->denomination;
+        }
+    @endphp
     <div class="page-number"></div>
-    <h2 style="text-align: center"><u>Elenco Fatture</u></h2>
+    <h2 style="text-align: center"><u>Elenco Fatture {{ $client }}</u></h2>
+    @php
+        function euroFormat($value) {
+            return number_format($value, 2, ',', '.') . ' €';
+        }
+    @endphp
     @if(!empty($filters))
         <p><strong>Filtri applicati:</strong></p>
         <ul>
@@ -108,13 +121,26 @@
                 // dd($filters);
                 $fieldTranslations = [
                     'doc_type_id' => 'Tipo',
-                    'tax_type' => 'Entrata',
-                    'sdi_status' => 'Status',
+                    'number' => 'Numero fattura',
+                    'paid' => 'Fatture saldate',
+                    'client_type' => 'Tipo cliente',
                     'client_id' => 'Cliente',
-                    'tender_id' => 'Appalto',
+                    'tax_type' => 'Entrata',
+                    'contract_id' => 'Contratto',
+                    'sdi_status' => 'Status',
+                    'accrual_type_id' => 'Tipo competenza',
+                    'manage_type_id' => 'Tipo gestione',
                 ];
                 $fieldValues = [
                     'doc_type_id' => \App\Models\DocType::pluck('description', 'id')->toArray(),
+                    'paid' => [
+                        'si' => 'Si',
+                        'no' => 'No'
+                    ],
+                    'client_type' => [
+                        'private' => 'Privato',
+                        'public' => 'Pubblica Amministrazione',
+                    ],
                     'tax_type' => [
                         'cds' => 'Codice della Strada',
                         'ici' => 'Imposta Comunale sugli Immobili',
@@ -145,38 +171,83 @@
                         'auto_inviata' => 'Auto inviata',
                         'fattura_aperta' => 'Fattura aperta',
                     ],
+                    'accrual_type_id' => \App\Models\AccrualType::pluck('name', 'id')->toArray(),
+                    'manage_type_id' => \App\Models\ManageType::pluck('name', 'id')->toArray(),
                 ];
-
-                function euroFormat($value) {
-                    return number_format($value, 2, ',', '.') . ' €';
-                }
 
                 $n = [];
             @endphp
             @foreach($filters as $field => $data)
-                @if(!empty($data['values']) || !empty($data['value']))
+                @continue(in_array($field, [
+                    'client_id',
+                    'invoice_year_from', 'invoice_year_to',
+                    'invoice_budget_year_from', 'invoice_budget_year_to',
+                    'invoice_accrual_year_from', 'invoice_accrual_year_to',
+                ]))
+                @if(!empty($data['number']))
+                    <li>
+                        {{ $fieldTranslations[$field] ?? ucfirst($field) }}: {{ str_pad($data['number'], 3, '0', STR_PAD_LEFT) }}
+                    </li>
+                @endif
+
+                @if(!empty($data['value']) && empty($data['number']) && empty($data['values']))
                     <li>
                         {{ $fieldTranslations[$field] ?? ucfirst($field) }}:
-                        @if($field == 'client_id')
+                        @if($field == 'client_type')
                             @php
-                                $client = !empty($data['value']) ? \App\Models\Client::find($data['value']) : null;
+                                $type = !empty($data['value']) ? $fieldValues[$field][$data['value']] : null;
                             @endphp
-                            {{ $client->denomination }}
+                            {{ $type }}
                         @elseif($field == 'contract_id')
                             @php
                                 $contract = !empty($data['value']) ? \App\Models\NewContract::find($data['value']) : null;
                             @endphp
                             {{$contract->office_name }} ({{ $contract->office_code }}) TIPO: {{ $contract->tax_type->getLabel() }} - CIG: {{ $contract->cig_code }}
-                        @else
+                        @elseif($field == 'paid')
                             @php
-                                $val = [];
-                                foreach($data['values'] as $el) {
-                                    $val[] = $fieldValues[$field][$el] ?? $el;
-                                }
+                                $paid = !empty($data['value']) ? ($fieldValues['paid'][$data['value']] ?? $data['value']) : 'Si/No';
                             @endphp
-                            {{ implode(', ', $val) }}
+                            {{ $paid }}
                         @endif
                     </li>
+                @endif
+
+                @if(!empty($data['values']))
+                    <li>
+                        {{ $fieldTranslations[$field] ?? ucfirst($field) }}:
+                        @php
+                            $val = [];
+                            foreach($data['values'] as $el) {
+                                $val[] = $fieldValues[$field][$el] ?? $el;
+                            }
+                        @endphp
+                        {{ implode(', ', $val) }}
+                    </li>
+                @endif
+            @endforeach
+            @php
+                $rangeFilters = [
+                    'invoice_year' => [
+                        'label' => 'Anno fattura',
+                        'from' => $filters['invoice_year_from']['value'] ?? null,
+                        'to' => $filters['invoice_year_to']['value'] ?? null,
+                    ],
+                    'invoice_budget_year' => [
+                        'label' => 'Anno bilancio',
+                        'from' => $filters['invoice_budget_year_from']['value'] ?? null,
+                        'to' => $filters['invoice_budget_year_to']['value'] ?? null,
+                    ],
+                    'invoice_accrual_year' => [
+                        'label' => 'Anno competenza',
+                        'from' => $filters['invoice_accrual_year_from']['value'] ?? null,
+                        'to' => $filters['invoice_accrual_year_to']['value'] ?? null,
+                    ],
+                ];
+            @endphp
+
+            @foreach($rangeFilters as $key => $range)
+                @if($range['from'] || $range['to'])
+                    <li>{{ $range['label'] }}: da {{ $range['from'] ?? '—' }} a {{ $range['to'] ?? '—' }}</li>
                 @endif
             @endforeach
         </ul>
@@ -225,7 +296,7 @@
                 @php
                     $payments = $invoice->activePayments?->sum('amount') ?? 0;
 
-                    $notes = $invoice->credit_notes?->sum('total') ?? 0;
+                    $notes = $invoice->creditNotes?->sum('total') ?? 0;
                     $n[] = $notes;
 
                     $residue = $invoice->total - $payments - $notes;

@@ -27,21 +27,21 @@ class NewInvoiceExporter extends Exporter
             $invoiceItemColumns[] = ExportColumn::make("item_{$i}_description")
                 ->label("{$labelPrefix} - Descrizione")
                 ->formatStateUsing(function ($record) use ($i) {
-                    $item = $record->invoice_items[$i] ?? null;
+                    $item = $record->invoiceItems[$i] ?? null;
                     return $item?->description;
                 });
 
             $invoiceItemColumns[] = ExportColumn::make("item_{$i}_amount")
                 ->label("{$labelPrefix} - Importo")
                 ->formatStateUsing(function ($record) use ($i) {
-                    $item = $record->invoice_items[$i] ?? null;
+                    $item = $record->invoiceItems[$i] ?? null;
                     return $item?->amount;
                 });
 
             $invoiceItemColumns[] = ExportColumn::make("item_{$i}_vat_rate")
                 ->label("{$labelPrefix} - Aliquota IVA")
                 ->formatStateUsing(function ($record) use ($i) {
-                    $item = $record->invoice_items[$i] ?? null;
+                    $item = $record->invoiceItems[$i] ?? null;
                     $rate = $item?->vat_code_type?->getRate();
 
                     return $rate !== null ? $rate . '%' : null;
@@ -50,7 +50,7 @@ class NewInvoiceExporter extends Exporter
             $invoiceItemColumns[] = ExportColumn::make("item_{$i}_total")
                 ->label("{$labelPrefix} - Totale")
                 ->formatStateUsing(function ($record) use ($i) {
-                    $item = $record->invoice_items[$i] ?? null;
+                    $item = $record->invoiceItems[$i] ?? null;
                     return $item?->total;
                 });
         }

@@ -13,6 +13,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use App\Enums\SdiStatus;
 use Filament\Forms\Form;
+use App\Enums\ClientType;
 use App\Models\Sectional;
 use App\Enums\InvoiceType;
 use App\Enums\PaymentType;
@@ -26,10 +27,13 @@ use Filament\Facades\Filament;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Filters\Filter;
 use Illuminate\Support\Facades\Blade;
 use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
@@ -307,6 +311,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(2)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => NewInvoiceResource::invoiceNumber($get, $set))
                                 ->live()
+                                ->disabled()
                                 ->dehydrated()
                                 ->required(),
 
@@ -326,17 +331,13 @@ class NewInvoiceResource extends Resource
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
                                     $set('number', $number);
-
-                                    NewInvoiceResource::invoiceNumber($get, $set);
-                                })
-                                ->afterStateHydrated(function (Get $get, Set $set) {
-                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
-                                    $set('number', $number);
                                     NewInvoiceResource::invoiceNumber($get, $set);
                                 })
                                 ->live()
                                 ->searchable()
                                 ->preload()
+                                ->disabled()
+                                ->dehydrated()
                                 ->columnSpan(2),
 
                             Forms\Components\TextInput::make('year')->label('Anno')
@@ -344,7 +345,6 @@ class NewInvoiceResource extends Resource
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
                                     $set('number', $number);
-
                                     NewInvoiceResource::invoiceNumber($get, $set);
                                 })
                                 ->live()
@@ -496,13 +496,55 @@ class NewInvoiceResource extends Resource
                     ->searchable()
                     ->columnSpan(2)
                     ->preload(),
+                Filter::make('number')
+                    ->form([
+                        TextInput::make('number')
+                            ->label('Numero Fattura'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (filled($data['number'])) {
+                            return $query->where('number', $data['number']);
+                        }
+                        return $query;
+                    }),
+                SelectFilter::make('paid')
+                    ->label('Saldate')
+                    ->options([
+                        'si' => 'Sì',
+                        'no' => 'No',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value'])) {
+                            return $query;
+                        }
+                        $sql = 'total - (total_payment + total_notes)';
+                        return $query->when($data['value'] === 'si', fn ($q) => $q->whereRaw("$sql <= 0"))
+                                    ->when($data['value'] === 'no', fn ($q) => $q->whereRaw("$sql > 0"));
+                    })
+                    ->preload(),
+                SelectFilter::make('client_type')
+                    ->label('Tipo cliente')
+                    ->options(ClientType::class)
+                    ->attribute(null)
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value) {
+                            return $query->whereHas('client', function ($q) use ($value) {
+                                $q->where('type', $value);
+                            });
+                        }
+                        return $query;
+                    })
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('client_id')->label('Cliente')
                     ->relationship(name: 'client', titleAttribute: 'denomination')
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
                     )
                     ->searchable()->preload()
-                        ->optionsLimit(5),
+                    ->columnSpan(2)
+                    ->optionsLimit(5),
                 SelectFilter::make('tax_type')->label('Entrata')->options(TaxType::class)
                     ->multiple()->searchable()->preload(),
                 SelectFilter::make('contract_id')->label('Contratto')
@@ -511,12 +553,154 @@ class NewInvoiceResource extends Resource
                         fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
                     )
                     ->searchable()->preload()
+                    ->columnSpan(2)
                     ->optionsLimit(5),
                 SelectFilter::make('sdi_status')->label('Status')->options(SdiStatus::class)
                     ->multiple()->searchable()->preload(),
+                SelectFilter::make('accrual_type_id')
+                    ->label('Tipo competenza')
+                    ->options(function () {
+                        return AccrualType::pluck('name', 'id')->toArray();
+                    })
+                    ->multiple()
+                    ->preload(),
+                SelectFilter::make('manage_type_id')
+                    ->label('Tipo gestione')
+                    ->options(function () {
+                        return ManageType::pluck('name', 'id')->toArray();
+                    })
+                    ->multiple()
+                    ->columnSpan(2)
+                    ->preload(),
+                SelectFilter::make('invoice_year_from')
+                    ->label('Anno fattura da')
+                    ->attribute(null)
+                    ->options(function () {
+                        $tenant = \Filament\Facades\Filament::getTenant();
+                        return \App\Models\Invoice::query()
+                            ->select('year')
+                            ->distinct()
+                            ->where('flow', 'out')
+                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                            ->orderBy('year')
+                            ->pluck('year', 'year')
+                            ->toArray();
+                    })
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value) {
+                            return $query->where('year', ">=", $value);
+                        }
+                        return $query;
+                    }),
+                SelectFilter::make('invoice_year_to')
+                    ->label('Anno fattura a')
+                    ->attribute(null)
+                    ->options(function () {
+                        $tenant = \Filament\Facades\Filament::getTenant();
+                        return \App\Models\Invoice::query()
+                            ->select('year')
+                            ->distinct()
+                            ->where('flow', 'out')
+                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                            ->orderBy('year')
+                            ->pluck('year', 'year')
+                            ->toArray();
+                    })
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value) {
+                            return $query->where('year', "<=", $value);
+                        }
+                        return $query;
+                    }),
 
-
-            ])->filtersFormColumns(2)
+                SelectFilter::make('invoice_budget_year_from')
+                    ->label('Anno bilancio da')
+                    ->attribute(null)
+                    ->options(function () {
+                        $tenant = \Filament\Facades\Filament::getTenant();
+                        return \App\Models\Invoice::query()
+                            ->select('budget_year')
+                            ->distinct()
+                            ->where('flow', 'out')
+                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                            ->orderByDesc('budget_year')
+                            ->pluck('budget_year', 'budget_year')
+                            ->toArray();
+                    })
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value) {
+                            return $query->where('budget_year', ">=", $value);
+                        }
+                        return $query;
+                    }),
+                SelectFilter::make('invoice_budget_year_to')
+                    ->label('Anno bilancio da')
+                    ->attribute(null)
+                    ->options(function () {
+                        $tenant = \Filament\Facades\Filament::getTenant();
+                        return \App\Models\Invoice::query()
+                            ->select('budget_year')
+                            ->distinct()
+                            ->where('flow', 'out')
+                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                            ->orderByDesc('budget_year')
+                            ->pluck('budget_year', 'budget_year')
+                            ->toArray();
+                    })
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value) {
+                            return $query->where('budget_year', "<=", $value);
+                        }
+                        return $query;
+                    }),
+                SelectFilter::make('invoice_accrual_year_from')
+                    ->label('Anno competenza da')
+                    ->attribute(null)
+                    ->options(function () {
+                        $tenant = \Filament\Facades\Filament::getTenant();
+                        return \App\Models\Invoice::query()
+                            ->select('accrual_year')
+                            ->distinct()
+                            ->where('flow', 'out')
+                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                            ->orderByDesc('accrual_year')
+                            ->pluck('accrual_year', 'accrual_year')
+                            ->toArray();
+                    })
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value) {
+                            return $query->where('accrual_year', ">=", $value);
+                        }
+                        return $query;
+                    }),
+                SelectFilter::make('invoice_accrual_year_to')
+                    ->label('Anno competenza da')
+                    ->attribute(null)
+                    ->options(function () {
+                        $tenant = \Filament\Facades\Filament::getTenant();
+                        return \App\Models\Invoice::query()
+                            ->select('accrual_year')
+                            ->distinct()
+                            ->where('flow', 'out')
+                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                            ->orderByDesc('accrual_year')
+                            ->pluck('accrual_year', 'accrual_year')
+                            ->toArray();
+                    })
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value) {
+                            return $query->where('accrual_year', "<=", $value);
+                        }
+                        return $query;
+                    }),
+            ],layout: FiltersLayout::Modal)->filtersFormColumns(4)
+            // ])->filtersFormColumns(2)
             ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\EditAction::make(),

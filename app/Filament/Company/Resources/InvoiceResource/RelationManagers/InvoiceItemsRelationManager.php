@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InvoiceItemsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'invoice_items';
+    protected static string $relationship = 'invoiceItems';
 
     protected static ?string $pluralModelLabel = 'Voci in fattura';
 

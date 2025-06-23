@@ -61,8 +61,8 @@ class Invoice extends Model
         return $this->belongsTo(BankAccount::class);
     }
 
-    public function invoice_items(){
-        return $this->hasMany(InvoiceItem::class);
+    public function invoiceItems(){
+        return $this->hasMany(InvoiceItem::class,'invoice_id','id');
     }
 
     public function sdi_notifications(){
@@ -93,7 +93,7 @@ class Invoice extends Model
         return $this->belongsTo(NewContract::class,'contract_id');
     }
 
-    public function credit_notes(){
+    public function creditNotes(){
         return $this->hasMany(Invoice::class, 'parent_id', 'id');
     }
 
@@ -104,7 +104,7 @@ class Invoice extends Model
             $number.= "0";
         }
         $number = $number.$this->number;
-        return $number." / 0".$this->section." / ".$this->year;
+        return $number."/0".$this->section."/".$this->year;
     }
 
     public function getNewInvoiceNumber(){
@@ -116,7 +116,7 @@ class Invoice extends Model
             $number.= "0";
         }
         $number = $number.$this->number;
-        return $number." / ".$sectional." / ".$this->year;
+        return $number."/".$sectional."/".$this->year;
 
     }
 
@@ -148,8 +148,15 @@ class Invoice extends Model
 
     public function updateTotal(): void
     {
-        $total = $this->invoice_items()->sum('total');
+        $total = $this->invoiceItems()->sum('total');
         $this->total = $total;
+        $this->save();
+    }
+
+    public function updateTotalNotes(): void
+    {
+        $total = $this->creditNotes()->sum('total');
+        $this->total_notes = $total;
         $this->save();
     }
 
@@ -159,8 +166,26 @@ class Invoice extends Model
             $invoice->flow = 'out';
         });
 
+        static::created(function ($invoice) {
+            if ($invoice->invoice) {
+                $invoice->invoice->updateTotalNotes();
+            }
+        });
+
         static::updating(function ($invoice) {
             //
+        });
+
+        static::updated(function ($invoice) {
+            if ($invoice->invoice) {
+                $invoice->invoice->updateTotalNotes();
+            }
+        });
+
+        static::deleted(function ($invoice) {
+            if ($invoice->invoice) {
+                $invoice->invoice->updateTotalNotes();
+            }
         });
     }
 }

@@ -127,8 +127,8 @@ class ActivePaymentsResource extends Resource
                 Tables\Columns\TextColumn::make('payment_date')
                     ->label('Data pagamento')
                     ->getStateUsing(function ($record) {
-                        return $record->registration_date
-                            ? Carbon::parse($record->registration_date)->format('d/m/Y')
+                        return $record->payment_date
+                            ? Carbon::parse($record->payment_date)->format('d/m/Y')
                             : 'Nessuna data';
                     })
                     ->sortable(),

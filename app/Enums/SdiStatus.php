@@ -27,7 +27,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
     CASE IN_ELABORAZIONE = "in_elaborazione";
 
     //AGGIUNTI DA RICCARDO, NON SONO STATUS UFFICIALI DEL SISTEMA DI INTERSCAMBIO
-    CASE RIFIUTO_VALIDATO = "rifiuto_validato";
+    CASE RIFIUTO_VALIDATO = "rifiuto_validato"; // due tipi (con emissione nuova, archivio)
     CASE AUTO_INVIATA = "auto_inviata";
     CASE APERTA = "fattura_aperta";
 

@@ -13,9 +13,6 @@ class EditActivePayments extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $data['registration_date'] = now();
-        $data['registered_by_user_id'] = Auth::id();
-
         if ($data['validated'] && !$this->record->validated) {
             $data['validation_date'] = now();
             $data['validated_by_user_id'] = Auth::id();

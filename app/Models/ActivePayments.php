@@ -26,8 +26,9 @@ class ActivePayments extends Model
         'accepted' => 'boolean',
     ];
 
-    public function invoice(){
-        return $this->belongsTo(Invoice::class, 'invoice_id');
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class)->with(['sectional', 'client']);
     }
 
     public function company(){
@@ -71,12 +72,34 @@ class ActivePayments extends Model
         static::creating(function ($payment) {
             $payment->company_id = Filament::getTenant()?->id;
             $payment->registration_date = now()->toDateString();
-            $payment->registration_user_id = auth()->user?->id;
+            $payment->registration_user_id = Auth::id();
+        });
+
+        static::created(function ($payment) {
+            if ($payment->invoice) {
+                $payment->invoice->total_payment += $payment->amount;
+                $payment->invoice->save();
+            }
         });
 
         static::updating(function ($payment) {
             $payment->registration_date = now()->toDateString();
             $payment->registration_user_id = Auth::id();
+
+            if ($payment->isDirty('amount') && $payment->invoice) {
+                $originalAmount = $payment->getOriginal('amount');
+                $invoice = $payment->invoice;
+                $invoice->total_payment = $invoice->total_payment - $originalAmount + $payment->amount;
+                $invoice->save();
+            }
         });
+
+        static::deleting(function ($payment) {
+            if ($payment->invoice) {
+                $payment->invoice->total_payment -= $payment->amount;
+                $payment->invoice->save();
+            }
+        });
+
     }
 }

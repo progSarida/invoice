@@ -31,4 +31,29 @@ class InvoiceItem extends Model
     {
         return $this->belongsTo(InvoiceElement::class, 'invoice_element_id', 'id');
     }
+
+    protected static function booted()
+    {
+        static::saved(function ($item) {
+            $item->invoice?->updateTotal();
+
+            if ($item->invoice?->parent_id) {
+                $item->invoice->invoice?->updateTotalNotes();
+            }
+        });
+
+        static::deleted(function ($item) {
+            $item->invoice?->updateTotal();
+
+            if ($item->invoice?->parent_id) {
+                $item->invoice->invoice?->updateTotalNotes();
+            }
+        });
+    }
+
+    public function calculateTotal(): void
+    {
+        $rate = $this->vat_code_type?->getRate() / 100 ?? 0;
+        $this->total = $this->amount + ($this->amount * $rate);
+    }
 }
