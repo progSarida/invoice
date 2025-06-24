@@ -13,7 +13,7 @@ class NewInvoiceExporter extends Exporter
 
     public static function getColumns(): array
     {
-        $maxItems = Invoice::withCount('invoice_items')
+        $maxItems = Invoice::withCount('invoiceItems')
                         ->where('flow', 'out')
                         ->orderBy('invoice_items_count', 'desc')
                         ->limit(1)
@@ -35,7 +35,7 @@ class NewInvoiceExporter extends Exporter
                 ->label("{$labelPrefix} - Importo")
                 ->formatStateUsing(function ($record) use ($i) {
                     $item = $record->invoiceItems[$i] ?? null;
-                    return $item?->amount;
+                    return $item && is_numeric($item->amount) ? number_format($item->amount, 2, ',', '.') : ($item?->amount ?? '0,00');
                 });
 
             $invoiceItemColumns[] = ExportColumn::make("item_{$i}_vat_rate")
@@ -51,7 +51,7 @@ class NewInvoiceExporter extends Exporter
                 ->label("{$labelPrefix} - Totale")
                 ->formatStateUsing(function ($record) use ($i) {
                     $item = $record->invoiceItems[$i] ?? null;
-                    return $item?->total;
+                    return $item && is_numeric($item->total) ? number_format($item->total, 2, ',', '.') : ($item?->total ?? '0,00');
                 });
         }
 
@@ -123,7 +123,8 @@ class NewInvoiceExporter extends Exporter
             // ExportColumn::make('bollo')
             //     ->label('Bollo'),
             ExportColumn::make('total')
-                ->label('Totale'),
+                ->label('Totale')
+                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '.') : $state),
             // ExportColumn::make('no_vat_total')
             //     ->label('Totale senza IVA'),
             ExportColumn::make('bankAccount.name')
@@ -137,7 +138,11 @@ class NewInvoiceExporter extends Exporter
             ExportColumn::make('payment_days')
                 ->label('Giorni'),
             ExportColumn::make('total_payment')
-                ->label('Totale pagamenti'),
+                ->label('Totale pagamenti')
+                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '.') : $state),
+            ExportColumn::make('total_notes')
+                ->label('Totale note di credito')
+                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '.') : $state),
             ExportColumn::make('last_payment_date')
                 ->label('Data ultimo pagamento')
                 ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : null),

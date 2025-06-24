@@ -43,7 +43,8 @@ class NewContractExporter extends Exporter
             ExportColumn::make('office_name')
                 ->label('Nome ufficio'),
             ExportColumn::make('amount')
-                ->label('Importo'),
+                ->label('Importo')
+                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '.') : $state),
             ExportColumn::make('latest_contract_detail_number')
                 ->label('Numero contratto')
                 ->formatStateUsing(function ($record) {
