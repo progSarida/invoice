@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SdiNotificationsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'sdi_notifications';
+    protected static string $relationship = 'sdiNotifications';
 
     protected static ?string $pluralModelLabel = 'Notifiche Sdi';
 

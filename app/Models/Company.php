@@ -39,6 +39,11 @@ class Company extends Model
         return $this->belongsTo(City::class, 'city_code', 'code');
     }
 
+    public function clients()
+    {
+        return $this->hasMany(Client::class);
+    }
+
     public function curator()
     {
         return $this->hasOne(Curator::class);

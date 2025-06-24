@@ -65,7 +65,7 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class,'invoice_id','id');
     }
 
-    public function sdi_notifications(){
+    public function sdiNotifications(){
         return $this->hasMany(SdiNotification::class);
     }
 
