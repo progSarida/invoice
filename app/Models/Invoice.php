@@ -5,12 +5,13 @@ namespace App\Models;
 use App\Enums\TaxType;
 use App\Enums\SdiStatus;
 // use App\Enums\AccrualType;
+use App\Enums\TimingType;
 use App\Enums\InvoiceType;
-use App\Enums\PaymentStatus;
 use App\Enums\PaymentType;
 use App\Models\AccrualType;
-use Illuminate\Database\Eloquent\Model;
+use App\Enums\PaymentStatus;
 use Filament\Facades\Filament;
+use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
@@ -38,6 +39,9 @@ class Invoice extends Model
         'bank_account_id',
         'payment_type',
         'payment_days',
+        'timing_type',
+        'delivery_note',
+        'delivery_date',
     ];
 
     protected $casts = [
@@ -46,7 +50,8 @@ class Invoice extends Model
         // 'accrual_type' => AccrualType::class,
         'payment_status' => PaymentStatus::class,
         'payment_type' => PaymentType::class,
-        'sdi_status' => SdiStatus::class
+        'sdi_status' => SdiStatus::class,
+        'timing_type' => TimingType::class
     ];
 
     public function company(){
@@ -107,6 +112,14 @@ class Invoice extends Model
         return $number."/0".$this->section."/".$this->year;
     }
 
+    public function getResidue()
+    {
+        $total = floatval($this->total ?? 0);
+        $totalPayment = floatval($this->total_payment ?? 0);
+        $totalNotes = floatval($this->total_notes ?? 0);
+        return $total - ($totalPayment + $totalNotes);
+    }
+
     public function getNewInvoiceNumber(){
 
         $number = "";
@@ -140,6 +153,7 @@ class Invoice extends Model
         $tenant = Filament::getTenant();
         return $query->where('flow', 'out')
                      ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                     ->orderByRaw("FIELD(sdi_status, 'rifiutata', 'scartata') DESC")
                      ->orderBy('invoice_date', 'desc')
                      ->orderBy('year', 'desc')
                      ->orderBy('sectional_id', 'asc')

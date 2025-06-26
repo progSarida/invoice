@@ -27,7 +27,10 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
     CASE IN_ELABORAZIONE = "in_elaborazione";
 
     //AGGIUNTI DA RICCARDO, NON SONO STATUS UFFICIALI DEL SISTEMA DI INTERSCAMBIO
-    CASE RIFIUTO_VALIDATO = "rifiuto_validato"; // due tipi (con emissione nuova, archivio)
+    // CASE RIFIUTO_VALIDATO = "rifiuto_validato";
+    CASE RIFIUTO_EMESSO = "rifiuto_emesso";
+    CASE RIFIUTO_ARCHIVIATO = "rifiuto_archiviato";
+    CASE SCARTO_VALIDATO = "scarto_validato";
     CASE AUTO_INVIATA = "auto_inviata";
     CASE APERTA = "fattura_aperta";
 
@@ -49,7 +52,10 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::EMESSA => 'AGYO - Fattura emessa',
             self::IN_ELABORAZIONE => 'AGYO - In elaborazione',
 
-            self::RIFIUTO_VALIDATO => 'Rifiuto validato',
+            // self::RIFIUTO_VALIDATO => 'Rifiuto validato',
+            self::RIFIUTO_EMESSO => 'RN - Rifiuto validato (emettere nota di credito)',
+            self::RIFIUTO_ARCHIVIATO => 'RM - Rifiuto validato (mantenere in contabilità)',
+            self::SCARTO_VALIDATO => 'SV - Scarto validato (mantenere in contabilità)',
             self::AUTO_INVIATA => 'Auto inviata',
             self::APERTA => 'Fattura aperta'
         };
@@ -73,7 +79,10 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::EMESSA => '',
             self::IN_ELABORAZIONE => '',
 
-            self::RIFIUTO_VALIDATO => 'gmdi-block',
+            // self::RIFIUTO_VALIDATO => 'gmdi-block',
+            self::RIFIUTO_EMESSO => '',
+            self::RIFIUTO_ARCHIVIATO => '',
+            self::SCARTO_VALIDATO => '',
             self::AUTO_INVIATA => '',
             self::APERTA => ''
         };
@@ -97,7 +106,10 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::EMESSA => 'AGYO - Fattura emessa',
             self::IN_ELABORAZIONE => 'Agyo - In elaborazione',
 
-            self::RIFIUTO_VALIDATO => 'Rifiuto validato',
+            // self::RIFIUTO_VALIDATO => 'Rifiuto validato',
+            self::RIFIUTO_EMESSO => 'RN - Rifiuto validato (emettere nota di credito)',
+            self::RIFIUTO_ARCHIVIATO => 'RM - Rifiuto validato (mantenere in contabilità)',
+            self::SCARTO_VALIDATO => 'SV - Scarto validato (mantenere in contabilità)',
             self::AUTO_INVIATA => 'Auto inviata',
             self::APERTA => 'Fattura aperta'
         };
@@ -121,7 +133,10 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::EMESSA => 'warning',
             self::IN_ELABORAZIONE => 'warning',
 
-            self::RIFIUTO_VALIDATO => 'gray',
+            // self::RIFIUTO_VALIDATO => 'gray',
+            self::RIFIUTO_EMESSO => 'gray',
+            self::RIFIUTO_ARCHIVIATO => 'gray',
+            self::SCARTO_VALIDATO => 'gray',
             self::AUTO_INVIATA => 'gray',
             self::APERTA => 'gray'
         };

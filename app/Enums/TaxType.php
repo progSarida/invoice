@@ -55,17 +55,18 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
 
     public function getColor(): string | array | null
     {
-        return match($this) {
-            self::CDS => 'info',
-            self::ICI => 'warning',
-            self::IMU => 'success',
-            self::LIBERO => 'danger',
-            self::PARK =>  Color::Blue,
-            self::PUB => Color::Cyan,
-            self::TARI =>  Color::Orange,
-            self::TEP => Color::Amber,
-            self::TOSAP => Color::Yellow,
-        };
+        // return match($this) {
+        //     self::CDS => 'info',
+        //     self::ICI => 'warning',
+        //     self::IMU => 'success',
+        //     self::LIBERO => 'danger',
+        //     self::PARK =>  Color::Blue,
+        //     self::PUB => Color::Cyan,
+        //     self::TARI =>  Color::Orange,
+        //     self::TEP => Color::Amber,
+        //     self::TOSAP => Color::Yellow,
+        // };
+        return null;
     }
 
     public static function multiColor($state): string

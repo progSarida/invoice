@@ -11,13 +11,16 @@ use App\Models\Invoice;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
+use App\Enums\TimingType;
 use App\Models\Sectional;
 use App\Enums\PaymentType;
+use App\Enums\VatCodeType;
 use App\Models\ManageType;
 use Filament\Tables\Table;
 use App\Models\AccrualType;
 use App\Models\NewContract;
 use App\Enums\PaymentStatus;
+use App\Models\InvoiceElement;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
@@ -49,6 +52,7 @@ class CreditNotesRelationManager extends RelationManager
 
                     Section::make('Destinatario')
                         ->collapsible()
+                        ->collapsed(fn (Get $get) => $get('id'))
                         ->schema([
 
                             Forms\Components\Select::make('client_id')->label('Cliente')
@@ -64,6 +68,13 @@ class CreditNotesRelationManager extends RelationManager
                                     fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
                                 )
                                 ->required()
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return $invoice->client_id;
+                                    }
+                                    return null;
+                                })
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     $set('contract_id', null);
                                     $set('sectional_id', null);
@@ -79,11 +90,11 @@ class CreditNotesRelationManager extends RelationManager
                                                 $set('sectional_id', $sectional->id);
                                                 $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
                                                 $set('number', $number);
-                                                NewInvoiceResource::invoiceNumber($get, $set);
+                                                CreditNotesRelationManager::invoiceNumber($get, $set);
                                             } else {
                                                 $set('sectional_id', null);
                                                 $set('number', null);
-                                                NewInvoiceResource::invoiceNumber($get, $set);
+                                                CreditNotesRelationManager::invoiceNumber($get, $set);
                                                 Notification::make()
                                                     ->title('Nessun sezionario trovato per il tipo di cliente selezionato.')
                                                     ->warning()
@@ -104,6 +115,13 @@ class CreditNotesRelationManager extends RelationManager
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     if(empty($get('client_id')) || empty($get('tax_type')))
                                     $set('contract_id', null);
+                                })
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return $invoice->tax_type;
+                                    }
+                                    return null;
                                 })
                                 ->searchable()
                                 ->live()
@@ -130,6 +148,13 @@ class CreditNotesRelationManager extends RelationManager
                                 ->getOptionLabelFromRecordUsing(
                                     fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
                                 )
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return $invoice->contract_id;
+                                    }
+                                    return null;
+                                })
                                 ->disabled(fn(Get $get): bool => ! filled($get('client_id')) || ! filled($get('tax_type')))
                                 ->required()
                                 ->searchable()
@@ -210,37 +235,65 @@ class CreditNotesRelationManager extends RelationManager
                                         return $return;
                                     }
                                 )
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return $invoice->id;
+                                    }
+                                    return null;
+                                })
                                 ->preload()
                                 // ->optionsLimit(10)
                                 ->searchable()
                         ]),
 
                         Section::make('Dati per il pagamento')->columns(4)
-                        ->collapsed()
-                        ->schema([
-                            Forms\Components\Select::make('bank_account_id')->label('IBAN')
-                                ->relationship(
-                                    name: 'bankAccount',
-                                    modifyQueryUsing: fn (Builder $query) =>
-                                    $query->where('company_id',Filament::getTenant()->id)
-                                )
-                                ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => "{$record->name}\n$record->iban"
-                                )
-                                ->searchable()
-                                ->columnSpanFull()->preload(),
-                            Forms\Components\Select::make('payment_type')->label('Tipo')
-                                ->options(PaymentType::class)->columnSpan(2),
-                            Forms\Components\Select::make('payment_days')
-                                ->label('Giorni')
-                                ->required()
-                                ->options([
-                                    30 => '30',
-                                    60 => '60',
-                                    90 => '90',
-                                    120 => '120',
-                                ])
-                                ->columnSpan(2),
+                            ->collapsed(fn (Get $get) => $get('id'))
+                            ->schema([
+                                Forms\Components\Select::make('bank_account_id')->label('IBAN')
+                                    ->relationship(
+                                        name: 'bankAccount',
+                                        modifyQueryUsing: fn (Builder $query) =>
+                                        $query->where('company_id',Filament::getTenant()->id)
+                                    )
+                                    ->getOptionLabelFromRecordUsing(
+                                        fn (Model $record) => "{$record->name}\n$record->iban"
+                                    )
+                                    ->default(function (Get $get, Set $set) {
+                                        if (blank($get('id'))) {
+                                            $invoice = $this->getOwnerRecord();
+                                            return $invoice->bank_account_id;
+                                        }
+                                        return null;
+                                    })
+                                    ->searchable()
+                                    ->columnSpanFull()->preload(),
+                                Forms\Components\Select::make('payment_type')->label('Tipo')
+                                    ->default(function (Get $get, Set $set) {
+                                        if (blank($get('id'))) {
+                                            $invoice = $this->getOwnerRecord();
+                                            return $invoice->payment_type;
+                                        }
+                                        return null;
+                                    })
+                                    ->options(PaymentType::class)->columnSpan(2),
+                                Forms\Components\Select::make('payment_days')
+                                    ->label('Giorni')
+                                    ->required()
+                                    ->default(function (Get $get, Set $set) {
+                                        if (blank($get('id'))) {
+                                            $invoice = $this->getOwnerRecord();
+                                            return $invoice->payment_days;
+                                        }
+                                        return null;
+                                    })
+                                    ->options([
+                                        30 => '30',
+                                        60 => '60',
+                                        90 => '90',
+                                        120 => '120',
+                                    ])
+                                    ->columnSpan(2),
                                 ]),
                         Section::make('Status del pagamento')->columns(2)
                             ->collapsed()
@@ -262,16 +315,45 @@ class CreditNotesRelationManager extends RelationManager
 
                     Section::make('')
                         ->columns(6)
+                        ->collapsed(fn (Get $get) => $get('id'))
                         ->schema([
+                            Forms\Components\Select::make('timing_type')->label('Modalità')->options(TimingType::class)
+                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
+                                ->placeholder(null)
+                                ->default('contestuale')
+                                ->live()
+                                ->columnSpan(2),
+                            Forms\Components\TextInput::make('delivery_note')->label('Documento di trasporto')
+                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
+                                ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita'),
+                            Forms\Components\DatePicker::make('delivery_date')->label('Data documento')
+                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
+                                ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita')
+                                ->native(false)
+                                ->displayFormat('d F Y'),
+                        ]),
 
-                            Forms\Components\Select::make('doc_type_id')->label('Tipo')
+                    Section::make('')
+                        ->columns(6)
+                        ->schema([
+                            Forms\Components\Select::make('doc_type_id')->label('Tipo documento')
                                 ->required()
+                                ->disabled()
+                                ->dehydrated()
                                 ->live()
                                 ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
                                     $docType = DocType::with('docGroup')->find($state);
                                     if (!$docType || $docType->docGroup?->name !== 'Note di variazione') {
                                         $set('parent_id', null);
                                     }
+                                })
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        $doc = DocType::where('description', "Nota di credito")->first();
+                                        return $doc->id;
+                                    }
+                                    return null;
                                 })
                                 ->options(function (Get $get) {
                                     $sectionalId = $get('sectional_id');
@@ -287,11 +369,23 @@ class CreditNotesRelationManager extends RelationManager
                                 ->columnSpan(3),
 
                             Forms\Components\TextInput::make('invoice_uid')->label('Identificativo')
+                                ->afterStateHydrated(function (Get $get, Set $set) {
+                                    return CreditNotesRelationManager::invoiceNumber($get, $set);
+                                })
                                 ->disabled()->columnSpan(3),
 
                             Forms\Components\TextInput::make('number')->label('Numero')
                                 ->columnSpan(2)
-                                ->afterStateUpdated(fn (Get $get, Set $set) => NewInvoiceResource::invoiceNumber($get, $set))
+                                ->afterStateUpdated(fn (Get $get, Set $set) => CreditNotesRelationManager::invoiceNumber($get, $set))
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        $year = now()->year;
+                                        $number = CreditNotesRelationManager::calculateNextInvoiceNumber($year, $invoice->sectional_id);
+                                        return $number;
+                                    }
+                                    return null;
+                                })
                                 ->live()
                                 ->disabled()
                                 ->dehydrated()
@@ -310,10 +404,17 @@ class CreditNotesRelationManager extends RelationManager
                                     }
                                     return $query->pluck('description', 'id');
                                 })
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return $invoice->sectional_id;
+                                    }
+                                    return null;
+                                })
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
                                     $set('number', $number);
-                                    NewInvoiceResource::invoiceNumber($get, $set);
+                                    CreditNotesRelationManager::invoiceNumber($get, $set);
                                 })
                                 ->live()
                                 ->searchable()
@@ -327,7 +428,7 @@ class CreditNotesRelationManager extends RelationManager
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
                                     $set('number', $number);
-                                    NewInvoiceResource::invoiceNumber($get, $set);
+                                    CreditNotesRelationManager::invoiceNumber($get, $set);
                                 })
                                 ->live()
                                 ->required()
@@ -345,6 +446,13 @@ class CreditNotesRelationManager extends RelationManager
                                 ->numeric()
                                 ->required()
                                 ->minValue(1900)
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return $invoice->budget_year;
+                                    }
+                                    return null;
+                                })
                                 ->rules(['digits:4'])
                                 ->columnSpan(2),
 
@@ -352,6 +460,13 @@ class CreditNotesRelationManager extends RelationManager
                                 ->numeric()
                                 ->required()
                                 ->minValue(1900)
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return $invoice->accrual_year;
+                                    }
+                                    return null;
+                                })
                                 ->rules(['digits:4'])
                                 ->columnSpan(2),
 
@@ -360,28 +475,219 @@ class CreditNotesRelationManager extends RelationManager
                                 ->options(function () {
                                     return AccrualType::orderBy('order')->pluck('name', 'id');
                                 })
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return $invoice->accrual_type_id;
+                                    }
+                                    return null;
+                                })
                                 ->columnSpan(3),
                             Forms\Components\Select::make('manage_type_id')->label('Tipo di gestione')
                                 ->options(function () {
                                     return ManageType::orderBy('order')->pluck('name', 'id');
+                                })
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return $invoice->manage_type_id;
+                                    }
+                                    return null;
                                 })
                                 ->columnSpan(3),
                         ]),
 
                     Section::make('Descrizioni')
                         ->collapsible()
+                        ->collapsed(fn (Get $get) => $get('id'))
                         ->schema([
                             Forms\Components\Textarea::make('description')->label('Descrizione')
                                 ->required()
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return "A storno della fattura n. " . $invoice->getNewInvoiceNumber() . " del " . \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y');
+                                    }
+                                })
+                                ->rules([
+                                    // Validazione personalizzata solo in creazione
+                                    fn (Get $get): array => blank($get('id')) ? [
+                                        function ($attribute, $value, $fail) {
+                                            if (!str_contains(strtolower($value), 'totale') && !str_contains(strtolower($value), 'parziale')) {
+                                                $fail('Il campo Descrizione deve contenere la parola "totale" o "parziale".');
+                                                // \Filament\Notifications\Notification::make()
+                                                //     ->title('Errore di validazione')
+                                                //     ->body('Il campo Descrizione deve contenere la parola "totale" o "parziale".')
+                                                //     ->danger()
+                                                //     ->duration(5000)
+                                                //     ->send();
+                                            }
+                                        },
+                                    ] : [],
+                                ])
                                 ->columnSpanFull(),
                             Forms\Components\Textarea::make('free_description')->label('Descrizione libera')
                                 ->required()
+                                ->default(function (Get $get, Set $set) {
+                                    if (blank($get('id'))) {
+                                        $invoice = $this->getOwnerRecord();
+                                        return "A storno della fattura n. " . $invoice->getNewInvoiceNumber() . " del " . \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y');
+                                    }
+                                })
+                                ->rules([
+                                    // Validazione personalizzata solo in creazione
+                                    fn (Get $get): array => blank($get('id')) ? [
+                                        function ($attribute, $value, $fail) {
+                                            if (!str_contains(strtolower($value), 'totale') && !str_contains(strtolower($value), 'parziale')) {
+                                                $fail('Il campo Descrizione libera deve contenere la parola "totale" o "parziale".');
+                                                // \Filament\Notifications\Notification::make()
+                                                //     ->title('Errore di validazione')
+                                                //     ->body('Il campo Descrizione libera deve contenere la parola "totale" o "parziale".')
+                                                //     ->danger()
+                                                //     ->duration(5000)
+                                                //     ->send();
+                                            }
+                                        },
+                                    ] : [],
+                                ])
                                 ->columnSpanFull(),
                         ]),
 
-
-
                 ]),//FIRST GRID
+                Section::make('Voci in fattura')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\Repeater::make('invoiceItems')
+                            ->label('')
+                            ->collapsible()
+                            ->collapsed()
+                            ->relationship('invoiceItems')
+                            ->schema([
+                                Forms\Components\Select::make('invoice_element_id')
+                                    ->label('Elemento')
+                                    ->required()
+                                    ->live()
+                                    ->options(InvoiceElement::pluck('name', 'id'))
+                                    ->searchable()
+                                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                        if ($state) {
+                                            $el = InvoiceElement::find($state);
+                                            $set('description', $el->name);
+                                            $set('amount', $el->amount);
+                                            $set('vat_code_type', $el->vat_code_type instanceof \App\Enums\VatCodeType ? $el->vat_code_type->value : $el->vat_code_type);
+
+                                            // Calcolo importo IVA e totale
+                                            $rate = VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
+                                            $amount = $el->amount ?? 0;
+                                            $vatAmount = $amount * $rate;
+                                            $total = $amount + $vatAmount;
+
+                                            $set('vat_amount', number_format($vatAmount, 2, '.', ''));
+                                            $set('total', number_format($total, 2, '.', ''));
+                                        }
+                                    })
+                                    ->columnSpan(4)
+                                    ->preload(),
+                                Forms\Components\TextInput::make('description')
+                                    ->label('Descrizione')
+                                    ->required()
+                                    ->columnSpan(8)
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('amount')
+                                    ->label('Importo')
+                                    ->required()
+                                    ->columnSpan(4)
+                                    ->prefix('€')
+                                    ->maxLength(255)
+                                    ->live()
+                                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                        // Calcola importo IVA e totale quando amount cambia
+                                        $rate = VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
+                                        $amount = $state ?? 0;
+                                        $vatAmount = $amount * $rate;
+                                        $total = $amount + $vatAmount;
+
+                                        $set('vat_amount', number_format($vatAmount, 2, '.', ''));
+                                        $set('total', number_format($total, 2, '.', ''));
+                                    }),
+                                Forms\Components\Select::make('vat_code_type')
+                                    ->label('Aliquota IVA')
+                                    ->required()
+                                    ->columnSpan(8)
+                                    ->options(VatCodeType::class)
+                                    ->searchable()
+                                    ->live()
+                                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                        // Calcola importo IVA e totale quando vat_code_type cambia
+                                        $rate = VatCodeType::tryFrom($state)?->getRate() / 100 ?? 0;
+                                        $amount = $get('amount') ?? 0;
+                                        $vatAmount = $amount * $rate;
+                                        $total = $amount + $vatAmount;
+
+                                        $set('vat_amount', number_format($vatAmount, 2, '.', ''));
+                                        $set('total', number_format($total, 2, '.', ''));
+                                    })
+                                    ->preload(),
+                                Forms\Components\TextInput::make('vat_amount')
+                                    ->label('Importo IVA')
+                                    ->readOnly()
+                                    ->prefix('€')
+                                    ->columnSpan(4)
+                                    ->formatStateUsing(function (Get $get, Set $set) {
+                                        $vatCodeType = $get('vat_code_type');
+                                        $rate = $vatCodeType instanceof \App\Enums\VatCodeType ? $vatCodeType->value : $vatCodeType;
+                                        $rate = VatCodeType::tryFrom($rate)?->getRate() / 100 ?? 0;
+                                        $amount = $get('amount') ?? 0;
+                                        $vatAmount = $amount * $rate;
+                                        return number_format($vatAmount, 2, '.', '');
+                                    })
+                                    ->default(0.00),
+                                Forms\Components\TextInput::make('total')
+                                    ->label('Totale')
+                                    ->readOnly()
+                                    ->prefix('€')
+                                    ->columnSpan(8)
+                                    ->default(0.00),
+                            ])
+                            ->columns(12)
+                            ->columnSpanFull()
+                            ->itemLabel(fn (array $state): ?string =>
+                                isset($state['vat_code_type']) && ($vat = VatCodeType::tryFrom($state['vat_code_type']))
+                                    ? $state['description'] . " (" . $state['amount'] . " - " . $vat->getRate() . "%)"
+                                    : null
+                            )
+                            // ->addActionLabel('Aggiungi voce')
+                            ->addable(false)
+                            ->default(function (Get $get, $operation) {
+                                if ($operation === 'create') {
+                                    $parentId = $get('parent_id');
+                                    if ($parentId) {
+                                        $parentInvoice = Invoice::with('invoiceItems')->find($parentId);
+                                        if ($parentInvoice && $parentInvoice->invoiceItems) {
+                                            return $parentInvoice->invoiceItems->map(function ($item) {
+                                                return [
+                                                    'invoice_element_id' => $item->invoice_element_id,
+                                                    'description' => $item->description,
+                                                    'amount' => $item->amount,
+                                                    'vat_code_type' => $item->vat_code_type instanceof \App\Enums\VatCodeType ? $item->vat_code_type->value : $item->vat_code_type,
+                                                    'vat_amount' => number_format($item->vat_amount, 2, '.', ''),
+                                                    'total' => number_format($item->total, 2, '.', ''),
+                                                ];
+                                            })->toArray();
+                                        }
+                                    }
+                                }
+                                return [];
+                            })
+                            ->afterStateUpdated(function ($record) {
+                                if ($record) {
+                                    $record->updateTotal();
+                                    if ($record->invoice) {
+                                        $record->invoice->updateTotalNotes();
+                                    }
+                                }
+                            }),
+                    ]),
             ])->columns(5);
     }
 
@@ -471,12 +777,10 @@ class CreditNotesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->modalWidth('7xl'),
+                Tables\Actions\CreateAction::make()->modalWidth('7xl'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->modalWidth('7xl'),
+                Tables\Actions\EditAction::make()->modalWidth('7xl'),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -484,5 +788,41 @@ class CreditNotesRelationManager extends RelationManager
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function invoiceNumber(Get $get, Set $set){
+
+        if(empty($get('number')) || empty($get('sectional_id')) || empty($get('year')))
+            $set('invoice_uid', null);
+        else{
+            $number = "";
+            $sectional = Sectional::find($get('sectional_id'))->description;
+            for($i=strlen($get('number'));$i<3;$i++)
+            {
+                $number.= "0";
+            }
+            $number = $number.$get('number');
+            $set('invoice_uid', $number."/".$sectional."/".$get('year'));
+        }
+
+    }
+
+    public static function calculateNextInvoiceNumber($year, $sectionalId): ?int
+    {
+        if ($year && $sectionalId) {
+            $maxNumber = \App\Models\Invoice::where('year', $year)
+                ->where('sectional_id', $sectionalId)
+                ->where('company_id', Filament::getTenant()->id)
+                ->max('number');
+
+            if ($maxNumber !== null) {
+                return $maxNumber + 1;
+            }
+
+            $sectional = \App\Models\Sectional::find($sectionalId);
+            return $sectional?->progressive;
+        }
+
+        return null;
     }
 }

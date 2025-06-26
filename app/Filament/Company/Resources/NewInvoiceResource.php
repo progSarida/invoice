@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
 use App\Enums\TaxType;
@@ -14,6 +15,7 @@ use Filament\Forms\Set;
 use App\Enums\SdiStatus;
 use Filament\Forms\Form;
 use App\Enums\ClientType;
+use App\Enums\TimingType;
 use App\Models\Sectional;
 use App\Enums\InvoiceType;
 use App\Enums\PaymentType;
@@ -232,6 +234,18 @@ class NewInvoiceResource extends Resource
                                 ->searchable()
                         ]),
 
+                        Section::make('Status SDI')->columns(2)
+                        ->collapsed()
+                        ->schema([
+                            Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
+                                ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))
+                                ->columnSpanFull(),
+                            Forms\Components\TextInput::make('sdi_code')->label('Codice')->readOnly()->columnSpan(1)->disabled(),
+                            Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(1)->disabled()
+                                ->native(false)
+                                ->displayFormat('d F Y'),
+                        ]),
+
                         Section::make('Dati per il pagamento')->columns(4)
                         ->collapsed()
                         ->schema([
@@ -280,8 +294,27 @@ class NewInvoiceResource extends Resource
                     Section::make('')
                         ->columns(6)
                         ->schema([
+                            Forms\Components\Select::make('timing_type')->label('Modalità')->options(TimingType::class)
+                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
+                                ->placeholder(null)
+                                ->default('contestuale')
+                                ->live()
+                                ->columnSpan(2),
+                            Forms\Components\TextInput::make('delivery_note')->label('Documento di trasporto')
+                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
+                                ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita'),
+                            Forms\Components\DatePicker::make('delivery_date')->label('Data documento')
+                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
+                                ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita')
+                                ->native(false)
+                                ->displayFormat('d F Y'),
+                        ]),
 
-                            Forms\Components\Select::make('doc_type_id')->label('Tipo')
+                    Section::make('')
+                        ->columns(6)
+                        ->schema([
+
+                            Forms\Components\Select::make('doc_type_id')->label('Tipo documento')
                                 ->required()
                                 ->live()
                                 ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
@@ -301,10 +334,10 @@ class NewInvoiceResource extends Resource
                                 ->disabled(fn (Get $get) => !filled($get('sectional_id')))
                                 ->searchable()
                                 ->preload()
-                                ->columnSpan(3),
+                                ->columnSpan(4),
 
                             Forms\Components\TextInput::make('invoice_uid')->label('Identificativo')
-                                ->disabled()->columnSpan(3),
+                                ->disabled()->columnSpan(2),
 
                             Forms\Components\TextInput::make('number')->label('Numero')
                                 ->columnSpan(2)
@@ -347,10 +380,29 @@ class NewInvoiceResource extends Resource
                                     NewInvoiceResource::invoiceNumber($get, $set);
                                 })
                                 ->live()
+                                ->disabled(function (Get $get): bool {
+                                    $timingType = $get('timing_type');
+                                    $today = now();
+
+                                    $contestualeCutoff = now()->copy()->startOfYear()->month(1)->day(12);
+
+                                    $differitaCutoff = now()->copy()->startOfYear()->month(1)->day(15);
+
+                                    if ($timingType === 'contestuale') {
+                                        return $today->gt($contestualeCutoff);
+                                    }
+
+                                    if ($timingType === 'differita') {
+                                        return $today->gt($differitaCutoff);
+                                    }
+
+                                    return false;
+                                })
                                 ->required()
-                                ->numeric()
-                                ->minValue(1900)
+                                // ->numeric()
+                                // ->minValue(1900)
                                 ->rules(['digits:4'])
+                                ->dehydrated()
                                 ->default(now()->year),
 
                             Forms\Components\DatePicker::make('invoice_date')->label('Data')
@@ -436,7 +488,7 @@ class NewInvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('invoice.id')->label('Fattura stornata')
                     ->formatStateUsing(function ( string $state ) {
                         $invoice = Invoice::find($state);
-                        return $invoice->getInvoiceNumber();
+                        return $invoice->getNewInvoiceNumber();
                     })
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -456,19 +508,31 @@ class NewInvoiceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
                     ->searchable()
-                    ->badge()
+                    // ->badge()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('total')->label('Totale a doversi')
+                Tables\Columns\TextColumn::make('total')->label('Totale')
                     ->money('EUR')
                     ->sortable()
                     ->alignRight()
+                    // ->tooltip(fn (Invoice $record) => $record->total . " - " . "(" . $record->total_payment . " + " . $record->total_notes . ")" . " = " . $record->total-($record->total_payment+$record->total_notes))
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total_payment')->label('Pagamenti')
                     ->money('EUR')
                     ->sortable()
                     ->alignRight()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('total_notes')->label('Note di credito')
+                    ->money('EUR')
+                    ->sortable()
+                    ->alignRight()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('tot_res')->label('Totale a doversi')
+                    ->money('EUR')
+                    ->state(fn (Invoice $invoice) => $invoice->getResidue())
+                    ->sortable()
+                    ->alignRight()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('sdi_status')->label('Status')
                     ->searchable()->badge()->sortable(),
                 Tables\Columns\TextColumn::make('sdi_date')->label('Data status')
@@ -702,7 +766,8 @@ class NewInvoiceResource extends Resource
             // ])->filtersFormColumns(2)
             ->persistFiltersInSession()
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->label(''),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
