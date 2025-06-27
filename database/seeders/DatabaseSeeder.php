@@ -31,5 +31,6 @@ class DatabaseSeeder extends Seeder
         $this->call(CompanyUserTableSeeder::class);
         $this->call(InvoiceItemsTableSeeder::class);
         $this->call(ActivePaymentsTableSeeder::class);
+        $this->call(LimitMotivationTypesTableSeeder::class);
     }
 }
