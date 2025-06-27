@@ -179,6 +179,7 @@ class NewInvoiceResource extends Resource
                                 ->hintAction(
                                     Action::make('Nuovo')
                                         ->icon('govicon-file-contract-o')
+                                        ->visible(fn(Get $get): bool => filled($get('tax_type')))
                                         ->fillForm(fn (Get $get): array => [
                                             'client_id' => $get('client_id'),
                                             'tax_type' => $get('tax_type'),
@@ -186,7 +187,7 @@ class NewInvoiceResource extends Resource
                                         ->form( fn(Form $form) => NewContractResource::modalForm($form) )
                                         ->modalWidth('7xl')
                                         ->modalHeading('')
-                                        ->action( fn(array $data, NewContract $contract) => NewContractResource::saveContract($data, $contract) )
+                                        ->action( fn(array $data, NewContract $contract, Set $set) => NewContractResource::saveContract($data, $contract, $set) )
                                 ),
 
                             Forms\Components\Select::make('parent_id')->label('Fattura da stornare')

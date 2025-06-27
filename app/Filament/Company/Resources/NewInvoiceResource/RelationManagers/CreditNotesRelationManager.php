@@ -198,7 +198,7 @@ class CreditNotesRelationManager extends RelationManager
                                         ->form( fn(Form $form) => NewContractResource::modalForm($form) )
                                         ->modalWidth('7xl')
                                         ->modalHeading('')
-                                        ->action( fn(array $data, NewContract $contract) => NewContractResource::saveContract($data, $contract) )
+                                        ->action( fn(array $data, NewContract $contract, Set $set) => NewContractResource::saveContract($data, $contract, $set) )
                                 ),
 
                             Forms\Components\Select::make('parent_id')->label('Fattura da stornare')

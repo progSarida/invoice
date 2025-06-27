@@ -76,6 +76,7 @@ class NewContractResource extends Resource
                     ->columnSpan(3),
                 DatePicker::make('start_validity_date')
                     ->label('Inizio Validità')
+                    ->required()
                     ->date()
                     ->columnSpan(2),
                 DatePicker::make('end_validity_date')
@@ -98,6 +99,7 @@ class NewContractResource extends Resource
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
+                    ->required()
                     ->columnSpan(3)
                     ->inputMode('decimal')
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
@@ -236,6 +238,7 @@ class NewContractResource extends Resource
                     ->columnSpan(3),
                 DatePicker::make('start_validity_date')
                     ->label('Inizio Validità')
+                    ->required()
                     ->date()
                     ->columnSpan(2),
                 DatePicker::make('end_validity_date')
@@ -257,6 +260,7 @@ class NewContractResource extends Resource
                     ->preload()
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('amount')
+                    ->required()
                     ->label('Importo')
                     ->columnSpan(3)
                     ->inputMode('decimal')
@@ -308,6 +312,31 @@ class NewContractResource extends Resource
 
         Notification::make()
             ->title('Cliente salvato con successo')
+            ->success()
+            ->send();
+    }
+
+    public static function saveContract(array $data, NewContract $contract, Set $set): void
+    {
+        $contract->company_id = Filament::getTenant()->id;
+        $contract->client_id = $data['client_id'];
+        $contract->tax_type = $data['tax_type'];
+        $contract->start_validity_date = $data['start_validity_date'];
+        $contract->end_validity_date = $data['end_validity_date'];
+        $contract->accrual_type_id = $data['accrual_type_id'];
+        $contract->payment_type = $data['payment_type'];
+        $contract->cig_code = $data['cig_code'];
+        $contract->cup_code = $data['cup_code'];
+        $contract->office_code = $data['office_code'];
+        $contract->office_name = $data['office_name'];
+        $contract->amount = $data['amount'];
+        $contract->save();
+
+        // Set the newly created client_id in the form
+        $set('contract_id', $contract->id);
+
+        Notification::make()
+            ->title('Contratto salvato con successo')
             ->success()
             ->send();
     }
