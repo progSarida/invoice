@@ -20,7 +20,13 @@ return new class extends Migration
             $table->string('tax_type');                                             // tipo entrata (Enum)
             $table->date('start_validity_date')->nullable();                        // data inizio validità contratto
             $table->date('end_validity_date')->nullable();                          // data fine validità contratto
+
+            // $table->unsignedBigInteger('accrual_type_id')->nullable();
+            // $table->foreign('accrual_type_id')->references('id')->on('accrual_types')
+            // ->onUpdate('cascade')->onDelete('cascade');
             $table->string('accrual_type_id')->nullable();                          // id competenza
+            // $table->foreignId('accrual_type_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
+
             $table->string('payment_type')->nullable();                             // tipo pagamento (Enum)
             $table->string('cig_code');                                             // codice identificativo gara
             $table->string('cup_code');                                             // codice unico progetto

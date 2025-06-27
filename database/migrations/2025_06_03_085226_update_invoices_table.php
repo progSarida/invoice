@@ -13,8 +13,18 @@ return new class extends Migration
     {
         Schema::table('invoices',function (Blueprint $table){
             $table->string('flow')->nullable();                                                 // tipo fattura: in => passiva, out => attiva (Enum)
+
+            // $table->unsignedBigInteger('accrual_type_id')->nullable();
+            // $table->foreign('accrual_type_id')->references('id')->on('accrual_types')
+            // ->onUpdate('cascade')->onDelete('cascade');
             $table->string('accrual_type_id')->nullable();                                      // id tipo di competenza
+            // $table->foreignId('accrual_type_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
+
+            // $table->unsignedBigInteger('manage_type_id')->nullable();
+            // $table->foreign('manage_type_id')->references('id')->on('manage_types')
+            // ->onUpdate('cascade')->onDelete('cascade');
             $table->string('manage_type_id')->nullable();                           // id tipo di gestione
+            // $table->foreignId('manage_type_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

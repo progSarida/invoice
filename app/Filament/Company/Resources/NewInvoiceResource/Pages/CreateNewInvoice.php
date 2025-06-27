@@ -5,6 +5,8 @@ namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 use Carbon\Carbon;
 use Filament\Actions;
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Company\Resources\NewInvoiceResource;
@@ -58,5 +60,48 @@ class CreateNewInvoice extends CreateRecord
         $data['flow'] = 'out';
 
         return $data;
+    }
+
+    protected function handleRecordCreation(array $data): Model
+    {
+        $data['company_id'] = filament()->getTenant()?->id;
+        $record = Invoice::create($data);
+
+        // GESTIONE VOCI NOTE DI CREDITO IN CASO DI LIMITE TEMPORALE PASSATO (1 anno)
+        if($record->year_limit == 'si'){                                                                                    // nota soggetta a limite temporale
+            // copio le voci della fattura da stornare ma applico vat_code_type 'vc00'
+            $items = InvoiceItem::where('invoice_id', $record->parent_id)->get();
+            foreach($items as $item){
+                // creo un InvoiceItem con invoice_id == id nota creata e vat_code_type == 'vc00'
+                InvoiceItem::create([
+                    'invoice_id'            => $record->id,
+                    'invoice_element_id'    => $item->invoice_element_id,
+                    'description'           => $item->description,
+                    'amount'                => $item->amount,
+                    'total'                 => $item->amount,
+                    'vat_code_type'         => 'vc00',
+                    'is_with_vat'           => true
+                ]);
+            }
+        }
+        else if($record->year_limit == 'no'){                                                                               // nota non soggetta a limite temporale
+            // copio le voci della fattura da stornare
+            $items = InvoiceItem::where('invoice_id', $record->parent_id)->get();
+            // controllo item parent?
+            foreach($items as $item){
+                // creo un InvoiceItem con invoice_id == id nota creata
+                InvoiceItem::create([
+                    'invoice_id'            => $record->id,
+                    'invoice_element_id'    => $item->invoice_element_id,
+                    'description'           => $item->description,
+                    'amount'                => $item->amount,
+                    'total'                 => $item->total,
+                    'vat_code_type'         => $item->vat_code_type,
+                    'is_with_vat'           => $item->is_with_vat
+                ]);
+            }
+        }
+
+        return $record;
     }
 }

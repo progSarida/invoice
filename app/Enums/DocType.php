@@ -16,6 +16,7 @@ enum DocType: string implements HasLabel, HasColor, HasDescription
     case TD04 = "td04";
     case TD05 = "td05";
     case TD06 = "td06";
+    case TD08 = "td08";
     case TD16 = "td16";
     case TD17 = "td17";
     case TD18 = "td18";
@@ -44,6 +45,7 @@ enum DocType: string implements HasLabel, HasColor, HasDescription
             self::TD04 => 'TD04',
             self::TD05 => 'TD05',
             self::TD06 => 'TD06',
+            self::TD08 => 'TD08',
             self::TD16 => 'TD16',
             self::TD17 => 'TD17',
             self::TD18 => 'TD18',
@@ -73,6 +75,7 @@ enum DocType: string implements HasLabel, HasColor, HasDescription
             self::TD04 => "Nota di credito",
             self::TD05 => "Nota di debito",
             self::TD06 => "Parcella",
+            self::TD08 => "Nota di credito semplificata",
             self::TD16 => "Integrazione fattura reverse charge interno",
             self::TD17 => "Integrazione/autofattura per acquisto servizi dall'estero",
             self::TD18 => "Integrazione/autofattura per acquisto di beni intracomunitari",
@@ -107,6 +110,7 @@ enum DocType: string implements HasLabel, HasColor, HasDescription
             self::TD04 => '',
             self::TD05 => '',
             self::TD06 => '',
+            self::TD08 => '',
             self::TD16 => '',
             self::TD17 => '',
             self::TD18 => '',
@@ -130,7 +134,7 @@ enum DocType: string implements HasLabel, HasColor, HasDescription
         return match ($this) {
             self::TD00 => 'Preavvisi di fattura',
             self::TD01, self::TD02, self::TD03, self::TD06, self::TD24, self::TD25, self::TD26 => 'Fatture',
-            self::TD04, self::TD05 => 'Nota di varazione',
+            self::TD04, self::TD05, self::TD08 => 'Nota di varazione',
             self::TD01A, self::TD16, self::TD17, self::TD18, self::TD19, self::TD20, self::TD21, self::TD22, self::TD23, self::TD24, self::TD25, self::TD26A, self::TD27, self::TD28, self::TD29 => 'Autofatture',
         };
     }

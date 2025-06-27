@@ -48,4 +48,12 @@ class Client extends Model
     public function contracts(){
         return $this->hasMany(Contract::class);
     }
+
+    public function isPublic(){
+        return $this->type === 'public';
+    }
+
+    public function isPrivate(){
+        return $this->type === 'private';
+    }
 }

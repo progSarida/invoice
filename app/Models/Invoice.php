@@ -24,7 +24,12 @@ class Invoice extends Model
         'parent_id',
         'tax_type',
         'invoice_type',
+        'timing_type',
+        'delivery_note',
+        'delivery_date',
         'doc_type_id',
+        'year_limit',
+        'limit_motivation_type_id',
         'number',
         'section',
         'sectional_id',
@@ -39,9 +44,6 @@ class Invoice extends Model
         'bank_account_id',
         'payment_type',
         'payment_days',
-        'timing_type',
-        'delivery_note',
-        'delivery_date',
     ];
 
     protected $casts = [

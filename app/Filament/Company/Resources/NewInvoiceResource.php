@@ -201,8 +201,33 @@ class NewInvoiceResource extends Resource
                                         $docType = DocType::with('docGroup')->find($docTypeId);
 
                                         return $docType?->docGroup?->name === 'Note di variazione';
+                                        // return true;
                                     }
                                 )
+                                ->afterStateUpdated( function($state){
+                                    $parent = Invoice::find($state);
+                                    $past = $parent && $parent->invoice_date
+                                        ? Carbon::parse($parent->invoice_date)->lt(Carbon::now()->subYear())
+                                        : false;
+                                    if($past)
+                                        \Filament\Notifications\Notification::make()
+                                            ->title('')
+                                            ->body('E\' passato più di un anno dall\'emissione della fattura da stornare<br>Gestire limite temporale ed eventuale motivazione per emettere la nota di credito')
+                                            ->warning()
+                                            ->duration(10000)
+                                            ->send();
+                                })
+                                ->required(function (?Model $record, Get $get) {
+                                    // $privateR = ($record && $record->client->type->isPrivate() ? true : false);
+                                    // $client_id = $get('client_id');
+                                    // $privateI = $client_id && Client::find($client_id)->type->isPrivate() ? true : false;
+                                    // $private = $privateR || $privateI;
+                                    $docTypeId = $get('doc_type_id');
+                                    if (!filled($docTypeId)) { return false; }
+                                    $docType = DocType::with('docGroup')->find($docTypeId);
+                                    // $note = $docType?->docGroup?->name === 'Note di variazione';
+                                    return ($docType?->docGroup?->name === 'Note di variazione');
+                                })
                                 ->live()
                                 ->relationship(
                                     name: 'invoice',
@@ -223,7 +248,7 @@ class NewInvoiceResource extends Resource
                                 ->getOptionLabelFromRecordUsing(
                                     function (Model $record) {
                                         $return = "Fattura n. {$record->getNewInvoiceNumber()}";
-                                        if($record->client->type->isPrivate())
+                                        if($record->client->type->isPublic())
                                             $return.= " - {$record->tax_type->getLabel()}\n{$record->contract->office_name} ({$record->contract->office_code}) - CIG: {$record->contract->cig_code}";
                                         $return.= "\nDestinatario: {$record->client->denomination}";
                                         return $return;
@@ -338,6 +363,56 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\TextInput::make('invoice_uid')->label('Identificativo')
                                 ->disabled()->columnSpan(2),
+
+                            // INSERIRE RIGA CON LIMITE TEMPORALE (SI/NO), MOTIVAZIONE (in tabella) (visibile SOLO se 'Nota di credito' e cliente 'Soggetto privato')
+                            Forms\Components\Select::make('year_limit')->label('Limite temporale')
+                                ->required()
+                                ->visible(function (?Model $record, Get $get) {
+                                    $parent = Invoice::find($get('parent_id'));
+                                    $past = $parent && $parent->invoice_date
+                                        ? Carbon::parse($parent->invoice_date)->lt(Carbon::now()->subYear())
+                                        : false;
+                                    $docTypeId = $get('doc_type_id');
+                                    if (!filled($docTypeId)) { return false; }
+                                    $docType = DocType::with('docGroup')->find($docTypeId);
+                                    $note = $docType?->docGroup?->name === 'Note di variazione';
+                                    return ($past && $note);
+                                })
+                                ->options([
+                                    'si' => 'Si',
+                                    'no' => 'No'
+                                ])
+                                ->afterStateUpdated(function (Get $get, Set $set) {
+                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                    $set('number', $number);
+                                    NewInvoiceResource::invoiceNumber($get, $set);
+                                })
+                                ->live()
+                                ->searchable()
+                                ->preload()
+                                ->disabled(function (?Model $record) {
+                                    return $record && $record->client->type->isPublic() ? true : false;
+                                })
+                                ->columnSpan(function (?Model $record, $state) {
+                                    return $state && $state == 'no' ? 2 : 6;
+                                }),
+
+                            Forms\Components\Select::make('limit_motivation_type_id')->label('Motivazione')
+                                ->required()
+                                ->visible(fn (Get $get) => $get('year_limit') == 'no')
+                                ->options(function (Get $get) {
+                                    $query = \App\Models\LimitMotivationType::where('company_id', Filament::getTenant()->id);
+                                    return $query->pluck('name', 'id');
+                                })
+                                ->afterStateUpdated(function (Get $get, Set $set) {
+                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                    $set('number', $number);
+                                    NewInvoiceResource::invoiceNumber($get, $set);
+                                })
+                                ->live()
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(4),
 
                             Forms\Components\TextInput::make('number')->label('Numero')
                                 ->columnSpan(2)

@@ -7,6 +7,7 @@ use Filament\Support\Contracts\HasLabel;
 
 enum VatCodeType: string implements HasLabel, HasDescription
 {
+    case VC00 = "vc00";                         // codice aliquota per nota di credito oltre l'anno
     case VC01 = "vc01";
     case VC02 = "vc02";
     case VC03 = "vc03";
@@ -37,6 +38,7 @@ enum VatCodeType: string implements HasLabel, HasDescription
     public function getRate(): string
     {
         return match($this) {
+            self::VC00 => "0",
             self::VC01 => "22",
             self::VC02 => "10",
             self::VC03 => "5",
@@ -69,6 +71,7 @@ enum VatCodeType: string implements HasLabel, HasDescription
     public function getCode(): string
     {
         return match($this) {
+            self::VC00 => "",
             self::VC01 => "",
             self::VC02 => "",
             self::VC03 => "",
@@ -101,6 +104,7 @@ enum VatCodeType: string implements HasLabel, HasDescription
     public function getDescription(): ?string
     {
         return match($this) {
+            self::VC00 => "Escluso IVA ex art. 26 c. 3 DPR 633/72",
             self::VC01 => "",
             self::VC02 => "",
             self::VC03 => "",
@@ -119,7 +123,7 @@ enum VatCodeType: string implements HasLabel, HasDescription
             self::VC16 => "Non imponibile altre operazioni che non concorrono alla formazione del platfond",
             self::VC17 => "Esente Art. 10 DPR 633/72",
             self::VC18 => "Esente art. 124 c. 2 DL 34/20 (operazioni contenimento Covid)",
-            self::VC19 => "E£scluso Art. 74 DPR 633/72",
+            self::VC19 => "Escluso Art. 74 DPR 633/72",
             self::VC20 => "Regime del margine Art. 36 41/95",
             self::VC21 => "Reverse charge Art. 74 vendita rottami e materiali di recupero DPR 633/72",
             self::VC22 => "Reverse charge cessioni di oro e argento puro Art. 17, c. 5 DPR 633/72",

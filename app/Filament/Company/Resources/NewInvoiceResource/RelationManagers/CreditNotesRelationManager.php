@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\RelationManagers;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
 use App\Enums\TaxType;
@@ -49,6 +50,11 @@ class CreditNotesRelationManager extends RelationManager
         return $form
             ->schema([
                 Grid::make('GRID')->columnSpan(2)->schema([
+
+                    Forms\Components\Hidden::make('company_id')
+                        ->default(fn () => Filament::getTenant()?->id ?? throw new \Exception('Tenant ID is missing'))
+                        ->required()
+                        ->dehydrated(true),
 
                     Section::make('Destinatario')
                         ->collapsible()
@@ -209,6 +215,30 @@ class CreditNotesRelationManager extends RelationManager
                                         return $docType?->docGroup?->name === 'Note di variazione';
                                     }
                                 )
+                                // ->afterStateUpdated( function($state){
+                                //     $parent = Invoice::find($state);
+                                //     $past = $parent && $parent->invoice_date
+                                //         ? Carbon::parse($parent->invoice_date)->lt(Carbon::now()->subYear())
+                                //         : false;
+                                //     if($past)
+                                //         \Filament\Notifications\Notification::make()
+                                //             ->title('')
+                                //             ->body('E\' passato più di un anno dall\'emissione della fattura da stornare<br>Gestire limite temporale ed eventuale motivazione per emettere la nota di credito')
+                                //             ->warning()
+                                //             ->duration(10000)
+                                //             ->send();
+                                // })
+                                ->required(function (?Model $record, Get $get) {
+                                    // $privateR = ($record && $record->client->type->isPrivate() ? true : false);
+                                    // $client_id = $get('client_id');
+                                    // $privateI = $client_id && Client::find($client_id)->type->isPrivate() ? true : false;
+                                    // $private = $privateR || $privateI;
+                                    $docTypeId = $get('doc_type_id');
+                                    if (!filled($docTypeId)) { return false; }
+                                    $docType = DocType::with('docGroup')->find($docTypeId);
+                                    // $note = $docType?->docGroup?->name === 'Note di variazione';
+                                    return ($docType?->docGroup?->name === 'Note di variazione');
+                                })
                                 ->live()
                                 ->relationship(
                                     name: 'invoice',
@@ -229,7 +259,7 @@ class CreditNotesRelationManager extends RelationManager
                                 ->getOptionLabelFromRecordUsing(
                                     function (Model $record) {
                                         $return = "Fattura n. {$record->getNewInvoiceNumber()}";
-                                        if($record->client->type->isPrivate())
+                                        if($record->client->type->isPublic())
                                             $return.= " - {$record->tax_type->getLabel()}\n{$record->contract->office_name} ({$record->contract->office_code}) - CIG: {$record->contract->cig_code}";
                                         $return.= "\nDestinatario: {$record->client->denomination}";
                                         return $return;
@@ -238,6 +268,16 @@ class CreditNotesRelationManager extends RelationManager
                                 ->default(function (Get $get, Set $set) {
                                     if (blank($get('id'))) {
                                         $invoice = $this->getOwnerRecord();
+                                        $past = $invoice && $invoice->invoice_date
+                                            ? Carbon::parse($invoice->invoice_date)->lt(Carbon::now()->subYear())
+                                            : false;
+                                        if($past)
+                                            \Filament\Notifications\Notification::make()
+                                                ->title('')
+                                                ->body('E\' passato più di un anno dall\'emissione della fattura da stornare<br>Gestire <b>limite temporale</b> ed eventuale <b>motivazione</b> per emettere la nota di credito')
+                                                ->warning()
+                                                ->duration(10000)
+                                                ->send();
                                         return $invoice->id;
                                     }
                                     return null;
@@ -373,6 +413,89 @@ class CreditNotesRelationManager extends RelationManager
                                     return CreditNotesRelationManager::invoiceNumber($get, $set);
                                 })
                                 ->disabled()->columnSpan(3),
+
+                            Forms\Components\Select::make('year_limit')->label('Limite temporale')
+                                ->required()
+                                ->visible(function (?Model $record, Get $get) {
+                                    $parent = Invoice::find($get('parent_id'));
+                                    $past = $parent && $parent->invoice_date
+                                        ? Carbon::parse($parent->invoice_date)->lt(Carbon::now()->subYear())
+                                        : false;
+                                    $docTypeId = $get('doc_type_id');
+                                    if (!filled($docTypeId)) { return false; }
+                                    $docType = DocType::with('docGroup')->find($docTypeId);
+                                    $note = $docType?->docGroup?->name === 'Note di variazione';
+                                    return ($past && $note);
+                                })
+                                ->options([
+                                    'si' => 'Si',
+                                    'no' => 'No'
+                                ])
+                                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                    // Update invoice number
+                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                    $set('number', $number);
+                                    CreditNotesRelationManager::invoiceNumber($get, $set);
+
+                                    // Get the current invoice items from the repeater
+                                    $invoiceItems = $get('invoiceItems') ?? [];
+                                    $docTypeId = $get('doc_type_id');
+                                    $docType = DocType::find($docTypeId);
+
+                                    // Update vat_code_type for each item in the repeater
+                                    $updatedItems = array_map(function ($item) use ($get,$docType, $state) {
+                                        // Set vat_code_type to 'vc00' if doc_type is "Nota di credito" and year_limit is 'si'
+                                        if ($docType && $docType->description === 'Nota di credito' && $state === 'si') {
+                                            $item['vat_code_type'] = 'vc00';
+                                        } else {
+                                            // Optionally, reset to the original vat_code_type from the parent invoice item
+                                            $parentInvoice = Invoice::with('invoiceItems')->find($get('parent_id'));
+                                            if ($parentInvoice && $parentInvoice->invoiceItems->isNotEmpty()) {
+                                                // Assuming invoice_element_id can be used to match items
+                                                $parentItem = $parentInvoice->invoiceItems->firstWhere('invoice_element_id', $item['invoice_element_id']);
+                                                $item['vat_code_type'] = $parentItem ? ($parentItem->vat_code_type instanceof \App\Enums\VatCodeType ? $parentItem->vat_code_type->value : $parentItem->vat_code_type) : $item['vat_code_type'];
+                                            }
+                                        }
+
+                                        // Recalculate vat_amount and total based on the updated vat_code_type
+                                        $rate = VatCodeType::tryFrom($item['vat_code_type'])?->getRate() / 100 ?? 0;
+                                        $amount = $item['amount'] ?? 0;
+                                        $vatAmount = $amount * $rate;
+                                        $item['vat_amount'] = number_format($vatAmount, 2, '.', '');
+                                        $item['total'] = number_format($amount + $vatAmount, 2, '.', '');
+
+                                        return $item;
+                                    }, $invoiceItems);
+
+                                    // Set the updated invoice items back to the repeater
+                                    $set('invoiceItems', $updatedItems);
+                                })
+                                ->live()
+                                ->searchable()
+                                ->preload()
+                                ->disabled(function (?Model $record) {
+                                    return $record && $record->client->type->isPublic() ? true : false;
+                                })
+                                ->columnSpan(function (?Model $record, $state) {
+                                    return $state && $state == 'no' ? 2 : 6;
+                                }),
+
+                            Forms\Components\Select::make('limit_motivation_type_id')->label('Motivazione')
+                                ->required()
+                                ->visible(fn (Get $get) => $get('year_limit') == 'no')
+                                ->options(function (Get $get) {
+                                    $query = \App\Models\LimitMotivationType::where('company_id', Filament::getTenant()->id);
+                                    return $query->pluck('name', 'id');
+                                })
+                                ->afterStateUpdated(function (Get $get, Set $set) {
+                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                    $set('number', $number);
+                                    NewInvoiceResource::invoiceNumber($get, $set);
+                                })
+                                ->live()
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(4),
 
                             Forms\Components\TextInput::make('number')->label('Numero')
                                 ->columnSpan(2)
@@ -514,7 +637,7 @@ class CreditNotesRelationManager extends RelationManager
                                     fn (Get $get): array => blank($get('id')) ? [
                                         function ($attribute, $value, $fail) {
                                             if (!str_contains(strtolower($value), 'totale') && !str_contains(strtolower($value), 'parziale')) {
-                                                $fail('Il campo Descrizione deve contenere la parola "totale" o "parziale".');
+                                                $fail("Nel campo 'Descrizione' deve essere indicato se si tratta di uno storno 'totale' o 'parziale'.");
                                                 // \Filament\Notifications\Notification::make()
                                                 //     ->title('Errore di validazione')
                                                 //     ->body('Il campo Descrizione deve contenere la parola "totale" o "parziale".')
@@ -539,7 +662,7 @@ class CreditNotesRelationManager extends RelationManager
                                     fn (Get $get): array => blank($get('id')) ? [
                                         function ($attribute, $value, $fail) {
                                             if (!str_contains(strtolower($value), 'totale') && !str_contains(strtolower($value), 'parziale')) {
-                                                $fail('Il campo Descrizione libera deve contenere la parola "totale" o "parziale".');
+                                                $fail("Nel campo 'Descrizione libera' deve essere indicato se si tratta di uno storno 'totale' o 'parziale'.");
                                                 // \Filament\Notifications\Notification::make()
                                                 //     ->title('Errore di validazione')
                                                 //     ->body('Il campo Descrizione libera deve contenere la parola "totale" o "parziale".')
@@ -659,17 +782,26 @@ class CreditNotesRelationManager extends RelationManager
                             // ->addActionLabel('Aggiungi voce')
                             ->addable(false)
                             ->default(function (Get $get, $operation) {
+                                $docTypeId = $get('doc_type_id');
+                                $yearLimit = $get('year_limit');
                                 if ($operation === 'create') {
                                     $parentId = $get('parent_id');
                                     if ($parentId) {
                                         $parentInvoice = Invoice::with('invoiceItems')->find($parentId);
                                         if ($parentInvoice && $parentInvoice->invoiceItems) {
-                                            return $parentInvoice->invoiceItems->map(function ($item) {
+                                            return $parentInvoice->invoiceItems->map(function ($item) use ($docTypeId, $yearLimit) {
+                                                $add = '';
+                                                // dd($docTypeId . " - " . $yearLimit);
+                                                if(DocType::find($docTypeId)->description == "Nota di credito" && $yearLimit == 'si'){
+                                                    $vatCodeType = 'vc00';
+                                                }
+                                                else
+                                                    $vatCodeType = $item->vat_code_type;
                                                 return [
                                                     'invoice_element_id' => $item->invoice_element_id,
                                                     'description' => $item->description,
                                                     'amount' => $item->amount,
-                                                    'vat_code_type' => $item->vat_code_type instanceof \App\Enums\VatCodeType ? $item->vat_code_type->value : $item->vat_code_type,
+                                                    'vat_code_type' => $vatCodeType instanceof \App\Enums\VatCodeType ? $vatCodeType->value : $vatCodeType,
                                                     'vat_amount' => number_format($item->vat_amount, 2, '.', ''),
                                                     'total' => number_format($item->total, 2, '.', ''),
                                                 ];
@@ -825,4 +957,5 @@ class CreditNotesRelationManager extends RelationManager
 
         return null;
     }
+
 }
