@@ -76,6 +76,11 @@ class Invoice extends Model
         return $this->hasMany(SdiNotification::class);
     }
 
+    public function lastSdiNotification()
+    {
+        return $this->hasOne(SdiNotification::class)->latestOfMany('date');
+    }
+
     public function activePayments(){
         return $this->hasMany(ActivePayments::class);
     }
@@ -112,6 +117,11 @@ class Invoice extends Model
         }
         $number = $number.$this->number;
         return $number."/0".$this->section."/".$this->year;
+    }
+
+    public function printNumber(){
+        $number = $this->getNewInvoiceNumber();
+        return str_replace('/', '_', $number);
     }
 
     public function getResidue()

@@ -83,8 +83,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->options(VatCodeType::class)
                     ->searchable()->live()
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        // Calcola importo IVA e totale quando vat_code_type cambia
-                        $rate = $state?->getRate() / 100 ?? 0;
+                        $rate = $state ? VatCodeType::tryFrom($state)?->getRate() / 100 : 0;
                         $amount = $get('amount') ?? 0;
                         $vatAmount = $amount * $rate;
                         $total = $amount + $vatAmount;

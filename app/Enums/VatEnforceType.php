@@ -19,4 +19,22 @@ enum VatEnforceType: string implements HasLabel
         };
     }
 
+    public function getSummary(): ?string
+    {
+        return match($this) {
+            self::NOW => "esigibilità immediata",
+            self::POSTPONED => "esigibilità differita",
+            self::SPLIT => "scissione dei pagamenti"
+        };
+    }
+
+    public function getCode(): ?string
+    {
+        return match($this) {
+            self::NOW => "I",
+            self::POSTPONED => "D",
+            self::SPLIT => "S"
+        };
+    }
+
 }

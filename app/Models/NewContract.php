@@ -52,4 +52,9 @@ class NewContract extends Model
     {
         return $this->hasMany(ContractDetail::class, 'contract_id');
     }
+
+    public function lastDetail()
+    {
+        return $this->hasOne(ContractDetail::class, 'contract_id')->latestOfMany('date');
+    }
 }
