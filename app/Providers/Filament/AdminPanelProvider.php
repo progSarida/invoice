@@ -49,7 +49,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login() // Abilita la pagina di login
-            ->registration() // Opzionale: abilita la registrazione
+            // ->registration() // Opzionale: abilita la registrazione
             ->passwordReset() // Opzionale: abilita il reset della password
             ->emailVerification() // Opzionale: abilita la verifica dell'email
             ->profile() // Opzionale: abilita la pagina del profilo
