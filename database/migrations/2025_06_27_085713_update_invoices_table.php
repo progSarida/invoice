@@ -37,6 +37,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('limit_motivation_types');
+        Schema::enableForeignKeyConstraints();
     }
 };

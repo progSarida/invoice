@@ -53,9 +53,20 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         ];
     }
 
-    public function canAccessPanel(Panel $panel): bool
+    // public function canAccessPanel(Panel $panel): bool
+    // {
+    //     return true;
+    // }
+
+    public function canAccessPanel(\Filament\Panel $panel): bool            // solo chi ha 'is_admin' == 1 può effettuarte l'accesso alla dashboard
     {
-        return true;
+        if ($panel->getId() === 'admin') {
+            return $this->is_admin;
+        }
+
+        if ($panel->getId() === 'company') {
+            return true;
+        }
     }
 
     public function companies(){

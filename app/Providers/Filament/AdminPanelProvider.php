@@ -48,7 +48,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login() // Abilita la pagina di login
+            ->registration() // Opzionale: abilita la registrazione
+            ->passwordReset() // Opzionale: abilita il reset della password
+            ->emailVerification() // Opzionale: abilita la verifica dell'email
+            ->profile() // Opzionale: abilita la pagina del profilo
             ->colors([
                 'primary' => Color::Amber,
             ])

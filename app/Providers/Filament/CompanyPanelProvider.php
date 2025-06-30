@@ -29,6 +29,11 @@ class CompanyPanelProvider extends PanelProvider
         return $panel
             ->id('company')
             ->path('company')
+            ->login() // Abilita la pagina di login
+            ->registration() // Opzionale: abilita la registrazione
+            ->passwordReset() // Opzionale: abilita il reset della password
+            ->emailVerification() // Opzionale: abilita la verifica dell'email
+            ->profile() // Opzionale: abilita la pagina del profilo
             ->tenant(Company::class)
             ->colors([
                 'primary' => Color::Amber,

@@ -47,7 +47,10 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('password_confirmation')
                     ->password()
                     ->label('Conferma password'),
-
+                Forms\Components\Toggle::make('is_admin')
+                    ->label('Amministratore')
+                    ->dehydrated(fn ($state) => filled($state)) // Only save if filled
+                    ->helperText(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord ? '' : ''),
                 Forms\Components\Section::make('Aziende')->schema([
                     CheckboxList::make('companies')->relationship('companies','name')->label('')
                 ])
@@ -62,6 +65,12 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')->label('Email')
                     ->searchable(),
+                Tables\Columns\ToggleColumn::make('is_admin')
+                    ->label('Admin')
+                    ->onIcon('heroicon-s-shield-check')
+                    ->offIcon('heroicon-s-shield-exclamation')
+                    ->onColor('success')
+                    ->offColor('danger'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
