@@ -587,6 +587,17 @@ class NewInvoiceResource extends Resource
                     // ->badge()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('no_vat_total')->label('Imponibile')
+                    ->money('EUR')
+                    ->sortable()
+                    ->alignRight()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('vat')->label('Importo IVA')
+                    ->money('EUR')
+                    ->state(fn (Invoice $invoice) => $invoice->getVat())
+                    ->sortable()
+                    ->alignRight()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total')->label('Totale')
                     ->money('EUR')
                     ->sortable()

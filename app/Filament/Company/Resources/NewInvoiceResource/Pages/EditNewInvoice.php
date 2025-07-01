@@ -3,6 +3,7 @@
 namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 
 use Filament\Actions;
+use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Sectional;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -22,8 +23,23 @@ class EditNewInvoice extends EditRecord
                 ->icon('heroicon-o-printer')
                 ->color('primary')
                 ->action(function (Invoice $record) {
-                    return response()->streamDownload(function () use ($record) {
-                        echo Pdf::loadView('pdf.invoice', ['invoice' => $record])->stream();
+                    $vats = $record->vatResume();
+                    $grouped = collect($vats)
+                        ->groupBy('%')
+                        ->map(function ($items, $percent) {
+                            return [
+                                '%' => $percent,
+                                'taxable' => $items->sum('taxable'),
+                                'vat' => $items->sum('vat'),
+                                'total' => $items->sum('total'),
+                                'norm' => $items->first()['norm'],
+                                'free' => $items->first()['free'],
+                            ];
+                        })
+                        ->values()
+                        ->toArray();
+                    return response()->streamDownload(function () use ($record, $grouped) {
+                        echo Pdf::loadView('pdf.invoice', [ 'invoice' => $record, 'vats' => $grouped ])->stream();
                     }, 'fattura-' . $record->printNumber() . '.pdf');
                 }),
         ];

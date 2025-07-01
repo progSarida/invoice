@@ -229,23 +229,23 @@ class CompanyResource extends Resource
                                             ->columnSpan(8)
                                     ])
                                     ->columns(12),
-                                Fieldset::make('Esigibilità IVA')
-                                    ->relationship('fiscalProfile')
-                                    ->schema([
-                                        Forms\Components\Toggle::make('vat_enforce')
-                                            ->label('Attiva')
-                                            ->reactive()
-                                            ->columnSpan(1),
-                                        Placeholder::make('')->content('')->columnSpan(1),
-                                        Select::make('vat_enforce_type')
-                                            ->label('')
-                                            ->options(
-                                                collect(VatEnforceType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                                            )
-                                            ->visible(fn ($get) => $get('vat_enforce'))
-                                            ->columnSpan(6),
-                                    ])
-                                    ->columns(12)
+                                // Fieldset::make('Esigibilità IVA')
+                                //     ->relationship('fiscalProfile')
+                                //     ->schema([
+                                //         Forms\Components\Toggle::make('vat_enforce')
+                                //             ->label('Attiva')
+                                //             ->reactive()
+                                //             ->columnSpan(1),
+                                //         Placeholder::make('')->content('')->columnSpan(1),
+                                //         Select::make('vat_enforce_type')
+                                //             ->label('')
+                                //             ->options(
+                                //                 collect(VatEnforceType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                //             )
+                                //             ->visible(fn ($get) => $get('vat_enforce'))
+                                //             ->columnSpan(6),
+                                //     ])
+                                //     ->columns(12)
                             ])
                             ->columns(12),
                         Tabs\Tab::make('Previdenza')
@@ -386,6 +386,7 @@ class CompanyResource extends Resource
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 if (!$state) {
                                                     $set('row_description', null);
+                                                    $set('amount', null);
                                                 }
                                             })
                                             ->disabled(fn ($get) => !$get('active'))
@@ -394,12 +395,20 @@ class CompanyResource extends Resource
                                         Placeholder::make('')->content('')->columnSpan(11),
                                         Placeholder::make('')
                                             ->content("Descrizione riga da aggiungere nella fattura elettronica")
-                                            ->columnSpan(12)->extraAttributes(['style' => 'font-weight: bold;']),
+                                            ->columnSpan(8)->extraAttributes(['style' => 'font-weight: bold;']),
+                                        Placeholder::make('')
+                                            ->content("Importo")
+                                            ->columnSpan(4)->extraAttributes(['style' => 'font-weight: bold;']),
                                         TextInput::make('row_description')
                                             ->label('')
                                             ->disabled(fn ($get) => !$get('add_row'))
                                             ->dehydrated(true)
                                             ->columnSpan(8),
+                                        TextInput::make('amount')
+                                            ->label('')
+                                            ->disabled(fn ($get) => !$get('add_row'))
+                                            ->dehydrated(true)
+                                            ->columnSpan(4),
                                     ])
                                     ->columns(12)
                             ])

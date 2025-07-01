@@ -87,6 +87,7 @@ return new class extends Migration
             $table->decimal('value',8,2)->nullable();                            // aliquota fiscale
             $table->boolean('add_row')->default(false);                           // addebito al cliente con riga aggiuntiva in fattura
             $table->string('row_description')->nullable();                        // descrizione riga da aggiungere
+            $table->decimal('amount',8,2)->nullable();                            //
             $table->timestamps();
         });
     }

@@ -8,14 +8,14 @@ enum VatEnforceType: string implements HasLabel
 {
     case NOW = "now";
     case POSTPONED = "postponed";
-    case SPLIT = "split";
+    // case SPLIT = "split";
 
     public function getLabel(): ?string
     {
         return match($this) {
             self::NOW => "IVA ad esigibilità immediata",
             self::POSTPONED => "IVA ad esigibilità differita",
-            self::SPLIT => "Scissione dei pagamenti"
+            // self::SPLIT => "Scissione dei pagamenti"
         };
     }
 
@@ -24,7 +24,7 @@ enum VatEnforceType: string implements HasLabel
         return match($this) {
             self::NOW => "esigibilità immediata",
             self::POSTPONED => "esigibilità differita",
-            self::SPLIT => "scissione dei pagamenti"
+            // self::SPLIT => "scissione dei pagamenti"
         };
     }
 
@@ -33,7 +33,7 @@ enum VatEnforceType: string implements HasLabel
         return match($this) {
             self::NOW => "I",
             self::POSTPONED => "D",
-            self::SPLIT => "S"
+            // self::SPLIT => "S"
         };
     }
 

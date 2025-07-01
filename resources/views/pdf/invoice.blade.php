@@ -27,6 +27,7 @@
         .causal { margin-bottom: 21px; }
         .items { margin-bottom: 21px; }
         .vat { margin-bottom: 21px; }
+        .total { margin-bottom: 21px; }
     </style>
 </head>
 <body>
@@ -60,7 +61,7 @@
         </tr>
         <tr>
             <td colspan="1"></td>
-            <td colspan="49">Regime fiscale: <b>{{ $invoice->company->fiscalProfile->tax_regime->getCode() }} ({{ $invoice->company->fiscalProfile->tax_regime->getDescription() }})</b></td>
+            <td colspan="49">Regime fiscale: <b>{{ $invoice->company?->fiscalProfile?->tax_regime?->getCode() }} ({{ $invoice->company?->fiscalProfile?->tax_regime?->getDescription() }})</b></td>
             <td colspan="1"></td>
             <td colspan="49">Indirizzo: <b>{{ $invoice->client->address }}</b></td>
         </tr>
@@ -120,7 +121,7 @@
         </tr>
         <tr>
             <td style="width: 10%" class="padding"></td>
-            <td style="width: 38%" class="padding"> Contratto {{ $invoice->contract->lastDetail->number }} del {{ $invoice->contract->lastDetail->date->format('d-m-Y') }}</td>
+            <td style="width: 38%" class="padding"> Contratto {{ $invoice->contractDetail->number }} del {{ $invoice->contractDetail->date->format('d-m-Y') }}, CIG: {{ $invoice->contract->cig_code }}</td>
             <td style="width: 10%" class="padding"></td>
             <td style="width: 10%" class="padding"></td>
             <td style="width: 5%" class="padding"></td>
@@ -168,23 +169,19 @@
             <td style="width: 17%" class="border_right padding">Totale imponibile</td>
             <td style="width: 12%" class="border_right padding">Totale imposta</td>
         </tr>
-        @foreach ($invoice->invoiceItems as $item)
+        @foreach ($vats as $vat)
             <tr>
-                <td style="width: 37%" class="padding">{{ $invoice->company->fiscalProfile->vat_enforce_type->getCode() }} ({{ $invoice->company->fiscalProfile->vat_enforce_type->getSummary() }})</td>
-                <td style="width: 9%" class="right padding">
-                    {{ $item->vat_code_type->getRate() == '0'
-                        ? $item->vat_code_type->getCode()
-                        : number_format((float) $item->vat_code_type->getRate(), 2, ',', '.') }}
-                </td>
+                <td style="width: 37%" class="padding">{{ $vat['norm'] }}</td>
+                <td style="width: 9%" class="right padding"> {{ $vat['%'] }} </td>
                 <td style="width: 18%" class="padding"></td>
                 <td style="width: 7%" class="padding"></td>
-                <td style="width: 17%" class="right padding">{{ number_format((float) $invoice->invoiceItems->sum('amount'), 2, ',', '.') }}</td>
-                <td style="width: 12%" class="right padding">{{ number_format((float) $invoice->invoiceItems->sum('amount') * ($item->vat_code_type->getRate() / 100), 2, ',', '.') }}</td>
+                <td style="width: 17%" class="right padding">{{ number_format((float) $vat['taxable'], 2, ',', '.') }}</td>
+                <td style="width: 12%" class="right padding">{{ number_format((float) $vat['vat'], 2, ',', '.') }}</td>
             </tr>
         @endforeach
     </table>
     {{--  --}}
-    <table>
+    <table class="total">
         <tr class="center bold border_bottom">
             <td colspan="5" class="padding">TOTALI</td>
         </tr>
@@ -196,11 +193,28 @@
             <td style="width: 25%" class="border_right padding">Totale documento</td>
         </tr>
         <tr>
-            <td style="width: 19%" class="right padding"></td>
-            <td style="width: 19%" class="center padding"></td>
+            <td style="width: 19%" class="right padding">{{ $invoice->company->stampDuty->active ? number_format((float) $invoice->company->stampDuty->amount, 2, ',', '.')  : ''}}</td>
+            <td style="width: 19%" class="center padding">{{ $invoice->company->stampDuty->active ? 'SI' : ''}}</td>
             <td style="width: 32%" class="padding"></td>
             <td style="width: 5%" class="padding"></td>
-            <td style="width: 25%" class="right padding"></td>
+            <td style="width: 25%" class="right padding bold">{{ number_format((float) $invoice->total, 2, ',', '.') }}</td>
+        </tr>
+    </table>
+
+    <table>
+        <tr class="center border_bottom">
+            <td style="width: 29%" class="border_right padding">Modalità pagamento</td>
+            <td style="width: 25%" class="border_right padding">Coordinate bancarie</td>
+            <td style="width: 25%" class="border_right padding">Istituto</td>
+            <td style="width: 11%" class="border_right padding">Data scadenza</td>
+            <td style="width: 10%" class="border_right padding">Importo</td>
+        </tr>
+        <tr>
+            <td style="width: 29%" class="right padding">{{ $invoice->bankAccount?->payment_type?->getLabel() }}</td>
+            <td style="width: 25%" class="center padding">{{ $invoice->bankAccount?->iban ? 'IBAN ' . $invoice->bankAccount->iban : '' }}</td>
+            <td style="width: 25%" class="padding">{{ $invoice->bankAccount?->name }}</td>
+            <td style="width: 11%" class="center padding">{{ $invoice->invoice_date->addDays($invoice->payment_days)->format('d/m/Y') }}</td>
+            <td style="width: 10%" class="right padding">{{ number_format((float) $invoice->total, 2, ',', '.') }}</td>
         </tr>
     </table>
 

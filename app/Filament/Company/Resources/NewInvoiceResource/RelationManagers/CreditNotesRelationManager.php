@@ -737,7 +737,13 @@ class CreditNotesRelationManager extends RelationManager
                                     ->label('Aliquota IVA')
                                     ->required()
                                     ->columnSpan(8)
-                                    ->options(VatCodeType::class)
+                                    // ->options(VatCodeType::class)
+                                    ->options(
+                                        collect(VatCodeType::cases())
+                                            ->reject(fn ($case) => $case === VatCodeType::VC06A)
+                                            ->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])
+                                            ->toArray()
+                                    )
                                     ->searchable()
                                     ->live()
                                     ->afterStateUpdated(function (Get $get, Set $set, $state) {

@@ -24,10 +24,10 @@ return new class extends Migration
         Schema::table('invoices',function (Blueprint $table){
             $table->string('year_limit')->nullable()->after('doc_type_id');                                                 // tipo tempistica: contestuale, differita (Enum)
 
-            // $table->unsignedBigInteger('limit_motivation_type_id')->nullable();
-            // $table->foreign('limit_motivation_type_id')->references('id')->on('limit_motivation_types')
-            // ->onUpdate('cascade')->onDelete('cascade');
-            $table->string('limit_motivation_type_id')->nullable()->after('year_limit');
+            $table->unsignedBigInteger('limit_motivation_type_id')->nullable()->after('year_limit');
+            $table->foreign('limit_motivation_type_id')->references('id')->on('limit_motivation_types')
+            ->onUpdate('cascade')->onDelete('cascade')->after('year_limit');
+            // $table->string('limit_motivation_type_id')->nullable()->after('year_limit');
             // $table->foreignId('limit_motivation_type_id')->constrained('limit_motivation_types')->onUpdate('cascade')->onDelete('cascade');
         });
     }

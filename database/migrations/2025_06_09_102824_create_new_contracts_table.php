@@ -21,10 +21,10 @@ return new class extends Migration
             $table->date('start_validity_date')->nullable();                        // data inizio validità contratto
             $table->date('end_validity_date')->nullable();                          // data fine validità contratto
 
-            // $table->unsignedBigInteger('accrual_type_id')->nullable();
-            // $table->foreign('accrual_type_id')->references('id')->on('accrual_types')
-            // ->onUpdate('cascade')->onDelete('cascade');
-            $table->string('accrual_type_id')->nullable();                          // id competenza
+            $table->unsignedBigInteger('accrual_type_id')->nullable();
+            $table->foreign('accrual_type_id')->references('id')->on('accrual_types')
+            ->onUpdate('cascade')->onDelete('cascade');
+            // $table->string('accrual_type_id')->nullable();                          // id competenza
             // $table->foreignId('accrual_type_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
 
             $table->string('payment_type')->nullable();                             // tipo pagamento (Enum)

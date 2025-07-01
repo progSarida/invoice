@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Company\Resources\NewInvoiceResource;
+use App\Models\NewContract;
 
 class CreateNewInvoice extends CreateRecord
 {
@@ -57,6 +58,7 @@ class CreateNewInvoice extends CreateRecord
             $this->halt();
         }
 
+        $data['contract_detail_id'] = NewContract::find($data['contract_id'])?->lastDetail?->id;
         $data['flow'] = 'out';
 
         return $data;

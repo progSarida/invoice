@@ -80,7 +80,13 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->label('Aliquota IVA')
                     ->required()
                     ->columnSpan(8)
-                    ->options(VatCodeType::class)
+                    // ->options(VatCodeType::class)
+                    ->options(
+                        collect(VatCodeType::cases())
+                            ->reject(fn ($case) => $case === VatCodeType::VC06A)
+                            ->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])
+                            ->toArray()
+                    )
                     ->searchable()->live()
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
                         $rate = $state ? VatCodeType::tryFrom($state)?->getRate() / 100 : 0;
@@ -177,6 +183,7 @@ class InvoiceItemsRelationManager extends RelationManager
                         $item = InvoiceItem::create($data);
                         $item->calculateTotal();
                         $item->save();
+                        $item->checkStampDuty();
                         return $item;
                     }),
             ])

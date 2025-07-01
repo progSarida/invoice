@@ -82,7 +82,8 @@ return new class extends Migration
         });
 
         Schema::table('invoices',function (Blueprint $table){
-            $table->foreign('parent_id')->references('id')->on('invoices');
+            $table->foreign('parent_id')->references('id')->on('invoices')
+                ->onUpdate('cascade')->onDelete('cascade');
         });
 
         Schema::create('sdi_notifications', function (Blueprint $table) {

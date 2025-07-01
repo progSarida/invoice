@@ -50,6 +50,7 @@ class Invoice extends Model
         'tax_type' =>  TaxType::class,
         'invoice_type' => InvoiceType::class,
         // 'accrual_type' => AccrualType::class,
+        'invoice_date' => 'date',
         'payment_status' => PaymentStatus::class,
         'payment_type' => PaymentType::class,
         'sdi_status' => SdiStatus::class,
@@ -105,6 +106,20 @@ class Invoice extends Model
         return $this->belongsTo(NewContract::class,'contract_id');
     }
 
+    public function contractDetail(){
+        return $this->belongsTo(ContractDetail::class,'contract_detail_id');
+    }
+
+    public function updatedContract()
+    {
+        return $this->contract
+            ? $this->contract->contractDetails()
+                ->where('date', '<=', $this->invoice_date)
+                ->orderByDesc('date')
+                ->first()
+            : null;
+    }
+
     public function creditNotes(){
         return $this->hasMany(Invoice::class, 'parent_id', 'id');
     }
@@ -127,10 +142,57 @@ class Invoice extends Model
     public function getResidue()
     {
         $total = floatval($this->total ?? 0);
+        $no_vat_total = floatval($this->no_vat_total ?? 0);
         $totalPayment = floatval($this->total_payment ?? 0);
         $totalNotes = floatval($this->total_notes ?? 0);
-        return $total - ($totalPayment + $totalNotes);
+        if($this->client->type->value == 'public')
+            return $no_vat_total - ($totalPayment + $totalNotes);
+        else
+            return $total - ($totalPayment + $totalNotes);
     }
+
+    public function getVat()
+    {
+        $total = $this->invoiceItems()->sum('total');
+        $no_vat_total = $this->invoiceItems()->sum('amount');
+        return $total - $no_vat_total;
+    }
+
+    public function vatResume(): array
+    {
+        $vats = [];
+        foreach ($this->invoiceItems as $item) {
+            $rate = $item->vat_code_type->value;
+            if (!isset($vats[$rate])) {
+                $vats[$rate] = [
+                    'norm' => $item->vat_code_type->getRate() == '0'
+                                ? 'ART. 15 DPR 633/72'
+                                : ($this->client?->type?->value == 'public'
+                                    ? 'S (scissione dei pagamenti)'
+                                    : (($this->company->fiscalProfile->tax_regime->value == 'rf16' || $this->company->fiscalProfile->tax_regime->value == 'rf17')
+                                        ? 'D (esigibilità differita)'
+                                        : 'I (esigibilità immediata')),
+                    '%' => $item->vat_code_type->getRate() == '0' ? $item->vat_code_type->getCode() : number_format((float) $item->vat_code_type->getRate(), 2, ',', '.'),
+                    'taxable' => 0,
+                    'vat' => 0,
+                    'total' => 0,
+                    'free' => $item->vat_code_type->getRate() == '0'
+                ];
+            }
+            $vats[$rate]['taxable'] += $item->amount;
+            $vats[$rate]['vat'] += $item->total - $item->amount;
+            $vats[$rate]['total'] += $item->total;
+        }
+        return $vats;
+    }
+
+    // public function checkStampDuty()
+    // {
+    //     if($this->company->stampDuty->active){
+    //         $vats = $this->vatResume();
+    //         dd($vats);
+    //     }
+    // }
 
     public function getNewInvoiceNumber(){
 
@@ -175,9 +237,12 @@ class Invoice extends Model
     public function updateTotal(): void
     {
         $total = $this->invoiceItems()->sum('total');
+        $no_vat_total = $this->invoiceItems()->sum('amount');
         $this->total = $total;
+        $this->no_vat_total = $no_vat_total;
         $this->save();
     }
+
 
     public function updateTotalNotes(): void
     {
@@ -189,6 +254,7 @@ class Invoice extends Model
     protected static function booted()
     {
         static::creating(function ($invoice) {
+            $invoice->contract_detail_id = $invoice->updatedContract()->id;
             $invoice->flow = 'out';
         });
 

@@ -14,6 +14,7 @@ enum VatCodeType: string implements HasLabel, HasDescription
     case VC04 = "vc04";
     case VC05 = "vc05";
     case VC06 = "vc06";
+    case VC06A = "vc06a";
     case VC07 = "vc07";
     case VC08 = "vc08";
     case VC09 = "vc09";
@@ -45,6 +46,7 @@ enum VatCodeType: string implements HasLabel, HasDescription
             self::VC04 => "4",
             self::VC05 => "0",
             self::VC06 => "0",
+            self::VC06A => "0",
             self::VC07 => "0",
             self::VC08 => "0",
             self::VC09 => "0",
@@ -78,6 +80,7 @@ enum VatCodeType: string implements HasLabel, HasDescription
             self::VC04 => "",
             self::VC05 => "",
             self::VC06 => "N1",
+            self::VC06A => "N1",
             self::VC07 => "N1",
             self::VC08 => "N2.1",
             self::VC09 => "N2.2",
@@ -111,6 +114,7 @@ enum VatCodeType: string implements HasLabel, HasDescription
             self::VC04 => "",
             self::VC05 => "Articolo generico",
             self::VC06 => "Escluso Art. 15 DPR 633/72",
+            self::VC06A => "Escluso Art. 15 DPR 633/72",
             self::VC07 => "Legge 27 novembre 1989, n. 384",
             self::VC08 => "Non soggette ad IVA ai sensi degli artt. Da 7 a 7-septies del DPR 633/72",
             self::VC09 => "Non soggette - altri casi",
