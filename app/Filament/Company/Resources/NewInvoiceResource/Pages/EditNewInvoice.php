@@ -18,6 +18,59 @@ class EditNewInvoice extends EditRecord
     {
         return [
             Actions\DeleteAction::make(),
+            // Actions\Action::make('stampa_pdf')
+            //     ->label('Stampa PDF')
+            //     ->icon('heroicon-o-printer')
+            //     ->color('primary')
+            //     ->action(function (Invoice $record) {
+            //         $vats = $record->vatResume();
+            //         $grouped = collect($vats)
+            //             ->groupBy('%')
+            //             ->map(function ($items, $percent) {
+            //                 return [
+            //                     '%' => $percent,
+            //                     'taxable' => $items->sum('taxable'),
+            //                     'vat' => $items->sum('vat'),
+            //                     'total' => $items->sum('total'),
+            //                     'norm' => $items->first()['norm'],
+            //                     'free' => $items->first()['free'],
+            //                 ];
+            //             })
+            //             ->values()
+            //             ->toArray();
+            //         return response()->streamDownload(function () use ($record, $grouped) {
+            //             echo Pdf::loadView('pdf.invoice', [ 'invoice' => $record, 'vats' => $grouped ])->stream();
+            //         }, 'fattura-' . $record->printNumber() . '.pdf');
+            //     }),
+
+            // Actions\Action::make('stampa_pdf')
+            //     ->label('Stampa PDF')
+            //     ->icon('heroicon-o-printer')
+            //     ->color('primary')
+            //     ->action(function (Invoice $record) {
+            //         $vats = $record->vatResume();
+            //         $grouped = collect($vats)
+            //             ->groupBy('%')
+            //             ->map(function ($items, $percent) {
+            //                 return [
+            //                     '%' => $percent,
+            //                     'taxable' => $items->sum('taxable'),
+            //                     'vat' => $items->sum('vat'),
+            //                     'total' => $items->sum('total'),
+            //                     'norm' => $items->first()['norm'],
+            //                     'free' => $items->first()['free'],
+            //                 ];
+            //             })
+            //             ->values()
+            //             ->toArray();
+            //         return response()->streamDownload(function () use ($record, $grouped) {
+            //             echo Pdf::loadView('pdf.invoice', [
+            //                 'invoice' => $record,
+            //                 'vats' => $grouped
+            //             ])->output(); // <- usa output() al posto di stream()
+            //         }, 'fattura-' . $record->printNumber() . '.pdf');
+            //     }),
+
             Actions\Action::make('stampa_pdf')
                 ->label('Stampa PDF')
                 ->icon('heroicon-o-printer')
@@ -38,8 +91,18 @@ class EditNewInvoice extends EditRecord
                         })
                         ->values()
                         ->toArray();
-                    return response()->streamDownload(function () use ($record, $grouped) {
-                        echo Pdf::loadView('pdf.invoice', [ 'invoice' => $record, 'vats' => $grouped ])->stream();
+
+                    $pdf = Pdf::loadView('pdf.invoice', [
+                        'invoice' => $record,
+                        'vats' => $grouped,
+                    ]);
+
+                    $pdf->setPaper('A4', 'portrait');
+
+                    $pdf->setOptions(['margin-top' => 0]);
+
+                    return response()->streamDownload(function () use ($pdf, $record) {
+                        echo $pdf->output();
                     }, 'fattura-' . $record->printNumber() . '.pdf');
                 }),
         ];

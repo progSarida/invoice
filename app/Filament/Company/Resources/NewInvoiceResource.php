@@ -287,7 +287,16 @@ class NewInvoiceResource extends Resource
                                 ->searchable()
                                 ->columnSpanFull()->preload(),
                             Forms\Components\Select::make('payment_type')->label('Tipo')
-                                ->options(PaymentType::class)->columnSpan(2),
+                                // ->options(PaymentType::class)
+                                ->options(
+                                    collect(PaymentType::cases())
+                                        ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                                        ->mapWithKeys(fn (PaymentType $type) => [
+                                            $type->value => $type->getLabel()
+                                        ])
+                                        ->toArray()
+                                )
+                                ->columnSpan(2),
                             Forms\Components\Select::make('payment_days')
                                 ->label('Giorni')
                                 ->required()
@@ -303,7 +312,9 @@ class NewInvoiceResource extends Resource
                             ->collapsed()
                             ->schema([
                                 Forms\Components\Select::make('payment_status')->label('Status')
-                                    ->options(PaymentStatus::class)->disabled()->columnSpan(2),
+                                    ->required()
+                                    ->default('waiting')
+                                    ->options(PaymentStatus::class)->columnSpan(2),
 
                                 Forms\Components\DatePicker::make('last_payment_date')->label('Data ultimo pagamento')
                                 ->native(false)

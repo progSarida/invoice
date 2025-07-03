@@ -220,7 +220,16 @@ class InvoiceResource extends Resource
                                 ->searchable()
                                 ->columnSpanFull()->preload(),
                             Forms\Components\Select::make('payment_type')->label('Tipo')
-                                ->options(PaymentType::class)->columnSpan(3),
+                                // ->options(PaymentType::class)
+                                ->options(
+                                    collect(PaymentType::cases())
+                                        ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                                        ->mapWithKeys(fn (PaymentType $type) => [
+                                            $type->value => $type->getLabel()
+                                        ])
+                                        ->toArray()
+                                )
+                                ->columnSpan(3),
                             Forms\Components\TextInput::make('payment_days')->label('Giorni')
                                 ->required()
                                 ->numeric()->columnSpan(1),

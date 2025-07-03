@@ -109,4 +109,9 @@ class Company extends Model
     {
         return $this->hasMany(NewContract::class);
     }
+
+    public function invoicesElements()
+    {
+        return $this->hasMany(InvoiceElement::class);
+    }
 }

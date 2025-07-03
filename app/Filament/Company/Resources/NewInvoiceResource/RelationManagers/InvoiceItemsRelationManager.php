@@ -89,7 +89,8 @@ class InvoiceItemsRelationManager extends RelationManager
                     )
                     ->searchable()->live()
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        $rate = $state ? VatCodeType::tryFrom($state)?->getRate() / 100 : 0;
+                        // $rate = $state ? VatCodeType::tryFrom($state)?->getRate() / 100 : 0;
+                        $rate = $state instanceof VatCodeType ? $state->getRate() / 100 : 0;
                         $amount = $get('amount') ?? 0;
                         $vatAmount = $amount * $rate;
                         $total = $amount + $vatAmount;

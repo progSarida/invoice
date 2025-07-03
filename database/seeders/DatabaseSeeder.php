@@ -34,5 +34,8 @@ class DatabaseSeeder extends Seeder
         $this->call(LimitMotivationTypesTableSeeder::class);
         $this->call(InvoiceElementsTableSeeder::class);
         $this->call(StampDutiesTableSeeder::class);
+        $this->call(SectionalsTableSeeder::class);
+        $this->call(FiscalProfilesTableSeeder::class);
+        $this->call(CompanyDocsTableSeeder::class);
     }
 }

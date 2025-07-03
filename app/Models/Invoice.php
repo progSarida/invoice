@@ -42,6 +42,7 @@ class Invoice extends Model
         'description',
         'free_description',
         'bank_account_id',
+        'payment_status',
         'payment_type',
         'payment_days',
     ];
@@ -53,6 +54,7 @@ class Invoice extends Model
         'invoice_date' => 'date',
         'payment_status' => PaymentStatus::class,
         'payment_type' => PaymentType::class,
+        'last_payment_date' => 'date',
         'sdi_status' => SdiStatus::class,
         'timing_type' => TimingType::class
     ];

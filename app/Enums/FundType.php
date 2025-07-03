@@ -61,12 +61,12 @@ enum FundType: string implements HasLabel, HasDescription
     public function getDescription(): ?string
     {
         return match($this) {
-            self::TC01 => "Cassa nazionale previdenza e assistenza avvocati e procuratiri legali",
-            self::TC02 => "Cassa previdenza dottori commercialisti",
-            self::TC03 => "Cassa previdenza e assistenza geometri",
-            self::TC04 => "Cassa nazionale previdenza e assistenza ingegneri e architetti liberi professionisti",
+            self::TC01 => "Cassa nazionale previdenza e assistenza avvocati e procuratori legali",
+            self::TC02 => "Cassa previdenza dottori commercialisti (CNPADC)",
+            self::TC03 => "Cassa previdenza e assistenza geometri (CIPAG)",
+            self::TC04 => "Cassa nazionale previdenza e assistenza ingegneri e architetti liberi professionisti (CNPAIALP)",
             self::TC05 => "Cassa nazionale del notariato",
-            self::TC06 => "Cassa nazionale previdenza e assistenza ragionieri e periti commercialisti",
+            self::TC06 => "Cassa nazionale previdenza e assistenza ragionieri e periti commercialisti (CNPR)",
             self::TC07 => "Ente nazionale assistenza agenti e rappresentanti di commercio (ENASARCO)",
             self::TC08 => "Ente nazionale previdenza e assistenza consulenti del lavoro (ENPACL)",
             self::TC09 => "Ente nazionale previdenza e assistenza medici (ENPAM)",

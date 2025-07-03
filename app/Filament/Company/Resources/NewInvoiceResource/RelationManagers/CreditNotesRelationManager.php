@@ -316,7 +316,16 @@ class CreditNotesRelationManager extends RelationManager
                                         }
                                         return null;
                                     })
-                                    ->options(PaymentType::class)->columnSpan(2),
+                                    // ->options(PaymentType::class)
+                                    ->options(
+                                        collect(PaymentType::cases())
+                                            ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                                            ->mapWithKeys(fn (PaymentType $type) => [
+                                                $type->value => $type->getLabel()
+                                            ])
+                                            ->toArray()
+                                    )
+                                    ->columnSpan(2),
                                 Forms\Components\Select::make('payment_days')
                                     ->label('Giorni')
                                     ->required()
@@ -748,7 +757,8 @@ class CreditNotesRelationManager extends RelationManager
                                     ->live()
                                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                         // Calcola importo IVA e totale quando vat_code_type cambia
-                                        $rate = VatCodeType::tryFrom($state)?->getRate() / 100 ?? 0;
+                                        // $rate = VatCodeType::tryFrom($state)?->getRate() / 100 ?? 0;
+                                        $rate = $state instanceof VatCodeType ? $state->getRate() / 100 : 0;
                                         $amount = $get('amount') ?? 0;
                                         $vatAmount = $amount * $rate;
                                         $total = $amount + $vatAmount;

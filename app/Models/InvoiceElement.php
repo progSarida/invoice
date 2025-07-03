@@ -19,4 +19,8 @@ class InvoiceElement extends Model
         'vat_code_type' => VatCodeType::class,
     ];
 
+    public function company(){
+        return $this->belongsTo(Company::class);
+    }
+
 }

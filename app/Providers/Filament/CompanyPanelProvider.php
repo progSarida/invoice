@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Tenancy\EditCompanyProfile;
 use App\Models\Company;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
@@ -35,6 +36,8 @@ class CompanyPanelProvider extends PanelProvider
             ->emailVerification() // Opzionale: abilita la verifica dell'email
             ->profile() // Opzionale: abilita la pagina del profilo
             ->tenant(Company::class)
+            ->tenantProfile(EditCompanyProfile::class)
+            // ->tenantProfile(Auth::user() && !Auth::user()->is_admin ? EditCompanyProfile::class : null)
             ->colors([
                 'primary' => Color::Amber,
             ])

@@ -29,8 +29,8 @@ class CompaniesTableSeeder extends Seeder
                 'address' => 'Via Mons. Vattuone, 9/6',
                 'city_code' => 'I693',
                 'is_active' => 1,
-                'created_at' => NULL,
-                'updated_at' => NULL,
+                'created_at' => '2025-01-01 00:00:00',
+                'updated_at' => '2025-01-01 00:00:00',
             ),
             1 =>
             array (
@@ -41,8 +41,8 @@ class CompaniesTableSeeder extends Seeder
                 'address' => 'Via Costaguta, 43',
                 'city_code' => 'C621',
                 'is_active' => 0,
-                'created_at' => NULL,
-                'updated_at' => NULL,
+                'created_at' => '2025-01-01 00:00:00',
+                'updated_at' => '2025-01-01 00:00:00',
             ),
         ));
 

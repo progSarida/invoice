@@ -28,6 +28,7 @@
         "laravel/tinker": "^2.10.1",
         "orangehill/iseed": "^3.1",
         "owenvoke/blade-fontawesome": "^2.9",
+        "secondnetwork/blade-tabler-icons": "^3.34",
         "troccoli/blade-health-icons": "^5.0"
     },
     "require-dev": {

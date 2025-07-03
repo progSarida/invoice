@@ -16,18 +16,19 @@ use Filament\Navigation\NavigationGroup;
 use App\Filament\Resources\RegionResource;
 use Filament\Http\Middleware\Authenticate;
 use App\Filament\Resources\CompanyResource;
+use App\Filament\Resources\DocTypeResource;
+use App\Filament\Resources\DocGroupResource;
 use App\Filament\Resources\ProvinceResource;
+use App\Filament\Resources\SectionalResource;
 use App\Filament\Resources\ManageTypeResource;
 use App\Filament\Resources\AccrualTypeResource;
-use App\Filament\Resources\DocGroupResource;
-use App\Filament\Resources\DocTypeResource;
-use App\Filament\Resources\SectionalResource;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Resources\LimitMotivationTypeResource;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -68,6 +69,7 @@ class AdminPanelProvider extends PanelProvider
                 ManageTypeResource::class,
                 DocGroupResource::class,
                 DocTypeResource::class,
+                LimitMotivationTypeResource::class,
             ])
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

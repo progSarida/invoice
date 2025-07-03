@@ -14,7 +14,7 @@ enum VatCodeType: string implements HasLabel, HasDescription
     case VC04 = "vc04";
     case VC05 = "vc05";
     case VC06 = "vc06";
-    case VC06A = "vc06a";
+    case VC06A = "vc06a";                       // codice per imposta di bollo automatica, da non mostrare in select aliquote in voci fattura
     case VC07 = "vc07";
     case VC08 = "vc08";
     case VC09 = "vc09";
