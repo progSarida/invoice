@@ -32,6 +32,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\Toggle;
 use Illuminate\Support\Facades\Blade;
 use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Model;
@@ -64,6 +65,70 @@ class NewInvoiceResource extends Resource
     {
         return $form
             ->schema([
+                Section::make('')
+                    // ->collapsible()
+                    ->columns(6)
+                    ->label('')
+                    ->schema([
+                        Toggle::make('art_73')
+                            ->label('Art. 73')
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                if ($state) {
+                                    $set('sectional_id', null);
+                                }
+                                else{
+                                    $clientId = $get('client_id');
+                                    if ($clientId) {
+                                        $client = \App\Models\Client::find($clientId);
+                                        if ($client && $client->type) {
+                                            $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
+                                                ->where('client_type', $client->type->value)
+                                                ->first();
+                                            if ($sectional) {
+                                                $set('sectional_id', $sectional->id);
+                                                $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                                $set('number', $number);
+                                                NewInvoiceResource::invoiceNumber($get, $set);
+                                            } else {
+                                                $set('sectional_id', null);
+                                                $set('number', null);
+                                                NewInvoiceResource::invoiceNumber($get, $set);
+                                                Notification::make()
+                                                    ->title('Nessun sezionario trovato per il tipo di cliente selezionato.')
+                                                    ->warning()
+                                                    ->send();
+                                            }
+                                        }
+                                    }
+                                }
+                            }),
+                        Toggle::make('social')
+                            ->columnSpan(2)
+                            ->label('Cassa previdenziale')
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                //
+                            })
+                            ->visible(
+                                    function(){
+                                        // se ci sono casse previdenziali per l'emittente della fattura => mostra select casse?
+                                    }
+                                ),
+                        Toggle::make('withholding')
+                            ->columnSpan(2)
+                            ->label('Ritenuta d\'acconto')
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                //
+                            })
+                            ->visible(
+                                    function(){
+                                        // se c'è la ritenuta d'acconto la inserisce nella stampa
+                                    }
+                                ),
+                        ]),
+
                 Grid::make('GRID')->columnSpan(2)->schema([
 
                     Section::make('Destinatario')
@@ -76,7 +141,7 @@ class NewInvoiceResource extends Resource
                                         ->icon('govicon-user-suit')
                                         ->form(fn (Form $form) => ClientResource::modalForm($form))
                                         ->modalHeading('')
-                                        ->action(fn (array $data, Client $client, Set $set) => NewInvoiceResource::saveClient($data, $client, $set))
+                                        ->action(fn (array $data, Client $client, Get $get, Set $set) => NewInvoiceResource::saveClient($data, $client, $get, $set))
                                 )
                                 ->relationship(name: 'client', titleAttribute: 'denomination')
                                 ->getOptionLabelFromRecordUsing(
@@ -273,7 +338,7 @@ class NewInvoiceResource extends Resource
                         ]),
 
                         Section::make('Dati per il pagamento')->columns(4)
-                        ->collapsed()
+                        ->collapsed(false)
                         ->schema([
                             Forms\Components\Select::make('bank_account_id')->label('IBAN')
                                 ->relationship(
@@ -296,6 +361,7 @@ class NewInvoiceResource extends Resource
                                         ])
                                         ->toArray()
                                 )
+                                ->default('mp05')
                                 ->columnSpan(2),
                             Forms\Components\Select::make('payment_days')
                                 ->label('Giorni')
@@ -306,6 +372,7 @@ class NewInvoiceResource extends Resource
                                     90 => '90',
                                     120 => '120',
                                 ])
+                                ->default(30)
                                 ->columnSpan(2),
                                 ]),
                         Section::make('Status del pagamento')->columns(2)
@@ -430,7 +497,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(2)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => NewInvoiceResource::invoiceNumber($get, $set))
                                 ->live()
-                                ->disabled()
+                                ->disabled(fn (Get $get) => !$get('art_73'))
                                 ->dehydrated()
                                 ->required(),
 
@@ -500,14 +567,16 @@ class NewInvoiceResource extends Resource
                             Forms\Components\TextInput::make('budget_year')->label('Anno di bilancio')
                                 ->numeric()
                                 ->required()
-                                ->minValue(1900)
+                                ->minValue(now()->subYears(10)->year)
+                                ->maxValue(now()->year)
                                 ->rules(['digits:4'])
                                 ->columnSpan(2),
 
                             Forms\Components\TextInput::make('accrual_year')->label('Anno di competenza')
                                 ->numeric()
                                 ->required()
-                                ->minValue(1900)
+                                ->minValue(now()->subYears(10)->year)
+                                ->maxValue(now()->year)
                                 ->rules(['digits:4'])
                                 ->columnSpan(2),
 
@@ -538,6 +607,7 @@ class NewInvoiceResource extends Resource
 
 
                 ]),//FIRST GRID
+
             ])->columns(5);
     }
 
@@ -601,6 +671,7 @@ class NewInvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('no_vat_total')->label('Imponibile')
                     ->money('EUR')
                     ->sortable()
+                    ->state(fn (Invoice $invoice) => $invoice->getTaxable())
                     ->alignRight()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('vat')->label('Importo IVA')
@@ -910,7 +981,7 @@ class NewInvoiceResource extends Resource
     //     return $data;
     // }
 
-    public static function saveClient(array $data, Client $client, Set $set): void
+    public static function saveClient(array $data, Client $client, Get $get, Set $set): void
     {
         $client->company_id = Filament::getTenant()->id;
         $client->type = $data['type'];
@@ -924,6 +995,27 @@ class NewInvoiceResource extends Resource
         $client->save();
 
         $set('client_id', $client->id);
+
+        if ($client && $client->type) {
+            $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
+                ->where('client_type', $client->type->value)
+                ->first();
+            if ($sectional) {
+                $set('sectional_id', $sectional->id);
+                $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                $set('number', $number);
+                NewInvoiceResource::invoiceNumber($get, $set);
+            } else {
+                $set('sectional_id', null);
+                $set('number', null);
+                NewInvoiceResource::invoiceNumber($get, $set);
+                Notification::make()
+                    ->title('Nessun sezionario trovato per il tipo di cliente selezionato.')
+                    ->warning()
+                    ->send();
+            }
+        }
+
 
         Notification::make()
             ->title('Cliente salvato con successo')

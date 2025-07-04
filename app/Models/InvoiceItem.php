@@ -52,12 +52,14 @@ class InvoiceItem extends Model
         });
     }
 
+    // Calcola il totale della voce della fattura
     public function calculateTotal(): void
     {
         $rate = $this->vat_code_type?->getRate() / 100 ?? 0;
         $this->total = $this->amount + ($this->amount * $rate);
     }
 
+    // Verifica se ci sono le condizioni per inserire l'imposta di bollo (gli importi esenti IVA sono uguali o superiori al valore indicato) e nel caso lo fa
     public function checkStampDuty()
     {
         $stampDuty = $this->invoice->company->stampDuty;

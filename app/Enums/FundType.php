@@ -90,4 +90,37 @@ enum FundType: string implements HasLabel, HasDescription
     {
         return $this->getCode() . " - " . $this->getDescription();
     }
+
+    public function getShortDesc(): ?string
+    {
+        return match($this) {
+            self::TC01 => "Cassa nazionale previdenza e assistenza avvocati e procuratori legali",
+            self::TC02 => "Cassa previdenza dottori commercialisti",
+            self::TC03 => "Cassa previdenza e assistenza geometri",
+            self::TC04 => "Cassa nazionale previdenza e assistenza ingegneri e architetti liberi professionisti",
+            self::TC05 => "Cassa nazionale del notariato",
+            self::TC06 => "Cassa nazionale previdenza e assistenza ragionieri e periti commercialisti",
+            self::TC07 => "Ente nazionale assistenza agenti e rappresentanti di commercio",
+            self::TC08 => "Ente nazionale previdenza e assistenza consulenti del lavoro",
+            self::TC09 => "Ente nazionale previdenza e assistenza medici",
+            self::TC10 => "Ente nazionale previdenza e assistenza farmacisti",
+            self::TC11 => "Ente nazionale previdena e assistenza veterinari",
+            self::TC12 => "Ente nazionale previdenza e assistenza impiegati dell'agricoltura",
+            self::TC13 => "Fondo previdenza impiegati imprese di spedizione e agenzie marittime",
+            self::TC14 => "Istituto nazionale previdenza giornalisti italiani",
+            self::TC15 => "Opera nazionale assistenza orfani sanitari italiani",
+            self::TC16 => "Cassa autonoma assistenza integrativi giornalisti italiani",
+            self::TC17 => "Ente previdenza periti industriali e periti industriali laureati",
+            self::TC18 => "Ente previdenza e assistenza pluricategoriale",
+            self::TC19 => "Ente nazionale previdenza e assistenza biologi",
+            self::TC20 => "Ente nazionale previdenza e assistenza professione infermieristica",
+            self::TC21 => "Ente nazionale previdenza e assistenza psicologi",
+            self::TC22 => "INPS"
+        };
+    }
+
+    public function forPrint(): string
+    {
+        return $this->getCode() . " (" . $this->getShortDesc() . ")";
+    }
 }

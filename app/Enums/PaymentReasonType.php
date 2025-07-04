@@ -34,6 +34,8 @@ enum PaymentReasonType: string implements HasLabel, HasDescription
     case W = "w";
     case X = "x";
     case Y = "y";
+    case Z = "z";
+    case ZO = "zo";
 
     public function getCode(): ?string
     {
@@ -64,7 +66,9 @@ enum PaymentReasonType: string implements HasLabel, HasDescription
             self::V1 => "V1",
             self::W => "W",
             self::X => "X",
-            self::Y => "Y"
+            self::Y => "Y",
+            self::Z => "Z",
+            self::ZO => "ZO"
         };
     }
 
@@ -97,12 +101,24 @@ enum PaymentReasonType: string implements HasLabel, HasDescription
             self::V1 => "Redditi derivanti da attività commerciali non esercitate abitulmente (ad esempio provvigioni corrisposteper prestazioni occasionali ad agente o rappresentante di commercio, mediatore, procacciatore d'affari)",
             self::W => "Corrispettivi erogati nel 2020 per prestazioni relative a contratti d'appalto cui si sono resi applicabili le disposizioni contenute nell'art. 25-ter del D.P.R. n. 600 del 29 settembre 1973",
             self::X => "Canoni corrisposti nel 2004 da società o enti residenti ovvero da stabili organizzazioni di società estere di cui all'art. 26-quater, comma 1, lett. a) e b) del D.P.R. 600 del 29 settembre 1973, a società o stabili organizzazioni di società, situate in altro stato membro dell'Unione Europea in presenza di requisiti di cui al citato art. 26-quater, del D.P.R. 600 del 29 settembre 1973, per i quali è stato effettuato, nell'anno 2006, il rimborso della ritenuta ai sensi dell'art. 4 del D.Lgs, 30 maggio 2005 n. 143",
-            self::Y => "Canoni corrisposti dal 1° gennaio 2005 al 26 luglio 2005 da società o enti residenti ovvero da stabili organizzazioni di societàestere di cui all'art. 26-quater, comma 1, latt. a) e b) del D.P.R. n. 600 del 29 settembre 1973, a società o stabili organizzazioni di società, situate in altro stato membro dell'Unione Europea in presenza dei requisiti di cui al citato art. 26-quater, del D.P.R. n. 600 del 29 settembre 1973, per i quali è stato effettuato, nell'anno 2006, il rimborso della ritenuta ai sensi dell'art. 4 del D.Lgs. 30 maggio 2005 n. 143"
+            self::Y => "Canoni corrisposti dal 1° gennaio 2005 al 26 luglio 2005 da società o enti residenti ovvero da stabili organizzazioni di societàestere di cui all'art. 26-quater, comma 1, latt. a) e b) del D.P.R. n. 600 del 29 settembre 1973, a società o stabili organizzazioni di società, situate in altro stato membro dell'Unione Europea in presenza dei requisiti di cui al citato art. 26-quater, del D.P.R. n. 600 del 29 settembre 1973, per i quali è stato effettuato, nell'anno 2006, il rimborso della ritenuta ai sensi dell'art. 4 del D.Lgs. 30 maggio 2005 n. 143",
+            self::Z => "Titolo diverso dai precedenti",
+            self::ZO => "Altri compensi non rientranti nelle categorie precedenti"
         };
     }
 
     public function getLabel(): ?string
     {
         return $this->getCode() . " - " . $this->getDescription();
+    }
+
+    public function getWording(): ?string
+    {
+        return " (decodifica come da modello CU)";
+    }
+
+    public function getCausal(): ?string
+    {
+        return $this->getCode() . $this->getWording();
     }
 }

@@ -85,7 +85,7 @@ class ClientResource extends Resource
                 Forms\Components\TextInput::make('denomination')->label('Denominazione')
                     ->label(function (callable $get) {
                         $subtype = $get('subtype');
-                        if (in_array($subtype, ['man', 'woman'])) {
+                        if (in_array($subtype, ['man', 'woman', 'professional'])) {
                             return 'Cognome e Nome';
                         }
                         return 'Denominazione';

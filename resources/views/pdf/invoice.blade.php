@@ -96,7 +96,7 @@
         </tbody>
     </table>
 
-    @if($invoice->socialContributions?->count() > 0)
+    @if(count($funds) > 0)
     {{-- Cassa previdenziale --}}
     <table class="total">
         <tr class="center border_bottom">
@@ -107,14 +107,20 @@
             <td style="width: 9%" class="border_right padding">%IVA</td>
             <td style="width: 13%" class="border_right padding">Importo</td>
         </tr>
-        @foreach ($invoice->socialContributions as $fund)
+        @foreach ($funds as $fund)
         <tr>
-            <td style="width: 49%" class="left padding">{{ $fund->getCode() }} ({{ $fund->getDescription() }})</td>
-            <td style="width: 17%" class="right padding"></td>
-            <td style="width: 9%" class="right padding">{{ number_format((float) $fund->rate, 2, ',', '.') }}</td>
+            <td style="width: 49%" class="left padding">{{ $fund['fund'] }}</td>
+            <td style="width: 17%" class="right padding">{{ number_format((float) $fund['taxable_base'], 2, ',', '.') }}</td>
+            <td style="width: 9%" class="right padding">{{ number_format((float) $fund['rate'], 2, ',', '.') }}</td>
             <td style="width: 9%" class="right padding"></td>
-            <td style="width: 9%" class="right padding"></td>
-            <td style="width: 13%" class="right padding"></td>
+            <td style="width: 9%" class="right padding">
+                @if (is_numeric($fund['%']))
+                    {{ number_format((float) $fund['%'], 2, ',', '.') }}
+                @else
+                    {{ $fund['%'] }}
+                @endif
+            </td>
+            <td style="width: 13%" class="right padding">{{ number_format((float) $fund['amount'], 2, ',', '.') }}</td>
         </tr>
         @endforeach
     </table>
@@ -136,7 +142,13 @@
         @foreach ($vats as $vat)
             <tr>
                 <td style="width: 37%" class="padding">{{ $vat['norm'] }}</td>
-                <td style="width: 9%" class="right padding"> {{ $vat['%'] }} </td>
+                <td style="width: 9%" class="right padding">
+                    @if (is_numeric($vat['%']))
+                        {{ number_format((float) $vat['%'], 2, ',', '.') }}
+                    @else
+                        {{ $vat['%'] }}
+                    @endif
+                </td>
                 <td style="width: 18%" class="padding"></td>
                 <td style="width: 7%" class="padding"></td>
                 <td style="width: 17%" class="right padding">{{ number_format((float) $vat['taxable'], 2, ',', '.') }}</td>
@@ -146,6 +158,14 @@
     </table>
 
     {{-- Totali --}}
+    @php
+        $fundTotal = 0;
+        $vatTotal = 0;
+        if(count($funds) > 0)
+            $fundTotal = array_sum(array_column($funds, 'amount'));
+        $vatTotal = array_sum(array_column($funds, 'vat'));
+        $total = $invoice->total + $fundTotal + $vatTotal;
+    @endphp
     <table class="total">
         <tr class="center bold border_bottom">
             <td colspan="5" class="padding">TOTALI</td>
@@ -162,11 +182,47 @@
             <td style="width: 19%" class="center padding">{{ $invoice->company->stampDuty->virtual_stamp ? 'SI' : ''}}</td>
             <td style="width: 32%" class="padding"></td>
             <td style="width: 5%" class="padding"></td>
-            <td style="width: 25%" class="right padding bold">{{ number_format((float) $invoice->total, 2, ',', '.') }}</td>
+            <td style="width: 25%" class="right padding bold">{{ number_format((float) $total, 2, ',', '.') }}</td>
         </tr>
     </table>
 
+    @php
+        use App\Enums\WithholdingType;
+        $accontoValues = [
+            WithholdingType::RT01,                               // Ritenuta d'acconto (persone fisiche)
+            WithholdingType::RT02,                               // Ritenuta d'acconto (persone giuridiche)
+        ];
+        $hasWithholdingTax = collect($invoice->company->withholdings)
+            ->search(fn($withholding) => in_array($withholding->withholding_type, $accontoValues));
+        $withholdingAmount = 0;
+    @endphp
+    @if(count($invoice->company->withholdings) > 0 && $hasWithholdingTax !== false &&
+            !in_array($invoice->client->subtype, [ \App\Enums\ClientSubtype::MAN, \App\Enums\ClientSubtype::WOMAN, ]))
+        {{-- Ritenuta --}}
+        @php
+            $taxable = $invoice->getTaxable();
+            $withholdingAmount = $taxable * ($invoice->company->withholdings[$hasWithholdingTax]->rate / 100);
+        @endphp
+        <table class="total">
+            <tr class="center border_bottom">
+                <td style="width: 48%" class="border_right padding">Dati ritenuta d'acconto</td>
+                <td style="width: 7%" class="border_right padding">Aliquota ritenuta</td>
+                <td style="width: 30%" class="border_right padding">Causale</td>
+                <td style="width: 15%" class="border_right padding">Importo</td>
+            </tr>
+            <tr>
+                <td style="width: 48%" class="left padding">{{ $invoice->company->withholdings[$hasWithholdingTax]->withholding_type->getPrint() }}</td>
+                <td style="width: 7%" class="right padding">{{ number_format((float) $invoice->company->withholdings[$hasWithholdingTax]->rate, 2, ',', '.') }}</td>
+                <td style="width: 30%" class="left padding">{{ $invoice->company->withholdings[$hasWithholdingTax]->payment_reason->getCausal() }}</td>
+                <td style="width: 15%" class="right padding">{{ number_format((float) $withholdingAmount, 2, ',', '.') }}</td>
+            </tr>
+        </table>
+    @endif
+
     {{-- Pagamento --}}
+    @php
+        $totalPay = $total - $withholdingAmount;
+    @endphp
     <table>
         <tr class="center border_bottom">
             <td style="width: 29%" class="border_right padding">Modalità pagamento</td>
@@ -179,8 +235,8 @@
             <td style="width: 29%" class="left padding">{{ $invoice->payment_type?->getCode() }} {{ $invoice->payment_type?->getLabel() }}</td>
             <td style="width: 25%" class="left padding">{{ $invoice->bankAccount?->iban ? 'IBAN ' . $invoice->bankAccount->iban : '' }}</td>
             <td style="width: 25%" class="left padding">{{ $invoice->bankAccount?->name }}</td>
-            <td style="width: 11%" class="center padding">{{ $invoice->invoice_date->addDays($invoice->payment_days)->format('d/m/Y') }}</td>
-            <td style="width: 10%" class="right padding">{{ number_format((float) $invoice->total, 2, ',', '.') }}</td>
+            <td style="width: 11%" class="center padding">{{ $invoice->invoice_date->addDays($invoice->payment_days)->format('d-m-Y') }}</td>
+            <td style="width: 10%" class="right padding">{{ number_format((float) $totalPay, 2, ',', '.') }}</td>
         </tr>
     </table>
 </body>

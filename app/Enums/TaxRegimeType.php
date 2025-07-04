@@ -65,7 +65,7 @@ enum TaxRegimeType: string implements HasLabel, HasDescription
             self::RF07 => "Editoria (art. 74, c. 1, DPR/633/72)",
             self::RF08 => "Gerstione servizi telefonia pubblica (art. 74, c. 1, DPR/633/72)",
             self::RF09 => "Rivendita documenti di trasporto pubblico e di sosta (art. 74, c. 1, DPR/633/72)",
-            self::RF10 => "Intrattenimenti, giochi e altre attività di cui all atariffa allegata al DPR 640/72 (art. 74, c. 1, DPR/633/72)",
+            self::RF10 => "Intrattenimenti, giochi e altre attività di cui alla tariffa allegata al DPR 640/72 (art. 74, c. 1, DPR/633/72)",
             self::RF11 => "Agenzie viaggi e turismo (art. 74-ter, DPR/633/72)",
             self::RF12 => "Agriturismo (art. 5, c. 2, L. 413/91)",
             self::RF13 => "Vendite a domicilio (art. 25-bis, c. 6, DPR 600/73)",
@@ -82,6 +82,36 @@ enum TaxRegimeType: string implements HasLabel, HasDescription
     public function getLabel(): string
     {
         return $this->getCode() . " - " . $this->getDescription();
+    }
+
+    public function getShortDesc(): ?string
+    {
+        return match($this) {
+            self::RF01 => "Ordinario",
+            self::RF02 => "Contribuenti minimi",
+            self::RF04 => "Agricoltura e attività connesse e pesca",
+            self::RF05 => "Vendita sali e tabacchi",
+            self::RF06 => "Commercio fiammiferi",
+            self::RF07 => "Editoria",
+            self::RF08 => "Gerstione servizi telefonia pubblica",
+            self::RF09 => "Rivendita documenti di trasporto pubblico e di sosta",
+            self::RF10 => "Intrattenimenti, giochi e altre attività di cui alla tariffa allegata al DPR 640/72",
+            self::RF11 => "Agenzie viaggi e turismo",
+            self::RF12 => "Agriturismo",
+            self::RF13 => "Vendite a domicilio",
+            self::RF14 => "Rivendita beni usati, oggetti d'arte, d'antiquariato o da collezione",
+            self::RF15 => "Agenzie di vendite all'asta di oggetti d'arte, antiquariato o da collezione",
+            self::RF16 => "IVA per cassa P.A.",
+            self::RF17 => "IVA per cassa",
+            self::RF18 => "Altro",
+            self::RF19 => "Regime forfettario",
+            self::RF20 => "Regime transfrontaliero di Franchigia IVA)"
+        };
+    }
+
+    public function forPrint(): string
+    {
+        return $this->getCode() . " (" . $this->getShortDesc() . ")";
     }
 
 }

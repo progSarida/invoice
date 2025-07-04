@@ -10,6 +10,7 @@ enum ClientSubType: string implements HasLabel
     case COMPANY = 'company';
     case MAN = 'man';
     case WOMAN = 'woman';
+    case PROFESSIONAL = 'professional';
     case CITY = 'city';
     case UNION = 'union';
     case FEDERATION = 'federation';
@@ -22,6 +23,7 @@ enum ClientSubType: string implements HasLabel
             self::COMPANY => 'Azienda',
             self::MAN => 'Uomo',
             self::WOMAN => 'Donna',
+            self::PROFESSIONAL => 'Professionista',
             self::CITY => 'Comune',
             self::UNION => 'Unione di comuni',
             self::FEDERATION => 'Federazione di comuni',
@@ -32,7 +34,7 @@ enum ClientSubType: string implements HasLabel
     public function getType(): ?string
     {
         return match ($this) {
-            self::COMPANY, self::MAN, self::WOMAN, self::EMPTY => ClientType::PRIVATE->value,
+            self::COMPANY, self::MAN, self::WOMAN, self::PROFESSIONAL, self::EMPTY => ClientType::PRIVATE->value,
             self::CITY, self::UNION, self::FEDERATION, self::PROVINCE => ClientType::PUBLIC->value,
             default => null,
         };
@@ -46,6 +48,7 @@ enum ClientSubType: string implements HasLabel
                 self::COMPANY,
                 self::MAN,
                 self::WOMAN,
+                self::PROFESSIONAL
             ],
             'public' => [
                 self::CITY,
@@ -75,6 +78,7 @@ enum ClientSubType: string implements HasLabel
             self::COMPANY => 'Spett. le ditta',
             self::MAN => 'Egr. signore',
             self::WOMAN => 'Egr. signora',
+            self::PROFESSIONAL => 'Spett. le',
             self::CITY => 'Spett. le Comune di',
             self::UNION => 'Spett. le',
             self::FEDERATION => 'Spett. le',
@@ -84,5 +88,9 @@ enum ClientSubType: string implements HasLabel
 
     public function isCompany(){
         return $this === self::COMPANY;
+    }
+
+    public function isProfessional(){
+        return $this === self::PROFESSIONAL;
     }
 }

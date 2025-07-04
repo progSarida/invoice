@@ -38,7 +38,7 @@ class LimitMotivationTypeResource extends Resource
                     ->label('Descrizione')
                     ->maxLength(255)
                     ->columnSpan(4),
-]);
+                ]);
     }
 
     public static function table(Table $table): Table

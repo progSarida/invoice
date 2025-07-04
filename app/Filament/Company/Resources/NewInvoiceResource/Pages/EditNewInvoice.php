@@ -76,8 +76,14 @@ class EditNewInvoice extends EditRecord
                 ->icon('heroicon-o-printer')
                 ->color('primary')
                 ->action(function (Invoice $record) {
-                    $vats = $record->vatResume();
-                    $grouped = collect($vats)
+                    $vats = $record->vatResume();                                   // Creazione array con dati riepiloghi IVA
+                    // dd($vats);
+                    $funds = $record->getFundBreakdown();                           // Creazione array con dati casse previdenziali
+                    // dd($funds);
+                    if(count($funds) > 0)
+                        $vats = $record->updateResume($vats, $funds);               // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
+                    // dd($vats);
+                    $grouped = collect($vats)                                       // Raggruppamento dati riepilochi IVA in base a aliquota
                         ->groupBy('%')
                         ->map(function ($items, $percent) {
                             return [
@@ -95,6 +101,7 @@ class EditNewInvoice extends EditRecord
                     $pdf = Pdf::loadView('pdf.invoice', [
                         'invoice' => $record,
                         'vats' => $grouped,
+                        'funds' => $funds,
                     ]);
 
                     $pdf->setPaper('A4', 'portrait');

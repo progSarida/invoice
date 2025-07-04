@@ -458,6 +458,7 @@ class EditCompanyProfile extends EditTenantProfile
                                             ->options(
                                                 collect(\App\Enums\NumerationType::cases())->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                                             )
+                                            ->live()
                                             ->required()
                                             ->columnSpan(3),
                                         TextInput::make('progressive')

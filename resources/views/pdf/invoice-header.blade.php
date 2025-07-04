@@ -49,7 +49,7 @@
         </tr>
         <tr>
             <td colspan="1"></td>
-            <td colspan="49">Regime fiscale: <b>{{ $invoice->company?->fiscalProfile?->tax_regime?->getCode() }} ({{ $invoice->company?->fiscalProfile?->tax_regime?->getDescription() }})</b></td>
+            <td colspan="49">Regime fiscale: <b>{{ $invoice->company?->fiscalProfile?->tax_regime?->forPrint() }}</b></td>
             <td colspan="1"></td>
             <td colspan="49">Indirizzo: <b>{{ $invoice->client->address }}</b></td>
         </tr>
@@ -82,7 +82,7 @@
             <td colspan="25" class="center">{{ $invoice->docType->name }} ({{ strtolower($invoice->docType->description) }})</td>
             <td colspan="8" class="center"></td>
             <td colspan="24" class="right">{{ $invoice->getNewInvoiceNumber() }}</td>
-            <td colspan="20" class="center">{{ $invoice->invoice_date }}</td>
+            <td colspan="20" class="center">{{ $invoice->invoice_date->format('d/m/Y') }}</td>
             <td colspan="23" class="center">{{ $invoice->contract->office_code }}</td>
         </tr>
     </table>
