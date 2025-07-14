@@ -11,6 +11,11 @@ class CreateActivePayments extends CreateRecord
 {
     protected static string $resource = ActivePaymentsResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if ($data['validated'] ?? false) {

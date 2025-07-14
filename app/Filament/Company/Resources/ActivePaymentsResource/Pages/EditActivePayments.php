@@ -11,6 +11,11 @@ class EditActivePayments extends EditRecord
 {
     protected static string $resource = ActivePaymentsResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         if ($data['validated'] && !$this->record->validated) {

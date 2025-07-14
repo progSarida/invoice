@@ -312,9 +312,11 @@ class ClientResource extends Resource
                     ->columnspan(3),
                 Forms\Components\TextInput::make('tax_code')->label('Codice Fiscale')
                     ->maxLength(255)
+                    ->required(fn (callable $get) => ($get('subtype') === 'man' || $get('subtype') === 'woman'))
                     ->columnspan(2),
                 Forms\Components\TextInput::make('vat_code')->label('Partita Iva')
                     ->maxLength(255)
+                    ->required(fn (callable $get) => ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
                     ->columnspan(2),
                 Forms\Components\TextInput::make('ipa_code')
                     ->label('Codice univoco')

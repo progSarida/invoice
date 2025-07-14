@@ -684,6 +684,7 @@ class NewInvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
                     ->searchable()
                     // ->badge()
+                    ->color('black')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('no_vat_total')->label('Imponibile')
@@ -721,7 +722,10 @@ class NewInvoiceResource extends Resource
                     ->alignRight()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('sdi_status')->label('Status')
-                    ->searchable()->badge()->sortable(),
+                    ->searchable()
+                    // ->badge()
+                    ->color('black')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('sdi_date')->label('Data status')
                     ->date()
                     ->sortable()

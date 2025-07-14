@@ -152,6 +152,7 @@ class NewContractResource extends Resource
                     ->label('Tipo pagamento')
                     ->searchable()
                     // ->badge()
+                    ->color('black')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_validity_date')
                     ->label('Inizio contratto')

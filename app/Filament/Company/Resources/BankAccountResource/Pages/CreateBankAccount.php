@@ -12,6 +12,11 @@ class CreateBankAccount extends CreateRecord
 {
     protected static string $resource = BankAccountResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
     {
         $exists = BankAccount::where('number', $data['number'])->exists();
