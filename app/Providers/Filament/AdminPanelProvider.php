@@ -98,7 +98,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 MenuItem::make()
-                    ->label('Gestione aziende')
+                    ->label('Passa ad operatore')
                     ->url('/company')
                     ->icon('gmdi-business-center-s'),
                 // ...

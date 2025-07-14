@@ -89,10 +89,11 @@ class ContractResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
                     ->searchable()
-                    ->badge()
+                    // ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')->label('Tipo')
-                    ->badge()
+                    // ->badge()
+                    ->color('black')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('number')->label('Numero')

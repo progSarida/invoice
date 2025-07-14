@@ -67,7 +67,7 @@ class CompanyPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 MenuItem::make()
-                ->label('Amministrazione')
+                ->label('Passa ad amministratore')
                 ->visible(fn (): bool => Auth::user()->is_admin)
                 ->url('/admin')
                 ->icon('clarity-administrator-line')

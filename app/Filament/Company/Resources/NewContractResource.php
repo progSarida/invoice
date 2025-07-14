@@ -142,7 +142,7 @@ class NewContractResource extends Resource
                 Tables\Columns\TextColumn::make('tax_type')
                     ->label('Entrata')
                     ->searchable()
-                    ->badge()
+                    // ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('accrualType.name')
                     ->label('Competenza')
@@ -151,7 +151,7 @@ class NewContractResource extends Resource
                 Tables\Columns\TextColumn::make('payment_type')
                     ->label('Tipo pagamento')
                     ->searchable()
-                    ->badge()
+                    // ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_validity_date')
                     ->label('Inizio contratto')

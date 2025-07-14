@@ -59,7 +59,7 @@ class CompanyResource extends Resource
                 //     ->tabs([
                 //         Tabs\Tab::make('Informazioni')
                 //             ->schema([
-                                Forms\Components\TextInput::make('name')->label('Nome')
+                                Forms\Components\TextInput::make('name')->label('Denominazione - Cognome e Nome')
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpan(6),

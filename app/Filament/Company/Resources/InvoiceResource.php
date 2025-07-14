@@ -388,7 +388,10 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('id')->label('Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_type')->label('Tipo')
-                    ->searchable()->badge()->sortable(),
+                    ->searchable()
+                    // ->badge()
+                    ->color('black')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('number')->label('Numero')
                     ->formatStateUsing(function ( Invoice $invoice) {
                         return $invoice->getInvoiceNumber();
@@ -432,7 +435,8 @@ class InvoiceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
                     ->searchable()
-                    ->badge()
+                    // ->badge()
+                    ->color('black')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total')->label('Totale a doversi')
@@ -452,7 +456,10 @@ class InvoiceResource extends Resource
                     ->alignRight()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('sdi_status')->label('Status')
-                    ->searchable()->badge()->sortable(),
+                    ->searchable()
+                    // ->badge()
+                    ->color('black')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('sdi_date')->label('Data status')
                     ->date()
                     ->sortable()

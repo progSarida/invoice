@@ -51,7 +51,7 @@ class EditCompanyProfile extends EditTenantProfile
                     ->tabs([
                         Tabs\Tab::make('Informazioni')
                             ->schema([
-                                TextInput::make('name')->label('Nome')
+                                TextInput::make('name')->label('Denominazione - Cognome e Nome')
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpan(6),
@@ -561,7 +561,7 @@ class EditCompanyProfile extends EditTenantProfile
                                     ->columnSpan(12),
                             ])
                             ->columns(12),
-                        Tabs\Tab::make('Voci fattura')
+                        Tabs\Tab::make('Voci in fattura')
                             ->schema([
                                 Repeater::make('invoicesElements')
                                     ->label('')

@@ -68,6 +68,7 @@ class NewInvoiceResource extends Resource
                 Section::make('')
                     // ->collapsible()
                     ->columns(6)
+                    ->collapsible()
                     ->label('')
                     ->schema([
                         Toggle::make('art_73')
@@ -325,17 +326,17 @@ class NewInvoiceResource extends Resource
                                 ->searchable()
                         ]),
 
-                        Section::make('Status SDI')->columns(2)
-                        ->collapsed()
-                        ->schema([
-                            Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
-                                ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))
-                                ->columnSpanFull(),
-                            Forms\Components\TextInput::make('sdi_code')->label('Codice')->readOnly()->columnSpan(1)->disabled(),
-                            Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(1)->disabled()
-                                ->native(false)
-                                ->displayFormat('d F Y'),
-                        ]),
+                        // Section::make('Status SDI')->columns(2)
+                        // ->collapsed()
+                        // ->schema([
+                        //     Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
+                        //         ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))
+                        //         ->columnSpanFull(),
+                        //     Forms\Components\TextInput::make('sdi_code')->label('Codice')->readOnly()->columnSpan(1)->disabled(),
+                        //     Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(1)->disabled()
+                        //         ->native(false)
+                        //         ->displayFormat('d F Y'),
+                        // ]),
 
                         Section::make('Dati per il pagamento')->columns(4)
                         ->collapsed(false)
@@ -350,6 +351,7 @@ class NewInvoiceResource extends Resource
                                     fn (Model $record) => "{$record->name}\n$record->iban"
                                 )
                                 ->searchable()
+                                ->required()
                                 ->columnSpanFull()->preload(),
                             Forms\Components\Select::make('payment_type')->label('Tipo')
                                 // ->options(PaymentType::class)
@@ -361,6 +363,7 @@ class NewInvoiceResource extends Resource
                                         ])
                                         ->toArray()
                                 )
+                                ->required()
                                 ->default('mp05')
                                 ->columnSpan(2),
                             Forms\Components\Select::make('payment_days')
@@ -375,6 +378,19 @@ class NewInvoiceResource extends Resource
                                 ->default(30)
                                 ->columnSpan(2),
                                 ]),
+
+                        Section::make('Status SDI')->columns(2)
+                        ->collapsed()
+                        ->schema([
+                            Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
+                                ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))
+                                ->columnSpanFull(),
+                            Forms\Components\TextInput::make('sdi_code')->label('Codice')->readOnly()->columnSpan(1)->disabled(),
+                            Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(1)->disabled()
+                                ->native(false)
+                                ->displayFormat('d F Y'),
+                        ]),
+
                         Section::make('Status del pagamento')->columns(2)
                             ->collapsed()
                             ->schema([
@@ -569,6 +585,7 @@ class NewInvoiceResource extends Resource
                                 ->required()
                                 ->minValue(now()->subYears(10)->year)
                                 ->maxValue(now()->year)
+                                ->default(now()->year)
                                 ->rules(['digits:4'])
                                 ->columnSpan(2),
 
@@ -577,6 +594,7 @@ class NewInvoiceResource extends Resource
                                 ->required()
                                 ->minValue(now()->subYears(10)->year)
                                 ->maxValue(now()->year)
+                                ->default(now()->year)
                                 ->rules(['digits:4'])
                                 ->columnSpan(2),
 

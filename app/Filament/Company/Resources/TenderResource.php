@@ -104,11 +104,13 @@ class TenderResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
                     ->searchable()
-                    ->badge()
+                    // ->badge()
+                    ->color('black')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')->label('Tipo pagamento')
                     ->searchable()
-                    ->badge()
+                    // ->badge()
+                    ->color('black')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('office_name')->label('Nome ufficio')
                     ->sortable()

@@ -90,6 +90,10 @@ enum ClientSubType: string implements HasLabel
         return $this === self::COMPANY;
     }
 
+    public function isPerson(){
+        return $this === self::MAN || $this === self::WOMAN;
+    }
+
     public function isProfessional(){
         return $this === self::PROFESSIONAL;
     }

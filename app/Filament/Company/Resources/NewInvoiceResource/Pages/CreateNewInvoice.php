@@ -16,6 +16,11 @@ class CreateNewInvoice extends CreateRecord
 {
     protected static string $resource = NewInvoiceResource::class;
 
+    public function getTitle(): string
+    {
+        return "Nuova fattura";
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if ( $data['timing_type'] === 'contestuale' && Carbon::parse($data['invoice_date'])->lt(now()->subDays(9) )) {      // controllo 9 giorni indietro data fattura contestuale

@@ -65,8 +65,9 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->columnSpan(4)
                     ->prefix('€')
                     ->maxLength(255)
-                    ->live()
+                    ->live(debounce: 500)
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                        if (!is_numeric($state)) return;
                         // Calcola importo IVA e totale quando amount cambia
                         $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
                         $amount = $state ?? 0;
