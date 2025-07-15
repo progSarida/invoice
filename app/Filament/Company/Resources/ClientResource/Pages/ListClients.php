@@ -23,6 +23,7 @@ class ListClients extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->icon('heroicon-o-plus-circle')
+                // ->keyBindings(['alt+n']),
                 ->keyBindings(['f6']),
             Actions\Action::make('stampa')
                 ->icon('heroicon-o-printer')
@@ -53,12 +54,14 @@ class ListClients extends ListRecords
                         ->success()
                         ->send();
                 })
+                // ->keyBindings(['alt+s'])
                 ,
             ExportAction::make('esporta')
                 ->icon('phosphor-export')
                 ->label('Esporta')
                 ->color('primary')
                 ->exporter(ClientExporter::class)
+                // ->keyBindings(['alt+e'])
         ];
     }
 }

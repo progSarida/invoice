@@ -21,7 +21,9 @@ class ListNewContracts extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->icon('heroicon-o-plus-circle'),
+                ->icon('heroicon-o-plus-circle')
+                // ->keyBindings(['alt+n'])
+                ,
             Actions\Action::make('stampa')
                 ->icon('heroicon-o-printer')
                 ->label('Stampa')
@@ -52,12 +54,14 @@ class ListNewContracts extends ListRecords
                         ->success()
                         ->send();
                 })
+                // ->keyBindings(['alt+s'])
                 ,
             ExportAction::make('esporta')
                 ->icon('phosphor-export')
                 ->label('Esporta')
                 ->color('primary')
                 ->exporter(NewContractExporter::class)
+                // ->keyBindings(['alt+e'])
         ];
     }
 }

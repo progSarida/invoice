@@ -59,7 +59,8 @@ class ClientResource extends Resource
                     ->afterStateUpdated(function (callable $set, $state) {
                         $set('subtype', null);
                     })
-                    ->columnspan(3),
+                    ->columnspan(3)
+                    ->autofocus(),
                 Forms\Components\Select::make('subtype')->label('Sottotipo')
                     ->options(function (callable $get) {
                         $type = $get('type');

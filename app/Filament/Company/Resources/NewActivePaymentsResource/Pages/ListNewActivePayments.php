@@ -52,7 +52,9 @@ class ListNewActivePayments extends ListRecords
                         ->title('Stampa avviata')
                         ->success()
                         ->send();
-                }),
+                })
+                // ->keyBindings(['alt+n'])
+                ,
         ];
     }
 }

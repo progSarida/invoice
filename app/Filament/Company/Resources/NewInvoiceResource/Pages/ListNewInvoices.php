@@ -153,7 +153,9 @@ class ListNewInvoices extends ListRecords
                     }
 
                     return ($refusedHide || $discardedHide || $lateHide || $silentHide);
-                }),
+                })
+                // ->keyBindings(['alt+n'])
+                ,
             Actions\Action::make('stampa')
                 ->icon('heroicon-o-printer')
                 ->label('Stampa')
@@ -190,12 +192,15 @@ class ListNewInvoices extends ListRecords
                         ->title('Stampa avviata')
                         ->success()
                         ->send();
-                }),
+                })
+                // ->keyBindings(['alt+s'])
+                ,
             ExportAction::make('esporta')
                 ->icon('phosphor-export')
                 ->label('Esporta')
                 ->color('primary')
                 ->exporter(NewInvoiceExporter::class)
+                // ->keyBindings(['alt+e'])
         ];
     }
 

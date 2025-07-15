@@ -68,7 +68,7 @@ class NewInvoiceResource extends Resource
                 Section::make('')
                     // ->collapsible()
                     ->columns(6)
-                    ->collapsible()
+                    ->collapsed()
                     ->label('')
                     ->schema([
                         Toggle::make('art_73')
@@ -181,7 +181,8 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 ->preload()
                                 ->optionsLimit(5)
-                                ->columns(1),
+                                ->columns(1)
+                                ->autofocus(),
 
                             Forms\Components\Select::make('tax_type')->label('Entrata')
                                 ->required()

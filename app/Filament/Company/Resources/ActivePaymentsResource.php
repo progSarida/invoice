@@ -54,7 +54,8 @@ class ActivePaymentsResource extends Resource
                     ->live()
                     ->preload()
                     // ->optionsLimit(20)
-                    ->columnSpan(5),
+                    ->columnSpan(5)
+                    ->autofocus(),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()

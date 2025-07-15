@@ -66,7 +66,8 @@ class NewContractResource extends Resource
                     ->live()
                     ->preload()
                     ->optionsLimit(5)
-                    ->columnSpan(5),
+                    ->columnSpan(5)
+                    ->autofocus(),
                 Forms\Components\Select::make('tax_type')
                     ->label('Entrata')
                     ->options(TaxType::class)
