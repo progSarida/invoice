@@ -169,7 +169,7 @@ class NewActivePaymentsResource extends Resource
                     ->afterStateUpdated(function (\App\Models\ActivePayments $record, bool $state) {
                         if ($state) {
                             $record->validation_date = now();
-                            $record->validation_user_id = auth()->id;
+                            $record->validation_user_id = auth()->id();
                         } else {
                             $record->validation_date = null;
                             $record->validation_user_id = null;
