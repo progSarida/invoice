@@ -188,11 +188,15 @@
 
     @php
         use App\Enums\WithholdingType;
+        $selectedIds = is_array($invoice->withholdings) ? $invoice->withholdings : [];
+        $withholdings = $invoice->company->withholdings->filter(function ($item) use ($selectedIds) {
+            return in_array($item->id, $selectedIds);
+        });
         $accontoValues = [
             WithholdingType::RT01,                               // Ritenuta d'acconto (persone fisiche)
             WithholdingType::RT02,                               // Ritenuta d'acconto (persone giuridiche)
         ];
-        $hasWithholdingTax = collect($invoice->company->withholdings)
+        $hasWithholdingTax = collect($withholdings)
             ->search(fn($withholding) => in_array($withholding->withholding_type, $accontoValues));
         $withholdingAmount = 0;
     @endphp

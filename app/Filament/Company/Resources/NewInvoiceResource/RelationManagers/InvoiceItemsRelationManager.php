@@ -70,7 +70,12 @@ class InvoiceItemsRelationManager extends RelationManager
                         if (!is_numeric($state)) return;
                         // Calcola importo IVA e totale quando amount cambia
                         // $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
-                        $rate = \App\Enums\VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
+                        // $rate = \App\Enums\VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
+                        $vatCode = $get('vat_code_type');
+                        if (!$vatCode instanceof \App\Enums\VatCodeType) {
+                            $vatCode = \App\Enums\VatCodeType::tryFrom($vatCode);
+                        }
+                        $rate = $vatCode?->getRate() / 100 ?? 0;
                         $amount = $state ?? 0;
                         $vatAmount = $amount * $rate;
                         $total = $amount + $vatAmount;

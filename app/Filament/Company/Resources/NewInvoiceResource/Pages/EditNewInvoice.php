@@ -130,14 +130,27 @@ class EditNewInvoice extends EditRecord
         // $number = $number.$data['number'];
         // $data['invoice_uid'] = $number." / 0".$data['section']." / ".$data['year'];
 
-        $number = "";
-        $sectional = Sectional::find($data['sectional_id'])->description;
-        for($i=strlen($data['number']);$i<3;$i++)
-        {
-            $number.= "0";
+        if($data['art_73']) {
+            $number = "";
+            // $date = $data['invoice_date'];
+            $date = \Carbon\Carbon::parse($data['invoice_date'])->format('Y-m-d');
+            for($i=strlen($data['number']);$i<3;$i++)
+            {
+                $number.= "0";
+            }
+            $number = $number.$data['number'];
+            $data['invoice_uid'] = $number."/".$date;
         }
-        $number = $number.$data['number'];
-        $data['invoice_uid'] = $number."/".$sectional."/".$data['year'];
+        else{
+            $number = "";
+            $sectional = Sectional::find($data['sectional_id'])->description;
+            for($i=strlen($data['number']);$i<3;$i++)
+            {
+                $number.= "0";
+            }
+            $number = $number.$data['number'];
+            $data['invoice_uid'] = $number."/".$sectional."/".$data['year'];
+        }
 
         return $data;
     }

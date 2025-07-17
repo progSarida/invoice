@@ -11,6 +11,7 @@ use App\Enums\PaymentType;
 use App\Enums\VatCodeType;
 use App\Models\AccrualType;
 use App\Enums\PaymentStatus;
+use App\Enums\VatEnforceType;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,6 +26,10 @@ class Invoice extends Model
         'parent_id',
         'tax_type',
         'invoice_type',
+        'art_73',
+        'social_contributions',
+        'withholdings',
+        'vat_enforce_type',
         'timing_type',
         'delivery_note',
         'delivery_date',
@@ -51,6 +56,9 @@ class Invoice extends Model
     protected $casts = [
         'tax_type' =>  TaxType::class,
         'invoice_type' => InvoiceType::class,
+        'social_contributions' => 'array',
+        'withholdings' => 'array',
+        'vat_enforce_type' => VatEnforceType::class,
         // 'accrual_type' => AccrualType::class,
         'invoice_date' => 'date',
         'payment_status' => PaymentStatus::class,
@@ -180,14 +188,26 @@ class Invoice extends Model
     public function getNewInvoiceNumber()
     {
 
-        $number = "";
-        $sectional = Sectional::find($this->sectional_id)->description;
-        for($i=strlen($this->number);$i<3;$i++)
-        {
-            $number.= "0";
+        if($this->art_73) {
+            $number = "";
+            $date = $this->invoice_date->format('Y-m-d');
+            for($i=strlen($this->number);$i<3;$i++)
+            {
+                $number.= "0";
+            }
+            $number = $number.$this->number;
+            return $number."/".$date;
         }
-        $number = $number.$this->number;
-        return $number."/".$sectional."/".$this->year;
+        else{
+            $number = "";
+            $sectional = Sectional::find($this->sectional_id)->description;
+            for($i=strlen($this->number);$i<3;$i++)
+            {
+                $number.= "0";
+            }
+            $number = $number.$this->number;
+            return $number."/".$sectional."/".$this->year;
+        }
 
     }
 
@@ -268,13 +288,16 @@ class Invoice extends Model
             $rate = $item->vat_code_type->value;
             if (!isset($vats[$rate])) {
                 $vats[$rate] = [
+                    // 'norm' => $item->vat_code_type->getRate() == '0'
+                    //             ? 'ART. 15 DPR 633/72'
+                    //             : ($this->client?->type?->value == 'public'
+                    //                 ? 'S (scissione dei pagamenti)'
+                    //                 : (($this->company->fiscalProfile->tax_regime->value == 'rf16' || $this->company->fiscalProfile->tax_regime->value == 'rf17')
+                    //                     ? 'D (esigibilità differita)'
+                    //                     : 'I (esigibilità immediata')),
                     'norm' => $item->vat_code_type->getRate() == '0'
                                 ? 'ART. 15 DPR 633/72'
-                                : ($this->client?->type?->value == 'public'
-                                    ? 'S (scissione dei pagamenti)'
-                                    : (($this->company->fiscalProfile->tax_regime->value == 'rf16' || $this->company->fiscalProfile->tax_regime->value == 'rf17')
-                                        ? 'D (esigibilità differita)'
-                                        : 'I (esigibilità immediata')),
+                                :  $this->vat_enforce_type?->getCode()."(".$this->vat_enforce_type?->getLabel().")",
                     '%' => $item->vat_code_type->getRate() == '0' ? $item->vat_code_type->getCode() : $item->vat_code_type->getRate(),
                     'taxable' => 0,
                     'vat' => 0,
@@ -319,8 +342,17 @@ class Invoice extends Model
         // Recupera il regime fiscale dell'azienda
         $taxRegime = $this->company->fiscalProfile->tax_regime->value;
 
-        // Itera sulle casse previdenziali associate all'azienda
-        foreach ($this->company->socialContributions as $contribution) {
+        $selectedIds = is_array($this->social_contributions) ? $this->social_contributions : [];
+
+        // $contributions = $this->company->socialContributions;dd($contributions);
+        // Filtra le socialContributions
+        $contributions = $this->company->socialContributions->filter(function ($item) use ($selectedIds) {
+            return in_array($item->id, $selectedIds);
+        });
+        // dd($contributions);
+
+        // Itera sulle casse previdenziali selezionate tra quelle associate all'azienda
+        foreach ($contributions as $contribution) {
             $taxablePerc = floatval($contribution->taxable_perc); // Percentuale imponibile (es. 100)
             $rate = floatval($contribution->rate); // Aliquota cassa (es. 4% per INPS)
             $fundCode = $contribution->fund->getCode(); // Codice SdI (es. TC22 per INPS)

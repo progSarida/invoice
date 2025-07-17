@@ -25,6 +25,7 @@ use Filament\Tables\Table;
 use App\Models\AccrualType;
 use App\Models\NewContract;
 use App\Enums\PaymentStatus;
+use App\Enums\VatEnforceType;
 use Filament\Facades\Filament;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
@@ -48,6 +49,8 @@ use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\CreditNot
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\InvoiceItemsRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\ActivePaymentsRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\SdiNotificationsRelationManager;
+use App\Models\SocialContribution;
+use App\Models\Withholding;
 
 class NewInvoiceResource extends Resource
 {
@@ -65,6 +68,151 @@ class NewInvoiceResource extends Resource
     {
         return $form
             ->schema([
+                Section::make('Opzioni')
+                    // ->collapsible()
+                    ->columns(12)
+                    ->collapsed()
+                    ->label('')
+                    ->schema([
+                        Toggle::make('art_73')
+                            ->label('Art. 73')
+                            ->dehydrated()
+                            ->columnSpan(2)
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                if ($state) {
+                                    $set('sectional_id', null);
+                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                    $set('number', $number);
+                                    NewInvoiceResource::invoiceNumber($get, $set);
+                                }
+                                else{
+                                    $clientId = $get('client_id');
+                                    if ($clientId) {
+                                        $client = \App\Models\Client::find($clientId);
+                                        if ($client && $client->type) {
+                                            $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
+                                                ->where('client_type', $client->type->value)
+                                                ->first();
+                                            if ($sectional) {
+                                                $set('sectional_id', $sectional->id);
+                                                $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                                $set('number', $number);
+                                                NewInvoiceResource::invoiceNumber($get, $set);
+                                            } else {
+                                                $set('sectional_id', null);
+                                                $set('number', null);
+                                                NewInvoiceResource::invoiceNumber($get, $set);
+                                                Notification::make()
+                                                    ->title('Nessun sezionario trovato per il tipo di cliente selezionato.')
+                                                    ->warning()
+                                                    ->send();
+                                            }
+                                        }
+                                    }
+                                }
+                            }),
+
+                        // Forms\Components\Select::make('social_contributions')   // se ci sono casse previdenziali per l'emittente della fattura => mostra select casse?
+                        //     ->columnSpan(2)
+                        //     // ->label('Cassa previdenziale')
+                        //     ->label('')
+                        //     ->placeholder('Cassa previdenziale')
+                        //     ->reactive()
+                        //     ->multiple()
+                        //     ->dehydrated()
+                        //     ->columns(2)
+                        //     ->options(
+                        //         function(){
+                        //                 return SocialContribution::where('company_id', Filament::getTenant()->id)
+                        //                             ->get()
+                        //                             ->mapWithKeys(function ($item) {
+                        //                                 return [$item->id => $item->fund?->getLabel()];
+                        //                             })
+                        //                             ->toArray();
+                        //             }
+                        //     )
+                        //     ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                        //         //
+                        //     })
+                        //     ->visible(
+                        //             function(){
+                        //                 $count = SocialContribution::where('company_id', Filament::getTenant()->id)->count();
+                        //                 return $count > 0;
+                        //             }
+                        //         ),
+                        
+                        Forms\Components\Select::make('social_contributions')
+                            ->label('')
+                            ->columnSpan(4)
+                            ->placeholder('Cassa previdenziale')
+                            ->multiple()
+                            ->options(function () {
+                                return SocialContribution::where('company_id', Filament::getTenant()->id)
+                                    ->get()
+                                    ->mapWithKeys(fn ($item) => [$item->id => $item->fund->getLabel()])
+                                    ->toArray();
+                            })
+                            // ->dehydrated(fn ($state) => is_array($state) && count($state)),
+                            ->dehydrated(),
+
+                        // Forms\Components\Select::make('withholdings')           // se c'è la ritenuta d'acconto la inserisce nella stampa
+                        //     ->columnSpan(2)
+                        //     // ->label('Ritenuta d\'acconto')
+                        //     ->label('')
+                        //     ->placeholder('Ritenute')
+                        //     ->reactive()
+                        //     ->multiple()
+                        //     ->dehydrated()
+                        //     ->columns(2)
+                        //     ->options(
+                        //         function(){
+                        //                 return Withholding::where('company_id', Filament::getTenant()->id)
+                        //                             ->get()
+                        //                             ->mapWithKeys(function ($item) {
+                        //                                 return [$item->id => $item->withholding_type?->getLabel()];
+                        //                             })
+                        //                             ->toArray();
+                        //             }
+                        //     )
+                        //     ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                        //         //
+                        //     })
+                        //     ->visible(
+                        //             function(){
+                        //                 $count = Withholding::where('company_id', Filament::getTenant()->id)->count();
+                        //                 return $count > 0;
+                        //             }
+                        //         ),
+                        //     ]),
+
+                        Forms\Components\Select::make('withholdings')
+                            ->label('')
+                            ->columnSpan(3)
+                            ->placeholder('Ritenute')
+                            ->multiple()
+                            ->options(function () {
+                                return Withholding::where('company_id', Filament::getTenant()->id)
+                                    ->get()
+                                    ->mapWithKeys(fn ($item) => [$item->id => $item->withholding_type->getLabel()])
+                                    ->toArray();
+                            })
+                            // ->dehydrated(fn ($state) => is_array($state) && count($state)),
+                            ->dehydrated(),
+
+                        Forms\Components\Select::make('vat_enforce_type')
+                            ->label('')
+                            ->columnSpan(3)
+                            ->placeholder('Esigibilità IVA')
+                            ->options(
+                                collect(VatEnforceType::cases())
+                                ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                            )
+                            ->dehydrated()
+
+
+                        ]),
+
                 Grid::make('GRID')->columnSpan(2)->schema([
 
                     Section::make('Destinatario')
@@ -89,7 +237,8 @@ class NewInvoiceResource extends Resource
                                     $set('sectional_id', null);
                                     $set('tax_type', null);
                                     $clientId = $get('client_id');
-                                    if ($clientId) {
+                                    $art73 = $get('art_73');
+                                    if ($clientId && !$art73) {
                                         $client = \App\Models\Client::find($clientId);
                                         if ($client && $client->type) {
                                             $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
@@ -381,13 +530,24 @@ class NewInvoiceResource extends Resource
                                 })
                                 ->options(function (Get $get) {
                                     $sectionalId = $get('sectional_id');
-                                    if (!$sectionalId) {
+                                    $art73 = $get('art_73');
+                                    if ($art73) {
+                                        // $docs = DocType::get();
+                                        // $docs = \Filament\Facades\Filament::getTenant()->docTypes();
+                                        $docs = \Filament\Facades\Filament::getTenant()
+                                                    ->docTypes()
+                                                    ->select('doc_types.id', 'doc_types.description')
+                                                    ->get();
+                                        return $docs->pluck('description', 'id')->toArray();
+                                    }
+                                    else if (!$sectionalId) {
                                         return [];
                                     }
                                     $sectional = Sectional::with('docTypes')->find($sectionalId);
                                     return $sectional ? $sectional->docTypes->pluck('description', 'id')->toArray() : [];
                                 })
-                                ->disabled(fn (Get $get) => !filled($get('sectional_id')))
+                                // ->disabled(fn (Get $get) => !filled($get('sectional_id')))
+                                ->dehydrated()
                                 ->searchable()
                                 ->preload()
                                 ->columnSpan(4),
@@ -454,7 +614,7 @@ class NewInvoiceResource extends Resource
                                 ->required(),
 
                             Forms\Components\Select::make('sectional_id')->label('Sezionario')
-                                ->required()
+                                ->required(fn (Get $get) => !$get('art_73'))
                                 ->options(function (Get $get) {
                                     $query = \App\Models\Sectional::where('company_id', Filament::getTenant()->id);
                                     $clientId = $get('client_id');
@@ -562,70 +722,104 @@ class NewInvoiceResource extends Resource
 
                 ]),//FIRST GRID
 
-                Section::make('Opzioni')
-                    // ->collapsible()
-                    ->columns(6)
-                    ->collapsed()
-                    ->label('')
-                    ->schema([
-                        Toggle::make('art_73')
-                            ->label('Art. 73')
-                            ->reactive()
-                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
-                                if ($state) {
-                                    $set('sectional_id', null);
-                                }
-                                else{
-                                    $clientId = $get('client_id');
-                                    if ($clientId) {
-                                        $client = \App\Models\Client::find($clientId);
-                                        if ($client && $client->type) {
-                                            $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
-                                                ->where('client_type', $client->type->value)
-                                                ->first();
-                                            if ($sectional) {
-                                                $set('sectional_id', $sectional->id);
-                                                $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
-                                                $set('number', $number);
-                                                NewInvoiceResource::invoiceNumber($get, $set);
-                                            } else {
-                                                $set('sectional_id', null);
-                                                $set('number', null);
-                                                NewInvoiceResource::invoiceNumber($get, $set);
-                                                Notification::make()
-                                                    ->title('Nessun sezionario trovato per il tipo di cliente selezionato.')
-                                                    ->warning()
-                                                    ->send();
-                                            }
-                                        }
-                                    }
-                                }
-                            }),
-                        Toggle::make('social')
-                            ->columnSpan(2)
-                            ->label('Cassa previdenziale')
-                            ->reactive()
-                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
-                                //
-                            })
-                            ->visible(
-                                    function(){
-                                        // se ci sono casse previdenziali per l'emittente della fattura => mostra select casse?
-                                    }
-                                ),
-                        Toggle::make('withholding')
-                            ->columnSpan(2)
-                            ->label('Ritenuta d\'acconto')
-                            ->reactive()
-                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
-                                //
-                            })
-                            ->visible(
-                                    function(){
-                                        // se c'è la ritenuta d'acconto la inserisce nella stampa
-                                    }
-                                ),
-                            ]),
+                // Section::make('Opzioni')
+                //     // ->collapsible()
+                //     ->columns(6)
+                //     ->collapsed()
+                //     ->label('')
+                //     ->schema([
+                //         Toggle::make('art_73')
+                //             ->label('Art. 73')
+                //             ->dehydrated()
+                //             ->reactive()
+                //             ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                //                 if ($state) {
+                //                     $set('sectional_id', null);
+                //                     $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                //                     $set('number', $number);
+                //                     NewInvoiceResource::invoiceNumber($get, $set);
+                //                 }
+                //                 else{
+                //                     $clientId = $get('client_id');
+                //                     if ($clientId) {
+                //                         $client = \App\Models\Client::find($clientId);
+                //                         if ($client && $client->type) {
+                //                             $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
+                //                                 ->where('client_type', $client->type->value)
+                //                                 ->first();
+                //                             if ($sectional) {
+                //                                 $set('sectional_id', $sectional->id);
+                //                                 $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                //                                 $set('number', $number);
+                //                                 NewInvoiceResource::invoiceNumber($get, $set);
+                //                             } else {
+                //                                 $set('sectional_id', null);
+                //                                 $set('number', null);
+                //                                 NewInvoiceResource::invoiceNumber($get, $set);
+                //                                 Notification::make()
+                //                                     ->title('Nessun sezionario trovato per il tipo di cliente selezionato.')
+                //                                     ->warning()
+                //                                     ->send();
+                //                             }
+                //                         }
+                //                     }
+                //                 }
+                //             }),
+                //         Forms\Components\Select::make('social')             // se ci sono casse previdenziali per l'emittente della fattura => mostra select casse?
+                //             ->columnSpan(2)
+                //             // ->label('Cassa previdenziale')
+                //             ->label('')
+                //             ->placeholder('Cassa previdenziale')
+                //             ->reactive()
+                //             ->multiple()
+                //             ->columns(2)
+                //             ->options(
+                //                 function(){
+                //                         return SocialContribution::where('company_id', Filament::getTenant()->id)
+                //                                     ->get()
+                //                                     ->mapWithKeys(function ($item) {
+                //                                         return [$item->id => $item->fund?->getLabel()];
+                //                                     })
+                //                                     ->toArray();
+                //                     }
+                //             )
+                //             ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                //                 //
+                //             })
+                //             ->visible(
+                //                     function(){
+                //                         $count = SocialContribution::where('company_id', Filament::getTenant()->id)->count();
+                //                         return $count > 0;
+                //                     }
+                //                 ),
+                //         Forms\Components\Select::make('withholding')        // se c'è la ritenuta d'acconto la inserisce nella stampa
+                //             ->columnSpan(2)
+                //             // ->label('Ritenuta d\'acconto')
+                //             ->label('')
+                //             ->placeholder('Ritenute')
+                //             ->reactive()
+                //             ->multiple()
+                //             ->columns(2)
+                //             ->options(
+                //                 function(){
+                //                         return Withholding::where('company_id', Filament::getTenant()->id)
+                //                                     ->get()
+                //                                     ->mapWithKeys(function ($item) {
+                //                                         return [$item->id => $item->withholding_type?->getLabel()];
+                //                                     })
+                //                                     ->toArray();
+                //                     }
+                //             )
+                //             ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                //                 //
+                //             })
+                //             ->visible(
+                //                     function(){
+                //                         $count = Withholding::where('company_id', Filament::getTenant()->id)->count();
+                //                         return $count > 0;
+                //                     }
+                //                 ),
+                //             ]),
 
             ])->columns(5);
             
@@ -1070,7 +1264,17 @@ class NewInvoiceResource extends Resource
 
     public static function invoiceNumber(Get $get, Set $set){
 
-        if(empty($get('number')) || empty($get('sectional_id')) || empty($get('year')))
+        if($get('art_73')) {
+            $number = "";
+            $date = $get('invoice_date');
+            for($i=strlen($get('number'));$i<3;$i++)
+            {
+                $number.= "0";
+            }
+            $number = $number.$get('number');
+            $set('invoice_uid', $number."/".$date);
+        }
+        else if(empty($get('number')) || empty($get('sectional_id')) || empty($get('year')))
             $set('invoice_uid', null);
         else{
             $number = "";
@@ -1089,8 +1293,22 @@ class NewInvoiceResource extends Resource
     {
         $year = $get('year');
         $sectionalId = $get('sectional_id');
+        $art73 = $get('art_73');
+        $invoiceDate = $get('invoice_date');
 
-        if ($year && $sectionalId) {
+        if ($art73) {
+            $maxNumber = \App\Models\Invoice::where('invoice_date', $invoiceDate)
+                ->where('art_73', true)
+                ->where('company_id', Filament::getTenant()->id)
+                ->max('number');
+
+            if ($maxNumber !== null) {
+                return $maxNumber + 1;
+            }
+
+            return 1;
+        }
+        else if ($year && $sectionalId) {
             $maxNumber = \App\Models\Invoice::where('year', $year)
                 ->where('sectional_id', $sectionalId)
                 ->where('company_id', Filament::getTenant()->id)
