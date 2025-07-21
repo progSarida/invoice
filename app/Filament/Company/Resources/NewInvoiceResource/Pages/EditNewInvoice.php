@@ -8,7 +8,10 @@ use App\Models\Invoice;
 use App\Models\Sectional;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Notifications\Notification;
 use App\Filament\Company\Resources\NewInvoiceResource;
+use App\Services\AndxorSoapService;
+use Filament\Forms\Components\TextInput;
 
 class EditNewInvoice extends EditRecord
 {
@@ -117,6 +120,33 @@ class EditNewInvoice extends EditRecord
                         echo $pdf->output();
                     }, 'fattura-' . $record->printNumber() . '.pdf');
                 }),
+
+            Actions\Action::make('sendInvoice')
+                ->label('Invia Fattura a SDI')
+                ->action(function (Invoice $record, array $data) {
+                    $soapService = app(AndxorSoapService::class);
+                    try {
+                        $response = $soapService->sendInvoice($record, 'W3iDWc3Q9w.3AUgd2zpz4');
+                        Notification::make()
+                            ->title('Fattura inviata con successo')
+                            ->body('Progressivo: ' . $response->ProgressivoInvio)
+                            ->success()
+                            ->send();
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Errore')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->form([
+                    TextInput::make('password')
+                        ->label('Password SOAP')
+                        ->password()
+                        ->required(),
+                ])
+                ->requiresConfirmation(),
         ];
     }
 
