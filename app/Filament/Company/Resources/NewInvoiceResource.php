@@ -225,6 +225,7 @@ class NewInvoiceResource extends Resource
                                         ->icon('govicon-user-suit')
                                         ->form(fn (Form $form) => ClientResource::modalForm($form))
                                         ->modalHeading('')
+                                        ->modalWidth('6xl')
                                         ->action(fn (array $data, Client $client, Get $get, Set $set) => NewInvoiceResource::saveClient($data, $client, $get, $set))
                                 )
                                 ->relationship(name: 'client', titleAttribute: 'denomination')
@@ -1201,15 +1202,20 @@ class NewInvoiceResource extends Resource
 
     public static function saveClient(array $data, Client $client, Get $get, Set $set): void
     {
+        // dd($data);
         $client->company_id = Filament::getTenant()->id;
-        $client->type = $data['type'];
-        $client->subtype = $data['subtype'];
-        $client->denomination = $data['denomination'];
-        $client->address = $data['address'];
-        $client->city_id = $data['city_id'];
-        $client->tax_code = $data['tax_code'];
-        $client->vat_code = $data['vat_code'];
-        $client->email = $data['email'];
+        $client->type = $data['type'] ?? null;
+        $client->subtype = $data['subtype'] ?? null;
+        $client->denomination = $data['denomination'] ?? null;
+        $client->state_id = $data['state_id'] ?? null;
+        $client->address = $data['address'] ?? null;
+        $client->city_id = $data['city_id'] ?? null;
+        $client->place = $data['place'] ?? null;
+        $client->tax_code = $data['tax_code'] ?? null;
+        $client->vat_code = $data['vat_code'] ?? null;
+        $client->phone = $data['phone'] ?? null;
+        $client->email = $data['email'] ?? null;
+        $client->pec = $data['pec'] ?? null;
         $client->save();
 
         $set('client_id', $client->id);

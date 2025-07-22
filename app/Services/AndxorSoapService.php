@@ -176,7 +176,7 @@ class AndxorSoapService
                             'CondizioniPagamento' => $invoice->payment_type->value ?? 'TP02',                                                   // MANCA
                             'DettaglioPagamento' => [
                                 [
-                                    'ModalitaPagamento' => $invoice->bankAccount->payment_type->getCode() ?? 'MP00',                            // Metodo pagamento
+                                    'ModalitaPagamento' => $invoice->payment_type->getCode() ?? 'MP00',                                         // Metodo pagamento
                                     'DataScadenzaPagamento' => $invoice->invoice_date->addDays($invoice->payment_days ?? 30)->format('Y-m-d'),  //
                                     'ImportoPagamento' => $invoice->total ?? 0.00,                                                              //
                                     'IBAN' => $invoice->bankAccount->iban ?? null,                                                              //

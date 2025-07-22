@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('clients',function (Blueprint $table){
             $table->unsignedBigInteger('state_id')->nullable()->after('denomination');
             $table->foreign('state_id')->references('id')->on('states')->nullOnDelete();
-            $table->string('city')->nullable()->after('city_id');
+            $table->string('place')->nullable()->after('city_id');
         });
 
         Schema::table('clients', function (Blueprint $table) {

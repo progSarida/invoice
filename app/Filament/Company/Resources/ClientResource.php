@@ -151,7 +151,7 @@ class ClientResource extends Resource
                             $component->state($city?->province_id);
                         }
                     }),
-                Forms\Components\TextInput::make('city')->label('Città')
+                Forms\Components\TextInput::make('place')->label('Luogo')
                     ->required()
                     ->maxLength(255)
                     ->visible(fn (callable $get) => $get('state_id') != $italyId)
@@ -281,6 +281,8 @@ class ClientResource extends Resource
 
     public static function modalForm(Form $form): Form
     {
+        $italyId = State::where('name', 'Italy')->first()->id;
+
         return $form
             ->columns(12)
             ->schema([
@@ -290,7 +292,11 @@ class ClientResource extends Resource
                     ->searchable()
                     ->preload()
                     ->reactive()
-                    ->columnspan(3),
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        $set('subtype', null);
+                    })
+                    ->columnspan(3)
+                    ->autofocus(),
                 Forms\Components\Select::make('subtype')->label('Sottotipo')
                     ->options(function (callable $get) {
                         $type = $get('type');
@@ -316,22 +322,81 @@ class ClientResource extends Resource
                 Forms\Components\TextInput::make('denomination')->label('Denominazione')
                     ->label(function (callable $get) {
                         $subtype = $get('subtype');
-                        if (in_array($subtype, ['man', 'woman'])) {
+                        if (in_array($subtype, ['man', 'woman', 'professional'])) {
                             return 'Cognome e Nome';
                         }
                         return 'Denominazione';
                     })
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(6),
+                    ->columnspan(4),
+                Forms\Components\Select::make('state_id')->label('Paese')
+                    ->options(State::all()->pluck('name', 'id')->toArray())
+                    ->placeholder('')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->reactive()
+                    ->default($italyId)
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        //
+                    })
+                    ->columnspan(2),
                 Forms\Components\TextInput::make('address')->label('Indirizzo')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(9),
+                    ->columnspan(6),
+                Forms\Components\TextInput::make('zip_code')->label('Cap')
+                    ->required()
+                    ->maxLength(5)
+                    ->disabled()
+                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
+                    ->columnspan(1),
                 Forms\Components\Select::make('city_id')->label('Città')
                     ->relationship(name: 'city', titleAttribute: 'name')
+                    ->required()
                     ->searchable()
                     ->preload()
+                    ->columnSpan(3)
+                    ->reactive()
+                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        if ($state) {
+                            $city = \App\Models\City::find($state);
+                            $set('zip_code', $city?->zip_code);
+                            $set('province_id', $city?->province_id);
+                        } else {
+                            $set('zip_code', null);
+                            $set('province_id', null);
+                        }
+                    }),
+                Forms\Components\Select::make('province_id')->label('Provincia')
+                    ->options(Province::pluck('code', 'id')->toArray())
+                    ->searchable()
+                    ->preload()
+                    ->disabled()
+                    ->columnSpan(2)
+                    ->reactive()
+                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
+                    ->afterStateHydrated(function ($component, $state, $record) {
+                        if ($record && $record->city_id) {
+                            $city = \App\Models\City::find($record->city_id);
+                            $component->state($city?->province_id);
+                        }
+                    }),
+                Forms\Components\TextInput::make('place')->label('Luogo')
+                    ->required()
+                    ->maxLength(255)
+                    ->visible(fn (callable $get) => $get('state_id') != $italyId)
+                    ->columnspan(6),
+                DatePicker::make('birth_date')
+                    ->label('Data di nascita')
+                    ->date()
+                    ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('birth_place')->label('Luogo di nascita')
+                    ->maxLength(255)
+                    ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
                     ->columnspan(3),
                 Forms\Components\TextInput::make('tax_code')->label('Codice Fiscale')
                     ->maxLength(255)
@@ -347,15 +412,27 @@ class ClientResource extends Resource
                     ->visible(fn (callable $get) => $get('type') === 'private')
                     ->required(fn (callable $get) => $get('type') === 'private')
                     ->columnspan(2),
+                Forms\Components\Placeholder::make('birth')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => $get('type') !== 'private' || ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
+                    ->columnspan(6),
                 Forms\Components\Placeholder::make('ipa_code')
                     ->label('')
                     ->content('')
                     ->visible(fn (callable $get) => $get('type') !== 'private')
                     ->columnspan(2),
+                Forms\Components\TextInput::make('phone')->label('Tel.')
+                    ->maxLength(255)
+                    ->columnspan(2),
                 Forms\Components\TextInput::make('email')->label('Email')
                     ->email()
                     ->maxLength(255)
-                    ->columnspan(6),
+                    ->columnspan(5),
+                Forms\Components\TextInput::make('pec')->label('Pec')
+                    ->email()
+                    ->maxLength(255)
+                    ->columnspan(5),
             ]);
 
     }
