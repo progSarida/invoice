@@ -141,7 +141,7 @@ class NewInvoiceResource extends Resource
                         //                 return $count > 0;
                         //             }
                         //         ),
-                        
+
                         Forms\Components\Select::make('social_contributions')
                             ->label('')
                             ->columnSpan(4)
@@ -822,7 +822,7 @@ class NewInvoiceResource extends Resource
                 //             ]),
 
             ])->columns(5);
-            
+
     }
 
     public static function table(Table $table): Table

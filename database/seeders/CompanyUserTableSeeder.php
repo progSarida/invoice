@@ -37,8 +37,28 @@ class CompanyUserTableSeeder extends Seeder
             ),
             3 =>
             array (
+                'company_id' => 2,
+                'user_id' => 2,
+            ),
+            4 =>
+            array (
                 'company_id' => 1,
                 'user_id' => 3,
+            ),
+            5 =>
+            array (
+                'company_id' => 2,
+                'user_id' => 3,
+            ),
+            6 =>
+            array (
+                'company_id' => 1,
+                'user_id' => 4,
+            ),
+            7 =>
+            array (
+                'company_id' => 2,
+                'user_id' => 4,
             ),
         ));
 

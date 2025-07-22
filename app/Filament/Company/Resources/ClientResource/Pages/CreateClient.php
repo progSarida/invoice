@@ -19,13 +19,24 @@ class CreateClient extends CreateRecord
 
     protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
     {
-        $exists = Client::where('tax_code', $data['tax_code'])
-            ->orWhere('vat_code', $data['vat_code'])
-            ->exists();
-        if ($exists) {
+        $existsCF = false;
+        $existsPI = false;
+        if ($data['subtype'] === 'man' || $data['subtype'] === 'woman')
+            $existsCF = Client::where('tax_code', $data['tax_code'])->exists();
+        else
+            $existsPI = Client::orWhere('vat_code', $data['vat_code'])->exists();
+        if ($existsCF) {
             Notification::make()
                 ->title('Attenzione')
-                ->body('Esiste già un cliente con questo codice fiscale o partita IVA.')
+                ->body('Esiste già un cliente con questo codice fiscale.')
+                ->warning()
+                ->send();
+            $this->halt(); // opzionale: blocca la UI se serve
+        }
+        else if ($existsPI) {
+            Notification::make()
+                ->title('Attenzione')
+                ->body('Esiste già un cliente con questa partita IVA.')
                 ->warning()
                 ->send();
             $this->halt(); // opzionale: blocca la UI se serve

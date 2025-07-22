@@ -4,6 +4,7 @@ namespace App\Filament\Company\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
+use App\Models\State;
 use App\Models\Client;
 use App\Models\Province;
 use Filament\Forms\Form;
@@ -47,6 +48,8 @@ class ClientResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $italyId = State::where('name', 'Italy')->first()->id;
+
         return $form
             ->columns(12)
             ->schema([
@@ -93,7 +96,19 @@ class ClientResource extends Resource
                     })
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(6),
+                    ->columnspan(4),
+                Forms\Components\Select::make('state_id')->label('Paese')
+                    ->options(State::all()->pluck('name', 'id')->toArray())
+                    ->placeholder('')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->reactive()
+                    ->default($italyId)
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        //
+                    })
+                    ->columnspan(2),
                 Forms\Components\TextInput::make('address')->label('Indirizzo')
                     ->required()
                     ->maxLength(255)
@@ -102,6 +117,7 @@ class ClientResource extends Resource
                     ->required()
                     ->maxLength(5)
                     ->disabled()
+                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
                     ->columnspan(1),
                 Forms\Components\Select::make('city_id')->label('Città')
                     ->relationship(name: 'city', titleAttribute: 'name')
@@ -110,6 +126,7 @@ class ClientResource extends Resource
                     ->preload()
                     ->columnSpan(3)
                     ->reactive()
+                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
                     ->afterStateUpdated(function (callable $set, $state) {
                         if ($state) {
                             $city = \App\Models\City::find($state);
@@ -127,12 +144,18 @@ class ClientResource extends Resource
                     ->disabled()
                     ->columnSpan(2)
                     ->reactive()
+                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
                     ->afterStateHydrated(function ($component, $state, $record) {
                         if ($record && $record->city_id) {
                             $city = \App\Models\City::find($record->city_id);
                             $component->state($city?->province_id);
                         }
                     }),
+                Forms\Components\TextInput::make('city')->label('Città')
+                    ->required()
+                    ->maxLength(255)
+                    ->visible(fn (callable $get) => $get('state_id') != $italyId)
+                    ->columnspan(6),
                 DatePicker::make('birth_date')
                     ->label('Data di nascita')
                     ->date()
@@ -167,7 +190,6 @@ class ClientResource extends Resource
                     ->visible(fn (callable $get) => $get('type') !== 'private')
                     ->columnspan(2),
                 Forms\Components\TextInput::make('phone')->label('Tel.')
-                    ->email()
                     ->maxLength(255)
                     ->columnspan(2),
                 Forms\Components\TextInput::make('email')->label('Email')
