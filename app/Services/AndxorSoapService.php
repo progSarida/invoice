@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use Exception;
-use SoapFault;
-use SoapClient;
-use App\Models\State;
-use App\Models\Invoice;
 use App\Enums\SdiStatus;
 use App\Enums\WithholdingType;
+use App\Models\Invoice;
+use App\Models\State;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Log;
+use SoapClient;
+use SoapFault;
 
 class AndxorSoapService
 {
@@ -245,18 +246,20 @@ class AndxorSoapService
             // Esegui la chiamata SOAP
             $response = $this->client->InviaFattura($payload);
 
-            dump($response);
+            // dd($response);
 
             // Aggiorna l'Invoice con il progressivo di invio
             $invoice->update([
-                'sdi_status' => SdiStatus::INVIATA,
+                'sdi_status' => SdiStatus::INVIATA->value ?? null,
+                'sdi_code' => $response->ProgressivoInvio ?? null,
+                'sdi_date' => Carbon::today()->format('Y-m-d')
             ]);
 
             // Log della richiesta e risposta per debug
             // Log::debug('Richiesta SOAP: ' . $this->client->getLastRequest());
             // Log::debug('Risposta SOAP: ' . $this->client->getLastResponse());
 
-            return $response->parametersOut;
+            return $response;
         } catch (SoapFault $fault) {
             Log::error('Errore SOAP: ' . $fault->faultcode . ' - ' . $fault->faultstring);
             throw new Exception('Errore SOAP: ' . $fault->faultstring, 0, $fault);

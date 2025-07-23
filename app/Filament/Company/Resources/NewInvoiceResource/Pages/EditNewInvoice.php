@@ -132,7 +132,7 @@ class EditNewInvoice extends EditRecord
                         // $response = $soapService->sendInvoice($record, 'W3iDWc3Q9w.3AUgd2zpz4');
                         Notification::make()
                             ->title('Fattura inviata con successo')
-                            ->body('Progressivo: ' . $response->ProgressivoInvio . '\nIn data ' . $response->DataOraRicezione)
+                            ->body('Progressivo: ' . $response->ProgressivoInvio)
                             ->success()
                             ->send();
                     } catch (\Exception $e) {

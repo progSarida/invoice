@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('companies',function (Blueprint $table){
             $table->unsignedBigInteger('state_id')->nullable()->after('tax_number');
             $table->foreign('state_id')->references('id')->on('states')->nullOnDelete();
-            $table->string('place')->nullable()->after('city');
+            $table->string('place')->nullable()->after('city_code');
         });
     }
 

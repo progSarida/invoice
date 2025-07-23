@@ -51,6 +51,9 @@ class Invoice extends Model
         'payment_status',
         'payment_type',
         'payment_days',
+        'sdi_status',
+        'sdi_code',
+        'sdi_date'
     ];
 
     protected $casts = [
