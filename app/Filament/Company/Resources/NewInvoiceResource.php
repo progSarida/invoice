@@ -1209,6 +1209,7 @@ class NewInvoiceResource extends Resource
         $client->denomination = $data['denomination'] ?? null;
         $client->state_id = $data['state_id'] ?? null;
         $client->address = $data['address'] ?? null;
+        $client->zip_code = $data['zip_code'] ?? null;
         $client->city_id = $data['city_id'] ?? null;
         $client->place = $data['place'] ?? null;
         $client->tax_code = $data['tax_code'] ?? null;

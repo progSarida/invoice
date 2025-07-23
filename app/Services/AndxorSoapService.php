@@ -2,27 +2,27 @@
 
 namespace App\Services;
 
+use Exception;
+use SoapFault;
+use SoapClient;
+use App\Models\State;
+use App\Models\Invoice;
 use App\Enums\SdiStatus;
 use App\Enums\WithholdingType;
-use App\Models\Invoice;
-use Exception;
 use Illuminate\Support\Facades\Log;
-use SoapClient;
-use SoapFault;
 
 class AndxorSoapService
 {
     protected $client;
 
-    /* Crea una nuova istanza */
     public function __construct()
     {
         $wsdl = 'https://tinv-test.andxor.it/userServices?wsdl';
         $options = [
-            'trace' => true,                                                    // Abilita il tracciamento per il debug
-            'exceptions' => true,                                               // Abilita le eccezioni
-            'cache_wsdl' => WSDL_CACHE_NONE,                                    // Disabilita la cache per test
-            'soap_version' => SOAP_1_1,                                         // Versione SOAP
+            'trace' => true,
+            'exceptions' => true,
+            'cache_wsdl' => WSDL_CACHE_NONE,
+            'soap_version' => SOAP_1_1,
         ];
 
         try {
@@ -32,154 +32,205 @@ class AndxorSoapService
         }
     }
 
+    private function validateCodiceDestinatario(?string $codice): string
+    {
+        if (empty($codice) || !preg_match('/^[A-Z0-9]{6,7}$/', $codice)) {
+            Log::warning("CodiceDestinatario non valido: $codice. Usato valore predefinito '0000000'.");
+            return '0000000';
+        }
+        return $codice;
+    }
+
+    private function mapPaymentTypeToCondizioniPagamento(string $paymentType): string
+    {
+        $mapping = [
+            'MP01' => 'TP02',
+            'MP05' => 'TP02',
+            'MP08' => 'TP02',
+        ];
+        return $mapping[$paymentType] ?? 'TP02';
+    }
+
+    private function validateIdFiscaleIVA(?string $vatNumber, ?string $taxNumber, string $idPaese): ?array
+    {
+        $idCodice = $vatNumber ?? $taxNumber;
+        if ($idCodice && preg_match('/^[A-Za-z0-9]{1,28}$/', $idCodice)) {
+            return [
+                'IdPaese' => $idPaese,
+                'IdCodice' => $idCodice,
+            ];
+        }
+        return null;
+    }
+
+    private function validateRegimeFiscale(?string $regime): string
+    {
+        $validRegimes = [
+            'RF01', 'RF02', 'RF03', 'RF04', 'RF05', 'RF06', 'RF07', 'RF08', 'RF09', 'RF10',
+            'RF11', 'RF12', 'RF13', 'RF14', 'RF15', 'RF16', 'RF17', 'RF18', 'RF19'
+        ];
+        if ($regime && preg_match('/^[A-Za-z0-9]{1,20}$/', $regime) && in_array($regime, $validRegimes)) {
+            return $regime;
+        }
+        Log::warning("RegimeFiscale non valido: '$regime'. Usato valore predefinito 'RF01'.");
+        return 'RF01';
+    }
+
     public function sendInvoice(Invoice $invoice, string $password)
     {
         try {
-            $withholdings = [];
-            foreach($invoice->company->withholdings as $item){
-                if(in_array($item->withholding_type, [WithholdingType::RT01, WithholdingType::RT02]))
-                    $withholdings[] = $item;
+            $vats = $invoice->vatResume();
+            $funds = array_filter($invoice->getFundBreakdown(), function ($fund) {
+                return isset($fund['fund_code'], $fund['rate'], $fund['amount'], $fund['taxable_base']);
+            });
+            if (count($funds) > 0) {
+                $vats = $invoice->updateResume($vats, $funds);
             }
-            // Mappa i dati dell'Invoice al payload SOAP
+            $withholdings = array_filter($invoice->company->withholdings->toArray(), function ($item) {
+                return in_array($item['withholding_type'], [WithholdingType::RT01, WithholdingType::RT02])
+                    && isset($item['tipo_ritenuta'], $item['importo_ritenuta'], $item['aliquota_ritenuta'], $item['causale_pagamento']);
+            });
+            $idPaeseCedente = $invoice->company->state_id && State::find($invoice->company->state_id) && preg_match('/^[A-Z]{2}$/', State::find($invoice->company->state_id)->alpha2) ? State::find($invoice->company->state_id)->alpha2 : 'IT';
+            $idPaeseCommittente = $invoice->client->state_id && State::find($invoice->client->state_id) && preg_match('/^[A-Z]{2}$/', State::find($invoice->client->state_id)->alpha2) ? State::find($invoice->client->state_id)->alpha2 : 'IT';
+
+            if (!$invoice->company->vat_number && !$invoice->company->tax_number) {
+                Log::error('Dati fiscali mancanti per Cedente: né vat_number né tax_number forniti.');
+                throw new Exception('Dati fiscali mancanti per Cedente.');
+            }
+
+            if (!$invoice->company->fiscalProfile || !$invoice->company->fiscalProfile->tax_regime) {
+                Log::error('Dati fiscali mancanti per Cedente: fiscalProfile o tax_regime non definiti.');
+                throw new Exception('Dati fiscali mancanti per Cedente: regime fiscale non definito.');
+            }
+
             $payload = [
                 'Autenticazione' => [
                     'Cedente' => [
-                        'IdPaese' => $invoice->company->country_code ?? 'IT',                                                                   // MANCA, mettere nei dati di company
-                        // 'IdCodice' => $invoice->company->vat_number ?? $invoice->company->tax_code,                                             // Partita IVA / Codice  Fiscale
-                        'IdCodice' => 'IT01338160995',                                                                                            // TEST
+                        'IdPaese' => $idPaeseCedente,
+                        'IdCodice' => '01338160995',
                     ],
-                    'Password' => $password,                                                                                                    //
-
+                    'Password' => $password,
                 ],
-                'CodiceDestinatario' => $invoice->client->ipa_code ?? $invoice->contract->office_code,                                          // Codice IPA cliente, se nullo codice IPA ufficio in contratto
-                'PECDestinatario' => $invoice->client->pec,                                                                                     // Alternativa, se necessario
+                'CodiceDestinatario' => $this->validateCodiceDestinatario($invoice->client->ipa_code ?? $invoice->contract->office_code ?? '0000000'),
+                'PECDestinatario' => $invoice->client->pec,
                 'OverrideCedente' => [
-                    'DatiAnagrafici' => [
-                        'IdFiscaleIVA' => [
-                            'IdPaese' => $invoice->company->country_code ?? 'IT',                                                               // MANCA, mettere nei dati di company
-                            'IdCodice' => $invoice->company->vat_number ?? $invoice->company->tax_number,                                       // Partita IVA / Codice  Fiscale
-                        ],
-                        'CodiceFiscale' => $invoice->company->tax_number ?? null,                                                               //
+                    'DatiAnagrafici' => array_filter([
+                        'IdFiscaleIVA' => $this->validateIdFiscaleIVA($invoice->company->vat_number, $invoice->company->tax_number, $idPaeseCedente),
+                        'CodiceFiscale' => $invoice->company->tax_number && preg_match('/^[A-Z0-9]{11,16}$/', $invoice->company->tax_number) ? $invoice->company->tax_number : null,
                         'Anagrafica' => [
-                            'Denominazione' => $invoice->company->name,                                                                         //
+                            'Denominazione' => $invoice->company->name,
                         ],
-                        'RegimeFiscale' => $invoice->company->fiscalProfile->tax_regime->getCode() ?? '',                                       //
-                    ],
-                    'Sede' => [
-                        'Indirizzo' => $invoice->company->address ?? '',                                                                        //
-                        'NumeroCivico' => $invoice->company->address_number ?? '',                                                              //
-                        'CAP' => $invoice->company->city->zip_code ?? '',                                                                       //
-                        'Comune' => $invoice->company->city->name ?? '',                                                                        //
-                        'Provincia' => $invoice->company->city->province->code ?? '',                                                           //
-                        'Nazione' => $invoice->company->country_code ?? 'IT',                                                                   // MANCA
-                    ],
-                    'Contatti' => [
-                        'Telefono' => $invoice->company->phone ?? '',                                                                           //
-                        'Email' => $invoice->company->email ?? '',                                                                              //
-                    ],
+                        'RegimeFiscale' => $this->validateRegimeFiscale($invoice->company->fiscalProfile->tax_regime->getCode() ?? 'RF01'),
+                    ], fn($value) => !is_null($value) && $value !== ''),
+                    'Sede' => array_filter([
+                        'Indirizzo' => $invoice->company->address ?? '',
+                        'NumeroCivico' => $invoice->company->address_number && preg_match('/^[A-Za-z0-9]{1,8}$/', $invoice->company->address_number) ? $invoice->company->address_number : null,
+                        'CAP' => $invoice->company->city->zip_code ?? '',
+                        'Comune' => $invoice->company->city->name ?? '',
+                        'Provincia' => $invoice->company->city->province->code ?? '',
+                        'Nazione' => $idPaeseCedente,
+                    ], fn($value) => !is_null($value) && $value !== ''),
+                    'Contatti' => array_filter([
+                        'Telefono' => $invoice->company->phone && preg_match('/^[A-Za-z0-9]{5,12}$/', $invoice->company->phone) ? $invoice->company->phone : null,
+                        'Email' => $invoice->company->email && preg_match('/^.+@.+[.]+.+$/', $invoice->company->email) ? $invoice->company->email : null,
+                    ], fn($value) => !is_null($value) && $value !== '') ?: null,
                 ],
                 'CessionarioCommittente' => [
                     'DatiAnagrafici' => [
-                        'IdFiscaleIVA' => [
-                            'IdPaese' => $invoice->client->country_code ?? 'IT',                                                                // MANCA
-                            'IdCodice' => $invoice->client->vat_number ?? $invoice->client->tax_number,                                         // Partita IVA / Codice Fiscale
-                        ],
-                        'CodiceFiscale' => $invoice->client->tax_number ?? null,                                                                // Codice Fiscale
+                        'IdFiscaleIVA' => $this->validateIdFiscaleIVA($invoice->client->vat_code, $invoice->client->tax_code, $idPaeseCommittente),
+                        'CodiceFiscale' => $invoice->client->tax_code ?? null,
                         'Anagrafica' => [
-                            'Denominazione' => $invoice->client->denomination,                                                                  //
-                            // Per persone fisiche: 'Nome' => $invoice->client->first_name, 'Cognome' => $invoice->client->last_name
+                            'Denominazione' => $invoice->client->denomination,
                         ],
                     ],
-                    'Sede' => [
-                        'Indirizzo' => $invoice->client->address ?? '',                                                                         //
-                        'CAP' => $invoice->client->city->zip_code ?? '',                                                                        //
-                        'Comune' => $invoice->client->city->name ?? '',                                                                         //
-                        'Provincia' => $invoice->client->city->province->code ?? '',                                                           //
-                        'Nazione' => $invoice->client->country_code ?? 'IT',                                                                    // MANCA
-                    ],
+                    'Sede' => array_filter([
+                        'Indirizzo' => $invoice->client->address ?? '',
+                        'NumeroCivico' => $invoice->client->address_number && preg_match('/^[A-Za-z0-9]{1,8}$/', $invoice->client->address_number) ? $invoice->client->address_number : null,
+                        'CAP' => $invoice->client->city->zip_code ?? '',
+                        'Comune' => $invoice->client->city->name ?? '',
+                        'Provincia' => $invoice->client->city->province->code ?? '',
+                        'Nazione' => $idPaeseCommittente,
+                    ], fn($value) => !is_null($value) && $value !== ''),
                 ],
                 'FatturaElettronicaBody' => [
                     'DatiGenerali' => [
                         'DatiGeneraliDocumento' => [
-                            'TipoDocumento' => $invoice->docType->name ?? $invoice->docType->name ?? '',                                        //
-                            'Divisa' => $invoice->divisa ?? 'EUR',                                                                              //
-                            'Data' => $invoice->invoice_date->format('Y-m-d'),                                                                  //
-                            'Numero' => $invoice->getNewInvoiceNumber(),                                                                        //
-                            'ImportoTotaleDocumento' => $invoice->total ?? 0.00,                                                                //
+                            'TipoDocumento' => $invoice->docType->name && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->docType->name) ? $invoice->docType->name : 'TD01',
+                            'Divisa' => $invoice->divisa ?? 'EUR',
+                            'Data' => $invoice->invoice_date->format('Y-m-d'),
+                            'Numero' => $invoice->getNewInvoiceNumber(),
+                            'ImportoTotaleDocumento' => sprintf("%.2f", (float) ($invoice->total ?? 0.00)),
                             'DatiRitenuta' => array_map(function ($withholding) {
                                 return [
-                                    'TipoRitenuta' => $withholding['tipo_ritenuta'] ?? 'RT01',                                                  //
-                                    'ImportoRitenuta' => $withholding['importo_ritenuta'] ?? 0.00,                                              //
-                                    'AliquotaRitenuta' => $withholding['aliquota_ritenuta'] ?? 20.00,                                           //
-                                    'CausalePagamento' => $withholding['causale_pagamento'] ?? 'A',                                             //
+                                    'TipoRitenuta' => $withholding['tipo_ritenuta'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['tipo_ritenuta']) ? $withholding['tipo_ritenuta'] : 'RT01',
+                                    'ImportoRitenuta' => sprintf("%.2f", (float) ($withholding['importo_ritenuta'] ?? 0.00)),
+                                    'AliquotaRitenuta' => sprintf("%.2f", (float) ($withholding['aliquota_ritenuta'] ?? 20.00)),
+                                    'CausalePagamento' => $withholding['causale_pagamento'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['causale_pagamento']) ? $withholding['causale_pagamento'] : 'A',
                                 ];
-                            }, $withholdings ?? []),
+                            }, $withholdings),
                             'DatiBollo' => [
-                                'BolloVirtuale' => $invoice->company->stampDuty->virtual_stamp ? 'SI' : '',                                     //
-                                'ImportoBollo' => $invoice->company->stampDuty->virtual_stamp ? 2.00 : '',                                      //
+                                'BolloVirtuale' => $invoice->company->stampDuty->virtual_stamp ? 'SI' : '',
+                                'ImportoBollo' => $invoice->company->stampDuty->virtual_stamp ? sprintf("%.2f", 2.00) : '',
                             ],
                             'DatiCassaPrevidenziale' => array_map(function ($fund) {
-                                return [
-                                    'TipoCassa' => $fund['fund_code'],                                                                          //
-                                    'AlCassa' => $fund['rate'],                                                                                 //
-                                    'ImportoContributoCassa' => $fund['amount'],                                                                //
-                                    'ImponibileCassa' => $fund['taxable_base'],                                                                 //
-                                    // 'AliquotaIVA' => $fund['%'] == 'N1' ? 0.00 : $fund['%'],                                                    //
-                                    'AliquotaIVA' => isset($fund['%']) && $fund['%'] !== null ? (float) $fund['%'] : 0.00,
-                                    'Ritenuta' => !empty($fund['withholding']) ? 'SI' : null,                                                   //
-                                    'Natura' => $fund['%'] == 'N1' ? 'N1' : null,                                                               //
-                                ];
-                            }, $invoice->getFundBreakdown()),
+                                return array_filter([
+                                    'TipoCassa' => $fund['fund_code'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $fund['fund_code']) ? $fund['fund_code'] : 'TC02',
+                                    'AlCassa' => sprintf("%.2f", (float) ($fund['rate'])),
+                                    'ImportoContributoCassa' => sprintf("%.2f", (float) ($fund['amount'])),
+                                    'ImponibileCassa' => sprintf("%.2f", (float) ($fund['taxable_base'])),
+                                    'AliquotaIVA' => isset($fund['%']) && $fund['%'] !== null ? sprintf("%.2f", (float) $fund['%']) : "0.00",
+                                    'Ritenuta' => !empty($fund['withholding']) ? 'SI' : null,
+                                    'Natura' => $fund['%'] == 'N1' ? 'N1' : null,
+                                ], fn($value) => !is_null($value) && $value !== '');
+                            }, $funds),
                         ],
-                        'DatiOrdineAcquisto' => $invoice->contract ? [                                                                          //
+                        'DatiOrdineAcquisto' => $invoice->contract ? array_filter([
+                            array_filter([
+                                'IdDocumento' => $invoice->contract->lastDetail->number && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->contract->lastDetail->number) ? $invoice->contract->lastDetail->number : null,
+                                'Data' => $invoice->contract->lastDetail->date ?? null,
+                                'CodiceCUP' => $invoice->contract->lastDetail->cup_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract->lastDetail->cup_code) ? $invoice->contract->lastDetail->cup_code : null,
+                                'CodiceCIG' => $invoice->contract->lastDetail->cig_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract->lastDetail->cig_code) ? $invoice->contract->lastDetail->cig_code : null,
+                            ], fn($value) => !is_null($value) && $value !== '')
+                        ], fn($value) => !empty($value)) : [],
+                        'DatiDDT' => $invoice->delivery_note ? [
                             [
-                                'IdDocumento' => $invoice->contract->number ?? null,                                                            //
-                                'Data' => $invoice->contract->date ?? null,                                                                     //
-                                'CodiceCUP' => $invoice->contract->cup_code ?? null,                                                            //
-                                'CodiceCIG' => $invoice->contract->cig_code ?? null,                                                            //
-                            ],
-                        ] : [],
-                        'DatiDDT' => $invoice->delivery_note ? [                                                                                //
-                            [
-                                'NumeroDDT' => $invoice->delivery_note,                                                                         //
-                                'DataDDT' => $invoice->delivery_date ?? $invoice->invoice_date->format('Y-m-d'),                                //
+                                'NumeroDDT' => $invoice->delivery_note,
+                                'DataDDT' => $invoice->delivery_date ?? $invoice->invoice_date->format('Y-m-d'),
                             ],
                         ] : [],
                     ],
                     'DatiBeniServizi' => [
-                        'DettaglioLinee' => $invoice->invoiceItems->map(function ($item, $index) {                                              //
+                        'DettaglioLinee' => $invoice->invoiceItems->map(function ($item, $index) {
                             return [
-                                'NumeroLinea' => $index + 1,                                                                                    //
-                                'Descrizione' => $item->description ?? 'Servizio',                                                              //
-                                'Quantita' => $item->quantity ?? 1.00,                                                                          //
-                                'PrezzoUnitario' => $item->unit_price ?? $item->amount,                                                         //
-                                'PrezzoTotale' => $item->amount,                                                                                //
-                                // 'AliquotaIVA' => $item->vat_code_type->getRate() == '0' ? 0.00 : $item->vat_code_type->getRate(),               //
-                                'AliquotaIVA' => is_numeric($item->vat_code_type->getRate()) ? (float) $item->vat_code_type->getRate() : 0.00,
-                                'Natura' => $item->vat_code_type->getRate() == '0' ? $item->vat_code_type->getCode() : null,                    //
+                                'NumeroLinea' => $index + 1,
+                                'Descrizione' => $item->description ?? 'Servizio',
+                                'Quantita' => sprintf("%.2f", (float) ($item->quantity ?? 1.00)),
+                                'PrezzoUnitario' => sprintf("%.2f", (float) ($item->unit_price ?? $item->amount)),
+                                'PrezzoTotale' => sprintf("%.2f", (float) $item->amount),
+                                'AliquotaIVA' => is_numeric($item->vat_code_type->getRate()) ? sprintf("%.2f", (float) $item->vat_code_type->getRate()) : "0.00",
+                                'Natura' => $item->vat_code_type->getRate() == '0' ? $item->vat_code_type->getCode() : null,
                             ];
                         })->toArray(),
-                        'DatiRiepilogo' => array_map(function ($vat) {
+                        'DatiRiepilogo' => array_values(array_map(function ($vat) {
                             return [
-                                // 'AliquotaIVA' => $vat['%'] == 'N1' ? 0.00 : $vat['%'],                                                          //
-                                'AliquotaIVA' => isset($vat['%']) && $vat['%'] !== 'N1' ? (float) $vat['%'] : 0.00,
-                                'Natura' => $vat['%'] == 'N1' ? 'N1' : null,                                                                    //
-                                'ImponibileImporto' => $vat['taxable'],                                                                         //
-                                'Imposta' => $vat['vat'],                                                                                       //
-                                'EsigibilitaIVA' => $vat['norm'][0] ?? 'I', // Primo carattere di 'norm' (es. 'S', 'D', 'I')                    //
-                                'RiferimentoNormativo' => $vat['free'] ? $vat['norm'] : null,                                                   //
+                                'AliquotaIVA' => isset($vat['%']) && $vat['%'] !== 'N1' ? sprintf("%.2f", (float) $vat['%']) : "0.00",
+                                'Natura' => $vat['%'] == 'N1' ? 'N1' : null,
+                                'ImponibileImporto' => sprintf("%.2f", (float) $vat['taxable']),
+                                'Imposta' => sprintf("%.2f", (float) $vat['vat']),
+                                'EsigibilitaIVA' => in_array($vat['norm'][0] ?? 'I', ['D', 'I', 'S']) ? $vat['norm'][0] : 'I',
+                                'RiferimentoNormativo' => $vat['free'] ? $vat['norm'] : null,
                             ];
-                        }, $invoice->updateResume($invoice->vatResume(), $invoice->getFundBreakdown())),
+                        }, $invoice->updateResume($invoice->vatResume(), $invoice->getFundBreakdown()))),
                     ],
                     'DatiPagamento' => [
                         [
-                            'CondizioniPagamento' => $invoice->payment_type->value ?? 'TP02',                                                   // MANCA
+                            'CondizioniPagamento' => $this->mapPaymentTypeToCondizioniPagamento($invoice->payment_type->value ?? 'TP02'),
                             'DettaglioPagamento' => [
                                 [
-                                    'ModalitaPagamento' => $invoice->payment_type->getCode() ?? 'MP00',                                         // Metodo pagamento
-                                    'DataScadenzaPagamento' => $invoice->invoice_date->addDays($invoice->payment_days ?? 30)->format('Y-m-d'),  //
-                                    'ImportoPagamento' => $invoice->total ?? 0.00,                                                              //
-                                    'IBAN' => $invoice->bankAccount->iban ?? null,                                                              //
+                                    'ModalitaPagamento' => $invoice->payment_type->getCode() ?? 'MP05',
+                                    'DataScadenzaPagamento' => $invoice->invoice_date->addDays($invoice->payment_days ?? 30)->format('Y-m-d'),
+                                    'ImportoPagamento' => sprintf("%.2f", (float) ($invoice->total ?? 0.00)),
+                                    'IBAN' => $invoice->bankAccount->iban ?? null,
                                 ],
                             ],
                         ],
@@ -187,21 +238,23 @@ class AndxorSoapService
                 ],
             ];
 
-            dd($payload);
+            // dd(json_encode($payload, JSON_PRETTY_PRINT));
+
+            Log::debug('Payload SOAP: ' . json_encode($payload, JSON_PRETTY_PRINT));
 
             // Esegui la chiamata SOAP
-            // $response = $this->client->InviaFattura(['parametersIn' => $payload]);
             $response = $this->client->InviaFattura($payload);
+
+            dump($response);
 
             // Aggiorna l'Invoice con il progressivo di invio
             $invoice->update([
-                // 'progressivo_invio' => $response->parametersOut->ProgressivoInvio,                                                              // MANCA
-                'sdi_status' => SdiStatus::INVIATA,                                                                                             //
+                'sdi_status' => SdiStatus::INVIATA,
             ]);
 
             // Log della richiesta e risposta per debug
-            Log::debug('Richiesta SOAP: ' . $this->client->getLastRequest());
-            Log::debug('Risposta SOAP: ' . $this->client->getLastResponse());
+            // Log::debug('Richiesta SOAP: ' . $this->client->getLastRequest());
+            // Log::debug('Risposta SOAP: ' . $this->client->getLastResponse());
 
             return $response->parametersOut;
         } catch (SoapFault $fault) {

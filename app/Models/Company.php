@@ -11,14 +11,16 @@ class Company extends Model
     protected $fillable = [
         'name',
         'vat_number',
+        'tax_number',
+        'state_id',
         'address',
         'city_code',
+        'place',
         'is_active',
         'email',
         'pec',
         'phone',
         'fax',
-        'tax_number',
         'register',
         'register_province_id',
         'register_number',
@@ -37,6 +39,11 @@ class Company extends Model
     public function city()
     {
         return $this->belongsTo(City::class, 'city_code', 'code');
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
     }
 
     public function clients()

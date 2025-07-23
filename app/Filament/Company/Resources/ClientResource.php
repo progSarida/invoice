@@ -350,6 +350,7 @@ class ClientResource extends Resource
                     ->required()
                     ->maxLength(5)
                     ->disabled()
+                    ->dehydrated()
                     ->visible(fn (callable $get) => $get('state_id') == $italyId)
                     ->columnspan(1),
                 Forms\Components\Select::make('city_id')->label('Città')

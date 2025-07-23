@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Tenancy;
 
 use App\Models\City;
 use App\Models\User;
+use App\Models\State;
 use App\Enums\FundType;
 use App\Models\DocType;
 use Filament\Forms\Form;
@@ -12,9 +13,9 @@ use App\Enums\TaxRegimeType;
 use App\Enums\LiquidationType;
 use App\Enums\ShareholderType;
 use App\Enums\WithholdingType;
+use App\Models\InvoiceElement;
 use Filament\Facades\Filament;
 use App\Enums\PaymentReasonType;
-use App\Models\InvoiceElement;
 use Filament\Forms\Components\Tabs;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
@@ -38,6 +39,7 @@ class EditCompanyProfile extends EditTenantProfile
     public function form(Form $form): Form
     {
         $company = filament()->getTenant();
+        $italyId = State::where('name', 'Italy')->first()->id;
         return $form
             ->columns(12)
             ->extraAttributes(['class' => 'w-full'])
@@ -58,11 +60,23 @@ class EditCompanyProfile extends EditTenantProfile
                                 TextInput::make('vat_number')->label('Partita Iva')
                                     ->required()
                                     ->maxLength(255)
-                                    ->columnSpan(3),
+                                    ->columnSpan(2),
                                 TextInput::make('tax_number')->label('Codice fiscale')
                                     ->required()
                                     ->maxLength(255)
-                                    ->columnSpan(3),
+                                    ->columnSpan(2),
+                                Select::make('state_id')->label('Paese')
+                                    ->options(State::all()->pluck('name', 'id')->toArray())
+                                    ->placeholder('')
+                                    ->required()
+                                    ->searchable()
+                                    ->preload()
+                                    ->reactive()
+                                    ->default($italyId)
+                                    ->afterStateUpdated(function (callable $set, $state) {
+                                        //
+                                    })
+                                    ->columnspan(2),
                                 TextInput::make('city_code')
                                     ->label('Codice catastale')
                                     ->required()
@@ -85,7 +99,13 @@ class EditCompanyProfile extends EditTenantProfile
                                     ->relationship(name: 'city', titleAttribute: 'name')
                                     ->searchable()
                                     ->preload()
+                                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
                                     ->columnSpan(4),
+                                TextInput::make('place')->label('Città')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->visible(fn (callable $get) => $get('state_id') != $italyId)
+                                    ->columnspan(4),
                                 TextInput::make('phone')->label('Telefono')
                                     ->maxLength(255)
                                     ->columnSpan(3),

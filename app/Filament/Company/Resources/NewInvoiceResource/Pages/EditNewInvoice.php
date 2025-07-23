@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 
+use App\Enums\SdiStatus;
 use Filament\Actions;
 use App\Models\Company;
 use App\Models\Invoice;
@@ -25,7 +26,8 @@ class EditNewInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE),
             // Actions\Action::make('stampa_pdf')
             //     ->label('Stampa PDF')
             //     ->icon('heroicon-o-printer')
@@ -126,10 +128,11 @@ class EditNewInvoice extends EditRecord
                 ->action(function (Invoice $record, array $data) {
                     $soapService = app(AndxorSoapService::class);
                     try {
-                        $response = $soapService->sendInvoice($record, 'W3iDWc3Q9w.3AUgd2zpz4');
+                        $response = $soapService->sendInvoice($record, $data['password']);
+                        // $response = $soapService->sendInvoice($record, 'W3iDWc3Q9w.3AUgd2zpz4');
                         Notification::make()
                             ->title('Fattura inviata con successo')
-                            ->body('Progressivo: ' . $response->ProgressivoInvio)
+                            ->body('Progressivo: ' . $response->ProgressivoInvio . '\nIn data ' . $response->DataOraRicezione)
                             ->success()
                             ->send();
                     } catch (\Exception $e) {
