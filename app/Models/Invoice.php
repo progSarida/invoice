@@ -7,6 +7,7 @@ use App\Enums\SdiStatus;
 // use App\Enums\AccrualType;
 use App\Enums\TimingType;
 use App\Enums\InvoiceType;
+use App\Enums\PaymentMode;
 use App\Enums\PaymentType;
 use App\Enums\VatCodeType;
 use App\Models\AccrualType;
@@ -49,8 +50,11 @@ class Invoice extends Model
         'free_description',
         'bank_account_id',
         'payment_status',
+        'payment_mode',
+        'rate_number',
         'payment_type',
         'payment_days',
+        'service_code',
         'sdi_status',
         'sdi_code',
         'sdi_date'
@@ -67,6 +71,7 @@ class Invoice extends Model
         'payment_status' => PaymentStatus::class,
         'payment_type' => PaymentType::class,
         'last_payment_date' => 'date',
+        'payment_mode' => PaymentMode::class,
         'sdi_status' => SdiStatus::class,
         'timing_type' => TimingType::class
     ];

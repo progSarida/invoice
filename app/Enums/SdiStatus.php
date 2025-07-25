@@ -10,14 +10,14 @@ use Filament\Support\Contracts\HasLabel;
 enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 {
     //
-    case EMPTY = "";
-    case DA_INVIARE = "da_inviare";
-    case INVIATA = "inviata";
-    case SCARTATA = "scartata";
-    case CONSEGNATA = "consegnata";
-    case MANCATA_CONSEGNA = "mancata_consegna";
-    case ACCETTATA = "accettata";
-    case RIFIUTATA = "rifiutata";
+    CASE EMPTY = "";
+    CASE DA_INVIARE = "da_inviare";
+    CASE INVIATA = "inviata";
+    CASE SCARTATA = "scartata";
+    CASE CONSEGNATA = "consegnata";
+    CASE MANCATA_CONSEGNA = "mancata_consegna";
+    CASE ACCETTATA = "accettata";
+    CASE RIFIUTATA = "rifiutata";
     CASE DECORRENZA_TERMINI = "decorrenza_termini";
     CASE AVVENUTA_TRASMISSIONE = "avvenuta_trasmissione";
     CASE METADATA = "metadata";
@@ -25,6 +25,15 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
     //casi di Agyo
     CASE EMESSA = "emessa";
     CASE IN_ELABORAZIONE = "in_elaborazione";
+
+    //casi ANDXOR
+    CASE GENERATA = "generata";
+    CASE TRASMESSA_SDI = "trasmessa_sdi";
+    CASE NON_CONSEGNATA = "non_consegnata";
+    CASE NON_RECAPITABILE = "non_recapitabile";
+    CASE NEL_CASSETTO = "nel_cassetto";
+    CASE RIELABORATA = "rielaborata";
+    CASE IMPORTATA = "importata";
 
     //AGGIUNTI DA RICCARDO, NON SONO STATUS UFFICIALI DEL SISTEMA DI INTERSCAMBIO
     // CASE RIFIUTO_VALIDATO = "rifiuto_validato";
@@ -51,6 +60,14 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             self::EMESSA => 'AGYO - Fattura emessa',
             self::IN_ELABORAZIONE => 'AGYO - In elaborazione',
+
+            self::GENERATA => 'Generata',
+            self::TRASMESSA_SDI => 'Trasmessa allo SdI',
+            self::NON_CONSEGNATA => 'Non ancora consegnata',
+            self::NON_RECAPITABILE => 'Non recapitabile',
+            self::NEL_CASSETTO => 'Nel cassetto',
+            self::RIELABORATA => 'Rielaborata',
+            self::IMPORTATA => 'Importata',
 
             // self::RIFIUTO_VALIDATO => 'Rifiuto validato',
             self::RIFIUTO_EMESSO => 'RN - Rifiuto validato (emettere nota di credito)',
@@ -79,6 +96,14 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::EMESSA => '',
             self::IN_ELABORAZIONE => '',
 
+            self::GENERATA => '',
+            self::TRASMESSA_SDI => '',
+            self::NON_CONSEGNATA => '',
+            self::NON_RECAPITABILE => '',
+            self::NEL_CASSETTO => '',
+            self::RIELABORATA => '',
+            self::IMPORTATA => '',
+
             // self::RIFIUTO_VALIDATO => 'gmdi-block',
             self::RIFIUTO_EMESSO => '',
             self::RIFIUTO_ARCHIVIATO => '',
@@ -104,7 +129,15 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::METADATA => 'MT - Metadati',
 
             self::EMESSA => 'AGYO - Fattura emessa',
-            self::IN_ELABORAZIONE => 'Agyo - In elaborazione',
+            self::IN_ELABORAZIONE => 'AGYO - In elaborazione',
+
+            self::GENERATA => 'ANDXOR - Generata',
+            self::TRASMESSA_SDI => 'ANDXOR - Trasmessa allo SdI',
+            self::NON_CONSEGNATA => 'ANDXOR - Non ancora consegnata',
+            self::NON_RECAPITABILE => 'ANDXOR - Non recapitabile',
+            self::NEL_CASSETTO => 'ANDXOR - Nel cassetto',
+            self::RIELABORATA => 'ANDXOR - Rielaborata',
+            self::IMPORTATA => 'ANDXOR - Importata',
 
             // self::RIFIUTO_VALIDATO => 'Rifiuto validato',
             self::RIFIUTO_EMESSO => 'RN - Rifiuto validato (emettere nota di credito)',
@@ -132,6 +165,14 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             self::EMESSA => 'warning',
             self::IN_ELABORAZIONE => 'warning',
+
+            self::GENERATA => 'gray',
+            self::TRASMESSA_SDI => 'info',
+            self::NON_CONSEGNATA => 'warning',
+            self::NON_RECAPITABILE => 'danger',
+            self::NEL_CASSETTO => 'gray',
+            self::RIELABORATA => 'gray',
+            self::IMPORTATA => 'gray',
 
             // self::RIFIUTO_VALIDATO => 'gray',
             self::RIFIUTO_EMESSO => 'gray',

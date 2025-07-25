@@ -244,6 +244,50 @@ class AndxorSoapService
         ];
     }
 
+    private function translateStatus(string $status): string
+    {
+        $translated = "";
+        switch($status){
+            case  'Generata':
+                $translated = "generata";
+                break;
+            case  'Trasmessa allo SdI':
+                $translated = "trasmessa_sdi";
+                break;
+            case  'Scartata':
+                $translated = "scartata";
+                break;
+            case  'Non ancora consegnata':
+                $translated = "non_consegnata";
+                break;
+            case  'Consegnata':
+                $translated = "consegnata";
+                break;
+            case  'Accettata':
+                $translated = "accettata";
+                break;
+            case  'Rifiutata':
+                $translated = "rifiutata";
+                break;
+            case  'Decorsi i termini':
+                $translated = "decorrenza_termini";
+                break;
+            case  'Non recapitabile':
+                $translated = "non_recapitabile";
+                break;
+            case  'Nel cassetto':
+                $translated = "nel_cassetto";
+                break;
+            case  'Rielaborata':
+                $translated = "rielaborata";
+                break;
+            case  'Importata':
+                $translated = "importata";
+                break;
+        }
+        return $translated;
+    }
+
     public function sendInvoice(Invoice $invoice, string $password)
     {
         try {
@@ -432,11 +476,21 @@ class AndxorSoapService
 
             // dd($response);
 
-            // Aggiorna l'Invoice con il progressivo di invio
+            $input['Autenticazione'] = $this->getAutenticazione($invoice, $password);
+            $input['ProgressivoInvio'] = $response->ProgressivoInvio ?? null;
+
+            $response_s = $this->client->Stato($input);
+
+            dd($response_s);
+
+            $date = explode("T", $response_s->DataOraCreazione);
+
+            // Aggiorna stato, codici e data di invio della fattura
             $invoice->update([
-                'sdi_status' => SdiStatus::INVIATA->value ?? null,
-                'sdi_code' => $response->ProgressivoInvio ?? null,
-                'sdi_date' => Carbon::today()->format('Y-m-d')
+                'service_code' => $response->ProgressivoInvio ?? null,
+                'sdi_code' => $response_s->IdSdI ?? null,
+                'sdi_status' => $this->translateStatus($response_s->Stato),
+                'sdi_date' => $date[0]
             ]);
 
             // Log della richiesta e risposta per debug
@@ -451,5 +505,29 @@ class AndxorSoapService
             Log::error('Errore generico: ' . $e->getMessage());
             throw new Exception('Errore generico: ' . $e->getMessage());
         }
+    }
+
+    private function getDate($response): string
+    {
+        return '1980-07-31';
+    }
+
+    public function updateStatus(Invoice $invoice, string $password)
+    {
+        $input['Autenticazione'] = $this->getAutenticazione($invoice, $password);
+        $input['ProgressivoInvio'] = $response->ProgressivoInvio ?? null;
+
+        $response = $this->client->Stato($input);
+
+        $date = explode("T", $response->DataOraCreazione);                                              // la data deve essere in base allo stato?
+        // $date = explode("T", $this->getDate($response));
+
+        // Aggiorna stato e data modifica stato della fattura
+        $invoice->update([
+            'sdi_status' => $this->translateStatus($response->Stato),
+            'sdi_date' => $date[0]
+        ]);
+
+        return $response;
     }
 }
