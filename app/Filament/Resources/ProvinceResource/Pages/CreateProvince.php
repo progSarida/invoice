@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateProvince extends CreateRecord
 {
     protected static string $resource = ProvinceResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuova provincia";
+    }
 }

@@ -126,13 +126,49 @@ class EditNewInvoice extends EditRecord
             Actions\Action::make('sendInvoice')
                 ->label('Invia Fattura a SDI')
                 ->action(function (Invoice $record, array $data) {
+                    if($record->invoiceItems() == null)
+                        Notification::make()
+                            ->title('Errore')
+                            ->body('Impossibile inviare la fattura alla SdI. Voci fattura non presenti.')
+                            ->warning()
+                            ->send();
+                    else{
+                        $soapService = app(AndxorSoapService::class);
+                        try {
+                            $response = $soapService->sendInvoice($record, $data['password']);
+                            // $response = $soapService->sendInvoice($record, 'W3iDWc3Q9w.3AUgd2zpz4');
+                            Notification::make()
+                                ->title('Fattura inviata con successo')
+                                ->body('Progressivo: ' . $response->ProgressivoInvio)
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }
+                })
+                ->form([
+                    TextInput::make('password')
+                        ->label('Password SOAP')
+                        ->password()
+                        ->required(),
+                ])
+                ->requiresConfirmation(),
+
+            Actions\Action::make('getStatus')
+                ->label('Aggiorna status SDI')
+                ->action(function (Invoice $record, array $data) {
                     $soapService = app(AndxorSoapService::class);
                     try {
-                        $response = $soapService->sendInvoice($record, $data['password']);
+                        $response = $soapService->updateStatus($record, $data['password']);
                         // $response = $soapService->sendInvoice($record, 'W3iDWc3Q9w.3AUgd2zpz4');
                         Notification::make()
-                            ->title('Fattura inviata con successo')
-                            ->body('Progressivo: ' . $response->ProgressivoInvio)
+                            ->title('Stato fattura aggiornato con successo')
+                            // ->body('Progressivo: ' . $response->ProgressivoInvio)
                             ->success()
                             ->send();
                     } catch (\Exception $e) {
@@ -142,6 +178,9 @@ class EditNewInvoice extends EditRecord
                             ->danger()
                             ->send();
                     }
+                })
+                ->visible(function (Invoice $record) {
+                    return $record->service_code != null;
                 })
                 ->form([
                     TextInput::make('password')

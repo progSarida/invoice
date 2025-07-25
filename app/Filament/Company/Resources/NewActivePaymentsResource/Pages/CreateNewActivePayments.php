@@ -11,6 +11,11 @@ class CreateNewActivePayments extends CreateRecord
 {
     protected static string $resource = NewActivePaymentsResource::class;
 
+    public function getTitle(): string
+    {
+        return "Nuovo pagamento";
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if ($data['validated'] ?? false) {

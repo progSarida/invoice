@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateLimitMotivationType extends CreateRecord
 {
     protected static string $resource = LimitMotivationTypeResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuova motivazione art. 26 633/72";
+    }
 }

@@ -104,11 +104,11 @@ class ProvinceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Gestione città';
+        return 'Anagrafiche territoriali';
     }
 
     public static function getNavigationSort(): ?int
     {
-        return 2;
+        return 3;
     }
 }

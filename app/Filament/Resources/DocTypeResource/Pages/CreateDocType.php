@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateDocType extends CreateRecord
 {
     protected static string $resource = DocTypeResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuovo tipo documento";
+    }
 }

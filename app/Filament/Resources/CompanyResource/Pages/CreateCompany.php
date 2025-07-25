@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateCompany extends CreateRecord
 {
     protected static string $resource = CompanyResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuova azienda";
+    }
 }

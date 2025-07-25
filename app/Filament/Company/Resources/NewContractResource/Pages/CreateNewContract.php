@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateNewContract extends CreateRecord
 {
     protected static string $resource = NewContractResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuovo contratto";
+    }
 }

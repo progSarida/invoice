@@ -85,11 +85,11 @@ class RegionResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Gestione città';
+        return 'Anagrafiche territoriali';
     }
 
     public static function getNavigationSort(): ?int
     {
-        return 1;
+        return 2;
     }
 }

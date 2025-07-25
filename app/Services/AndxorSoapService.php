@@ -481,7 +481,7 @@ class AndxorSoapService
 
             $response_s = $this->client->Stato($input);
 
-            dd($response_s);
+            // dd($response_s);
 
             $date = explode("T", $response_s->DataOraCreazione);
 
@@ -515,9 +515,11 @@ class AndxorSoapService
     public function updateStatus(Invoice $invoice, string $password)
     {
         $input['Autenticazione'] = $this->getAutenticazione($invoice, $password);
-        $input['ProgressivoInvio'] = $response->ProgressivoInvio ?? null;
+        $input['ProgressivoInvio'] = $invoice->service_code ?? null;
 
         $response = $this->client->Stato($input);
+
+        dd($response);
 
         $date = explode("T", $response->DataOraCreazione);                                              // la data deve essere in base allo stato?
         // $date = explode("T", $this->getDate($response));

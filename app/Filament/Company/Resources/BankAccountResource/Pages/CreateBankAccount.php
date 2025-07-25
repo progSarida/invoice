@@ -12,6 +12,11 @@ class CreateBankAccount extends CreateRecord
 {
     protected static string $resource = BankAccountResource::class;
 
+    public function getTitle(): string
+    {
+        return "Nuovo conto bancario";
+    }
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

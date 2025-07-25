@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateSectional extends CreateRecord
 {
     protected static string $resource = SectionalResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuovo Sezionario";
+    }
 }

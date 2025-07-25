@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateManageType extends CreateRecord
 {
     protected static string $resource = ManageTypeResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuova gestione";
+    }
 }

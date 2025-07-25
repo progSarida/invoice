@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateAccrualType extends CreateRecord
 {
     protected static string $resource = AccrualTypeResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuova competenza";
+    }
 }

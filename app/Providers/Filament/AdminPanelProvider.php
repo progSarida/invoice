@@ -29,6 +29,7 @@ use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Filament\Resources\LimitMotivationTypeResource;
+use App\Filament\Resources\StateResource;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -59,6 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             // ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->resources([
+                StateResource::class,
                 RegionResource::class,
                 ProvinceResource::class,
                 CityResource::class,
