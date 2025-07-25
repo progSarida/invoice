@@ -303,6 +303,27 @@ class NewInvoiceResource extends Resource
                                     fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
                                 )
                                 ->disabled(fn(Get $get): bool => ! filled($get('client_id')) || ! filled($get('tax_type')))
+                                ->afterStateUpdated(function (Set $set, $state) {
+                                    if($state) {
+                                        $contract = NewContract::find($state);
+                                        $lastDetail = $contract->lastDetail()->first();
+                                        if (!$lastDetail) {
+                                            // $set('contract_id', null);
+                                            Notification::make()
+                                                ->title('Attenzione! E\' stato selezionato un contratto senza dettagli.')
+                                                ->warning()
+                                                ->duration(6000)
+                                                ->actions([
+                                                        \Filament\Notifications\Actions\Action::make('edit')
+                                                            ->label('Vai al contratto')
+                                                            ->url(NewContractResource::getUrl('edit', ['record' => $contract->id]))
+                                                            ->openUrlInNewTab()
+                                                            ->color('warning'),
+                                                    ])
+                                                ->send();
+                                        }
+                                    }
+                                })
                                 ->required()
                                 ->searchable()
                                 ->live()
