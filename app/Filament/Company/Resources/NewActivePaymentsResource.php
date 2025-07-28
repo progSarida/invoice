@@ -8,11 +8,14 @@ use App\Filament\Company\Resources\NewActivePaymentsResource\Pages;
 use App\Filament\Company\Resources\NewActivePaymentsResource\RelationManagers;
 use App\Models\AccrualType;
 use App\Models\ActivePayments;
+use App\Models\Invoice;
 use App\Models\NewActivePayments;
 use App\Models\Sectional;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
@@ -21,6 +24,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -79,9 +83,22 @@ class NewActivePaymentsResource extends Resource
                     // ->rules(['numeric', 'min:0'])
                     ->suffix('€')
                     ->columnSpan(2),
-                DatePicker::make('payment_date')
+                Forms\Components\DatePicker::make('payment_date')
                     ->label('Data pagamento')
                     ->disabled(fn ($get) => $get('validated'))
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                        $invoice = Invoice::find($get('invoice_id'));
+                        $paymentDate = $get('payment_date');
+
+                        if ($paymentDate && $invoice && $paymentDate < $invoice->invoice_date) {
+                            Notification::make()
+                                ->title('Attenzione! La data del pagamento è inferiore alla data della fattura.')
+                                ->danger()
+                                ->duration(6000)
+                                ->send();
+                        }
+                    })
                     ->date()
                     ->columnSpan(2),
                 Placeholder::make('')
