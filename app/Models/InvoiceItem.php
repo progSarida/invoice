@@ -83,6 +83,11 @@ class InvoiceItem extends Model
                 $item->calculateTotal();
                 $item->save();
                 return $item;
+            } else {
+                // Le condizioni NON sono soddisfatte: elimina l'eventuale voce di bollo
+                InvoiceItem::where('invoice_id', $this->invoice->id)
+                    ->where('vat_code_type', 'vc06a')
+                    ->delete();
             }
         }
     }

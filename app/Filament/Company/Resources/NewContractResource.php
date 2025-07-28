@@ -105,7 +105,7 @@ class NewContractResource extends Resource
                     ->inputMode('decimal')
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    ->rules(['numeric', 'min:0'])
+                    // ->rules(['numeric', 'min:0'])
                     ->suffix('€'),
                 Placeholder::make('')
                     ->content('')
@@ -268,7 +268,7 @@ class NewContractResource extends Resource
                     ->inputMode('decimal')
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    ->rules(['numeric', 'min:0'])
+                    // ->rules(['numeric', 'min:0'])
                     ->suffix('€'),
                 Placeholder::make('')
                     ->content('')

@@ -34,7 +34,7 @@ class ListNewInvoices extends ListRecords
                     $late = \App\Models\Invoice::where('flow', 'out')->where('sdi_status', 'da_inviare')->where('invoice_date', '<', Carbon::now()->subDays(2));
                     // Fatture senza esito inviate da più di 3 giorni
                     $silentHide = false;
-                    $silent = \App\Models\Invoice::where('flow', 'out')->where('sdi_status', 'inviata')->where('sdi_date', '<', Carbon::now()->subDays(3));
+                    $silent = \App\Models\Invoice::where('flow', 'out')->whereIn('sdi_status', ['inviata', 'trasmessa_sdi'])->where('sdi_date', '<', Carbon::now()->subDays(3));
 
                     // $discardedE = \App\Models\Invoice::where('sdi_status', 'scartata');
 

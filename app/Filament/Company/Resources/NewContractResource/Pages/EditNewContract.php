@@ -2,9 +2,10 @@
 
 namespace App\Filament\Company\Resources\NewContractResource\Pages;
 
-use App\Filament\Company\Resources\NewContractResource;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Company\Resources\NewContractResource;
 
 class EditNewContract extends EditRecord
 {
@@ -25,5 +26,17 @@ class EditNewContract extends EditRecord
     public function hasCombinedRelationManagerTabsWithContent(): bool
     {
         return true;
+    }
+
+    protected function beforeSave(): void
+    {
+        if (!is_numeric($this->form->getState()['amount'])) {
+            Notification::make()
+                ->title('Importo non valido')
+                ->danger()
+                ->send();
+
+            $this->halt(); // blocca il salvataggio
+        }
     }
 }

@@ -201,9 +201,16 @@ class InvoiceItemsRelationManager extends RelationManager
                         $record->fill($data);
                         $record->calculateTotal();
                         $record->save();
+                        $record->checkStampDuty();
                         return $record;
                     }),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn ($record) => $record->vat_code_type !== VatCodeType::VC06A)
+                    ->using(function (InvoiceItem $record): InvoiceItem {
+                        $record->checkStampDuty();
+                        return $record;
+                    }),
+                // Tables\Actions\DeleteAction::make(),                                                                            // solo per test
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

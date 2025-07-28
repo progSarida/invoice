@@ -361,7 +361,27 @@ class NewInvoiceResource extends Resource
                                         ->form( fn(Form $form) => NewContractResource::modalForm($form) )
                                         ->modalWidth('7xl')
                                         ->modalHeading('')
-                                        ->action( fn(array $data, NewContract $contract, Set $set) => NewContractResource::saveContract($data, $contract, $set) )
+                                        // ->action( fn(array $data, NewContract $contract, Set $set) => NewContractResource::saveContract($data, $contract, $set) )
+                                        ->action(function (array $data, NewContract $contract, Set $set) {
+                                            NewContractResource::saveContract($data, $contract, $set);
+
+                                            $lastDetail = $contract->lastDetail()->first();
+
+                                            if (!$lastDetail) {
+                                                Notification::make()
+                                                    ->title('Attenzione! Il contratto creato è senza dettagli.')
+                                                    ->warning()
+                                                    ->duration(6000)
+                                                    ->actions([
+                                                        \Filament\Notifications\Actions\Action::make('edit')
+                                                            ->label('Vai al contratto')
+                                                            ->url(NewContractResource::getUrl('edit', ['record' => $contract->id]))
+                                                            ->openUrlInNewTab()
+                                                            ->color('warning'),
+                                                    ])
+                                                    ->send();
+                                            }
+                                        })
                                 ),
 
                             Forms\Components\Select::make('parent_id')->label('Fattura da stornare')

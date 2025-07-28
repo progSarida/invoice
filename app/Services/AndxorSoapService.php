@@ -519,7 +519,7 @@ class AndxorSoapService
 
         $response = $this->client->Stato($input);
 
-        dd($response);
+        // dd($response);
 
         $date = explode("T", $response->DataOraCreazione);                                              // la data deve essere in base allo stato?
         // $date = explode("T", $this->getDate($response));
