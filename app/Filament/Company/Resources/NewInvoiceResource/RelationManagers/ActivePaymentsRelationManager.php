@@ -2,19 +2,24 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\RelationManagers;
 
+use App\Models\Invoice;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Tables;
-use App\Models\Invoice;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Forms\Components\Toggle;
-use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ActivePaymentsRelationManager extends RelationManager
 {
@@ -77,27 +82,35 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->live()
                     ->default(false)
                     ->columnSpan(2),
-                DatePicker::make('registration_date')
-                    ->label('Data registrazione')
-                    ->disabled()
-                    ->date()
-                    ->columnSpan(2),
-                Forms\Components\Select::make('registered_by_user_id')
-                    ->label('Registrato da')
-                    ->relationship('registrationUser', 'name')
-                    ->disabled()
-                    ->columnSpan(3),
-                DatePicker::make('validation_date')
-                    ->label('Data validazione')
-                    ->disabled()
-                    ->visible(fn ($get) => $get('validated'))
-                    ->columnSpan(2),
-                Forms\Components\Select::make('validated_by_user_id')
-                    ->label('Validato da')
-                    ->relationship('validationUser', 'name')
-                    ->disabled()
-                    ->visible(fn ($get) => $get('validated'))
-                    ->columnSpan(3),
+                Section::make('Dati registrazione/validazione')
+                        // ->collapsible()
+                        ->columns(12)
+                        ->collapsed()
+                        ->label('')
+                        ->visible(fn ($get) => !is_null($get('registration_date')))
+                        ->schema([
+                            DatePicker::make('registration_date')
+                                ->label('Data registrazione')
+                                ->disabled()
+                                ->date()
+                                ->columnSpan(2),
+                            Forms\Components\Select::make('registered_by_user_id')
+                                ->label('Registrato da')
+                                ->relationship('registrationUser', 'name')
+                                ->disabled()
+                                ->columnSpan(3),
+                            DatePicker::make('validation_date')
+                                ->label('Data validazione')
+                                ->disabled()
+                                ->visible(fn ($get) => $get('validated'))
+                                ->columnSpan(2),
+                            Forms\Components\Select::make('validated_by_user_id')
+                                ->label('Validato da')
+                                ->relationship('validationUser', 'name')
+                                ->disabled()
+                                ->visible(fn ($get) => $get('validated'))
+                                ->columnSpan(3),
+                    ])
             ]);
     }
 
