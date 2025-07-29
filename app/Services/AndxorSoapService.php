@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Enums\SdiStatus;
 use App\Enums\WithholdingType;
+use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\State;
 use Carbon\Carbon;
 use Exception;
+use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Log;
 use SoapClient;
 use SoapFault;
@@ -78,20 +80,25 @@ class AndxorSoapService
         return 'RF01';
     }
 
-    private function getAutenticazione(Invoice $invoice, string $password): ?array
+    private function getAutenticazione(?Invoice $invoice, string $password): ?array
     {
-        $idPaeseCedente = $invoice->company->state_id && State::find($invoice->company->state_id) && preg_match('/^[A-Z]{2}$/', State::find($invoice->company->state_id)->alpha2) ? State::find($invoice->company->state_id)->alpha2 : 'IT';
-        $idCodice = $invoice->company->vat_number ?? $invoice->company->taxnumber;
-        if ($idPaeseCedente && preg_match('/^[A-Za-z0-9]{1,28}$/', $idCodice)) {
+        $entity = $invoice ? $invoice->company : Filament::getTenant();
+
+        $state = State::find($entity->state_id);
+        $alpha2 = ($state && preg_match('/^[A-Z]{2}$/', $state->alpha2)) ? $state->alpha2 : 'IT';
+
+        $idCodice = $entity->vat_number ?? $entity->taxnumber;
+
+        if ($alpha2 && preg_match('/^[A-Za-z0-9]{1,28}$/', $idCodice)) {
             return [
                 'Cedente' => [
-                    'IdPaese' => $idPaeseCedente,
+                    'IdPaese' => $alpha2,
                     'IdCodice' => $idCodice,
-                    // 'IdCodice_' => '01338160995',
                 ],
                 'Password' => $password,
             ];
         }
+
         return null;
     }
 
@@ -531,5 +538,162 @@ class AndxorSoapService
         ]);
 
         return $response;
+    }
+
+    private function xmlToArray($xmlString) {
+        try {
+            // Carico la stringa XML in SimpleXMLElement, gestisco namespaces and CDATA
+            $xml = simplexml_load_string($xmlString, 'SimpleXMLElement', LIBXML_NOCDATA);
+            if ($xml === false) {
+                throw new Exception('Lettura XML fallita');
+            }
+
+            // Recupero i namespaces
+            $namespaces = $xml->getNamespaces(true);
+            $ns = isset($namespaces['ns3']) ? 'ns3' : (isset($namespaces['']) ? '' : key($namespaces));
+
+            // Debug: Log namespaces
+            // error_log('Namespaces: ' . print_r($namespaces, true));
+
+            // Converto ricorsivamente XML in array
+            $result = $this->xmlElementToArray($xml, $ns);
+
+            // Debug: Log raw result
+            // error_log('Parsed Result: ' . print_r($result, true));
+
+            return $result;
+        } catch (Exception $e) {
+            return ['error' => 'Errore lettura XML: ' . $e->getMessage()];
+        }
+    }
+
+    private function xmlElementToArray($element, $ns = '') {
+        $result = [];
+
+        // Gestisco gli attributi
+        foreach ($element->attributes() as $attrName => $attrValue) {
+            $result['@attributes'][$attrName] = (string)$attrValue;
+        }
+
+        // Gestisco i figli con namespace
+        $children = $ns ? $element->children($ns, true) : $element->children();
+        if ($children->count() == 0 && $ns) {
+            // Se non ci sono figli provo senza namespace
+            $children = $element->children();
+        }
+
+        foreach ($children as $childName => $child) {
+            // Debug: Log child name
+            // error_log('Processing child: ' . $childName);
+
+            // Se il figlio ha figli processo ricorsivamente
+            if ($child->count() > 0 || $child->attributes()->count() > 0) {
+                $childArray = $this->xmlElementToArray($child, $ns);
+            } else {
+                $childArray = trim((string)$child);
+            }
+
+            // Gestisco elementi ripetuti
+            if (isset($result[$childName])) {
+                if (!is_array($result[$childName]) || !isset($result[$childName][0])) {
+                    $result[$childName] = [$result[$childName]];
+                }
+                $result[$childName][] = $childArray;
+            } else {
+                $result[$childName] = $childArray;
+            }
+        }
+
+        // Se non ci sono figli o attributi ritorno il contenuto
+        if (empty($result) && trim((string)$element) !== '') {
+            return trim((string)$element);
+        }
+
+        return $result;
+    }
+
+    private function checkSupplier(array $data): bool
+    {
+        return '1980-07-31';
+    }
+
+    private function createPassiveInvoice(array $data)//: PassiveInvoice
+    {
+        return '1980-07-31';
+    }
+
+    private function createPassiveDetails(array $data): int
+    {
+        return 0;
+    }
+
+    public function passiveList(array $data)
+    {
+        $input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
+        $input['IncludiArchiviate'] = false;
+        // $input['Testo'] = [
+        //     ['DataInizio'] => '2025-01-01',
+        //     ['DataOraInizio'] => '00:00:00',
+        //     ['DataFine'] => '2025-07-29',
+        //     ['DataOraFine'] => '00:00:00'
+        // ];
+        // $input['Limite'] = 50;
+        // $input['Tags'] = [
+        //     ['contabilizzata'] => true,
+        //     ['corretta'] => true,
+        //     ['da_verificare'] => true,
+        //     ['inviata'] => true,
+        //     ['letta'] => true,
+        //     ['pagata'] => true,
+        //     ['pagata_parziale'] => true,
+        //     ['scaricata'] => true,
+        //     ['stampata'] => true
+        // ];
+        // $input['DataParam'] = 'data_fattura';                                                           // 'data_sistema', 'data_fattura', 'data_corrispettivo'
+        // $input['useTags'] = false;
+        // $input['tContabilizzata'] = false;
+        // $input['tCorretta'] = false;
+        // $input['tDaVerificare'] = false;
+        // $input['tInviata'] = false;
+        // $input['tLetta'] = false;
+        // $input['tPagata'] = false;
+        // $input['tPagataParziale'] = false;
+        // $input['tScaricata'] = false;
+        // $input['tStampata'] = false;
+
+        $response = $this->client->PasvElencoFatture($input);
+
+        // dd($response->Fattura);
+
+        $supplierNumber = 0;
+        $invoiceNumber = 0;
+
+        foreach($response->Fattura as $item){
+            // dd($item);
+
+            $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
+            $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+            $i_input['Unwrap'] = true;
+
+            $i_response = $this->client->PasvDownload($i_input);
+
+            // dd($i_response->Contenuto);
+
+            $a  = $this->xmlToArray($i_response->Contenuto);                                            // creo l'array con i dati dell'xml della fattura
+
+            dd($a);
+
+            $newSupplier = $this->checkSupplier($a);                                                    // controllo e nel caso inserisco un nuovo fornitore e ritorno true (crea fornitore), o false
+            if($newSupplier) $supplierNumber++;                                                         // se ho oggiunto il fornitore incremento il contatore dei fornitori
+            $passiveInvoice = $this->createPassiveInvoice($a);                                          // creo una nuova fattura passiva e ritorno la fattura creata
+            $detailsNumber = $this->createPassiveDetails($a);                                           // creo i dettagli della fattura passiva 
+
+            $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
+        }
+
+        $output['supplierNumber'] = $supplierNumber;
+        $output['invoiceNumber'] = $invoiceNumber;
+
+        return $output;
     }
 }

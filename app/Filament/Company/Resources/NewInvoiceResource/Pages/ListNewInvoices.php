@@ -12,6 +12,8 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Exports\NewInvoiceExporter;
 use App\Filament\Company\Resources\NewInvoiceResource;
+use App\Services\AndxorSoapService;
+use Filament\Forms\Components\TextInput;
 
 class ListNewInvoices extends ListRecords
 {
@@ -201,6 +203,35 @@ class ListNewInvoices extends ListRecords
                 ->color('primary')
                 ->exporter(NewInvoiceExporter::class)
                 // ->keyBindings(['alt+e'])
+            
+                ,
+            Actions\Action::make('passiveList')
+                ->label('Scarica fatture passive')
+                ->action(function (array $data) {
+                    $soapService = app(AndxorSoapService::class);
+                    try {
+                        $response = $soapService->passiveList($data);
+                        // $response = $soapService->sendInvoice($record, 'W3iDWc3Q9w.3AUgd2zpz4');
+                        Notification::make()
+                            ->title('Fattura inviata con successo')
+                            ->body('Progressivo: ' . $response->ProgressivoInvio)
+                            ->success()
+                            ->send();
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Errore')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->form([
+                    TextInput::make('password')
+                        ->label('Password SOAP')
+                        ->password()
+                        ->required(),
+                ])
+                ->requiresConfirmation()
         ];
     }
 
