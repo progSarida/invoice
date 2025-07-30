@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('passive_payments', function (Blueprint $table) {                                        // tabella pagamenti passivi
             $table->id();
             $table->foreignId('company_id')->constrained()->onUpdate('cascade')->onDelete('cascade');           // id tenant
-            $table->foreignId('invoice_id')->constrained()->onUpdate('cascade')->onDelete('cascade');           // id fattura passiva
+            $table->foreignId('passive_invoice_id')->constrained()->onUpdate('cascade')->onDelete('cascade');   // id fattura passiva
             $table->decimal('amount',10,2);                                                                     // importo pagamento
             $table->date('payment_date')->nullable();                                                           // data pagamento
             $table->date('registration_date')->nullable();                                                      // data registrazione

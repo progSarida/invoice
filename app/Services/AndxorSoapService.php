@@ -685,25 +685,28 @@ class AndxorSoapService
             $invoiceNumber = 0;
 
             foreach($response->Fattura as $item){
-                dd($item);
+                // dd($item);
 
-                $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
+                $i_input['Autenticazionee'] = $this->getAutenticazione(null, $data['password']);
                 $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
-                // $i_input['Unwrap'] = true;
 
-                $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
                 $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
+
+                dd($i_response_pdf->Contenuto);
+
+                $i_input['Unwrap'] = true;
+                $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
 
                 // dd($i_response_xml->Contenuto);
 
-                $param['filePath_xml'] = $this->saveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
-                $param['filePath_pdf'] = $this->savePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
+                // $param['filePath_xml'] = $this->saveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
+                // $param['filePath_pdf'] = $this->savePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
 
                 $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
 
-                dd($param);
+                // dd($param);
 
-                $newSupplier = $this->checkSupplier($param);                                                // controllo e nel caso inserisco un nuovo fornitore e ritorno true (crea fornitore), o false
+                $newSupplier = $this->checkSupplier($param);                                                // controllo e nel caso inserisco un nuovo fornitore e lo ritorno
                 if($newSupplier) $supplierNumber++;                                                         // se ho oggiunto il fornitore incremento il contatore dei fornitori
                 $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
                 $detailsNumber = $this->createPassiveDetails($param);                                       // creo i dettagli della fattura passiva
@@ -711,6 +714,7 @@ class AndxorSoapService
                 $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
             }
 
+            $output = array();
             $output['supplierNumber'] = $supplierNumber;
             $output['invoiceNumber'] = $invoiceNumber;
 

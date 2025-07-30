@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('passive_invoices', function (Blueprint $table) {
+        Schema::create('passive_downloads', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->onUpdate('cascade');
-            $table->foreignId('supplier_id')->constrained()->onUpdate('cascade');
+            $table->foreignId('company_id')->constrained()->onUpdate('cascade');                // id tenant
+            $table->date('date');                                                               // data download
+            $table->boolean('success');                                                         // 
             $table->timestamps();
         });
     }
@@ -25,7 +26,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('passive_invoices');
+        Schema::dropIfExists('passive_downloads');
         Schema::enableForeignKeyConstraints();
     }
 };
