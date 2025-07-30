@@ -14,24 +14,24 @@ return new class extends Migration
         Schema::create('suppliers', function (Blueprint $table) {                               // tabella fornitori
             $table->id();
             $table->foreignId('company_id')->constrained()->onUpdate('cascade');                // id tenant
-            $table->string('type')->nullable();                                                 // tipo fornitore
-            $table->string('subtype')->nullable();                                              // sottotipo fornitore
             $table->string('denomination');                                                     // nome fornitore
-            $table->unsignedBigInteger('state_id')->nullable();                                 // id stato
-            $table->foreign('state_id')->references('id')->on('states')->nullOnDelete();        //
-            $table->string('address')->nullable();                                              // indirizzo
-            $table->string('zip_code')->nullable();                                             // cap
-            $table->unsignedBigInteger('city_id')->nullable();                                  // id città (in caso di indirizzo italiano)
-            $table->foreign('city_id')->references('id')->on('cities');                         //
-            $table->string('place')->nullable();                                                // città (in caso di indirizzo estero)
-            $table->date('birth_date')->nullable();                                             // data di nascita
-            $table->string('birth_place')->nullable();                                          // luogo di nascita
             $table->string('tax_code')->nullable();                                             // codice fiscale
             $table->string('vat_code')->nullable();                                             // partita iva
+            $table->string('address')->nullable();                                              // indirizzo
+            $table->string('civic_number')->nullable();                                         // numero civico
+            $table->string('zip_code')->nullable();                                             // cap
+            $table->string('city')->nullable();                                                 // città
+            $table->string('province')->nullable();                                             // provincia
+            $table->string('country')->nullable();                                              // stato
+            $table->string('rea_office')->nullable();                                           // ufficio iscrizione REA
+            $table->string('rea_number')->nullable();                                           // numero iscrizione REA
+            $table->string('capital')->nullable();                                              // capitale sociale
+            $table->string('sole_share')->nullable();                                           // socio unico
+            $table->string('liquidation_status')->nullable();                                   // stati liquidazione
             $table->string('phone')->nullable();                                                // telefono
+            $table->string('fax')->nullable();                                                // fax
             $table->string('email')->nullable();                                                // email
             $table->string('pec')->nullable();                                                  // pec
-            $table->string('ipa_code')->nullable();                                             // codic ipa
             $table->string('bank')->nullable();                                                 // nome banca
             $table->string('iban')->nullable();                                                 // codice iban
             $table->string('bic')->nullable();                                                  // codice bic

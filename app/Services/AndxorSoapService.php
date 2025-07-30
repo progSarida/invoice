@@ -2,17 +2,18 @@
 
 namespace App\Services;
 
-use App\Enums\SdiStatus;
-use App\Enums\WithholdingType;
+use Exception;
+use SoapFault;
+use SoapClient;
+use Carbon\Carbon;
+use App\Models\State;
 use App\Models\Company;
 use App\Models\Invoice;
-use App\Models\State;
-use Carbon\Carbon;
-use Exception;
+use App\Enums\SdiStatus;
+use App\Enums\WithholdingType;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use SoapClient;
-use SoapFault;
 
 class AndxorSoapService
 {
@@ -612,9 +613,19 @@ class AndxorSoapService
         return $result;
     }
 
+    private function saveXML(string $filename, string $content): string
+    {
+        return 'percorso al file';
+    }
+
+    private function savePDF(string $filename, string $content): string
+    {
+        return 'percorso al file';
+    }
+
     private function checkSupplier(array $data): bool
     {
-        return '1980-07-31';
+        return true;
     }
 
     private function createPassiveInvoice(array $data)//: PassiveInvoice
@@ -627,73 +638,90 @@ class AndxorSoapService
         return 0;
     }
 
-    public function passiveList(array $data)
+    public function downloadPassive(array $data)
     {
-        $input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
-        $input['IncludiArchiviate'] = false;
-        // $input['Testo'] = [
-        //     ['DataInizio'] => '2025-01-01',
-        //     ['DataOraInizio'] => '00:00:00',
-        //     ['DataFine'] => '2025-07-29',
-        //     ['DataOraFine'] => '00:00:00'
-        // ];
-        // $input['Limite'] = 50;
-        // $input['Tags'] = [
-        //     ['contabilizzata'] => true,
-        //     ['corretta'] => true,
-        //     ['da_verificare'] => true,
-        //     ['inviata'] => true,
-        //     ['letta'] => true,
-        //     ['pagata'] => true,
-        //     ['pagata_parziale'] => true,
-        //     ['scaricata'] => true,
-        //     ['stampata'] => true
-        // ];
-        // $input['DataParam'] = 'data_fattura';                                                           // 'data_sistema', 'data_fattura', 'data_corrispettivo'
-        // $input['useTags'] = false;
-        // $input['tContabilizzata'] = false;
-        // $input['tCorretta'] = false;
-        // $input['tDaVerificare'] = false;
-        // $input['tInviata'] = false;
-        // $input['tLetta'] = false;
-        // $input['tPagata'] = false;
-        // $input['tPagataParziale'] = false;
-        // $input['tScaricata'] = false;
-        // $input['tStampata'] = false;
+        try {
 
-        $response = $this->client->PasvElencoFatture($input);
+            DB::beginTransaction();
 
-        // dd($response->Fattura);
+            $input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
+            $input['IncludiArchiviate'] = false;
+            // I parametri seguenti dipenderanno dai filtri
+            // $input['Testo'] = [
+            //     ['DataInizio'] => '2025-01-01',
+            //     ['DataOraInizio'] => '00:00:00',
+            //     ['DataFine'] => '2025-07-29',
+            //     ['DataOraFine'] => '00:00:00'
+            // ];
+            // $input['Limite'] = 50;
+            // $input['Tags'] = [
+            //     ['contabilizzata'] => true,
+            //     ['corretta'] => true,
+            //     ['da_verificare'] => true,
+            //     ['inviata'] => true,
+            //     ['letta'] => true,
+            //     ['pagata'] => true,
+            //     ['pagata_parziale'] => true,
+            //     ['scaricata'] => true,
+            //     ['stampata'] => true
+            // ];
+            // $input['DataParam'] = 'data_fattura';                                                           // 'data_sistema', 'data_fattura', 'data_corrispettivo'
+            // $input['useTags'] = false;
+            // $input['tContabilizzata'] = false;
+            // $input['tCorretta'] = false;
+            // $input['tDaVerificare'] = false;
+            // $input['tInviata'] = false;
+            // $input['tLetta'] = false;
+            // $input['tPagata'] = false;
+            // $input['tPagataParziale'] = false;
+            // $input['tScaricata'] = false;
+            // $input['tStampata'] = false;
 
-        $supplierNumber = 0;
-        $invoiceNumber = 0;
+            $response = $this->client->PasvElencoFatture($input);                                           // scarico elenco fatture passive
 
-        foreach($response->Fattura as $item){
-            // dd($item);
+            // dd($response->Fattura);
 
-            $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
-            $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
-            $i_input['Unwrap'] = true;
+            $supplierNumber = 0;
+            $invoiceNumber = 0;
 
-            $i_response = $this->client->PasvDownload($i_input);
+            foreach($response->Fattura as $item){
+                dd($item);
 
-            // dd($i_response->Contenuto);
+                $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
+                $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+                // $i_input['Unwrap'] = true;
 
-            $a  = $this->xmlToArray($i_response->Contenuto);                                            // creo l'array con i dati dell'xml della fattura
+                $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
+                $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
 
-            dd($a);
+                // dd($i_response_xml->Contenuto);
 
-            $newSupplier = $this->checkSupplier($a);                                                    // controllo e nel caso inserisco un nuovo fornitore e ritorno true (crea fornitore), o false
-            if($newSupplier) $supplierNumber++;                                                         // se ho oggiunto il fornitore incremento il contatore dei fornitori
-            $passiveInvoice = $this->createPassiveInvoice($a);                                          // creo una nuova fattura passiva e ritorno la fattura creata
-            $detailsNumber = $this->createPassiveDetails($a);                                           // creo i dettagli della fattura passiva 
+                $param['filePath_xml'] = $this->saveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
+                $param['filePath_pdf'] = $this->savePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
 
-            $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
+                $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
+
+                dd($param);
+
+                $newSupplier = $this->checkSupplier($param);                                                // controllo e nel caso inserisco un nuovo fornitore e ritorno true (crea fornitore), o false
+                if($newSupplier) $supplierNumber++;                                                         // se ho oggiunto il fornitore incremento il contatore dei fornitori
+                $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
+                $detailsNumber = $this->createPassiveDetails($param);                                       // creo i dettagli della fattura passiva
+
+                $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
+            }
+
+            $output['supplierNumber'] = $supplierNumber;
+            $output['invoiceNumber'] = $invoiceNumber;
+
+            dd($output);
+
+            DB::commit();
+
+            return $output;
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            // dd($ex->getMessage() . " - " . $ex->getLine());
         }
-
-        $output['supplierNumber'] = $supplierNumber;
-        $output['invoiceNumber'] = $invoiceNumber;
-
-        return $output;
     }
 }
