@@ -11,6 +11,8 @@ use App\Models\Company;
 use App\Models\Invoice;
 use App\Enums\SdiStatus;
 use App\Enums\WithholdingType;
+use App\Models\PassiveInvoice;
+use App\Models\PassiveItem;
 use App\Models\Supplier;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\DB;
@@ -655,10 +657,25 @@ class AndxorSoapService
     private function checkSupplier(array $param): array
     {
         $output['new'] = false;
-        $supplier = Supplier::where('vat_code', $param['CedentePrestatore']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice'])
-                            // ->orWhere('tax_code', $param['CedentePrestatore']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice'])
-                            ->orWhere('tax_code', $param['CedentePrestatore']['DatiAnagrafici']['CodiceFiscale'])
-                            ->first();
+        // $supplier = Supplier::where('vat_code', $param['CedentePrestatore']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice'])
+        //                     ->orWhere('tax_code', $param['CedentePrestatore']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice'])
+        //                     ->orWhere('tax_code', $param['CedentePrestatore']['DatiAnagrafici']['CodiceFiscale'])
+        //                     ->first();
+
+        $query = Supplier::query();
+        $vatCode = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice');
+        $taxCode1 = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice'); // può essere lo stesso del precedente
+        $taxCode2 = data_get($param, 'CedentePrestatore.DatiAnagrafici.CodiceFiscale');
+        if ($vatCode) {
+            $query->orWhere('vat_code', $vatCode);
+        }
+        if ($taxCode1) {
+            $query->orWhere('tax_code', $taxCode1);
+        }
+        if ($taxCode2) {
+            $query->orWhere('tax_code', $taxCode2);
+        }
+        $supplier = $query->first();
 
         // dd($supplier);
 
@@ -702,14 +719,61 @@ class AndxorSoapService
         return $output;
     }
 
-    private function createPassiveInvoice(array $data)//: PassiveInvoice
+    private function createPassiveInvoice(array $param): PassiveInvoice
     {
-        return '1980-07-31';
+        $supplier = $param['supplier'];                                                                                 // fornitore
+        $xml = $param['content'];                                                                                       // array xml
+        $item = $param['item'];
+dd($xml);
+        $data = [
+                'company_id' => Filament::getTenant()->id,
+                'supplier_id' => $supplier->id,
+                'doc_type' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['TipoDocumento'] ?? null,
+                'invoice_date' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Data'] ?? null,
+                'number' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Numero'] ?? null,
+                'description' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Causale'] ?? null,
+                'total' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['ImportoTotaleDocumento'] ?? null,
+                'payment_term' => $xml['FatturaElettronicaBody']['DatiPagamento']['CondizioniPagamento'] ?? null,
+                'payment_method' => $xml['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ModalitaPagamento'] ?? null,
+                'payment_deadline' => $xml['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ImportoPagamento'] ?? null,
+                'bank' => $xml['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['IstituoFinanziario'] ?? null,
+                'iban' => $xml['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['IBAN'] ?? null,
+                'filename' => explode('.', $item->NomeFile)[0] ?? null,
+                'xml_path' => $param['filePath_xml'] ?? null,
+                'pdf_path' => $param['filePath_pdf'] ?? null
+            ];
+
+        dd(var_dump($data));
+        
+        $passiveInvoice = PassiveInvoice::create($data);
+
+        // dd($passiveInvoice);
+
+        return $passiveInvoice;
     }
 
-    private function createPassiveDetails(array $data): int
+    private function createPassiveItems(array $param): int
     {
-        return 0;
+        $detailsNumber = 0;
+        $details = $param['content']['FatturaElettronicaBody']['DatiBeniServizi']['DettaglioLinee']; 
+
+        foreach($details as $detail){
+            $data = [
+                    'company_id' => Filament::getTenant()->id,
+                    'passive_invoice_id' => $param['passive_invoice']->id,
+                    'description' => $detail['Descrizione'] ?? null,
+                    'quantity' => $detail['Quantita'] ?? null,
+                    'unit_price' => $detail['PrezzoUnitario'] ?? null,
+                    'total_price' => $detail['PrezzoTotale'] ?? null,
+                    'vat_rate' => $detail['AliquotaIVA'] ?? null
+                ];
+
+            $nvoiceDetail = PassiveItem::create($data);
+
+            $detailsNumber++;
+        }
+
+        return $detailsNumber;
     }
 
     public function downloadPassive(array $data)
@@ -759,10 +823,13 @@ class AndxorSoapService
             $invoiceNumber = 0;
 
             foreach($response->Fattura as $item){
+                $param['item'] = $item;
                 // dd($item);
 
                 $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
-                $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+                // $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+                // $i_input['IdentificativoSdI'] = '15103163806';
+                $i_input['IdentificativoSdI'] = '15103162717';
 
                 $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
 
@@ -780,18 +847,22 @@ class AndxorSoapService
 
                 $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
 
-                // dd($param);
+                // dd($param['content']);
 
                 $newSupplier = $this->checkSupplier($param['content']['FatturaElettronicaHeader']);         // controllo e nel caso inserisco un nuovo fornitore, ritorno il fornitore della fattura
                 if($newSupplier['new']) $supplierNumber++;                                                  // se ho aggiunto il fornitore incremento il contatore dei fornitori
                 $param['supplier']  = $newSupplier['supplier'];
 
-                dd($param);
+                // dd($param['supplier']);
+
                 $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
                 $param['passive_invoice']  = $passiveInvoice;
 
+                // dd($param['passive_invoice']);
+
                 // dd($param);
-                $detailsNumber = $this->createPassiveDetails($param);                                       // creo i dettagli della fattura passiva
+
+                $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
 
                 $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
             }
@@ -809,7 +880,7 @@ class AndxorSoapService
             return $output;
         } catch (\Exception $ex) {
             DB::rollBack();
-            // dd($ex->getMessage() . " - " . $ex->getLine());
+            dd($ex->getMessage() . " - " . $ex->getLine());
         }
     }
 }
