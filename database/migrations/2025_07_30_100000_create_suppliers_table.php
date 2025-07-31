@@ -32,10 +32,6 @@ return new class extends Migration
             $table->string('fax')->nullable();                                                // fax
             $table->string('email')->nullable();                                                // email
             $table->string('pec')->nullable();                                                  // pec
-            $table->string('bank')->nullable();                                                 // nome banca
-            $table->string('iban')->nullable();                                                 // codice iban
-            $table->string('bic')->nullable();                                                  // codice bic
-            $table->string('swift')->nullable();                                                // codice swift
             $table->timestamps();
         });
     }

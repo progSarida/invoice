@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('payment_term');                                                     // condizioni di pagamento
             $table->string('payment_method');                                                   // metodo di pagamento
             $table->date('payment_deadline');                                                   // scadenza pagamento
+            $table->string('bank')->nullable();                                                 // nome banca
+            $table->string('iban')->nullable();                                                 // codice iban
             $table->string('filename');                                                         // nome file associati
             $table->string('xml_path');                                                         // percorso file xml
             $table->string('pdf_path');                                                         // percorso file pdf
