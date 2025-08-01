@@ -29,4 +29,12 @@ class PassiveInvoice extends Model
     public function company(){
         return $this->belongsTo(Company::class);
     }
+
+    public function supplier(){
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function docType(){
+        return $this->belongsTo(DocType::class, 'doc_type', 'name');
+    }
 }

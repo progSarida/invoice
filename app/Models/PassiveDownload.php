@@ -9,12 +9,12 @@ class PassiveDownload extends Model
     protected $fillable = [
         'company_id',
         'date',
-        'success'
+        'new_suppliers',
+        'new_invoices'
     ];
 
     protected $casts = [
-        'date' => 'date',
-        'success' => 'boolean'
+        'date' => 'date'
     ];
 
     public function company(){

@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('passive_downloads', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->onUpdate('cascade');                // id tenant
-            $table->date('date');                                                               // data download
-            $table->boolean('success');                                                         // 
+            $table->date('date');                                                               // data ultime fatture scaricate
+            $table->integer('new_suppliers');                                                   // nuovi fornitori inseriti
+            $table->integer('new_invoices');                                                    // nuove fatture passive scaricate
             $table->timestamps();
         });
     }

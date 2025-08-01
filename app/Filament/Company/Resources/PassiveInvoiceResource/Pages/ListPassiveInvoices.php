@@ -8,6 +8,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Notifications\Notification;
 use App\Services\AndxorSoapService;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Enums\MaxWidth;
 
 class ListPassiveInvoices extends ListRecords
 {
@@ -22,22 +23,31 @@ class ListPassiveInvoices extends ListRecords
                 ->action(function (array $data) {
                     $soapService = app(AndxorSoapService::class);
                     try {
-                        // $response = $soapService->downloadPassive($data);
-                        $response = $soapService->downloadPassive(['password' => 'W3iDWc3Q9w.3AUgd2zpz4']);
+                        $response = $soapService->downloadPassive($data);
+                        // $response = $soapService->downloadPassive(['password' => 'W3iDWc3Q9w.3AUgd2zpz4']);
+
+                        if (!$response instanceof \App\Models\PassiveDownload) {
+                            throw new \Exception($response->getMessage());
+                        }
+
+                        $msg = '';
+                        if ($response->new_suppliers == 1) {
+                            $msg .= 'Inserito ' . $response->new_suppliers . ' nuovo fornitore.<br> ';
+                        } elseif ($response->new_suppliers > 1) {
+                            $msg .= 'Inseriti ' . $response->new_suppliers . ' nuovi fornitori.<br> ';
+                        }
+                        if ($response->new_invoices == 1) {
+                            $msg .= 'Scaricata ' . $response->new_invoices . ' nuova fattura passiva.';
+                        } elseif ($response->new_invoices > 1) {
+                            $msg .= 'Scaricate ' . $response->new_invoices . ' nuove fatture passive.';
+                        }
+                        if (empty($msg)) {
+                            $msg = 'Nessuna nuova fattura o fornitore scaricato.';
+                        }
+
                         Notification::make()
                             ->title('Fatture passive scaricate con successo.')
-                            ->body(function () use ($response) {
-                                    $msg = '';
-                                    if($response['supplierNumber'] = 1)
-                                        $msg .= 'Inserito ' . $response['supplierNumber'] . ' nuovo fornitore\n';
-                                    else if($response['supplierNumber'] > 1)
-                                        $msg .= 'Inseriti ' . $response['supplierNumber'] . ' nuovi fornitori\n';
-                                    if($response['supplierNumber'] > 0)
-                                        $msg .= 'Scaricate ' . $response['invoiceNumber'] . ' nuove fatture passive';
-
-                                    return $msg;
-                                }
-                            )
+                            ->body($msg)
                             ->success()
                             ->send();
                     } catch (\Exception $e) {
@@ -54,8 +64,15 @@ class ListPassiveInvoices extends ListRecords
                         ->label('Password SOAP')
                         ->password()
                         ->required(),
+                    TextInput::make('limit')
+                        ->label('Numero fatture')
                 ])
                 ->requiresConfirmation()
         ];
+    }
+
+    public function getMaxContentWidth(): MaxWidth|string|null                                  // allarga la tabella a tutta pagina
+    {
+        return MaxWidth::Full;
     }
 }

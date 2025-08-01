@@ -972,7 +972,7 @@ class NewInvoiceResource extends Resource
                     ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                    Tables\Columns\TextColumn::make('client.denomination')->label('Cliente')
+                Tables\Columns\TextColumn::make('client.denomination')->label('Cliente')
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
