@@ -14,9 +14,13 @@ class PassiveInvoice extends Model
         'number',
         'description',
         'total',
-        'payment_term',
-        'payment_method',
+        'sdi_status',
+        'sdi_code',
+        'payment_mode',
+        'payment_type',
         'payment_deadline',
+        'bank',
+        'iban',
         'filename',
         'xml_path',
         'pdf_path'
@@ -36,5 +40,13 @@ class PassiveInvoice extends Model
 
     public function docType(){
         return $this->belongsTo(DocType::class, 'doc_type', 'name');
+    }
+
+    public function parent(){
+        return $this->belongsTo(PassiveInvoice::class, 'parent_id', 'id');
+    }
+
+    public function passiveItems(){
+        return $this->hasMany(PassiveItem::class,'passive_invoice_id','id');
     }
 }

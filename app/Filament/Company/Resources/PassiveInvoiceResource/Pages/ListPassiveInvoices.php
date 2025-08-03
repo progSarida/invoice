@@ -17,7 +17,7 @@ class ListPassiveInvoices extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            // Actions\CreateAction::make(),
             Actions\Action::make('passiveList')
                 ->label('Scarica fatture passive')
                 ->action(function (array $data) {
@@ -64,8 +64,8 @@ class ListPassiveInvoices extends ListRecords
                         ->label('Password SOAP')
                         ->password()
                         ->required(),
-                    TextInput::make('limit')
-                        ->label('Numero fatture')
+                    // TextInput::make('limit')
+                    //     ->label('Numero fatture')
                 ])
                 ->requiresConfirmation()
         ];

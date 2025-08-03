@@ -2,11 +2,20 @@
 
 namespace App\Filament\Company\Resources;
 
+use App\Enums\PaymentMode;
+use App\Enums\PaymentType;
 use App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
+use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassiveItemsRelationManager;
+use App\Models\DocType;
 use App\Models\PassiveInvoice;
 use Filament\Forms;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -14,6 +23,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class PassiveInvoiceResource extends Resource
@@ -37,8 +47,110 @@ class PassiveInvoiceResource extends Resource
     {
         return $form
             ->schema([
-                //
-            ]);
+                Grid::make('GRID')->columnSpan(2)->schema([
+
+                    Section::make('Riferimenti')
+                        ->collapsible()
+                        ->schema([
+
+                            Forms\Components\Select::make('supplier_id')
+                                ->label('Fornitore')
+                                ->relationship('supplier', 'denomination')
+                                ->disabled(),
+
+                            Forms\Components\Select::make('parent_id')
+                                ->label('Fattura')
+                                ->relationship('parent', 'denomination')
+                                ->getOptionLabelFromRecordUsing(
+                                    fn (Model $record) => $record->number
+                                )
+                                ->visible(fn (Get $get) => !is_null($get('parent_id')))
+                                ->disabled(),
+                        ]),
+
+                        Section::make('Dati per il pagamento')
+                            ->collapsed(false)
+                            ->schema([
+                                Forms\Components\Select::make('payment_mode')
+                                    ->label('Condizioni di pagamento')
+                                    ->options(
+                                        collect(PaymentMode::cases())
+                                            ->sortBy(fn (PaymentMode $type) => $type->getOrder())
+                                            ->mapWithKeys(fn (PaymentMode $type) => [
+                                                $type->getCode() => $type->getLabel()
+                                            ])
+                                            ->toArray()
+                                    )
+                                    ->disabled(),
+                                Forms\Components\Select::make('payment_type')
+                                    ->label('Metodo di pagamento')
+                                    ->options(
+                                        collect(PaymentType::cases())
+                                            ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                                            ->mapWithKeys(fn (PaymentType $type) => [
+                                                $type->getCode() => $type->getLabel()
+                                            ])
+                                            ->toArray()
+                                    )
+                                    ->disabled(),
+                                Forms\Components\DatePicker::make('payment_deadline')
+                                    ->label('Scadenza pagamento')
+                                    ->disabled(),
+                                    
+                                Forms\Components\TextInput::make('bank')
+                                    ->label('Istituto finanziario')
+                                    // ->visible(fn (Get $get) => !is_null($get('bank')))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('iban')
+                                    ->label('IBAN')
+                                    // ->visible(fn (Get $get) => !is_null($get('iban')))
+                                    ->disabled(),
+                            ]),
+
+                        Section::make('Status SDI')
+                            ->collapsed(false)
+                            ->schema([
+                                Forms\Components\TextInput::make('sdi_status')
+                                    ->label('Status')
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('sdi_code')
+                                    ->label('Codice SDI')
+                                    ->disabled(),
+                            ]),
+
+                ]),
+                Grid::make('GRID')->columnSpan(3)->schema([
+                    Section::make('')
+                        ->columns(3)
+                        ->schema([
+                            Forms\Components\Select::make('doc_type')
+                                ->label('Tipo documento')
+                                ->columnSpan(3)
+                                ->options(function (Get $get) {
+                                    $docs = DocType::select('doc_types.name', 'doc_types.description')
+                                        ->get();
+                                    return $docs->pluck('description', 'name')->toArray();
+                                })
+                                ->disabled(),
+                            Forms\Components\TextInput::make('number')
+                                ->label('Numero')
+                                ->columnSpan(2)
+                                ->disabled(),
+                            Forms\Components\DatePicker::make('invoice_date')
+                                ->label('Data')
+                                ->columnSpan(1)
+                                ->disabled(),
+                        ]),
+                    Section::make('Descrizione')
+                        ->collapsible()
+                        ->schema([
+                            Forms\Components\Textarea::make('description')
+                                ->label('')
+                                ->columnSpanFull()
+                                ->disabled(),
+                        ]),
+                ]),
+            ])->columns(5);
     }
 
     public static function table(Table $table): Table
@@ -64,6 +176,7 @@ class PassiveInvoiceResource extends Resource
                 TextColumn::make('description')
                     ->label('Descrizione')
                     ->searchable()
+                    ->wrap()
                     ->sortable(),
                 TextColumn::make('total')
                     ->label('Totale a doversi')
@@ -127,7 +240,7 @@ class PassiveInvoiceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            PassiveItemsRelationManager::class
         ];
     }
 
@@ -138,5 +251,10 @@ class PassiveInvoiceResource extends Resource
             'create' => Pages\CreatePassiveInvoice::route('/create'),
             'edit' => Pages\EditPassiveInvoice::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('supplier');
     }
 }

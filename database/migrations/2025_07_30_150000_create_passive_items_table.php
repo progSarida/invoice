@@ -16,7 +16,10 @@ return new class extends Migration
             $table->foreignId('company_id')->constrained()->onUpdate('cascade');                // id tenant
             $table->foreignId('passive_invoice_id')->constrained()->onUpdate('cascade');        // id fornitore
             $table->string('description')->nullable();                                          // descrizione
+            $table->date('start_date')->nullable();                                             // data inizio periodo
+            $table->date('end_date')->nullable();                                               // data fine periodo
             $table->integer('quantity')->nullable();                                            // quantità
+            $table->string('unit')->nullable();                                                 // unità di misura
             $table->decimal('unit_price',10,2)->nullable();                                     // prezzo unitario
             $table->decimal('total_price',10,2)->nullable();                                    // prezzo totale
             $table->decimal('vat_rate',10,2)->nullable();                                       // aliquota IVA

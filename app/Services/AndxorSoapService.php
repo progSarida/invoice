@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\FundType;
 use Exception;
 use SoapFault;
 use SoapClient;
@@ -11,6 +12,7 @@ use App\Models\Company;
 use App\Models\Invoice;
 use App\Enums\SdiStatus;
 use App\Enums\WithholdingType;
+use App\Models\Deadline;
 use App\Models\PassiveDownload;
 use App\Models\PassiveInvoice;
 use App\Models\PassiveItem;
@@ -730,10 +732,12 @@ class AndxorSoapService
                 'number' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Numero'] ?? null,
                 'description' => is_array($rawCausale) ? implode('; ', $rawCausale) : $rawCausale,
                 'total' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['ImportoTotaleDocumento'] ?? null,
-                'payment_term' => $xml['FatturaElettronicaBody']['DatiPagamento']['CondizioniPagamento'] ?? null,
-                'payment_method' => $xml['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ModalitaPagamento'] ?? null,
+                'sdi_code' => $item->IdentificativoSdI,
+                'sdi_status' => $item->Stato,
+                'payment_mode' => $xml['FatturaElettronicaBody']['DatiPagamento']['CondizioniPagamento'] ?? null,
+                'payment_type' => $xml['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ModalitaPagamento'] ?? null,
                 'payment_deadline' => $xml['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['DataScadenzaPagamento'] ?? null,
-                'bank' => $xml['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['IstituoFinanziario'] ?? null,
+                'bank' => $xml['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['IstitutoFinanziario'] ?? null,
                 'iban' => $xml['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['IBAN'] ?? null,
                 'filename' => explode('.', $item->NomeFile)[0] ?? null,
                 'xml_path' => $param['filePath_xml'] ?? null,
@@ -749,28 +753,301 @@ class AndxorSoapService
         return $passiveInvoice;
     }
 
+    private function createDetailItems(array $param): int
+    {
+        $items = 0;
+        $details = $param['content']['FatturaElettronicaBody']['DatiBeniServizi']['DettaglioLinee'] ?? null;
+
+        if (!empty($details)) {
+
+            $array = !empty($details) && array_reduce($details, function ($carry, $item) {
+                        return $carry && is_array($item);
+                    }, true);
+
+            if($array){
+                foreach ($details as $detail) {
+                    $data = [
+                        'company_id' => Filament::getTenant()->id,
+                        'passive_invoice_id' => $param['passive_invoice']->id,
+                        'description' => $detail['Descrizione'] ?? null,
+                        'quantity' => $detail['Quantita'] ?? null,
+                        'unit_price' => $detail['PrezzoUnitario'] ?? null,
+                        'total_price' => $detail['PrezzoTotale'] ?? null,
+                        'vat_rate' => $detail['AliquotaIVA'] ?? null
+                    ];
+
+                    $nvoiceDetail = PassiveItem::create($data);
+                    $items++;
+                }
+            }
+            else{
+                $data = [
+                    'company_id' => Filament::getTenant()->id,
+                    'passive_invoice_id' => $param['passive_invoice']->id,
+                    'description' => $details['Descrizione'] ?? null,
+                    'quantity' => $details['Quantita'] ?? null,
+                    'unit_price' => $details['PrezzoUnitario'] ?? null,
+                    'total_price' => $details['PrezzoTotale'] ?? null,
+                    'vat_rate' => $details['AliquotaIVA'] ?? null
+                ];
+
+                $invoiceDetail = PassiveItem::create($data);
+                $items++;
+            }
+        }
+
+        return $items;
+    }
+
+    private function createResumeItems(array $param): int
+    {
+        $items = 0;
+
+        $resumes = $param['content']['FatturaElettronicaBody']['DatiBeniServizi']['DatiRiepilogo'] ?? null;
+
+        // dd($param);
+
+        if (!empty($resumes)) {
+
+            Log::info('Resume items processing', [
+                'IdentificativoSdI' => $param['item']->IdentificativoSdI,
+            ]);
+
+
+            $array = !empty($resumes) && array_reduce($resumes, function ($carry, $item) {
+                        return $carry && is_array($item);
+                    }, true);
+
+            if ($array) {
+                // dd('ARRAY');
+                foreach ($resumes as $resume) {
+                    $collectability = '*';
+                    if (isset($resume['EsigibilitaIVA'])) {
+                        switch ($resume['EsigibilitaIVA']) {
+                            case 'I':
+                                $collectability = 'Immediata';
+                                break;
+                            case 'D':
+                                $collectability = 'Differita';
+                                break;
+                            case 'S':
+                                $collectability = 'Scissione';
+                                break;
+                        }
+                    }
+                    $data = [
+                        'company_id' => Filament::getTenant()->id,
+                        'passive_invoice_id' => $param['passive_invoice']->id,
+                        'description' => 'Riepilogo - ' . ($resume['Natura'] ?? '*') . ' - ' . $collectability . ' - ' . ($resume['RiferimentoNormativo'] ?? '*'),
+                        'quantity' => null,
+                        'unit_price' => null,
+                        'total_price' => $resume['Imposta'] ?? null,
+                        'vat_rate' => $resume['AliquotaIVA'] ?? null
+                    ];
+
+                    $invoiceDetail = PassiveItem::create($data);
+                    $items++;
+                }
+            }
+            else {
+                // dd('SINGOLO');
+                $collectability = '*';
+                if (isset($resumes['EsigibilitaIVA'])) {
+                    switch ($resumes['EsigibilitaIVA']) {
+                        case 'I':
+                            $collectability = 'Immediata';
+                            break;
+                        case 'D':
+                            $collectability = 'Differita';
+                            break;
+                        case 'S':
+                            $collectability = 'Scissione';
+                            break;
+                    }
+                }
+                $data = [
+                    'company_id' => Filament::getTenant()->id,
+                    'passive_invoice_id' => $param['passive_invoice']->id,
+                    'description' => 'Riepilogo - ' . ($resumes['Natura'] ?? '*') . ' - ' . $collectability . ' - ' . ($resumes['RiferimentoNormativo'] ?? '*'),
+                    'quantity' => null,
+                    'unit_price' => null,
+                    'total_price' => $resumes['Imposta'] ?? null,
+                    'vat_rate' => $resumes['AliquotaIVA'] ?? null
+                ];
+
+                $invoiceDetail = PassiveItem::create($data);
+                $items++;
+            }
+        }
+
+        return $items;
+    }
+
+    private function createFundItems(array $param): int
+    {
+        $items = 0;
+
+        $funds = $param['content']['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['DatiCassaPrevidenziale'] ?? null;
+
+        // dd($funds);
+
+        if (!empty($funds)) {
+
+            // dd($funds);
+
+            $array = !empty($funds) && array_reduce($funds, function ($carry, $item) {
+                        return $carry && is_array($item);
+                    }, true);
+
+            if ($array) {
+
+                // dd('ARRAY');
+
+                foreach ($funds as $fund) {
+                    // Ottieni l'istanza dell'enum FundType basata su TipoCassa
+                    $description = isset($fund['TipoCassa']) && is_string($fund['TipoCassa'])
+                        ? collect(FundType::cases())
+                            ->first(fn($case) => $case->getCode() === $fund['TipoCassa'])
+                            ?->getDescription() ?? null
+                        : null;
+                    // Usa getDescription() se fundType esiste, altrimenti null
+                    // $description = $fundType?->getDescription() ?? null;
+
+                    $data = [
+                        'company_id' => Filament::getTenant()->id,
+                        'passive_invoice_id' => $param['passive_invoice']->id,
+                        'description' => 'Cassa prev. - ' . $description,
+                        'quantity' => null,
+                        'unit_price' => null,
+                        'total_price' => $fund['ImportoContributoCassa'] ?? null, // Corretto il typo
+                        'vat_rate' => $fund['AliquotaIVA'] ?? null
+                    ];
+
+                    $nvoiceDetail = PassiveItem::create($data);
+                    $items++;
+                }
+            }
+            else {
+
+                // dd('SINGOLO');
+
+                $description = isset($funds['TipoCassa']) && is_string($funds['TipoCassa'])
+                    ? collect(FundType::cases())
+                        ->first(fn($case) => $case->getCode() === $funds['TipoCassa'])
+                        ?->getDescription() ?? null
+                    : null;
+
+                // dd($param['passive_invoice']->id  . ": " . $fundType);
+                // dd('STOP1');
+
+                // Usa getDescription() se fundType esiste, altrimenti null
+                // $description = $fundType?->getDescription() ?? null;
+
+                $data = [
+                    'company_id' => Filament::getTenant()->id,
+                    'passive_invoice_id' => $param['passive_invoice']->id,
+                    'description' => 'Cassa prev. - ' . $description,
+                    'quantity' => null,
+                    'unit_price' => null,
+                    'total_price' => $funds['ImportoContributoCassa'] ?? null, // Corretto il typo
+                    'vat_rate' => $funds['AliquotaIVA'] ?? null
+                ];
+
+                // dd('STOP2');
+
+                $nvoiceDetail = PassiveItem::create($data);
+                $items++;
+            }
+        }
+
+        return $items;
+    }
+
     private function createPassiveItems(array $param): int
     {
         $detailsNumber = 0;
-        $details = $param['content']['FatturaElettronicaBody']['DatiBeniServizi']['DettaglioLinee'];
+        $resumesNumber = 0;
+        $fundsNumber = 0;
 
-        foreach($details as $detail){
-            $data = [
-                    'company_id' => Filament::getTenant()->id,
-                    'passive_invoice_id' => $param['passive_invoice']->id,
-                    'description' => $detail['Descrizione'] ?? null,
-                    'quantity' => $detail['Quantita'] ?? null,
-                    'unit_price' => $detail['PrezzoUnitario'] ?? null,
-                    'total_price' => $detail['PrezzoTotale'] ?? null,
-                    'vat_rate' => $detail['AliquotaIVA'] ?? null
-                ];
+        // // Normalizza DettaglioLinee in un array
+        // $details = $param['content']['FatturaElettronicaBody']['DatiBeniServizi']['DettaglioLinee'] ?? [];
+        // $details = is_array($details) ? $details : [$details]; // Converti in array se è un elemento singolo
 
-            $nvoiceDetail = PassiveItem::create($data);
+        // if (!empty($details)) {
+        //     foreach ($details as $detail) {
+        //         $data = [
+        //             'company_id' => Filament::getTenant()->id,
+        //             'passive_invoice_id' => $param['passive_invoice']->id,
+        //             'description' => $detail['Descrizione'] ?? null,
+        //             'quantity' => $detail['Quantita'] ?? null,
+        //             'unit_price' => $detail['PrezzoUnitario'] ?? null,
+        //             'total_price' => $detail['PrezzoTotale'] ?? null,
+        //             'vat_rate' => $detail['AliquotaIVA'] ?? null
+        //         ];
 
-            $detailsNumber++;
-        }
+        //         $nvoiceDetail = PassiveItem::create($data);
+        //         $detailsNumber++;
+        //     }
+        // }
 
-        return $detailsNumber;
+        $detailsNumber = $this->createDetailItems($param);                                                      // creo voci fattura da DettaglioLinee
+
+        // Normalizza DatiRiepilogo in un array
+        // $resumes = $param['content']['FatturaElettronicaBody']['DatiBeniServizi']['DatiRiepilogo'] ?? [];
+        // $resumes = is_array($resumes) ? $resumes : [$resumes]; // Converti in array se è un elemento singolo
+
+        // if (!empty($resumes)) {
+        //     foreach ($resumes as $resume) {
+        //         $data = [
+        //             'company_id' => Filament::getTenant()->id,
+        //             'passive_invoice_id' => $param['passive_invoice']->id,
+        //             'description' => $resume['RiferimentoNormativo'] ?? null,
+        //             'quantity' => null,
+        //             'unit_price' => null,
+        //             'total_price' => $resume['Imposta'] ?? null,
+        //             'vat_rate' => $resume['AliquotaIVA'] ?? null
+        //         ];
+
+        //         $nvoiceDetail = PassiveItem::create($data);
+        //         $detailsNumber++;
+        //     }
+        // }
+
+        $resumesNumber = $this->createResumeItems($param);                                                      // creo voci fattura da DatiRiepilogo
+
+        // Normalizza DatiRiepilogo in un array
+        // $funds = $param['content']['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['DatiCassaPrevidenziale'] ?? [];
+
+        // $funds = is_array($funds) ? $funds : [$funds]; // Converti in array se è un elemento singolo
+
+        // if (!empty($funds)) {
+        //     foreach ($funds as $fund) {
+        //         dd($fund);
+        //         // Ottieni l'istanza dell'enum FundType basata su TipoCassa
+        //         $fundType = isset($fund['TipoCassa']) && is_string($fund['TipoCassa']) 
+        //             ? FundType::tryFrom($fund['TipoCassa']) 
+        //             : null;
+        //         // Usa getDescription() se fundType esiste, altrimenti null
+        //         $description = $fundType?->getDescription() ?? null;
+
+        //         $data = [
+        //             'company_id' => Filament::getTenant()->id,
+        //             'passive_invoice_id' => $param['passive_invoice']->id,
+        //             'description' => $description,
+        //             'quantity' => null,
+        //             'unit_price' => null,
+        //             'total_price' => $fund['ImportoContributoCassa'] ?? null, // Corretto il typo
+        //             'vat_rate' => $fund['AliquotaIVA'] ?? null
+        //         ];
+
+        //         $nvoiceDetail = PassiveItem::create($data);
+        //         $detailsNumber++;
+        //     }
+        // }
+
+        $fundsNumber = $this->createFundItems($param);                                                      // creo voci fattura da DatiCassaPrevidenziale
+
+        return $detailsNumber + $resumesNumber + $fundsNumber;
     }
 
     public function downloadPassive(array $data)
@@ -793,8 +1070,8 @@ class AndxorSoapService
                 // 'Limite' => 1, // Opzionale, se vuoi limitare il numero di fatture
                 // 'DataParam' => 'data_fattura', // Opzionale, se vuoi specificare il tipo di data
             ];
-            if($data['limit'])
-                    $input['Limite'] = $data['limit'];
+            // if($data['limit'])
+            //         $input['Limite'] = $data['limit'];
             // $input['Tags'] = [
             //     ['contabilizzata'] => true,
             //     ['corretta'] => true,
@@ -831,6 +1108,7 @@ class AndxorSoapService
 
                     $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
                     $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+                    // $i_input['IdentificativoSdI'] = '15082389451';
 
                     $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
 
@@ -852,6 +1130,15 @@ class AndxorSoapService
                     $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
 
                     $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
+
+                    $deadline = Deadline::create([
+                        'company_id' => Filament::getTenant()->id,
+                        'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
+                        'note' => null,
+                        'date' => $passiveInvoice->payment_deadline,
+                        'amount'  => $passiveInvoice->total,
+                        'dispatched' => false
+                    ]);
                 }
             } else {                                                                                            // se c'è una sola fattura passiva da scaricare
                 $item = $response->Fattura;
@@ -859,6 +1146,7 @@ class AndxorSoapService
 
                     $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
                     $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+                    // $i_input['IdentificativoSdI'] = '15082389451';
 
                     $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
 
@@ -880,6 +1168,15 @@ class AndxorSoapService
                     $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
 
                     $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
+
+                    $deadline = Deadline::create([
+                        'company_id' => Filament::getTenant()->id,
+                        'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
+                        'note' => null,
+                        'date' => $passiveInvoice->payment_deadline,
+                        'amount'  => $passiveInvoice->total,
+                        'dispatched' => false
+                    ]);
             }
 
             $download = PassiveDownload::create([

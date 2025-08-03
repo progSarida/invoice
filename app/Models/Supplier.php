@@ -26,10 +26,6 @@ class Supplier extends Model
         'fax',
         'email',
         'pec',
-        'bank',
-        'iban',
-        'bic',
-        'swift'
     ];
 
     protected $casts = [

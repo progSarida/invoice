@@ -15,13 +15,16 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onUpdate('cascade');                // id tenant
             $table->foreignId('supplier_id')->constrained()->onUpdate('cascade');               // id fornitore
+            $table->unsignedBigInteger('parent_id')->nullable();                                // id fattura stornata
             $table->string('doc_type')->nullable();                                             // codice tipo di documento
             $table->date('invoice_date')->nullable();                                           // data fattura
             $table->string('number')->nullable();                                               // numero fattura
             $table->string('description')->nullable();                                          // descrizione
             $table->decimal('total',10,2)->nullable();                                          // totale fattura
-            $table->string('payment_term')->nullable();                                         // condizioni di pagamento
-            $table->string('payment_method')->nullable();                                       // metodo di pagamento
+            $table->string('sdi_code')->nullable();                                             // identificativo sdi
+            $table->string('sdi_status')->nullable();                                           // status sdi
+            $table->string('payment_mode')->nullable();                                         // modalità di pagamento
+            $table->string('payment_type')->nullable();                                         // tipo di pagamento
             $table->date('payment_deadline')->nullable();                                       // scadenza pagamento
             $table->string('bank')->nullable();                                                 // nome banca
             $table->string('iban')->nullable();                                                 // codice iban

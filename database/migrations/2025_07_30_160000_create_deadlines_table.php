@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onUpdate('cascade');    // id tenant
             $table->string('description');                                          // descrizione scadenza
-            $table->string('note');                                                 // note scadenza
-            $table->date('date');                                                   // data scadenza
+            $table->string('note')->nullable();                                     // note scadenza
+            $table->date('date')->nullable();                                       // data scadenza
+            $table->decimal('amount',10,2)->nullable();                             // totale fattura
             $table->boolean('dispatched')->default(0);                              // flag evasione scadenza
             $table->timestamps();
         });

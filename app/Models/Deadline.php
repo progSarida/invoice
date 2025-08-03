@@ -11,6 +11,7 @@ class Deadline extends Model
         'description',
         'note',
         'date',
+        'amount',
         'dispatched'
     ];
 
