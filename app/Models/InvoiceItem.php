@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SdiStatus;
+use App\Enums\TransactionType;
 use App\Enums\VatCodeType;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,13 @@ class InvoiceItem extends Model
         'invoice_id',
         'invoice_element_id',
         'description',
+        'transaction_type',
+        'code',
+        'start_date',
+        'end_date',
+        'quantity',
+        'measure_unit',
+        'unit_price',
         'amount',
         'total',
         'vat_code_type',
@@ -22,6 +30,9 @@ class InvoiceItem extends Model
 
     protected $casts = [
         'vat_code_type' =>  VatCodeType::class,
+        'transaction_type' => TransactionType::class,
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     public function invoice(){

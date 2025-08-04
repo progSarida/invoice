@@ -16,6 +16,7 @@ use App\Enums\WithholdingType;
 use App\Models\InvoiceElement;
 use Filament\Facades\Filament;
 use App\Enums\PaymentReasonType;
+use App\Enums\TransactionType;
 use Filament\Forms\Components\Tabs;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
@@ -595,12 +596,32 @@ class EditCompanyProfile extends EditTenantProfile
                                         TextInput::make('description')
                                             ->label('Descrizione')
                                             ->maxLength(255)
+                                            ->columnSpan(8),
+                                        Select::make('transaction_type')
+                                            ->label('Tipo di transazione')
+                                            ->options(
+                                                collect(TransactionType::cases())->mapWithKeys(fn ($case) => [
+                                                    $case->value => $case->getLabel(),
+                                                ])->toArray()
+                                            )
+                                            ->columnSpan(4),
+                                        TextInput::make('quantity')->label('Quantità')
+                                            ->columnSpan(2)
+                                            ->numeric(),
+                                        TextInput::make('measure_unit')->label('Unità di misura')
+                                            ->columnSpan(2)
+                                            ->maxLength(255),
+                                        Placeholder::make('')
                                             ->columnSpan(3),
+                                        TextInput::make('unit_price')
+                                            ->label('Prezzo unitario')
+                                            ->columnSpan(3)
+                                            ->default(0.00),
                                         TextInput::make('amount')
                                             ->label('Importo')
                                             ->required()
                                             ->default(0.00)
-                                            ->columnSpan(1),
+                                            ->columnSpan(3),
                                         Select::make('vat_code_type')
                                             ->label('Aliquota IVA')
                                             ->options(

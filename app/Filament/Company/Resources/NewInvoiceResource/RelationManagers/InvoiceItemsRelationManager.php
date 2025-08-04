@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\RelationManagers;
 
+use App\Enums\TransactionType;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Get;
@@ -60,6 +61,33 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->required()
                     ->columnSpan(8)
                     ->maxLength(255),
+                Forms\Components\Select::make('transaction_type')
+                    ->label('Tipo di transazione')
+                    ->options(
+                        collect(TransactionType::cases())->mapWithKeys(fn ($case) => [
+                            $case->value => $case->getLabel(),
+                        ])->toArray()
+                    )
+                    ->columnSpan(4)
+                    ->required(),
+                Forms\Components\DatePicker::make('start_date')
+                    ->label('Data inizio periodo')
+                    ->columnSpan(3),
+                Forms\Components\DatePicker::make('end_date')
+                    ->label('Data fine periodo')
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('quantity')->label('Quantità')
+                    ->required()
+                    ->columnSpan(4)
+                    ->numeric(),
+                Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
+                    ->required()
+                    ->columnSpan(4)
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('unit_price')
+                    ->label('Prezzo unitario')
+                    ->columnSpan(4)
+                    ->default(0.00),
                 Forms\Components\TextInput::make('amount')->label('Importo')
                     ->required()
                     ->columnSpan(4)
