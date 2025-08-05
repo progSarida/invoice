@@ -411,6 +411,14 @@ class NewInvoiceResource extends Resource
                                             ->warning()
                                             ->duration(10000)
                                             ->send();
+                                    $accepted = $parent->sdi_status == SdiStatus::ACCETTATA->value;
+                                    if($accepted)
+                                        \Filament\Notifications\Notification::make()
+                                            ->title('')
+                                            ->body('Attenzione! stai creando una nota di credito su una fattura accettata.')
+                                            ->warning()
+                                            ->duration(10000)
+                                            ->send();
                                 })
                                 ->required(function (?Model $record, Get $get) {
                                     // $privateR = ($record && $record->client->type->isPrivate() ? true : false);

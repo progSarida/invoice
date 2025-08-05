@@ -611,12 +611,12 @@ class EditCompanyProfile extends EditTenantProfile
                                         TextInput::make('measure_unit')->label('Unità di misura')
                                             ->columnSpan(2)
                                             ->maxLength(255),
-                                        Placeholder::make('')
-                                            ->columnSpan(3),
+                                        // Placeholder::make('')
+                                        //     ->columnSpan(3),
                                         TextInput::make('unit_price')
                                             ->label('Prezzo unitario')
-                                            ->columnSpan(3)
-                                            ->default(0.00),
+                                            ->columnSpan(3),
+                                            // ->default(0.00),
                                         TextInput::make('amount')
                                             ->label('Importo')
                                             ->required()

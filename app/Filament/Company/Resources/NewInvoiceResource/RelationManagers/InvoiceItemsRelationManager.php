@@ -41,9 +41,13 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
                         if ($state) {
                             $el = InvoiceElement::find($state);
-                            $set('description', $el->name);
+                            $set('description', $el->description);
+                            $set('transection_type', $el->transaction_type);
+                            $set('quantity', $el->quantity);
+                            $set('measure_unit', $el->measure_unit);
+                            $set('unit_price', $el->unit_price);
                             $set('amount', $el->amount);
-                            $set('vat_code_type', $el->vat_code_type);
+                            $set('vat_code_type', $el->vat_code_type);                            
 
                             // Calcolo importo IVA e totale
                             $rate = $el->vat_code_type?->getRate() / 100 ?? 0;
@@ -68,8 +72,7 @@ class InvoiceItemsRelationManager extends RelationManager
                             $case->value => $case->getLabel(),
                         ])->toArray()
                     )
-                    ->columnSpan(4)
-                    ->required(),
+                    ->columnSpan(4),
                 Forms\Components\DatePicker::make('start_date')
                     ->label('Data inizio periodo')
                     ->columnSpan(3),
@@ -77,17 +80,72 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->label('Data fine periodo')
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('quantity')->label('Quantità')
-                    ->required()
                     ->columnSpan(4)
-                    ->numeric(),
+                    ->numeric()
+                    ->live(debounce: 500)
+                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                        $unit_price = $get('unit_price');
+                        if($state && $unit_price){
+                            if (!is_numeric($state) || !is_numeric($unit_price)) return;
+                            // Calcolo importo in base a quantità e prezzo unitario
+                            $quantity = $state ?? 0;
+                            $amount = $quantity * $unit_price;
+                            $set('amount', $amount);
+                            // Calcolo importo IVA e totale quando amount cambia
+                            // $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
+                            // $rate = \App\Enums\VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
+                            $vatCode = $get('vat_code_type');
+                            if (!$vatCode instanceof \App\Enums\VatCodeType) {
+                                $vatCode = \App\Enums\VatCodeType::tryFrom($vatCode);
+                            }
+                            $rate = $vatCode?->getRate() / 100 ?? 0;
+                            $vatAmount = $amount * $rate;
+                            $total = $amount + $vatAmount;
+
+                            $set('vat_amount', number_format($vatAmount, 2, '.', ''));
+                            $set('total', number_format($total, 2, '.', ''));
+                        }
+                        else {
+                            $set('amount', 0);
+                            $set('vat_amount', 0);
+                            $set('total', 0);
+                        }
+                    }),
                 Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
-                    ->required()
                     ->columnSpan(4)
                     ->maxLength(255),
                 Forms\Components\TextInput::make('unit_price')
                     ->label('Prezzo unitario')
                     ->columnSpan(4)
-                    ->default(0.00),
+                    ->live(debounce: 500)
+                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                        $quantity = $get('quantity');
+                        if($state && $quantity){
+                            if (!is_numeric($state) || !is_numeric($quantity)) return;
+                            // Calcolo importo in base a quantità e prezzo unitario
+                            $unit_price = $state ?? 0;
+                            $amount = $quantity * $unit_price;
+                            $set('amount', $amount);
+                            // Calcolo importo IVA e totale quando amount cambia
+                            // $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
+                            // $rate = \App\Enums\VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
+                            $vatCode = $get('vat_code_type');
+                            if (!$vatCode instanceof \App\Enums\VatCodeType) {
+                                $vatCode = \App\Enums\VatCodeType::tryFrom($vatCode);
+                            }
+                            $rate = $vatCode?->getRate() / 100 ?? 0;
+                            $vatAmount = $amount * $rate;
+                            $total = $amount + $vatAmount;
+
+                            $set('vat_amount', number_format($vatAmount, 2, '.', ''));
+                            $set('total', number_format($total, 2, '.', ''));
+                        }
+                        else {
+                            $set('amount', 0);
+                            $set('vat_amount', 0);
+                            $set('total', 0);
+                        }
+                    }),
                 Forms\Components\TextInput::make('amount')->label('Importo')
                     ->required()
                     ->columnSpan(4)
@@ -96,7 +154,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->live(debounce: 500)
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
                         if (!is_numeric($state)) return;
-                        // Calcola importo IVA e totale quando amount cambia
+                        // Calcolo importo IVA e totale quando amount cambia
                         // $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
                         // $rate = \App\Enums\VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
                         $vatCode = $get('vat_code_type');

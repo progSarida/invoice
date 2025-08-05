@@ -67,7 +67,7 @@ class CreditNotesRelationManager extends RelationManager
                                         ->icon('govicon-user-suit')
                                         ->form(fn (Form $form) => ClientResource::modalForm($form))
                                         ->modalHeading('')
-                                        ->action(fn (array $data, Client $client, Set $set) => NewInvoiceResource::saveClient($data, $client, $set))
+                                        ->action(fn (array $data, Client $client, Get $get, Set $set) => NewInvoiceResource::saveClient($data, $client, $get, $set))
                                 )
                                 ->relationship(name: 'client', titleAttribute: 'denomination')
                                 ->getOptionLabelFromRecordUsing(
@@ -925,7 +925,25 @@ class CreditNotesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()->modalWidth('7xl'),
+                Tables\Actions\CreateAction::make()
+                ->modalWidth('7xl')
+                ->action(function ($livewire) {
+                $owner = $livewire->getOwnerRecord();
+
+                if ($owner->total_payment >= $owner->total) {
+                    Notification::make()
+                        ->title('')
+                        ->body('Attenzione! stai creando una nota di credito su una fattura pagata.')
+                        ->warning()
+                        ->send();
+
+                    // Interrompi l'esecuzione dell'action
+                    return;
+                }
+
+                // Altrimenti, procedi con la creazione (se necessario puoi ritornare true o qualcosa)
+                // oppure puoi chiamare un metodo personalizzato
+            }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->modalWidth('7xl'),
