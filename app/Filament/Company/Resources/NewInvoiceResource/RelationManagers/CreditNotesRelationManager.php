@@ -21,6 +21,7 @@ use Filament\Tables\Table;
 use App\Models\AccrualType;
 use App\Models\NewContract;
 use App\Enums\PaymentStatus;
+use App\Enums\SdiStatus;
 use App\Models\InvoiceElement;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Grid;
@@ -927,8 +928,17 @@ class CreditNotesRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                 ->modalWidth('7xl')
-                ->action(function ($livewire) {
+                ->action(function ($livewire, Get $get) {
                 $owner = $livewire->getOwnerRecord();
+
+                $accepted = $owner->sdi_status == SdiStatus::ACCETTATA->value;
+                if($accepted)
+                    \Filament\Notifications\Notification::make()
+                        ->title('')
+                        ->body('Attenzione! Stai creando una nota di credito su una fattura accettata.')
+                        ->warning()
+                        ->duration(10000)
+                        ->send();
 
                 if ($owner->total_payment >= $owner->total) {
                     Notification::make()

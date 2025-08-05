@@ -399,7 +399,7 @@ class NewInvoiceResource extends Resource
                                         // return true;
                                     }
                                 )
-                                ->afterStateUpdated( function($state){
+                                ->afterStateUpdated( function($state, Get $get){
                                     $parent = Invoice::find($state);
                                     $past = $parent && $parent->invoice_date
                                         ? Carbon::parse($parent->invoice_date)->lt(Carbon::now()->subYear())
@@ -412,13 +412,25 @@ class NewInvoiceResource extends Resource
                                             ->duration(10000)
                                             ->send();
                                     $accepted = $parent->sdi_status == SdiStatus::ACCETTATA->value;
-                                    if($accepted)
+                                    $note = DocType::find($get('doc_type_id'))->description == 'Nota di credito';
+                                    if($accepted && $note )
                                         \Filament\Notifications\Notification::make()
                                             ->title('')
-                                            ->body('Attenzione! stai creando una nota di credito su una fattura accettata.')
+                                            ->body('Attenzione! Stai creando una nota di credito su una fattura accettata.')
                                             ->warning()
                                             ->duration(10000)
                                             ->send();
+
+                                    if ($parent->total_payment >= $parent->total) {
+                                        Notification::make()
+                                            ->title('')
+                                            ->body('Attenzione! stai creando una nota di credito su una fattura pagata.')
+                                            ->warning()
+                                            ->send();
+
+                                        // Interrompi l'esecuzione dell'action
+                                        return;
+                                    }
                                 })
                                 ->required(function (?Model $record, Get $get) {
                                     // $privateR = ($record && $record->client->type->isPrivate() ? true : false);
