@@ -1,38 +1,28 @@
 <?php
 
-namespace App\Filament\Company\Resources;
+namespace App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
 
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use App\Models\PassivePayment;
-use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Company\Resources\PassivePaymentResource\Pages;
-use App\Filament\Company\Resources\PassivePaymentResource\RelationManagers;
+use Filament\Resources\RelationManagers\RelationManager;
 
-class PassivePaymentResource extends Resource
+class PassivePaymentsRelationManager extends RelationManager
 {
-    protected static ?string $model = PassivePayment::class;
+    protected static string $relationship = 'passivePayments';
 
-    public static ?string $pluralModelLabel = 'Pagamenti';
+    protected static ?string $pluralModelLabel = 'Pagamenti';
 
-    public static ?string $modelLabel = 'Pagamento';
+    protected static ?string $modelLabel = 'Pagamento';
 
-    protected static ?string $navigationIcon = 'polaris-payment-icon';
+    protected static ?string $title = 'Pagamenti';
 
-    protected static ?string $navigationGroup = 'Fatturazione passiva';
-
-    public static function getNavigationSort(): ?int
-    {
-        return 3;
-    }
-
-    public static function form(Form $form): Form
+    public function form(Form $form): Form
     {
         return $form
             ->columns(12)
@@ -99,20 +89,21 @@ class PassivePaymentResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
+            ->recordTitleAttribute('amount')
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_formatted')
                     ->label('Fattura')
                     ->getStateUsing(function ($record) {
-                        $invoice = $record->invoice;
+                        $invoice = $record->passiveInvoice;
                         if (!$invoice) {
                             return 'Nessuna fattura';
                         }
-                        return "{$record->number}/{$invoice->invoice_date->format('d-m-Y')}";
+                        return "{$invoice->number}/{$invoice->invoice_date->format('d-m-Y')}";
                     })
                     ->sortable()
                     ->searchable(),
@@ -158,29 +149,17 @@ class PassivePaymentResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListPassivePayments::route('/'),
-            'create' => Pages\CreatePassivePayment::route('/create'),
-            'edit' => Pages\EditPassivePayment::route('/{record}/edit'),
-        ];
     }
 }

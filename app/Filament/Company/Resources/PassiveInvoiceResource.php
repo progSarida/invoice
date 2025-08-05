@@ -7,6 +7,7 @@ use App\Enums\PaymentType;
 use App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassiveItemsRelationManager;
+use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassivePaymentsRelationManager;
 use App\Models\DocType;
 use App\Models\PassiveInvoice;
 use Filament\Forms;
@@ -56,7 +57,8 @@ class PassiveInvoiceResource extends Resource
                             Forms\Components\Select::make('supplier_id')
                                 ->label('Fornitore')
                                 ->relationship('supplier', 'denomination')
-                                ->disabled(),
+                                ->disabled()
+                                ,
 
                             Forms\Components\Select::make('parent_id')
                                 ->label('Fattura')
@@ -65,7 +67,8 @@ class PassiveInvoiceResource extends Resource
                                     fn (Model $record) => $record->number
                                 )
                                 ->visible(fn (Get $get) => !is_null($get('parent_id')))
-                                ->disabled(),
+                                ->disabled()
+                                ,
                         ]),
 
                         Section::make('Dati per il pagamento')
@@ -81,7 +84,8 @@ class PassiveInvoiceResource extends Resource
                                             ])
                                             ->toArray()
                                     )
-                                    ->disabled(),
+                                    ->disabled()
+                                    ,
                                 Forms\Components\Select::make('payment_type')
                                     ->label('Metodo di pagamento')
                                     ->options(
@@ -92,36 +96,38 @@ class PassiveInvoiceResource extends Resource
                                             ])
                                             ->toArray()
                                     )
-                                    ->disabled(),
+                                    ->disabled()
+                                    ,
                                 Forms\Components\DatePicker::make('payment_deadline')
                                     ->label('Scadenza pagamento')
                                     ->disabled(),
-                                    
+
+                                Forms\Components\DatePicker::make('last_payment_date')
+                                    ->label('Data ultimo pagamento')
+                                    ->columnSpan(1)
+                                    ->disabled()
+                                    ,
+
+                                Forms\Components\TextInput::make('total_payment')
+                                    ->label('Totale pagato')
+                                    // ->visible(fn (Get $get) => !is_null($get('bank')))
+                                    ->disabled()
+                                    ,
+
                                 Forms\Components\TextInput::make('bank')
                                     ->label('Istituto finanziario')
-                                    // ->visible(fn (Get $get) => !is_null($get('bank')))
+                                    ->columnSpan(1)
                                     ->disabled(),
                                 Forms\Components\TextInput::make('iban')
                                     ->label('IBAN')
                                     // ->visible(fn (Get $get) => !is_null($get('iban')))
-                                    ->disabled(),
+                                    ->disabled()
+                                    ,
                             ]),
-
-                        Section::make('Status SDI')
-                            ->collapsed(false)
-                            ->schema([
-                                Forms\Components\TextInput::make('sdi_status')
-                                    ->label('Status')
-                                    ->disabled(),
-                                Forms\Components\TextInput::make('sdi_code')
-                                    ->label('Codice SDI')
-                                    ->disabled(),
-                            ]),
-
                 ]),
                 Grid::make('GRID')->columnSpan(3)->schema([
                     Section::make('')
-                        ->columns(3)
+                        // ->columns(3)
                         ->schema([
                             Forms\Components\Select::make('doc_type')
                                 ->label('Tipo documento')
@@ -131,7 +137,8 @@ class PassiveInvoiceResource extends Resource
                                         ->get();
                                     return $docs->pluck('description', 'name')->toArray();
                                 })
-                                ->disabled(),
+                                ->disabled()
+                                ,
                             Forms\Components\TextInput::make('number')
                                 ->label('Numero')
                                 ->columnSpan(2)
@@ -139,7 +146,8 @@ class PassiveInvoiceResource extends Resource
                             Forms\Components\DatePicker::make('invoice_date')
                                 ->label('Data')
                                 ->columnSpan(1)
-                                ->disabled(),
+                                ->disabled()
+                                ,
                         ]),
                     Section::make('Descrizione')
                         ->collapsible()
@@ -147,8 +155,21 @@ class PassiveInvoiceResource extends Resource
                             Forms\Components\Textarea::make('description')
                                 ->label('')
                                 ->columnSpanFull()
-                                ->disabled(),
+                                ->disabled()
+                                ,
                         ]),
+                    Section::make('Status SDI')
+                            ->collapsed(false)
+                            ->schema([
+                                Forms\Components\TextInput::make('sdi_status')
+                                    ->label('Status')
+                                    ->disabled()
+                                    ,
+                                Forms\Components\TextInput::make('sdi_code')
+                                    ->label('Codice SDI')
+                                    ->disabled()
+                                    ,
+                            ]),
                 ]),
             ])->columns(5);
     }
@@ -240,7 +261,8 @@ class PassiveInvoiceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            PassiveItemsRelationManager::class
+            PassiveItemsRelationManager::class,
+            PassivePaymentsRelationManager::class
         ];
     }
 

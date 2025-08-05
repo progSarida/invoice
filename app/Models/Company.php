@@ -98,6 +98,10 @@ class Company extends Model
         return $this->hasMany(ActivePayments::class);
     }
 
+    public function passivePayments(){
+        return $this->hasMany(PassivePayment::class);
+    }
+
     public function registerProvince(){
         return $this->belongsTo(Province::class, 'register_province_id');
     }

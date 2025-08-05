@@ -21,11 +21,13 @@ return new class extends Migration
             $table->string('number')->nullable();                                               // numero fattura
             $table->string('description')->nullable();                                          // descrizione
             $table->decimal('total',10,2)->nullable();                                          // totale fattura
+            $table->decimal('total_payment',10,2)->nullable();                                  // totale pagamenti
             $table->string('sdi_code')->nullable();                                             // identificativo sdi
             $table->string('sdi_status')->nullable();                                           // status sdi
             $table->string('payment_mode')->nullable();                                         // modalità di pagamento
             $table->string('payment_type')->nullable();                                         // tipo di pagamento
             $table->date('payment_deadline')->nullable();                                       // scadenza pagamento
+            $table->date('last_payment_date')->nullable();                                      // data ultimo pagamento
             $table->string('bank')->nullable();                                                 // nome banca
             $table->string('iban')->nullable();                                                 // codice iban
             $table->string('filename')->nullable();                                             // nome file associati

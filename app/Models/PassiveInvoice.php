@@ -14,6 +14,8 @@ class PassiveInvoice extends Model
         'number',
         'description',
         'total',
+        'total_payment',
+        'last_payment_date',
         'sdi_status',
         'sdi_code',
         'payment_mode',
@@ -48,5 +50,9 @@ class PassiveInvoice extends Model
 
     public function passiveItems(){
         return $this->hasMany(PassiveItem::class,'passive_invoice_id','id');
+    }
+
+    public function passivePayments(){
+        return $this->hasMany(PassivePayment::class);
     }
 }
