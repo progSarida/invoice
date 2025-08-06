@@ -219,7 +219,7 @@ class AndxorSoapService
     private function getDatiBeniServizi(Invoice $invoice): ?array
     {
         return [
-            'DettaglioLinee' => $invoice->invoiceItems->map(function ($item, $index) {
+            'DettaglioLinee' => $invoice->invoiceItems->map(function ($item, $index) {                      // prima di ->map() inserire ->where('auto', false)
                 return [
                     'NumeroLinea' => $index + 1,
                     'Descrizione' => $item->description ?? 'Servizio',
@@ -923,7 +923,7 @@ class AndxorSoapService
                         'vat_rate' => $fund['AliquotaIVA'] ?? null
                     ];
 
-                    $nvoiceDetail = PassiveItem::create($data);
+                    $invoiceDetail = PassiveItem::create($data);
                     $items++;
                 }
             }
@@ -955,7 +955,89 @@ class AndxorSoapService
 
                 // dd('STOP2');
 
-                $nvoiceDetail = PassiveItem::create($data);
+                $invoiceDetail = PassiveItem::create($data);
+                $items++;
+            }
+        }
+
+        return $items;
+    }
+
+    private function createWithholdingItems(array $param): int
+    {
+        $items = 0;
+
+        $withholdings = $param['content']['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['DatiRitenuta'] ?? null;
+
+        // dd($funds);
+
+        if (!empty($withholdings)) {
+
+            // dd($withholdings);
+
+            $array = !empty($withholdings) && array_reduce($withholdings, function ($carry, $item) {
+                        return $carry && is_array($item);
+                    }, true);
+
+            if ($array) {
+
+                // dd('ARRAY');
+
+                foreach ($withholdings as $withholding) {
+                    // Ottieni l'istanza dell'enum FundType basata su TipoCassa
+                    $description = isset($withholding['TipoRitenuta']) && is_string($withholding['TipoRitenuta'])
+                        ? collect(WithholdingType::cases())
+                            ->first(fn($case) => $case->getCode() === $withholding['TipoRitenuta'])
+                            ?->getDescription() ?? null
+                        : null;
+
+                    $reason = isset($withholding['CausalePagamento']) && is_string($withholding['CausalePagamento'])
+                        ? collect(WithholdingType::cases())
+                            ->first(fn($case) => $case->getCode() === $withholding['CausalePagamento'])
+                            ?->getDescription() ?? null
+                        : null;
+
+                    $data = [
+                        'company_id' => Filament::getTenant()->id,
+                        'passive_invoice_id' => $param['passive_invoice']->id,
+                        'description' => $description . ' - ' . $reason,
+                        'quantity' => null,
+                        'unit_price' => null,
+                        'total_price' => $withholding['ImportoRitenuta'] ?? null,
+                        'vat_rate' => $withholding['AliquotaRitenuta'] ?? null
+                    ];
+
+                    $invoiceDetail = PassiveItem::create($data);
+                    $items++;
+                }
+            }
+            else {
+
+                // dd('SINGOLO');
+
+                $description = isset($withholdings['TipoRitenuta']) && is_string($withholdings['TipoRitenuta'])
+                    ? collect(WithholdingType::cases())
+                        ->first(fn($case) => $case->getCode() === $withholdings['TipoRitenuta'])
+                        ?->getDescription() ?? null
+                    : null;
+
+                $reason = isset($withholdings['CausalePagamento']) && is_string($withholdings['CausalePagamento'])
+                    ? collect(WithholdingType::cases())
+                        ->first(fn($case) => $case->getCode() === $withholdings['CausalePagamento'])
+                        ?->getDescription() ?? null
+                    : null;
+
+                $data = [
+                    'company_id' => Filament::getTenant()->id,
+                    'passive_invoice_id' => $param['passive_invoice']->id,
+                    'description' => $description . ' - ' . $reason,
+                    'quantity' => null,
+                    'unit_price' => null,
+                    'total_price' => $withholdings['ImportoRitenuta'] ?? null,
+                    'vat_rate' => $withholdings['AliquotaRitenuta'] ?? null
+                ];
+
+                $invoiceDetail = PassiveItem::create($data);
                 $items++;
             }
         }
@@ -1013,6 +1095,8 @@ class AndxorSoapService
         //     }
         // }
 
+        $withholdingsNumber = $this->createWithholdingItems($param);                                            // creo voci fattura da DatiRitenuta
+        
         $resumesNumber = $this->createResumeItems($param);                                                      // creo voci fattura da DatiRiepilogo
 
         // Normalizza DatiRiepilogo in un array
@@ -1047,7 +1131,7 @@ class AndxorSoapService
 
         $fundsNumber = $this->createFundItems($param);                                                      // creo voci fattura da DatiCassaPrevidenziale
 
-        return $detailsNumber + $resumesNumber + $fundsNumber;
+        return $withholdingsNumber + $detailsNumber + $resumesNumber + $fundsNumber;
     }
 
     public function downloadPassive(array $data)

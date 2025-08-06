@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\SdiStatus;
 use App\Enums\TransactionType;
 use App\Enums\VatCodeType;
+use App\Enums\WithholdingType;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 
@@ -26,6 +27,7 @@ class InvoiceItem extends Model
         'amount',
         'total',
         'vat_code_type',
+        // 'auto',                              // campo per distiguere tra voci inserite dalll'operatore e voci ritenute, riepiloghi e cassa perv. inserite auttomaticamente
     ];
 
     protected $casts = [
@@ -33,6 +35,7 @@ class InvoiceItem extends Model
         'transaction_type' => TransactionType::class,
         'start_date' => 'date',
         'end_date' => 'date',
+        // 'auto' => 'boolean',                    
     ];
 
     public function invoice(){
@@ -101,5 +104,49 @@ class InvoiceItem extends Model
                     ->delete();
             }
         }
+    }
+
+    // 
+    public function autoInsert()
+    {
+        $vats = $this->vatResume();                                   // Creazione array con dati riepiloghi IVA
+        $funds = $this->getFundBreakdown();                           // Creazione array con dati casse previdenziali
+        if(count($funds) > 0)
+            $vats = $this->updateResume($vats, $funds);               // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
+        // --------------------------------------------------------------------------------------------------------------------------------------------
+        $vats = $this->vatResume();
+        $funds = array_filter($this->getFundBreakdown(), function ($fund) {
+            return isset($fund['fund_code'], $fund['rate'], $fund['amount'], $fund['taxable_base']);
+        });
+        if (count($funds) > 0) {
+            $vats = $this->updateResume($vats, $funds);
+        }
+        $withholdings = array_filter($this->company->withholdings->toArray(), function ($item) {
+            return in_array($item['withholding_type'], [WithholdingType::RT01, WithholdingType::RT02])
+                && isset($item['tipo_ritenuta'], $item['importo_ritenuta'], $item['aliquota_ritenuta'], $item['causale_pagamento']);
+        });
+        // --------------------------------------------------------------------------------------------------------------------------------------------
+        $this->insertResumes($vats);
+        $this->insertFunds($funds);
+        $this->insertWithholdings();
+    }
+
+    // Genera le voci dei riepiloghi IVA e li inserisce come voci della fattura
+    public function insertResumes($vats)
+    {
+        //
+        
+    }
+
+    // Genera le voci delle casse previdenziali e le insrisce come voci della fattura
+    public function insertFunds($funds)
+    {
+        // 
+    }
+
+    // Genera le voci delle ritenute e le inserisce come voci della fattura
+    public function insertWithholdings()
+    {
+        // 
     }
 }
