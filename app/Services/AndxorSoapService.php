@@ -219,7 +219,7 @@ class AndxorSoapService
     private function getDatiBeniServizi(Invoice $invoice): ?array
     {
         return [
-            'DettaglioLinee' => $invoice->invoiceItems->map(function ($item, $index) {                      // prima di ->map() inserire ->where('auto', false)
+            'DettaglioLinee' => $invoice->invoiceItems->where('auto', false)->map(function ($item, $index) {
                 return [
                     'NumeroLinea' => $index + 1,
                     'Descrizione' => $item->description ?? 'Servizio',

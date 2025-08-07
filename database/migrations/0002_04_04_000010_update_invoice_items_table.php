@@ -29,8 +29,10 @@ return new class extends Migration
                 ->constrained('invoice_elements')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-            $table->decimal('total')->after('amount');
-            $table->string('vat_code_type')->after('total');                        // Enum
+            $table->decimal('taxable')->after('amount');
+            $table->decimal('total')->nullable()->after('taxable');
+            $table->string('vat_code_type')->nullable()->after('total');            // Enum
+            $table->boolean('auto')->after('vat_code_type');                        // Flag per indicare se si tratta di una voce inserita dall'operatore (false) o automaticamente (true)
         });
     }
 

@@ -21,27 +21,38 @@ class NewInvoiceExporter extends Exporter
 
         $invoiceItemColumns = [];
 
+        
+
         for ($i = 0; $i < $maxItems; $i++) {
             $labelPrefix = 'Voce ' . ($i + 1);
 
             $invoiceItemColumns[] = ExportColumn::make("item_{$i}_description")
                 ->label("{$labelPrefix} - Descrizione")
                 ->formatStateUsing(function ($record) use ($i) {
-                    $item = $record->invoiceItems[$i] ?? null;
+                    $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
+                        ? $record->invoiceItems->where('auto', false)
+                        : $record->invoiceItems()->where('auto', false)->get();
+                    $item = $items[$i] ?? null;
                     return $item?->description;
                 });
 
             $invoiceItemColumns[] = ExportColumn::make("item_{$i}_amount")
                 ->label("{$labelPrefix} - Importo")
                 ->formatStateUsing(function ($record) use ($i) {
-                    $item = $record->invoiceItems[$i] ?? null;
+                    $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
+                        ? $record->invoiceItems->where('auto', false)
+                        : $record->invoiceItems()->where('auto', false)->get();
+                    $item = $items[$i] ?? null;
                     return $item && is_numeric($item->amount) ? number_format($item->amount, 2, ',', '.') : ($item?->amount ?? '0,00');
                 });
 
             $invoiceItemColumns[] = ExportColumn::make("item_{$i}_vat_rate")
                 ->label("{$labelPrefix} - Aliquota IVA")
                 ->formatStateUsing(function ($record) use ($i) {
-                    $item = $record->invoiceItems[$i] ?? null;
+                    $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
+                        ? $record->invoiceItems->where('auto', false)
+                        : $record->invoiceItems()->where('auto', false)->get();
+                    $item = $items[$i] ?? null;
                     $rate = $item?->vat_code_type?->getRate();
 
                     return $rate !== null ? $rate . '%' : null;
@@ -50,7 +61,10 @@ class NewInvoiceExporter extends Exporter
             $invoiceItemColumns[] = ExportColumn::make("item_{$i}_total")
                 ->label("{$labelPrefix} - Totale")
                 ->formatStateUsing(function ($record) use ($i) {
-                    $item = $record->invoiceItems[$i] ?? null;
+                    $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
+                        ? $record->invoiceItems->where('auto', false)
+                        : $record->invoiceItems()->where('auto', false)->get();
+                    $item = $items[$i] ?? null;
                     return $item && is_numeric($item->total) ? number_format($item->total, 2, ',', '.') : ($item?->total ?? '0,00');
                 });
         }

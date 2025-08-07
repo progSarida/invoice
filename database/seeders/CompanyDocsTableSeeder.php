@@ -39,15 +39,7 @@ class CompanyDocsTableSeeder extends Seeder
             array (
                 'id' => 3,
                 'company_id' => 1,
-                'doc_type_id' => 3,
-                'created_at' => '2025-07-03 09:16:34',
-                'updated_at' => '2025-07-03 09:16:34',
-            ),
-            3 => 
-            array (
-                'id' => 4,
-                'company_id' => 1,
-                'doc_type_id' => 6,
+                'doc_type_id' => 5,
                 'created_at' => '2025-07-03 09:16:34',
                 'updated_at' => '2025-07-03 09:16:34',
             ),

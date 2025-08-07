@@ -187,8 +187,8 @@ class Invoice extends Model
     // Calcola l'importo IVA da mostrare in tabella
     public function getVat()
     {
-        $total = $this->invoiceItems()->sum('total');
-        $no_vat_total = $this->invoiceItems()->sum('amount');
+        $total = $this->invoiceItems()->where('auto', false)->sum('total');
+        $no_vat_total = $this->invoiceItems()->where('auto', false)->sum('amount');
         return $total - $no_vat_total;
     }
 
@@ -244,7 +244,8 @@ class Invoice extends Model
     public function updateTotal(): void
     {
         $total = $this->invoiceItems()->sum('total');
-        $no_vat_total = $this->invoiceItems()->sum('amount');
+        // $total = $this->invoiceItems()->where('auto', false)->sum('total');
+        $no_vat_total = $this->invoiceItems()->where('auto', false)->sum('amount');
         $this->total = $total;
         $this->no_vat_total = $no_vat_total;
         $this->save();
@@ -292,20 +293,23 @@ class Invoice extends Model
     public function vatResume(): array
     {
         $vats = [];
-        foreach ($this->invoiceItems as $item) {
+        $items = $this->invoiceItems instanceof \Illuminate\Support\Collection
+            ? $this->invoiceItems->where('auto', false)
+            : $this->invoiceItems()->where('auto', false)->get();
+        foreach ($items as $item) {
             $rate = $item->vat_code_type->value;
             if (!isset($vats[$rate])) {
                 $vats[$rate] = [
-                    // 'norm' => $item->vat_code_type->getRate() == '0'
-                    //             ? 'ART. 15 DPR 633/72'
-                    //             : ($this->client?->type?->value == 'public'
-                    //                 ? 'S (scissione dei pagamenti)'
-                    //                 : (($this->company->fiscalProfile->tax_regime->value == 'rf16' || $this->company->fiscalProfile->tax_regime->value == 'rf17')
-                    //                     ? 'D (esigibilità differita)'
-                    //                     : 'I (esigibilità immediata')),
                     'norm' => $item->vat_code_type->getRate() == '0'
                                 ? 'ART. 15 DPR 633/72'
-                                :  $this->vat_enforce_type?->getCode()."(".$this->vat_enforce_type?->getLabel().")",
+                                : ($this->client?->type?->value == 'public'
+                                    ? 'S (scissione dei pagamenti)'
+                                    : (($this->company->fiscalProfile->tax_regime->value == 'rf16' || $this->company->fiscalProfile->tax_regime->value == 'rf17')
+                                        ? 'D (esigibilità differita)'
+                                        : 'I (esigibilità immediata')),
+                    // 'norm' => $item->vat_code_type->getRate() == '0'
+                    //             ? 'ART. 15 DPR 633/72'
+                    //             :  $this->vat_enforce_type?->getCode()."(".$this->vat_enforce_type?->getLabel().")",
                     '%' => $item->vat_code_type->getRate() == '0' ? $item->vat_code_type->getCode() : $item->vat_code_type->getRate(),
                     'taxable' => 0,
                     'vat' => 0,
@@ -325,7 +329,10 @@ class Invoice extends Model
     {
         $taxRegime = $this->company->fiscalProfile->tax_regime->value;
         $base = 0;
-        foreach ($this->invoiceItems as $item) {
+        $items = $this->invoiceItems instanceof \Illuminate\Support\Collection
+            ? $this->invoiceItems->where('auto', false)
+            : $this->invoiceItems()->where('auto', false)->get();
+        foreach ($items as $item) {
             $vatCodeType = $item->vat_code_type;
             $vatRate = floatval($item->vat_code_type->getRate());
 

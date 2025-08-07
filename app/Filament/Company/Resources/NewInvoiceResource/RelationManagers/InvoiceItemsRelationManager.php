@@ -241,7 +241,7 @@ class InvoiceItemsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('vat_amount')->label('Importo IVA')
                     ->getStateUsing(function ($record) {
                         $rate = $record->vat_code_type?->getRate() / 100;
-                        return $record->amount * $rate;
+                        return $record->vat_code_type == null ? '' : $record->amount * $rate;
                     })
                     ->money('EUR', true, 'it_IT')
                     ->sortable(),
@@ -278,6 +278,7 @@ class InvoiceItemsRelationManager extends RelationManager
                         $item->calculateTotal();
                         $item->save();
                         $item->checkStampDuty();
+                        $item->autoInsert();
                         return $item;
                     }),
             ])
@@ -288,6 +289,7 @@ class InvoiceItemsRelationManager extends RelationManager
                         $record->calculateTotal();
                         $record->save();
                         $record->checkStampDuty();
+                        $record->autoInsert();
                         return $record;
                     }),
                 Tables\Actions\DeleteAction::make()

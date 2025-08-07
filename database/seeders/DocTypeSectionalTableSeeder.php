@@ -39,15 +39,15 @@ class DocTypeSectionalTableSeeder extends Seeder
             array (
                 'id' => 3,
                 'sectional_id' => 1,
-                'doc_type_id' => 3,
+                'doc_type_id' => 5,
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
             3 => 
             array (
                 'id' => 4,
-                'sectional_id' => 1,
-                'doc_type_id' => 6,
+                'sectional_id' => 2,
+                'doc_type_id' => 1,
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
@@ -55,7 +55,7 @@ class DocTypeSectionalTableSeeder extends Seeder
             array (
                 'id' => 5,
                 'sectional_id' => 2,
-                'doc_type_id' => 1,
+                'doc_type_id' => 2,
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
@@ -63,23 +63,7 @@ class DocTypeSectionalTableSeeder extends Seeder
             array (
                 'id' => 6,
                 'sectional_id' => 2,
-                'doc_type_id' => 2,
-                'created_at' => NULL,
-                'updated_at' => NULL,
-            ),
-            6 => 
-            array (
-                'id' => 7,
-                'sectional_id' => 2,
-                'doc_type_id' => 3,
-                'created_at' => NULL,
-                'updated_at' => NULL,
-            ),
-            7 => 
-            array (
-                'id' => 8,
-                'sectional_id' => 2,
-                'doc_type_id' => 6,
+                'doc_type_id' => 5,
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),

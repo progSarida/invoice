@@ -106,7 +106,7 @@ return new class extends Migration
             $table->foreignId('invoice_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
 
             $table->string('description');
-            $table->decimal('amount',10,2);
+            $table->decimal('amount',10,2)->nullable();
             $table->boolean('is_with_vat')->default(1);
 
             $table->timestamps();

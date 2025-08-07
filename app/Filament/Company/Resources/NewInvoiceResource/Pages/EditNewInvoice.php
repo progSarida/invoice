@@ -95,6 +95,7 @@ class EditNewInvoice extends EditRecord
                     // dd($vats);
                     $grouped = collect($vats)                                       // Raggruppamento dati riepilochi IVA in base a aliquota
                         ->groupBy('%')
+                        ->where('auto', false)
                         ->map(function ($items, $percent) {
                             return [
                                 '%' => $percent,
@@ -126,7 +127,10 @@ class EditNewInvoice extends EditRecord
             Actions\Action::make('sendInvoice')
                 ->label('Invia Fattura a SDI')
                 ->action(function (Invoice $record, array $data) {
-                    if($record->invoiceItems() == null)
+                    $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
+                        ? $record->invoiceItems->where('auto', false)
+                        : $record->invoiceItems()->where('auto', false)->get();
+                    if($items == null)
                         Notification::make()
                             ->title('Errore')
                             ->body('Impossibile inviare la fattura alla SdI. Voci fattura non presenti.')

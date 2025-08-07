@@ -77,7 +77,12 @@
                 <td class="padding">---------------</td>
                 <td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td>
             </tr>
-            @foreach ($invoice->invoiceItems as $item)
+            @php
+                $items = $invoice->invoiceItems instanceof \Illuminate\Support\Collection
+                    ? $invoice->invoiceItems->where('auto', false)
+                    : $invoice->invoiceItems()->where('auto', false)->get();
+            @endphp
+            @foreach ($items as $item)
                 <tr>
                     <td class="padding"></td>
                     <td class="padding">{{ $item->description }}</td>
@@ -182,7 +187,7 @@
             <td style="width: 19%" class="center padding">{{ $invoice->company->stampDuty->virtual_stamp ? 'SI' : ''}}</td>
             <td style="width: 32%" class="padding"></td>
             <td style="width: 5%" class="padding"></td>
-            <td style="width: 25%" class="right padding bold">{{ number_format((float) $total, 2, ',', '.') }}</td>
+            <td style="width: 25%" class="right padding bold">{{ number_format((float) $invoice->total, 2, ',', '.') }}</td>
         </tr>
     </table>
 
@@ -225,7 +230,7 @@
 
     {{-- Pagamento --}}
     @php
-        $totalPay = $total - $withholdingAmount;
+        $totalPay = $invoice->total - $withholdingAmount;
     @endphp
     <table>
         <tr class="center border_bottom">

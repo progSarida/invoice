@@ -27,7 +27,7 @@ class InvoiceItem extends Model
         'amount',
         'total',
         'vat_code_type',
-        // 'auto',                              // campo per distiguere tra voci inserite dalll'operatore e voci ritenute, riepiloghi e cassa perv. inserite auttomaticamente
+        'auto',                              // campo per distiguere tra voci inserite dalll'operatore e voci ritenute, riepiloghi e cassa perv. inserite auttomaticamente
     ];
 
     protected $casts = [
@@ -35,7 +35,7 @@ class InvoiceItem extends Model
         'transaction_type' => TransactionType::class,
         'start_date' => 'date',
         'end_date' => 'date',
-        // 'auto' => 'boolean',                    
+        'auto' => 'boolean',                    
     ];
 
     public function invoice(){
@@ -70,7 +70,8 @@ class InvoiceItem extends Model
     public function calculateTotal(): void
     {
         $rate = $this->vat_code_type?->getRate() / 100 ?? 0;
-        $this->total = $this->amount + ($this->amount * $rate);
+        // $this->total = $this->amount + ($this->amount * $rate);
+        $this->total = $this->amount;
     }
 
     // Verifica se ci sono le condizioni per inserire l'imposta di bollo (gli importi esenti IVA sono uguali o superiori al valore indicato) e nel caso lo fa
@@ -106,47 +107,74 @@ class InvoiceItem extends Model
         }
     }
 
-    // 
+    // Crea automaticamente le voci della fattura riferiti a ritenute, riepiloghi e casse previdenziali 
     public function autoInsert()
     {
-        $vats = $this->vatResume();                                   // Creazione array con dati riepiloghi IVA
-        $funds = $this->getFundBreakdown();                           // Creazione array con dati casse previdenziali
-        if(count($funds) > 0)
-            $vats = $this->updateResume($vats, $funds);               // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
+        // $vats = $this->vatResume();                                             // Creazione array con dati riepiloghi IVA
+        // $funds = $this->getFundBreakdown();                                     // Creazione array con dati casse previdenziali
+        // if(count($funds) > 0)
+        //     $vats = $this->updateResume($vats, $funds);                         // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
         // --------------------------------------------------------------------------------------------------------------------------------------------
-        $vats = $this->vatResume();
-        $funds = array_filter($this->getFundBreakdown(), function ($fund) {
+        $vats = $this->invoice->vatResume();                                                                 // Creazione array con dati riepiloghi IVA
+        $funds = array_filter($this->invoice->getFundBreakdown(), function ($fund) {                         // Creazione array con dati casse previdenziali
             return isset($fund['fund_code'], $fund['rate'], $fund['amount'], $fund['taxable_base']);
         });
         if (count($funds) > 0) {
-            $vats = $this->updateResume($vats, $funds);
+            $vats = $this->invoice->updateResume($vats, $funds);                                             // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
         }
-        $withholdings = array_filter($this->company->withholdings->toArray(), function ($item) {
+        $withholdings = array_filter($this->invoice->company->withholdings->toArray(), function ($item) {    // Creazione array con dati ritenute
             return in_array($item['withholding_type'], [WithholdingType::RT01, WithholdingType::RT02])
                 && isset($item['tipo_ritenuta'], $item['importo_ritenuta'], $item['aliquota_ritenuta'], $item['causale_pagamento']);
         });
         // --------------------------------------------------------------------------------------------------------------------------------------------
         $this->insertResumes($vats);
         $this->insertFunds($funds);
-        $this->insertWithholdings();
+        $this->insertWithholdings($withholdings);
     }
 
     // Genera le voci dei riepiloghi IVA e li inserisce come voci della fattura
     public function insertResumes($vats)
     {
-        //
-        
+        // dd($vats);
+        foreach($vats as $vat) {
+            // dd($vat);
+            $a = [
+                'invoice_id' => $this->invoice->id,
+                'invoice_element_id' => null,
+                'description' => "Riepilogo IVA" . " - " . $vat['norm'] . " - " . (is_numeric($vat['%']) ? $vat['%'] . '%' : $vat['%']),
+                'amount' => null,
+                'total' => (float) $vat['vat'],
+                'vat_code_type' => null,
+                'auto' => true
+            ];
+            $item = InvoiceItem::create($a);
+            $item->save();
+        }
     }
 
     // Genera le voci delle casse previdenziali e le insrisce come voci della fattura
     public function insertFunds($funds)
     {
-        // 
+        // dd($funds);
+        foreach($funds as $fund) {
+            // dd($vat);
+            $a = [
+                'invoice_id' => $this->invoice->id,
+                'invoice_element_id' => null,
+                'description' => "Cassa  prev." . " - " . $fund['fund'],
+                'amount' => null,
+                'total' => (float) $fund['amount'],
+                'vat_code_type' => null,
+                'auto' => true
+            ];
+            $item = InvoiceItem::create($a);
+            $item->save();
+        }
     }
 
     // Genera le voci delle ritenute e le inserisce come voci della fattura
-    public function insertWithholdings()
+    public function insertWithholdings($withholdings)
     {
-        // 
+        // dd($withholdings);
     }
 }

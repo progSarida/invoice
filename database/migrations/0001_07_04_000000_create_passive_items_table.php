@@ -16,18 +16,13 @@ return new class extends Migration
             $table->foreignId('company_id')->constrained()->onUpdate('cascade');                // id tenant
             $table->foreignId('passive_invoice_id')->constrained()->onUpdate('cascade');        // id fornitore
             $table->string('description')->nullable();                                          // descrizione
-            $table->string('transaction_type')->nullable();         // enum tipo transazione
-            $table->date('start_date')->nullable();                 // data inizio periodo
-            $table->date('end_date')->nullable();                   // data fine periodo
-            $table->string('code')->nullable();                     // codice prodotto
-            $table->integer('quantity')->nullable();                // quantità
-            $table->string('measure_unit')->nullable();             // unità di misura
-            $table->decimal('unit_price')->nullable();              // prezzo unitario
+            $table->string('transaction_type')->nullable();                                     // enum tipo transazione
             $table->date('start_date')->nullable();                                             // data inizio periodo
             $table->date('end_date')->nullable();                                               // data fine periodo
+            $table->string('code')->nullable();                                                 // codice prodotto
             $table->integer('quantity')->nullable();                                            // quantità
-            $table->string('unit')->nullable();                                                 // unità di misura
-            $table->decimal('unit_price',10,2)->nullable();                                     // prezzo unitario
+            $table->string('measure_unit')->nullable();                                         // unità di misura
+            $table->decimal('unit_price')->nullable();                                          // prezzo unitario
             $table->decimal('total_price',10,2)->nullable();                                    // prezzo totale
             $table->decimal('vat_rate',10,2)->nullable();                                       // aliquota IVA
             $table->timestamps();

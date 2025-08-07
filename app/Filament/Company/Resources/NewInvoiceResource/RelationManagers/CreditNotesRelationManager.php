@@ -460,9 +460,12 @@ class CreditNotesRelationManager extends RelationManager
                                         } else {
                                             // Optionally, reset to the original vat_code_type from the parent invoice item
                                             $parentInvoice = Invoice::with('invoiceItems')->find($get('parent_id'));
-                                            if ($parentInvoice && $parentInvoice->invoiceItems->isNotEmpty()) {
+                                            $items = $parentInvoice->invoiceItems instanceof \Illuminate\Support\Collection
+                                                ? $parentInvoice->invoiceItems->where('auto', false)
+                                                : $parentInvoice->invoiceItems()->where('auto', false)->get();
+                                            if ($parentInvoice && $items->isNotEmpty()) {
                                                 // Assuming invoice_element_id can be used to match items
-                                                $parentItem = $parentInvoice->invoiceItems->firstWhere('invoice_element_id', $item['invoice_element_id']);
+                                                $parentItem = $items->firstWhere('invoice_element_id', $item['invoice_element_id']);
                                                 $item['vat_code_type'] = $parentItem ? ($parentItem->vat_code_type instanceof \App\Enums\VatCodeType ? $parentItem->vat_code_type->value : $parentItem->vat_code_type) : $item['vat_code_type'];
                                             }
                                         }
@@ -805,8 +808,11 @@ class CreditNotesRelationManager extends RelationManager
                                     $parentId = $get('parent_id');
                                     if ($parentId) {
                                         $parentInvoice = Invoice::with('invoiceItems')->find($parentId);
-                                        if ($parentInvoice && $parentInvoice->invoiceItems) {
-                                            return $parentInvoice->invoiceItems->map(function ($item) use ($docTypeId, $yearLimit) {
+                                        $items = $parentInvoice->invoiceItems instanceof \Illuminate\Support\Collection
+                                                ? $parentInvoice->invoiceItems->where('auto', false)
+                                                : $parentInvoice->invoiceItems()->where('auto', false)->get();
+                                        if ($parentInvoice && $items) {
+                                            return $items->map(function ($item) use ($docTypeId, $yearLimit) {
                                                 $add = '';
                                                 // dd($docTypeId . " - " . $yearLimit);
                                                 if(DocType::find($docTypeId)->description == "Nota di credito" && $yearLimit == 'si'){
