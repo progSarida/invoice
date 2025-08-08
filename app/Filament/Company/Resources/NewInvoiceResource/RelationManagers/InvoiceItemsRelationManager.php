@@ -47,7 +47,7 @@ class InvoiceItemsRelationManager extends RelationManager
                             $set('measure_unit', $el->measure_unit);
                             $set('unit_price', $el->unit_price);
                             $set('amount', $el->amount);
-                            $set('vat_code_type', $el->vat_code_type);                            
+                            $set('vat_code_type', $el->vat_code_type);
 
                             // Calcolo importo IVA e totale
                             $rate = $el->vat_code_type?->getRate() / 100 ?? 0;
@@ -293,10 +293,13 @@ class InvoiceItemsRelationManager extends RelationManager
                         return $record;
                     }),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn ($record) => $record->vat_code_type !== VatCodeType::VC06A)
+                    ->visible(fn ($record) => $record->vat_code_type !== VatCodeType::VC06A && $record->auto !== true)
                     ->using(function (InvoiceItem $record): InvoiceItem {
-                        $record->checkStampDuty();
-                        return $record;
+                            $invoice = $record->invoice;
+                            $record->delete();
+                            $invoice->checkStampDuty();
+                            $record->autoInsert();
+                            return $record;
                     }),
                 // Tables\Actions\DeleteAction::make(),                                                                            // solo per test
             ])

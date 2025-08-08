@@ -58,6 +58,7 @@ class InvoiceItem extends Model
         });
 
         static::deleted(function ($item) {
+            $item->autoInsert();
             $item->invoice?->updateTotal();
 
             if ($item->invoice?->parent_id) {
@@ -141,6 +142,13 @@ class InvoiceItem extends Model
     // Genera le voci dei riepiloghi IVA e li inserisce come voci della fattura
     public function insertResumes($vats)
     {
+        $hasManualItems = InvoiceItem::where('invoice_id', $this->invoice->id)
+            ->where('auto', false)
+            ->exists();
+
+        if (! $hasManualItems) {
+            return;
+        }
         // dd($vats);
         foreach($vats as $vat) {
             // dd($vat);
@@ -161,6 +169,13 @@ class InvoiceItem extends Model
     // Genera le voci delle casse previdenziali e le insrisce come voci della fattura
     public function insertFunds($funds)
     {
+        $hasManualItems = InvoiceItem::where('invoice_id', $this->invoice->id)
+            ->where('auto', false)
+            ->exists();
+
+        if (! $hasManualItems) {
+            return; // Interrompe la funzione se non ci sono item manuali
+        }
         // dd($funds);
         foreach($funds as $fund) {
             // dd($vat);
@@ -181,6 +196,14 @@ class InvoiceItem extends Model
     // Genera le voci delle ritenute e le inserisce come voci della fattura
     public function insertWithholdings()
     {
+        $hasManualItems = InvoiceItem::where('invoice_id', $this->invoice->id)
+            ->where('auto', false)
+            ->exists();
+
+        if (! $hasManualItems) {
+            return; // Interrompe la funzione se non ci sono item manuali
+        }
+
         // dd($withholdings);
         $invoice = $this->invoice;
         $selectedIds = is_array($invoice->withholdings) ? $invoice->withholdings : [];

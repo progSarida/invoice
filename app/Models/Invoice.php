@@ -437,4 +437,37 @@ class Invoice extends Model
         }
         return $vats;
     }
+
+    // Verifica se ci sono le condizioni per inserire l'imposta di bollo (gli importi esenti IVA sono uguali o superiori al valore indicato) e nel caso lo fa
+    public function checkStampDuty()
+    {
+        $stampDuty = $this->company->stampDuty;
+        if($stampDuty->active){
+            $vats = $this->vatResume();
+            $free = 0;
+            $insert = true;
+            foreach($vats as $key => $vat){
+                if($key == 'vc06a') $insert = false;
+                if($vat['free']) $free += $vat['taxable'];
+            }
+            if($insert && $free >= $stampDuty->value){
+                $a = [
+                    'invoice_id' => $this->id,
+                    'invoice_element_id' => null,
+                    'description' => $stampDuty->row_description,
+                    'amount' => (string) $stampDuty->amount,
+                    'vat_code_type' => 'vc06a'
+                ];
+                $item = InvoiceItem::create($a);
+                $item->calculateTotal();
+                $item->save();
+                return $item;
+            } else {
+                // Le condizioni NON sono soddisfatte: elimina l'eventuale voce di bollo
+                InvoiceItem::where('invoice_id', $this->id)
+                    ->where('vat_code_type', 'vc06a')
+                    ->delete();
+            }
+        }
+    }
 }
