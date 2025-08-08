@@ -35,7 +35,7 @@ class InvoiceItem extends Model
         'transaction_type' => TransactionType::class,
         'start_date' => 'date',
         'end_date' => 'date',
-        'auto' => 'boolean',                    
+        'auto' => 'boolean',
     ];
 
     public function invoice(){
@@ -107,9 +107,14 @@ class InvoiceItem extends Model
         }
     }
 
-    // Crea automaticamente le voci della fattura riferiti a ritenute, riepiloghi e casse previdenziali 
+    // Crea automaticamente le voci della fattura riferiti a ritenute, riepiloghi e casse previdenziali
     public function autoInsert()
     {
+        // Elimino tutti gli InvoiceItem auto-generati per questa fattura
+        InvoiceItem::where('invoice_id', $this->invoice->id)
+            ->where('auto', true)
+            ->delete();
+
         // $vats = $this->vatResume();                                             // Creazione array con dati riepiloghi IVA
         // $funds = $this->getFundBreakdown();                                     // Creazione array con dati casse previdenziali
         // if(count($funds) > 0)
@@ -122,14 +127,15 @@ class InvoiceItem extends Model
         if (count($funds) > 0) {
             $vats = $this->invoice->updateResume($vats, $funds);                                             // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
         }
-        $withholdings = array_filter($this->invoice->company->withholdings->toArray(), function ($item) {    // Creazione array con dati ritenute
-            return in_array($item['withholding_type'], [WithholdingType::RT01, WithholdingType::RT02])
-                && isset($item['tipo_ritenuta'], $item['importo_ritenuta'], $item['aliquota_ritenuta'], $item['causale_pagamento']);
-        });
+        // $withholdings = array_filter($this->invoice->company->withholdings->toArray(), function ($item) {    // Creazione array con dati ritenute
+        //     return in_array($item['withholding_type'], [WithholdingType::RT01, WithholdingType::RT02])
+        //         && isset($item['tipo_ritenuta'], $item['importo_ritenuta'], $item['aliquota_ritenuta'], $item['causale_pagamento']);
+        // });
+        // dd($withholdings);
         // --------------------------------------------------------------------------------------------------------------------------------------------
-        $this->insertResumes($vats);
         $this->insertFunds($funds);
-        $this->insertWithholdings($withholdings);
+        $this->insertResumes($vats);
+        $this->insertWithholdings();
     }
 
     // Genera le voci dei riepiloghi IVA e li inserisce come voci della fattura
@@ -173,8 +179,41 @@ class InvoiceItem extends Model
     }
 
     // Genera le voci delle ritenute e le inserisce come voci della fattura
-    public function insertWithholdings($withholdings)
+    public function insertWithholdings()
     {
         // dd($withholdings);
+        $invoice = $this->invoice;
+        $selectedIds = is_array($invoice->withholdings) ? $invoice->withholdings : [];
+        $withholdings = $invoice->company->withholdings->filter(function ($item) use ($selectedIds) {
+            return in_array($item->id, $selectedIds);
+        });
+        $accontoValues = [
+            WithholdingType::RT01,                               // Ritenuta d'acconto (persone fisiche)
+            WithholdingType::RT02,                               // Ritenuta d'acconto (persone giuridiche)
+        ];
+        $hasWithholdingTax = collect($withholdings)
+            ->search(fn($withholding) => in_array($withholding->withholding_type, $accontoValues));
+        $withholdingAmount = 0;
+        if(count($withholdings) > 0 && $hasWithholdingTax !== false &&
+            !in_array($invoice->client->subtype, [ \App\Enums\ClientSubtype::MAN, \App\Enums\ClientSubtype::WOMAN, ])){
+                $taxable = $invoice->getTaxable();
+                // $withholdingAmount = $taxable * ($invoice->company->withholdings[$hasWithholdingTax]->rate / 100);
+                $withholdingAmount = -($taxable * ($invoice->company->withholdings[$hasWithholdingTax]->rate / 100));
+            }
+        foreach($withholdings as $withholding){
+            // dd($withholding);
+            $a = [
+                'invoice_id' => $invoice->id,
+                'invoice_element_id' => null,
+                'description' => $withholding->withholding_type->getPrint(),
+                'amount' => null,
+                'total' => (float) $withholdingAmount,
+                'vat_code_type' => null,
+                'auto' => true
+            ];
+            $item = InvoiceItem::create($a);
+            $item->save();
+        }
+
     }
 }

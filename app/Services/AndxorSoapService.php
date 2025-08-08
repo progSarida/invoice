@@ -445,7 +445,7 @@ class AndxorSoapService
                         ] : [],
                     ],
                     'DatiBeniServizi' => [
-                        'DettaglioLinee' => $invoice->invoiceItems->map(function ($item, $index) {
+                        'DettaglioLinee' => $invoice->invoiceItems->where('auto', false)->map(function ($item, $index) {
                             return [
                                 'NumeroLinea' => $index + 1,
                                 'Descrizione' => $item->description ?? 'Servizio',
@@ -1096,7 +1096,7 @@ class AndxorSoapService
         // }
 
         $withholdingsNumber = $this->createWithholdingItems($param);                                            // creo voci fattura da DatiRitenuta
-        
+
         $resumesNumber = $this->createResumeItems($param);                                                      // creo voci fattura da DatiRiepilogo
 
         // Normalizza DatiRiepilogo in un array
@@ -1108,8 +1108,8 @@ class AndxorSoapService
         //     foreach ($funds as $fund) {
         //         dd($fund);
         //         // Ottieni l'istanza dell'enum FundType basata su TipoCassa
-        //         $fundType = isset($fund['TipoCassa']) && is_string($fund['TipoCassa']) 
-        //             ? FundType::tryFrom($fund['TipoCassa']) 
+        //         $fundType = isset($fund['TipoCassa']) && is_string($fund['TipoCassa'])
+        //             ? FundType::tryFrom($fund['TipoCassa'])
         //             : null;
         //         // Usa getDescription() se fundType esiste, altrimenti null
         //         $description = $fundType?->getDescription() ?? null;

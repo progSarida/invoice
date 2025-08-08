@@ -162,6 +162,26 @@
         @endforeach
     </table>
 
+    {{-- Ritenute --}}
+    @php
+        use App\Enums\WithholdingType;
+        $selectedIds = is_array($invoice->withholdings) ? $invoice->withholdings : [];
+        $withholdings = $invoice->company->withholdings->filter(function ($item) use ($selectedIds) {
+            return in_array($item->id, $selectedIds);
+        });
+        $accontoValues = [
+            WithholdingType::RT01,                               // Ritenuta d'acconto (persone fisiche)
+            WithholdingType::RT02,                               // Ritenuta d'acconto (persone giuridiche)
+        ];
+        $hasWithholdingTax = collect($withholdings)
+            ->search(fn($withholding) => in_array($withholding->withholding_type, $accontoValues));
+        $withholdingAmount = 0;
+        if(count($invoice->withholdings) > 0 && $hasWithholdingTax !== false &&
+            !in_array($invoice->client->subtype, [ \App\Enums\ClientSubtype::MAN, \App\Enums\ClientSubtype::WOMAN, ])){
+                $taxable = $invoice->getTaxable();
+                $withholdingAmount = $taxable * ($invoice->company->withholdings[$hasWithholdingTax]->rate / 100);
+            }
+    @endphp
     {{-- Totali --}}
     @php
         $fundTotal = 0;
@@ -169,7 +189,7 @@
         if(count($funds) > 0)
             $fundTotal = array_sum(array_column($funds, 'amount'));
         $vatTotal = array_sum(array_column($funds, 'vat'));
-        $total = $invoice->total + $fundTotal + $vatTotal;
+        $total = $invoice->total + $withholdingAmount;
     @endphp
     <table class="total">
         <tr class="center bold border_bottom">
@@ -187,31 +207,12 @@
             <td style="width: 19%" class="center padding">{{ $invoice->company->stampDuty->virtual_stamp ? 'SI' : ''}}</td>
             <td style="width: 32%" class="padding"></td>
             <td style="width: 5%" class="padding"></td>
-            <td style="width: 25%" class="right padding bold">{{ number_format((float) $invoice->total, 2, ',', '.') }}</td>
+            <td style="width: 25%" class="right padding bold">{{ number_format((float) ($total), 2, ',', '.') }}</td>
         </tr>
     </table>
 
-    @php
-        use App\Enums\WithholdingType;
-        $selectedIds = is_array($invoice->withholdings) ? $invoice->withholdings : [];
-        $withholdings = $invoice->company->withholdings->filter(function ($item) use ($selectedIds) {
-            return in_array($item->id, $selectedIds);
-        });
-        $accontoValues = [
-            WithholdingType::RT01,                               // Ritenuta d'acconto (persone fisiche)
-            WithholdingType::RT02,                               // Ritenuta d'acconto (persone giuridiche)
-        ];
-        $hasWithholdingTax = collect($withholdings)
-            ->search(fn($withholding) => in_array($withholding->withholding_type, $accontoValues));
-        $withholdingAmount = 0;
-    @endphp
     @if(count($invoice->company->withholdings) > 0 && $hasWithholdingTax !== false &&
             !in_array($invoice->client->subtype, [ \App\Enums\ClientSubtype::MAN, \App\Enums\ClientSubtype::WOMAN, ]))
-        {{-- Ritenuta --}}
-        @php
-            $taxable = $invoice->getTaxable();
-            $withholdingAmount = $taxable * ($invoice->company->withholdings[$hasWithholdingTax]->rate / 100);
-        @endphp
         <table class="total">
             <tr class="center border_bottom">
                 <td style="width: 48%" class="border_right padding">Dati ritenuta d'acconto</td>
@@ -230,7 +231,8 @@
 
     {{-- Pagamento --}}
     @php
-        $totalPay = $invoice->total - $withholdingAmount;
+        // $totalPay = $invoice->total - $withholdingAmount;
+        $totalPay = $invoice->total;
     @endphp
     <table>
         <tr class="center border_bottom">

@@ -1031,7 +1031,7 @@ class NewInvoiceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('vat')->label('Importo IVA')
                     ->money('EUR')
-                    ->state(fn (Invoice $invoice) => $invoice->getVat())
+                    // ->state(fn (Invoice $invoice) => $invoice->getVat())
                     ->sortable()
                     ->alignRight()
                     ->toggleable(isToggledHiddenByDefault: false),

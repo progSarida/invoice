@@ -48,6 +48,7 @@ class Invoice extends Model
         'manage_type_id',
         'description',
         'free_description',
+        'vat',
         'bank_account_id',
         'payment_status',
         'payment_mode',
@@ -246,6 +247,7 @@ class Invoice extends Model
         $total = $this->invoiceItems()->sum('total');
         // $total = $this->invoiceItems()->where('auto', false)->sum('total');
         $no_vat_total = $this->invoiceItems()->where('auto', false)->sum('amount');
+        $this->vat = $total - $no_vat_total;
         $this->total = $total;
         $this->no_vat_total = $no_vat_total;
         $this->save();
