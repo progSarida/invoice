@@ -56,6 +56,10 @@ class Client extends Model
         return $this->hasMany(Contract::class);
     }
 
+    public function postalExpenses(){
+        return $this->hasMany(PostalExpense::class);
+    }
+
     public function isPublic(){
         return $this->type === 'public';
     }

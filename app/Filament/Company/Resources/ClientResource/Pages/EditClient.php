@@ -21,4 +21,9 @@ class EditClient extends EditRecord
             Actions\DeleteAction::make()->keyBindings(['f4']),
         ];
     }
+
+    public function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
 }

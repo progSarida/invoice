@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\ClientResource\Pages;
 use App\Filament\Company\Resources\ClientResource\RelationManagers;
+use App\Filament\Company\Resources\ClientResource\RelationManagers\PostalExpensesRelationManager;
 
 class ClientResource extends Resource
 {
@@ -266,7 +267,7 @@ class ClientResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            PostalExpensesRelationManager::class,
         ];
     }
 
