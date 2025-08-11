@@ -15,17 +15,17 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onUpdate('cascade');
 
-            $table->foreignId('new_contract_id')->constrained()->onUpdate('cascade');
+            $table->foreignId('new_contract_id')->constrained('new_contracts')->onUpdate('cascade');
 
             $table->string('send_number');
             $table->string('send_date');
-            // $table->string('shipment_type_id');                                                  // in sospeso
+            // $table->string('shipment_type_id')->constrained('shipment_types')->onUpdate('cascade');      // in sospeso
             $table->foreignId('client_id')->constrained('clients')->onUpdate('cascade');
             $table->foreignId('supplier_id')->constrained('suppliers')->onUpdate('cascade');
             $table->string('recipient');
             $table->string('tax_type');
             $table->integer('year');
-            // $table->foreignId('act_type_id')->constrained()->onUpdate('cascade');               // in sospeso
+            // $table->foreignId('act_type_id')->constrained('act_types')->onUpdate('cascade');             // in sospeso
             $table->string('act_id');
             $table->integer('act_year');
             $table->foreignId('shipment_insert_user_id')->constrained('users')->onUpdate('cascade');

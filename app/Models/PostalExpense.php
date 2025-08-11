@@ -22,6 +22,10 @@ class PostalExpense extends Model
         return $this->belongsTo(Company::class);
     }
 
+    public function newContract(){
+        return $this->belongsTo(NewContract::class);
+    }
+
     public function client(){
         return $this->belongsTo(Client::class);
     }
