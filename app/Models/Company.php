@@ -51,6 +51,11 @@ class Company extends Model
         return $this->hasMany(Client::class);
     }
 
+    public function suppliers()
+    {
+        return $this->hasMany(Supplier::class);
+    }
+
     public function curator()
     {
         return $this->hasOne(Curator::class);

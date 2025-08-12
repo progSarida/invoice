@@ -107,8 +107,9 @@ class NewContractResource extends Resource
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     // ->rules(['numeric', 'min:0'])
                     ->suffix('€'),
-                Placeholder::make('')
-                    ->content('')
+                Forms\Components\Toggle::make('reinvoice')
+                    ->label('Rifatturazione spese postali')
+                    ->dehydrated(fn ($state) => filled($state))
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('office_name')
                     ->label('Nome ufficio')

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\NotifyType;
 use Illuminate\Database\Eloquent\Model;
 
 class PostalExpense extends Model
@@ -11,7 +12,7 @@ class PostalExpense extends Model
     ];
 
     protected $casts = [
-        //
+        'notify_type' =>  NotifyType::class,
     ];
 
     // public function shipmentType(){
@@ -36,6 +37,11 @@ class PostalExpense extends Model
 
     public function supplier(){
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function passiveInvoice()
+    {
+        return $this->belongsTo(PassiveInvoice::class, 's_passive_invoice_id');
     }
 
     public function shipmentInsertUser(){

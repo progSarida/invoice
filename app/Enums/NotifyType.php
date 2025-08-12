@@ -33,4 +33,9 @@ enum NotifyType: string implements HasLabel, HasDescription
             self::MESSO => 'Messo',
         };
     }
+
+    public function isShipment()
+    {
+        return $this === self::SPEDIZIONE;
+    }
 }
