@@ -109,8 +109,12 @@ return new class extends Migration
             // $table->foreignId('m_payment_insert_user_id')->constrained('users')->onUpdate('cascade');           // inserito pagamento da utente
 
         // altri campi comuni
-            $table->date('reinvoice_insert_date');                                                              // rifatturato da utente
-            $table->foreignId('reinvoice_insert_user_id')->constrained('users')->onUpdate('cascade');           // rifatturato in data
+            // $table->date('reinvoice_insert_date');                                                              // rifatturato in data
+
+            $table->unsignedBigInteger('reinvoice_insert_user_id')->nullable();                                 //
+            $table->foreign('reinvoice_insert_user_id')->references('id')->on('users');                         // rifatturato da utente
+            // $table->foreignId('reinvoice_insert_user_id')->constrained('users')->onUpdate('cascade');           // 
+
             $table->foreignId('reinvoice_id')->constrained('invoices')->onUpdate('cascade');                    // fattura
             $table->string('note')->nullable();                                                                 // note
 
