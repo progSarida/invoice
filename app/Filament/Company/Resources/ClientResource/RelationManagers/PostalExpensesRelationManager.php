@@ -53,7 +53,7 @@ class PostalExpensesRelationManager extends RelationManager
                     ->preload()
                     ->autofocus()
                     ->columnSpan(2),
-                Forms\Components\Select::make('contract_id')->label('Contratto')
+                Forms\Components\Select::make('new_contract_id')->label('Contratto')
                     ->relationship(
                         name: 'contract',
                         modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$this->getOwnerRecord()->id)
@@ -114,7 +114,7 @@ class PostalExpensesRelationManager extends RelationManager
                         ->visibility('public')
                         ->acceptedFileTypes(['application/pdf', 'image/*'])
                         ->maxSize(10240)
-                        ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                        // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                         ->columnSpan(6),
                     Forms\Components\Actions::make([
                         Forms\Components\Actions\Action::make('view_attachment')
@@ -122,19 +122,19 @@ class PostalExpensesRelationManager extends RelationManager
                             ->icon('heroicon-o-eye')
                             ->url(fn($record): ?string => $record && $record->attachment ? Storage::url($record->attachment) : null)
                             ->openUrlInNewTab()
-                            ->visible(fn(Get $get, $record): bool => $get('notify_type') === NotifyType::MESSO->value && $record && $record->attachment)
+                            // ->visible(fn(Get $get, $record): bool => $get('notify_type') === NotifyType::MESSO->value && $record && $record->attachment)
                             ->disabled(fn($record): bool => !$record || !$record->attachment)
                             ->color('primary'),
                     ])->extraAttributes(['class' => 'col-span-6']), // Imposta la larghezza del contenitore Actions
                 ])
                 ->columnSpan(8),
                 // campi usati nel caso di notify_type == 'spedizione'
-                Forms\Components\DatePicker::make('s_shipment_date')->label('Data spedizione')
+                Forms\Components\DatePicker::make('shipment_date')->label('Data spedizione')
                     ->required()
                     ->default(now()->toDateString())
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                     ->columnSpan(2),
-                Forms\Components\Select::make('s_month')->label('Mese')
+                Forms\Components\Select::make('month')->label('Mese')
                     ->required()
                     ->options(Month::class)
                     ->afterStateUpdated(function (Get $get, Set $set) {
@@ -143,16 +143,16 @@ class PostalExpensesRelationManager extends RelationManager
                     ->searchable()
                     ->live()
                     ->preload()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                     ->columnSpan(2),
-                Forms\Components\Select::make('s_shipment_type_id')->label('Modalità spedizione')
+                Forms\Components\Select::make('shipment_type_id')->label('Modalità spedizione')
                     ->options(ShipmentType::pluck('name', 'id')->toArray())
                     ->searchable()
                     ->preload()
                     ->reactive()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                     ->columnSpan(4),
-                Forms\Components\Select::make('s_supplier_id')->label('Fornitore')
+                Forms\Components\Select::make('supplier_id')->label('Fornitore')
                     ->options(Supplier::pluck('denomination', 'id')->toArray())
                     ->searchable()
                     ->preload()
@@ -160,16 +160,16 @@ class PostalExpensesRelationManager extends RelationManager
                     ->afterStateUpdated(function (Set $set) {
                         $set('s_passive_invoice_id', null);                                                 // reset della fattura passiva quando cambia il fornitore
                     })
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                     ->columnSpan(4),
-                Forms\Components\TextInput::make('s_year')->label('Anno')
+                Forms\Components\TextInput::make('year')->label('Anno')
                     ->afterStateUpdated(function (Get $get, Set $set) {
                         //
                     })
                     ->live()
                     ->required()
                     ->rules(['digits:4'])
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                     ->default(now()->year)
                     ->columnSpan(2),
                 Forms\Components\Select::make('s_postal_doc_type')->label('Tipo documento')
@@ -181,7 +181,7 @@ class PostalExpensesRelationManager extends RelationManager
                     ->searchable()
                     ->live()
                     ->preload()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                     ->columnSpan(2),
                 Forms\Components\Select::make('s_product_type')->label('Tipologia spesa')
                     ->required()
@@ -192,7 +192,7 @@ class PostalExpensesRelationManager extends RelationManager
                     ->searchable()
                     ->live()
                     ->preload()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                     ->columnSpan(4),
                 Forms\Components\TextInput::make('s_amount')->label('Importo')
                     ->required()
@@ -200,7 +200,7 @@ class PostalExpensesRelationManager extends RelationManager
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->suffix('€')
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                     ->columnSpan(3),
                 Forms\Components\Select::make('s_passive_invoice_id')->label('Fattura passiva')
                     ->options(function (Get $get): array {
@@ -225,24 +225,24 @@ class PostalExpensesRelationManager extends RelationManager
                             else $set('s_passive_invoice_settle_date', null);
                         }
                     })
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_supplier_id'))
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_supplier_id'))
                     ->disabled(fn(Get $get): bool => !$get('s_supplier_id'))
                     ->placeholder('Seleziona prima un fornitore')
                     ->columnSpan(12),
                 Forms\Components\TextInput::make('s_passive_invoice_number')->label('Numero fattura')
                     ->required()
                     ->maxLength(255)
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
                     ->disabled(fn(Get $get): bool => !$get('s_passive_invoice_id'))
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('s_passive_invoice_date')->label('Data fattura')
                     ->required()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
                     ->disabled(fn(Get $get): bool => !$get('s_passive_invoice_id'))
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('s_passive_invoice_settle_date')->label('Data saldo')
                     ->required()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
                     ->disabled(fn(Get $get): bool => !$get('s_passive_invoice_id'))
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('s_passive_invoice_amount')->label('Importo fattura')
@@ -251,13 +251,13 @@ class PostalExpensesRelationManager extends RelationManager
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->suffix('€')
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
                     ->disabled(fn(Get $get): bool => !$get('s_passive_invoice_id'))
                     ->columnSpan(3),
                 // campi usati nel caso di notify_Type == 'messo'
                 Forms\Components\DatePicker::make('m_notify_registration_date')->label('Data registrazione')
                     ->required()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(2),
                 Forms\Components\Select::make('m_notify_registration_user_id')->label('Registrato da')
                     ->relationship(
@@ -275,11 +275,11 @@ class PostalExpensesRelationManager extends RelationManager
                     ->live()
                     ->preload()
                     ->optionsLimit(5)
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(4),
                 Forms\Components\DatePicker::make('m_scan_import_date')->label('Data scansione file')
                     ->required()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(2),
                 Forms\Components\Select::make('m_scan_import_user_id')->label('Scansionato da')
                     ->relationship(
@@ -297,38 +297,38 @@ class PostalExpensesRelationManager extends RelationManager
                     ->live()
                     ->preload()
                     ->optionsLimit(5)
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(4),
                 Forms\Components\TextInput::make('m_send_protocol_number')->label('Protocollo invio (numero)')
                     ->required()
                     ->maxLength(255)
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('m_send_protocol_date')->label('Protocollo invio (data)')
                     ->required()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('m_receive_protocol_number')->label('Protocollo ricezione (numero)')
                     ->required()
                     ->maxLength(255)
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(4),
                 Forms\Components\DatePicker::make('m_receive_protocol_date')->label('Protocollo ricezione (data)')
                     ->required()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(4),
                 Forms\Components\TextInput::make('m_supplier')->label('Ente da rimborsare')
                     ->required()
                     ->maxLength(255)
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(4),
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    ->columnSpan(5),
                 Forms\Components\Select::make('m_act_type_id')->label('Tipo atto')
                     ->options(ShipmentType::pluck('name', 'id')->toArray())
                     ->searchable()
                     ->preload()
                     ->reactive()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(4),
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    ->columnSpan(3),
                 Forms\Components\TextInput::make('m_act_year')->label('Anno atto')
                     ->afterStateUpdated(function (Get $get, Set $set) {
                         //
@@ -336,25 +336,25 @@ class PostalExpensesRelationManager extends RelationManager
                     ->live()
                     ->required()
                     ->rules(['digits:4'])
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->default(now()->year)
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('m_recipient')->label('Destinatario / Trasgressore')
                     ->live()
                     ->required()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(6),
                 Forms\Components\TextInput::make('m_amount')->label('Importo')
                     ->live()
                     ->required()
                     ->suffix('€')
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('m_iban')->label('IBAN')
                     ->live()
                     ->required()
                     ->suffix('€')
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                     ->columnSpan(3),
                 Forms\Components\Toggle::make('m_payed')
                     ->label('Pagato')
@@ -363,11 +363,11 @@ class PostalExpensesRelationManager extends RelationManager
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('m_payment_date')->label('Data pagamento')
                     ->required()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value && $get('m_payed'))
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value && $get('m_payed'))
                     ->columnSpan(3),
                 Forms\Components\DatePicker::make('m_payment_insert_date')->label('Data pagamento')
                     ->required()
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value && $get('m_payed'))
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value && $get('m_payed'))
                     ->columnSpan(3),
                 Forms\Components\Select::make('m_payment_insert_user_id')->label('Pagamento registrato da')
                     ->relationship(
@@ -385,7 +385,7 @@ class PostalExpensesRelationManager extends RelationManager
                     ->live()
                     ->preload()
                     ->optionsLimit(5)
-                    ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value && $get('m_payed'))
+                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value && $get('m_payed'))
                     ->columnSpan(3),
                 //
                 Forms\Components\Select::make('reinvoice_id')->label('Fattura emessa')
@@ -406,18 +406,18 @@ class PostalExpensesRelationManager extends RelationManager
                             $set('invoice_amount', number_format($invoice->total, 2, ',', '.'));
                         }
                     })
-                    ->visible(fn(Get $get): bool => ($get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id')) || ($get('notify_type') === NotifyType::MESSO->value))
+                    // ->visible(fn(Get $get): bool => ($get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id')) || ($get('notify_type') === NotifyType::MESSO->value))
                     // ->disabled(fn(Get $get): bool => ($get('notify_type') === NotifyType::SPEDIZIONE->value && !$get('s_passive_invoice_id')) || ($get('notify_type') !== NotifyType::MESSO->value))
                     ->placeholder('Seleziona prima un fornitore')
                     ->columnSpan(12),
                 Forms\Components\TextInput::make('invoice_number')->label('Numero fattura')
                     ->required()
                     ->maxLength(255)
-                    ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
+                    // ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('invoice_date')->label('Data fattura')
                     ->required()
-                    ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
+                    // ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('invoice_amount')->label('Importo fattura')
                     ->required()
@@ -425,14 +425,14 @@ class PostalExpensesRelationManager extends RelationManager
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->suffix('€')
-                    ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
+                    // ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
                     ->disabled(fn(Get $get): bool => !$get('s_passive_invoice_id'))
                     ->columnSpan(2),
                 // Forms\Components\DatePicker::make('reinvoice_insert_date')->label('Data rifatturazione')
                 //     ->required()
-                //     ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
+                //     // ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
                 //     ->columnSpan(3),
-                Forms\Components\Select::make('reinvoice_insert_user_id')->label('Ridfatturatto da')
+                Forms\Components\Select::make('reinvoice_insert_user_id')->label('Rifatturatto da')
                     ->relationship(
                         name: 'paymentInsertUser',
                         // modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$this->getOwnerRecord()->id)
@@ -448,7 +448,7 @@ class PostalExpensesRelationManager extends RelationManager
                     ->live()
                     ->preload()
                     ->optionsLimit(5)
-                    ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
+                    // ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
                     ->columnSpan(3),
                 Forms\Components\Textarea::make('note')->label('Note')
                         ->required()
@@ -486,7 +486,7 @@ class PostalExpensesRelationManager extends RelationManager
                     ->icon('heroicon-o-eye')
                     ->url(fn($record): ?string => $record->attachment ? Storage::url($record->attachment) : null)
                     ->openUrlInNewTab()
-                    ->visible(fn($record): bool => $record->notify_type === NotifyType::MESSO->value && $record->attachment)
+                    // ->visible(fn($record): bool => $record->notify_type === NotifyType::MESSO->value && $record->attachment)
                     ->disabled(fn($record): bool => !$record->attachment)
                     ->color('primary'),
                 Tables\Actions\DeleteAction::make(),
