@@ -2,12 +2,12 @@
 
 namespace App\Filament\Company\Resources\ClientResource\RelationManagers;
 
+use App\Enums\ExpenseType;
 use App\Enums\Month;
 use App\Enums\NotifyType;
-use App\Enums\PostalDocType;
-use App\Enums\ProductType;
+use App\Enums\ShipmentDocType;
 use App\Enums\TaxType;
-use App\Models\Contract;
+use App\Models\ActType;
 use App\Models\Invoice;
 use App\Models\NewContract;
 use App\Models\PassiveInvoice;
@@ -23,7 +23,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Storage;
 
 class PostalExpensesRelationManager extends RelationManager
@@ -39,456 +38,469 @@ class PostalExpensesRelationManager extends RelationManager
     public function form(Form $form): Form
     {
         return $form
-            ->columns(12)
             ->schema([
-                // campi comuni
-                Forms\Components\Select::make('notify_type')->label('Tipo notifica')
-                    ->required()
-                    ->options(NotifyType::class)
-                    ->afterStateUpdated(function (Get $get, Set $set) {
-                        //
-                    })
-                    ->searchable()
-                    ->live()
-                    ->preload()
-                    ->autofocus()
-                    ->columnSpan(2),
-                Forms\Components\Select::make('new_contract_id')->label('Contratto')
-                    ->relationship(
-                        name: 'contract',
-                        modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$this->getOwnerRecord()->id)
-                    )
-                    ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => "{$record->office_name} ({$record->office_code}) - TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
-                    )
-                    ->afterStateUpdated(function (Set $set, $state) {
-                        $contract = NewContract::find($state);
-                        $set('tax_type', $contract->tax_type);
-                        $set('reinvoice', $contract->reinvoice);
-                    })
-                    ->required()
-                    ->searchable()
-                    ->live()
-                    ->preload()
-                    ->optionsLimit(5)
-                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        //
-                    })
-                    ->columnSpan(6),
-                Forms\Components\Select::make('tax_type')->label('Entrata')
-                    ->required()
-                    ->options(TaxType::class)
-                    ->afterStateUpdated(function (Get $get, Set $set) {
-                        //
-                    })
-                    ->searchable()
-                    ->live()
-                    ->preload()
-                    ->columnSpan(2),
-                Forms\Components\Toggle::make('reinvoice')
-                    ->label('Rifatturare')
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->columnSpan(2),
-                Forms\Components\TextInput::make('order_rif')->label('Riferimento commessa')
-                    ->required()
-                    ->maxLength(255)
-                    ->columnSpan(2),
-                Forms\Components\TextInput::make('list_rif')->label('Riferimento distinta')
-                    ->required()
-                    ->maxLength(255)
-                    ->columnSpan(2),
-                // Forms\Components\Placeholder::make('void')
-                //     ->label('')
-                //     ->content('')
-                //     ->columnspan(8),
-                // inserire qui per caricare allegato visibile solo con 'messo'
-                // Forms\Components\Placeholder::make('void')
-                //     ->label('')
-                //     ->content('')
-                //     ->columnSpan(8),
-                Forms\Components\Group::make([
-                    Forms\Components\FileUpload::make('attachment')
-                        ->label('Allegato')
-                        ->disk('public')
-                        ->directory('postal-attachments')
-                        ->visibility('public')
-                        ->acceptedFileTypes(['application/pdf', 'image/*'])
-                        ->maxSize(10240)
-                        // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                        ->columnSpan(6),
-                    Forms\Components\Actions::make([
-                        Forms\Components\Actions\Action::make('view_attachment')
-                            ->label('Visualizza Allegato')
-                            ->icon('heroicon-o-eye')
-                            ->url(fn($record): ?string => $record && $record->attachment ? Storage::url($record->attachment) : null)
-                            ->openUrlInNewTab()
-                            // ->visible(fn(Get $get, $record): bool => $get('notify_type') === NotifyType::MESSO->value && $record && $record->attachment)
-                            ->disabled(fn($record): bool => !$record || !$record->attachment)
-                            ->color('primary'),
-                    ])->extraAttributes(['class' => 'col-span-6']), // Imposta la larghezza del contenitore Actions
-                ])
-                ->columnSpan(8),
-                // campi usati nel caso di notify_type == 'spedizione'
-                Forms\Components\DatePicker::make('shipment_date')->label('Data spedizione')
-                    ->required()
-                    ->default(now()->toDateString())
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
-                    ->columnSpan(2),
-                Forms\Components\Select::make('month')->label('Mese')
-                    ->required()
-                    ->options(Month::class)
-                    ->afterStateUpdated(function (Get $get, Set $set) {
-                        //
-                    })
-                    ->searchable()
-                    ->live()
-                    ->preload()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
-                    ->columnSpan(2),
-                Forms\Components\Select::make('shipment_type_id')->label('Modalità spedizione')
-                    ->options(ShipmentType::pluck('name', 'id')->toArray())
-                    ->searchable()
-                    ->preload()
-                    ->reactive()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
-                    ->columnSpan(4),
-                Forms\Components\Select::make('supplier_id')->label('Fornitore')
-                    ->options(Supplier::pluck('denomination', 'id')->toArray())
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->afterStateUpdated(function (Set $set) {
-                        $set('s_passive_invoice_id', null);                                                 // reset della fattura passiva quando cambia il fornitore
-                    })
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
-                    ->columnSpan(4),
-                Forms\Components\TextInput::make('year')->label('Anno')
-                    ->afterStateUpdated(function (Get $get, Set $set) {
-                        //
-                    })
-                    ->live()
-                    ->required()
-                    ->rules(['digits:4'])
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
-                    ->default(now()->year)
-                    ->columnSpan(2),
-                Forms\Components\Select::make('s_postal_doc_type')->label('Tipo documento')
-                    ->required()
-                    ->options(PostalDocType::class)
-                    ->afterStateUpdated(function (Get $get, Set $set) {
-                        //
-                    })
-                    ->searchable()
-                    ->live()
-                    ->preload()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
-                    ->columnSpan(2),
-                Forms\Components\Select::make('s_product_type')->label('Tipologia spesa')
-                    ->required()
-                    ->options(ProductType::class)
-                    ->afterStateUpdated(function (Get $get, Set $set) {
-                        //
-                    })
-                    ->searchable()
-                    ->live()
-                    ->preload()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
-                    ->columnSpan(4),
-                Forms\Components\TextInput::make('s_amount')->label('Importo')
-                    ->required()
-                    ->inputMode('decimal')
-                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    ->suffix('€')
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
-                    ->columnSpan(3),
-                Forms\Components\Select::make('s_passive_invoice_id')->label('Fattura passiva')
-                    ->options(function (Get $get): array {
-                        $supplierId = $get('s_supplier_id');
-                        if (!$supplierId) { return []; }
-                        return PassiveInvoice::where('supplier_id', $supplierId)
-                            ->pluck('description', 'id')
-                            ->toArray();
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->afterStateUpdated(function (Set $set, $state) {
-                        if($state){
-                            $invoice = PassiveInvoice::find($state);
-                            $set('s_passive_invoice_number', $invoice->number);
-                            $set('s_passive_invoice_date', \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d'));
-                            $set('s_passive_invoice_amount', number_format($invoice->total, 2, ',', '.'));
-                            if($invoice->total_payment >= $invoice->total){
-                                $set('s_passive_invoice_settle_date', $invoice->last_payment_date);
-                            }
-                            else $set('s_passive_invoice_settle_date', null);
-                        }
-                    })
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_supplier_id'))
-                    ->disabled(fn(Get $get): bool => !$get('s_supplier_id'))
-                    ->placeholder('Seleziona prima un fornitore')
-                    ->columnSpan(12),
-                Forms\Components\TextInput::make('s_passive_invoice_number')->label('Numero fattura')
-                    ->required()
-                    ->maxLength(255)
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
-                    ->disabled(fn(Get $get): bool => !$get('s_passive_invoice_id'))
-                    ->columnSpan(2),
-                Forms\Components\DatePicker::make('s_passive_invoice_date')->label('Data fattura')
-                    ->required()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
-                    ->disabled(fn(Get $get): bool => !$get('s_passive_invoice_id'))
-                    ->columnSpan(2),
-                Forms\Components\DatePicker::make('s_passive_invoice_settle_date')->label('Data saldo')
-                    ->required()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
-                    ->disabled(fn(Get $get): bool => !$get('s_passive_invoice_id'))
-                    ->columnSpan(2),
-                Forms\Components\TextInput::make('s_passive_invoice_amount')->label('Importo fattura')
-                    ->required()
-                    ->inputMode('decimal')
-                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    ->suffix('€')
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id'))
-                    ->disabled(fn(Get $get): bool => !$get('s_passive_invoice_id'))
-                    ->columnSpan(3),
-                // campi usati nel caso di notify_Type == 'messo'
-                Forms\Components\DatePicker::make('m_notify_registration_date')->label('Data registrazione')
-                    ->required()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(2),
-                Forms\Components\Select::make('m_notify_registration_user_id')->label('Registrato da')
-                    ->relationship(
-                        name: 'notifyRegistrationUser',
-                        // modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$this->getOwnerRecord()->id)
-                    )
-                    ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => "{$record->name}"
-                    )
-                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        //
-                    })
-                    ->required()
-                    ->searchable()
-                    ->live()
-                    ->preload()
-                    ->optionsLimit(5)
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(4),
-                Forms\Components\DatePicker::make('m_scan_import_date')->label('Data scansione file')
-                    ->required()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(2),
-                Forms\Components\Select::make('m_scan_import_user_id')->label('Scansionato da')
-                    ->relationship(
-                        name: 'notifyRegistrationUser',
-                        // modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$this->getOwnerRecord()->id)
-                    )
-                    ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => "{$record->name}"
-                    )
-                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        //
-                    })
-                    ->required()
-                    ->searchable()
-                    ->live()
-                    ->preload()
-                    ->optionsLimit(5)
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(4),
-                Forms\Components\TextInput::make('m_send_protocol_number')->label('Protocollo invio (numero)')
-                    ->required()
-                    ->maxLength(255)
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(2),
-                Forms\Components\DatePicker::make('m_send_protocol_date')->label('Protocollo invio (data)')
-                    ->required()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(2),
-                Forms\Components\TextInput::make('m_receive_protocol_number')->label('Protocollo ricezione (numero)')
-                    ->required()
-                    ->maxLength(255)
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(4),
-                Forms\Components\DatePicker::make('m_receive_protocol_date')->label('Protocollo ricezione (data)')
-                    ->required()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(4),
-                Forms\Components\TextInput::make('m_supplier')->label('Ente da rimborsare')
-                    ->required()
-                    ->maxLength(255)
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(5),
-                Forms\Components\Select::make('m_act_type_id')->label('Tipo atto')
-                    ->options(ShipmentType::pluck('name', 'id')->toArray())
-                    ->searchable()
-                    ->preload()
-                    ->reactive()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(3),
-                Forms\Components\TextInput::make('m_act_year')->label('Anno atto')
-                    ->afterStateUpdated(function (Get $get, Set $set) {
-                        //
-                    })
-                    ->live()
-                    ->required()
-                    ->rules(['digits:4'])
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->default(now()->year)
-                    ->columnSpan(2),
-                Forms\Components\TextInput::make('m_recipient')->label('Destinatario / Trasgressore')
-                    ->live()
-                    ->required()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(6),
-                Forms\Components\TextInput::make('m_amount')->label('Importo')
-                    ->live()
-                    ->required()
-                    ->suffix('€')
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(3),
-                Forms\Components\TextInput::make('m_iban')->label('IBAN')
-                    ->live()
-                    ->required()
-                    ->suffix('€')
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                    ->columnSpan(3),
-                Forms\Components\Toggle::make('m_payed')
-                    ->label('Pagato')
-                    ->live()
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->columnSpan(2),
-                Forms\Components\DatePicker::make('m_payment_date')->label('Data pagamento')
-                    ->required()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value && $get('m_payed'))
-                    ->columnSpan(3),
-                Forms\Components\DatePicker::make('m_payment_insert_date')->label('Data pagamento')
-                    ->required()
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value && $get('m_payed'))
-                    ->columnSpan(3),
-                Forms\Components\Select::make('m_payment_insert_user_id')->label('Pagamento registrato da')
-                    ->relationship(
-                        name: 'paymentInsertUser',
-                        // modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$this->getOwnerRecord()->id)
-                    )
-                    ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => "{$record->name}"
-                    )
-                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        //
-                    })
-                    ->required()
-                    ->searchable()
-                    ->live()
-                    ->preload()
-                    ->optionsLimit(5)
-                    // ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value && $get('m_payed'))
-                    ->columnSpan(3),
-                //
-                Forms\Components\Select::make('reinvoice_id')->label('Fattura emessa')
-                    ->options(function (Get $get): array {
-                        return Invoice::where('client_id', $this->getOwnerRecord()->id)
-                            ->whereNotNull('flow')
-                            ->pluck('description', 'id')
-                            ->toArray();
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->afterStateUpdated(function (Set $set, $state) {
-                        if($state){
-                            $invoice = Invoice::find($state);
-                            $set('invoice_number', $invoice->number);
-                            $set('invoice_date', \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d'));
-                            $set('invoice_amount', number_format($invoice->total, 2, ',', '.'));
-                        }
-                    })
-                    // ->visible(fn(Get $get): bool => ($get('notify_type') === NotifyType::SPEDIZIONE->value && $get('s_passive_invoice_id')) || ($get('notify_type') === NotifyType::MESSO->value))
-                    // ->disabled(fn(Get $get): bool => ($get('notify_type') === NotifyType::SPEDIZIONE->value && !$get('s_passive_invoice_id')) || ($get('notify_type') !== NotifyType::MESSO->value))
-                    ->placeholder('Seleziona prima un fornitore')
-                    ->columnSpan(12),
-                Forms\Components\TextInput::make('invoice_number')->label('Numero fattura')
-                    ->required()
-                    ->maxLength(255)
-                    // ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
-                    ->columnSpan(2),
-                Forms\Components\DatePicker::make('invoice_date')->label('Data fattura')
-                    ->required()
-                    // ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
-                    ->columnSpan(2),
-                Forms\Components\TextInput::make('invoice_amount')->label('Importo fattura')
-                    ->required()
-                    ->inputMode('decimal')
-                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    ->suffix('€')
-                    // ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
-                    ->disabled(fn(Get $get): bool => !$get('s_passive_invoice_id'))
-                    ->columnSpan(2),
-                // Forms\Components\DatePicker::make('reinvoice_insert_date')->label('Data rifatturazione')
-                //     ->required()
-                //     // ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
-                //     ->columnSpan(3),
-                Forms\Components\Select::make('reinvoice_insert_user_id')->label('Rifatturatto da')
-                    ->relationship(
-                        name: 'paymentInsertUser',
-                        // modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$this->getOwnerRecord()->id)
-                    )
-                    ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => "{$record->name}"
-                    )
-                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        //
-                    })
-                    ->required()
-                    ->searchable()
-                    ->live()
-                    ->preload()
-                    ->optionsLimit(5)
-                    // ->visible(fn(Get $get): bool => $get('reinvoice_id') !== null)
-                    ->columnSpan(3),
-                Forms\Components\Textarea::make('note')->label('Note')
-                        ->required()
-                        ->columnSpanFull(),
+                // SEZIONE: Informazioni Base e Identificazione
+                Forms\Components\Section::make('Informazioni Base e Tenant')
+                    ->description('Informazioni di base per l\'identificazione della spesa postale')
+                    ->icon('heroicon-o-identification')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\Select::make('notify_type')->label('Tipo notifica')
+                            ->required()
+                            ->options(NotifyType::class)
+                            ->searchable()
+                            ->live()
+                            ->preload()
+                            ->autofocus()
+                            ->columnSpanFull(),
+
+                        Forms\Components\Select::make('new_contract_id')->label('Contratto')
+                            ->relationship(
+                                name: 'contract',
+                                modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$this->getOwnerRecord()->id)
+                            )
+                            ->getOptionLabelFromRecordUsing(
+                                fn (Model $record) => "{$record->office_name} ({$record->office_code}) - TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
+                            )
+                            ->afterStateUpdated(function (Set $set, $state) {
+                                $contract = NewContract::find($state);
+                                if ($contract) {
+                                    $set('tax_type', $contract->tax_type);
+                                    $set('reinvoice', $contract->reinvoice);
+                                }
+                            })
+                            ->required()
+                            ->searchable()
+                            ->live()
+                            ->preload()
+                            ->optionsLimit(5)
+                            ->columnSpanFull(),
+
+                        Forms\Components\Select::make('tax_type')->label('Tipo entrata')
+                            ->required()
+                            ->options(TaxType::class)
+                            ->searchable()
+                            ->live()
+                            ->preload()
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(3),
+
+                // SEZIONE: Dati di Invio e Protocollo
+                Forms\Components\Section::make('Riferimenti Invio e Classificazione Atto')
+                    ->description('Dati relativi al protocollo di invio e alla classificazione dell\'atto inviato in lavorazione/notifica')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\TextInput::make('send_protocol_number')->label('Numero protocollo invio')
+                            ->maxLength(255),
+
+                        Forms\Components\DatePicker::make('send_protocol_date')->label('Data protocollo invio'),
+
+                        Forms\Components\Select::make('shipment_type_id')->label('Modalità di invio')
+                            ->relationship('shipmentType', 'name')
+                            ->searchable()
+                            ->preload(),
+
+                        Forms\Components\TextInput::make('recipient')->label('Destinatario notifica/trasgressore')
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+
+                        // Fornitore/Supplier condizionale
+                        Forms\Components\Select::make('supplier_id')->label('Fornitore')
+                            ->relationship('supplier', 'denomination')
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->afterStateUpdated(function (Set $set) {
+                                $set('passive_invoice_id', null);
+                            })
+                            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
+                            ->columnSpanFull(),
+
+                        Forms\Components\TextInput::make('supplier')->label('Ente da rimborsare')
+                            ->maxLength(255)
+                            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                            ->columnSpanFull(),
+
+                        // Gestione anni
+                        Forms\Components\TextInput::make('manage_year')->label('Anno di gestione')
+                            ->numeric()
+                            ->rules(['digits:4'])
+                            ->default(now()->year),
+
+                        Forms\Components\Select::make('act_type_id')->label('Tipo atto')
+                            ->relationship('actType', 'name')
+                            ->searchable()
+                            ->preload(),
+
+                        Forms\Components\TextInput::make('act_id')->label('ID atto')
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('act_year')->label('Anno atto')
+                            ->numeric()
+                            ->rules(['digits:4'])
+                            ->default(now()->year),
+
+                        Forms\Components\FileUpload::make('act_attachment_path')->label('Allegato atto')
+                            ->disk('public')
+                            ->directory('postal-act-attachments')
+                            ->visibility('public')
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->maxSize(10240),
+
+                        Forms\Components\DatePicker::make('act_attachment_date')->label('Data allegato atto'),
+
+                        Forms\Components\Select::make('shipment_insert_user_id')->label('Utente inserimento dati')
+                            ->relationship('shipmentInsertUser', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(5),
+
+                        Forms\Components\DatePicker::make('shipment_insert_date')->label('Data inserimento dati'),
+                    ])
+                    ->columns(3),
+
+                // SEZIONE: Lavorazione e Notifica
+                Forms\Components\Section::make('Lavorazione e Notifica Richiesta')
+                    ->description('Dati relativi alla lavorazione/notifica richiesta ed effettuata dal fornitore incaricato')
+                    ->icon('heroicon-o-bell-alert')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
+                            ->disk('public')
+                            ->directory('postal-notify-attachments')
+                            ->visibility('public')
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->maxSize(10240),
+
+                        Forms\Components\DatePicker::make('notify_attachment_date')->label('Data allegato notifica'),
+
+                        Forms\Components\TextInput::make('order_rif')->label('Riferimento commessa')
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('list_rif')->label('Riferimento distinta')
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('receive_protocol_number')->label('Numero protocollo ricezione')
+                            ->maxLength(255),
+
+                        Forms\Components\DatePicker::make('receive_protocol_date')->label('Data protocollo ricezione'),
+
+                        Forms\Components\TextInput::make('notify_year')->label('Anno notifica')
+                            ->numeric()
+                            ->rules(['digits:4'])
+                            ->default(now()->year),
+
+                        Forms\Components\Select::make('notify_month')->label('Mese notifica')
+                            ->options(Month::class)
+                            ->searchable()
+                            ->preload(),
+
+                        Forms\Components\TextInput::make('notify_amount')->label('Importo notifica')
+                            ->numeric()
+                            ->inputMode('decimal')
+                            ->step(0.01)
+                            ->suffix('€'),
+
+                        Forms\Components\DatePicker::make('amount_registration_date')->label('Data registrazione importo'),
+
+                        Forms\Components\Select::make('notify_insert_user_id')->label('Utente inserimento notifica')
+                            ->relationship('notifyInsertUser', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(5),
+
+                        Forms\Components\DatePicker::make('notify_insert_date')->label('Data inserimento notifica'),
+                    ])
+                    ->columns(3),
+
+                // SEZIONE: Gestione Spese
+                Forms\Components\Section::make('Spese della Lavorazione/Notifica')
+                    ->description('Riferimenti alle spese della lavorazione/notifica richiesta')
+                    ->icon('heroicon-o-currency-euro')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\Select::make('expense_type')->label('Tipologia spesa')
+                            ->required()
+                            ->options(ExpenseType::class)
+                            ->searchable()
+                            ->live()
+                            ->preload()
+                            ->columnSpanFull(),
+
+                        Forms\Components\Select::make('passive_invoice_id')->label('Fattura passiva')
+                            ->relationship('passiveInvoice', 'description')
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->columnSpanFull(),
+
+                        Forms\Components\TextInput::make('notify_expense_amount')->label('Importo spese notifica')
+                            ->numeric()
+                            ->inputMode('decimal')
+                            ->step(0.01)
+                            ->suffix('€'),
+
+                        Forms\Components\TextInput::make('mark_expense_amount')->label('Importo spese contrassegno')
+                            ->numeric()
+                            ->inputMode('decimal')
+                            ->step(0.01)
+                            ->suffix('€'),
+
+                        Forms\Components\Toggle::make('reinvoice')
+                            ->label('Rifatturazione spese'),
+
+                        Forms\Components\Select::make('shipment_doc_type')->label('Tipo documento spedizione')
+                            ->required()
+                            ->options(ShipmentDocType::class)
+                            ->searchable()
+                            ->preload(),
+
+                        Forms\Components\TextInput::make('shipment_doc_number')->label('Numero documento')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\DatePicker::make('shipment_doc_date')->label('Data documento')
+                            ->required(),
+
+                        Forms\Components\TextInput::make('iban')->label('IBAN')
+                            ->maxLength(255)
+                            ->rules(['iban']),
+
+                        Forms\Components\Select::make('expense_insert_user_id')->label('Utente inserimento spese')
+                            ->relationship('expenseInsertUser', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(5),
+
+                        Forms\Components\DatePicker::make('expense_insert_date')->label('Data inserimento spese'),
+                    ])
+                    ->columns(3),
+
+                // SEZIONE: Pagamenti
+                Forms\Components\Section::make('Estremi del Pagamento')
+                    ->description('Informazioni relative ai pagamenti delle spese')
+                    ->icon('heroicon-o-credit-card')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\Toggle::make('payed')
+                            ->label('Spese pagate')
+                            ->live(),
+
+                        Forms\Components\DatePicker::make('payment_date')->label('Data pagamento')
+                            ->helperText('In caso di più pagamenti, inserire la data dell\'ultimo pagamento'),
+
+                        Forms\Components\TextInput::make('payment_total')->label('Totale pagamenti')
+                            ->numeric()
+                            ->inputMode('decimal')
+                            ->step(0.01)
+                            ->suffix('€'),
+
+                        Forms\Components\Select::make('payment_insert_user_id')->label('Utente inserimento pagamento')
+                            ->relationship('paymentInsertUser', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(5),
+
+                        Forms\Components\DatePicker::make('payment_insert_date')->label('Data inserimento pagamento'),
+                    ])
+                    ->columns(3),
+
+                // SEZIONE: Rifatturazione
+                Forms\Components\Section::make('Estremi della Rifatturazione')
+                    ->description('Estremi della rifatturazione delle spese della lavorazione/notifica')
+                    ->icon('heroicon-o-receipt-refund')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\Select::make('reinvoice_id')->label('Fattura emessa per rifatturazione')
+                            ->relationship('reinvoiceInvoice', 'description')
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->afterStateUpdated(function (Set $set, $state) {
+                                if($state){
+                                    $invoice = Invoice::find($state);
+                                    if ($invoice) {
+                                        $set('reinvoice_number', $invoice->number);
+                                        $set('reinvoice_date', $invoice->invoice_date->format('Y-m-d'));
+                                        $set('reinvoice_amount', $invoice->total);
+                                    }
+                                }
+                            })
+                            ->columnSpanFull(),
+
+                        Forms\Components\TextInput::make('reinvoice_number')->label('Numero fattura emessa')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\DatePicker::make('reinvoice_date')->label('Data fattura emessa')
+                            ->required(),
+
+                        Forms\Components\TextInput::make('reinvoice_amount')->label('Importo fattura emessa')
+                            ->numeric()
+                            ->inputMode('decimal')
+                            ->step(0.01)
+                            ->suffix('€'),
+
+                        Forms\Components\Select::make('reinvoice_insert_user_id')->label('Utente inserimento rifatturazione')
+                            ->relationship('reinvoiceInsertUser', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(5),
+
+                        Forms\Components\DatePicker::make('reinvoice_insert_date')->label('Data inserimento rifatturazione'),
+                    ])
+                    ->columns(3),
+
+                // SEZIONE: Registrazione e Allegati
+                Forms\Components\Section::make('Registrazione Data di Lavorazione/Modifica')
+                    ->description('Registrazione della data di lavorazione/modifica e allegati')
+                    ->icon('heroicon-o-document-text')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\FileUpload::make('reinvoice_attachment_path')->label('Allegato fattura emessa')
+                            ->disk('public')
+                            ->directory('postal-reinvoice-attachments')
+                            ->visibility('public')
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->maxSize(10240),
+
+                        Forms\Components\DatePicker::make('reinvoice_attachment_date')->label('Data file fattura emessa caricato'),
+
+                        Forms\Components\DatePicker::make('notify_date_registration_date')->label('Data registrazione data di notifica'),
+
+                        Forms\Components\Select::make('reinvoice_registration_user_id')->label('Utente registrazione')
+                            ->relationship('reinvoiceRegistrationUser', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(5),
+
+                        Forms\Components\DatePicker::make('reinvoice_registration_date')->label('Data inserimento registrazione'),
+                    ])
+                    ->columns(3),
+
+                // SEZIONE: Note
+                Forms\Components\Section::make('Note')
+                    ->description('Note aggiuntive')
+                    ->icon('heroicon-o-chat-bubble-left-ellipsis')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\Textarea::make('note')->label('Note')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ]),
+
+                // SEZIONE: Visualizzazione Allegati
+                Forms\Components\Section::make('Visualizza Allegati')
+                    ->description('Azioni per visualizzare gli allegati caricati')
+                    ->icon('heroicon-o-paper-clip')
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\Actions::make([
+                            Forms\Components\Actions\Action::make('view_act_attachment')
+                                ->label('Visualizza Allegato Atto')
+                                ->icon('heroicon-o-eye')
+                                ->url(fn($record): ?string => $record && $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
+                                ->openUrlInNewTab()
+                                ->disabled(fn($record): bool => !$record || !$record->act_attachment_path)
+                                ->color('primary'),
+                            
+                            Forms\Components\Actions\Action::make('view_notify_attachment')
+                                ->label('Visualizza Allegato Notifica')
+                                ->icon('heroicon-o-eye')
+                                ->url(fn($record): ?string => $record && $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
+                                ->openUrlInNewTab()
+                                ->disabled(fn($record): bool => !$record || !$record->notify_attachment_path)
+                                ->color('secondary'),
+                            
+                            Forms\Components\Actions\Action::make('view_reinvoice_attachment')
+                                ->label('Visualizza Allegato Rifatturazione')
+                                ->icon('heroicon-o-eye')
+                                ->url(fn($record): ?string => $record && $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
+                                ->openUrlInNewTab()
+                                ->disabled(fn($record): bool => !$record || !$record->reinvoice_attachment_path)
+                                ->color('success'),
+                        ])->columnSpanFull()
+                    ]),
             ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('order_rif') // Modificato da 'send_number' a 'order_rif' (o altro campo appropriato)
+            ->recordTitleAttribute('order_rif')
             ->columns([
-                Tables\Columns\TextColumn::make('order_rif')->label('Rif. Commessa'),
-                Tables\Columns\TextColumn::make('list_rif')->label('Rif. Distinta'),
-                Tables\Columns\TextColumn::make('notify_type')->label('Tipo Notifica'),
+                Tables\Columns\TextColumn::make('notify_type')
+                    ->label('Tipo Notifica')
+                    ->badge(),
+                Tables\Columns\TextColumn::make('order_rif')
+                    ->label('Rif. Commessa')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('list_rif')
+                    ->label('Rif. Distinta')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('contract.office_name')
+                    ->label('Contratto')
+                    ->limit(30),
+                Tables\Columns\TextColumn::make('recipient')
+                    ->label('Destinatario')
+                    ->limit(20),
+                Tables\Columns\TextColumn::make('notify_amount')
+                    ->label('Importo')
+                    ->money('EUR'),
+                Tables\Columns\IconColumn::make('payed')
+                    ->label('Pagato')
+                    ->boolean(),
+                Tables\Columns\IconColumn::make('reinvoice')
+                    ->label('Rifatturato')
+                    ->boolean(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('notify_type')
+                    ->options(NotifyType::class),
+                Tables\Filters\TernaryFilter::make('payed')
+                    ->label('Pagato'),
+                Tables\Filters\TernaryFilter::make('reinvoice')
+                    ->label('Rifatturazione'),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->modalWidth(MaxWidth::SevenExtraLarge)
                     ->extraAttributes([
-                        'style' => 'max-width: min(90vw, 1400px) !important;'
+                        'style' => 'max-width: min(95vw, 1600px) !important;'
                     ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->modalWidth(MaxWidth::SevenExtraLarge)
                     ->extraAttributes([
-                        'style' => 'max-width: min(90vw, 1400px) !important;'
+                        'style' => 'max-width: min(95vw, 1600px) !important;'
                     ]),
-                Tables\Actions\Action::make('view_attachment')
-                    ->label('Visualizza Allegato')
-                    ->icon('heroicon-o-eye')
-                    ->url(fn($record): ?string => $record->attachment ? Storage::url($record->attachment) : null)
-                    ->openUrlInNewTab()
-                    // ->visible(fn($record): bool => $record->notify_type === NotifyType::MESSO->value && $record->attachment)
-                    ->disabled(fn($record): bool => !$record->attachment)
-                    ->color('primary'),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('view_act_attachment')
+                        ->label('Allegato Atto')
+                        ->icon('heroicon-o-document')
+                        ->url(fn($record): ?string => $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
+                        ->openUrlInNewTab()
+                        ->visible(fn($record): bool => (bool)$record->act_attachment_path),
+                    Tables\Actions\Action::make('view_notify_attachment')
+                        ->label('Allegato Notifica')
+                        ->icon('heroicon-o-bell')
+                        ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
+                        ->openUrlInNewTab()
+                        ->visible(fn($record): bool => (bool)$record->notify_attachment_path),
+                    Tables\Actions\Action::make('view_reinvoice_attachment')
+                        ->label('Allegato Rifatturazione')
+                        ->icon('heroicon-o-receipt-tax')
+                        ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
+                        ->openUrlInNewTab()
+                        ->visible(fn($record): bool => (bool)$record->reinvoice_attachment_path),
+                ])
+                ->label('Allegati')
+                ->icon('heroicon-o-paper-clip')
+                ->color('gray')
+                ->button(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

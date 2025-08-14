@@ -2,136 +2,238 @@
 
 namespace App\Models;
 
+use App\Enums\ExpenseType;
 use App\Enums\Month;
 use App\Enums\NotifyType;
-use App\Enums\PostalDocType;
-use App\Enums\ProductType;
+use App\Enums\ShipmentDocType;
 use App\Enums\TaxType;
 use Illuminate\Database\Eloquent\Model;
 
 class PostalExpense extends Model
 {
     protected $fillable = [
+        // Informazioni base
         'company_id',
-        'client_id',
         'notify_type',
         'new_contract_id',
+        'client_id',
         'tax_type',
-        'reinvoice',
+        
+        // Protocollo e invio
+        'send_protocol_number',
+        'send_protocol_date',
+        'shipment_type_id',
+        'supplier_id',
+        'supplier',
+        'recipient',
+        
+        // Gestione anni
+        'manage_year',
+        'notify_year',
+        'notify_month',
+        
+        // Classificazione atto
+        'act_type_id',
+        'act_id',
+        'act_year',
+        'act_attachment_path',
+        'act_attachment_date',
+        
+        // Utente inserimento spedizione
+        'shipment_insert_user_id',
+        'shipment_insert_date',
+        
+        // Lavorazione e notifica
+        'notify_attachment_path',
+        'notify_attachment_date',
         'order_rif',
         'list_rif',
-        'reinvoice_insert_user_id',
+        'receive_protocol_number',
+        'receive_protocol_date',
+        'notify_amount',
+        'amount_registration_date',
+        
+        // Utente inserimento notifica
+        'notify_insert_user_id',
+        'notify_insert_date',
+        
+        // Gestione spese
+        'expense_type',
+        'passive_invoice_id',
+        'notify_expense_amount',
+        'mark_expense_amount',
+        'reinvoice',
+        'shipment_doc_type',
+        'shipment_doc_number',
+        'shipment_doc_date',
+        'iban',
+        
+        // Utente inserimento spese
+        'expense_insert_user_id',
+        'expense_insert_date',
+        
+        // Pagamenti
+        'payed',
+        'payment_date',
+        'payment_total',
+        
+        // Utente inserimento pagamento
+        'payment_insert_user_id',
+        'payment_insert_date',
+        
+        // Rifatturazione
         'reinvoice_id',
+        'reinvoice_number',
+        'reinvoice_date',
+        'reinvoice_amount',
+        
+        // Utente inserimento rifatturazione
+        'reinvoice_insert_user_id',
+        'reinvoice_insert_date',
+        
+        // Allegati e registrazione
+        'reinvoice_attachment_path',
+        'reinvoice_attachment_date',
+        'notify_date_registration_date',
+        
+        // Utente registrazione
+        'reinvoice_registration_user_id',
+        'reinvoice_registration_date',
+        
+        // Note
         'note',
-        's_shipment_date',
-        's_month',
-        's_shipment_type_id',
-        's_supplier_id',
-        's_year',
-        's_postal_doc_type',
-        's_product_type',
-        's_amount',
-        's_passive_invoice_id',
-        's_passive_invoice_expenses',
-        's_passive_invoice_settle_date',
-        's_passive_invoice_amount',
-        'm_notify_registration_date',
-        'm_notify_registration_user_id',
-        'm_scan_import_date',
-        'm_scan_import_user_id',
-        'm_send_protocol_number',
-        'm_send_protocol_date',
-        'm_receive_protocol_number',
-        'm_receive_protocol_date',
-        'm_supplier',
-        'm_act_type_id',
-        'm_act_id',
-        'm_act_year',
-        'm_recipient',
-        'm_amount',
-        'm_iban',
-        'attachment',
-        'm_payed',
-        'm_payment_date',
-        'm_payment_insert_date',
-        'm_payment_insert_user_id',
     ];
 
     protected $casts = [
-        'reinvoice' => 'boolean',
-        'm_payed' => 'boolean',
-        's_shipment_date' => 'date',
-        's_passive_invoice_settle_date' => 'date',
-        'm_notify_registration_date' => 'date',
-        'm_scan_import_date' => 'date',
-        'm_send_protocol_date' => 'date',
-        'm_receive_protocol_date' => 'date',
-        'm_payment_date' => 'date',
-        'm_payment_insert_date' => 'date',
-        's_amount' => 'decimal:2',
-        's_passive_invoice_expenses' => 'decimal:2',
-        's_passive_invoice_amount' => 'decimal:2',
-        'm_amount' => 'decimal:2',
-        's_year' => 'integer',
-        'm_act_year' => 'integer',
+        // Enums
         'notify_type' => NotifyType::class,
         'tax_type' => TaxType::class,
-        's_month' => Month::class,
-        's_postal_doc_type' => PostalDocType::class,
-        's_product_type' => ProductType::class,
+        'expense_type' => ExpenseType::class,
+        'shipment_doc_type' => ShipmentDocType::class,
+        'notify_month' => Month::class,
+        
+        // Date fields
+        'send_protocol_date' => 'date',
+        'act_attachment_date' => 'date',
+        'shipment_insert_date' => 'date',
+        'notify_attachment_date' => 'date',
+        'receive_protocol_date' => 'date',
+        'amount_registration_date' => 'date',
+        'notify_insert_date' => 'date',
+        'expense_insert_date' => 'date',
+        'payment_date' => 'date',
+        'payment_insert_date' => 'date',
+        'reinvoice_date' => 'date',
+        'reinvoice_insert_date' => 'date',
+        'reinvoice_attachment_date' => 'date',
+        'notify_date_registration_date' => 'date',
+        'reinvoice_registration_date' => 'date',
+        
+        // Decimal fields
+        'notify_amount' => 'decimal:2',
+        'notify_expense_amount' => 'decimal:2',
+        'mark_expense_amount' => 'decimal:2',
+        'payment_total' => 'decimal:2',
+        'reinvoice_amount' => 'decimal:2',
+        
+        // Boolean fields
+        'reinvoice' => 'boolean',
+        'payed' => 'boolean',
+        
+        // Integer fields (Foreign Keys)
+        'company_id' => 'integer',
+        'new_contract_id' => 'integer',
+        'shipment_type_id' => 'integer',
+        'client_id' => 'integer',
+        'supplier_id' => 'integer',
+        'act_type_id' => 'integer',
+        'shipment_insert_user_id' => 'integer',
+        'notify_insert_user_id' => 'integer',
+        'passive_invoice_id' => 'integer',
+        'expense_insert_user_id' => 'integer',
+        'payment_insert_user_id' => 'integer',
+        'reinvoice_id' => 'integer',
+        'reinvoice_insert_user_id' => 'integer',
+        'reinvoice_registration_user_id' => 'integer',
+        
+        // Integer fields (Years and IDs)
+        'manage_year' => 'integer',
+        'notify_year' => 'integer',
+        'act_year' => 'integer',
     ];
 
-    // public function shipmentType(){
-    //     return $this->belongsTo(ShipmentType::class);                            // in sospeso
-    // }
-
-    public function company(){
+    // Relazioni esistenti corrette
+    public function company()
+    {
         return $this->belongsTo(Company::class);
     }
 
-    public function newContract(){
-        return $this->belongsTo(NewContract::class);
+    public function shipmentType()
+    {
+        return $this->belongsTo(ShipmentType::class);
     }
 
-    public function client(){
+    public function actType()
+    {
+        return $this->belongsTo(ActType::class);
+    }
+
+    public function client()
+    {
         return $this->belongsTo(Client::class);
     }
 
-    public function contract(){
-        return $this->belongsTo(NewContract::class);
+    public function contract()
+    {
+        return $this->belongsTo(NewContract::class, 'new_contract_id');
     }
 
-    public function supplier(){
-        return $this->belongsTo(Supplier::class);
+    // Correzione relazione supplier
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
+    // Correzione relazione passive invoice
     public function passiveInvoice()
     {
-        return $this->belongsTo(PassiveInvoice::class, 's_passive_invoice_id');
+        return $this->belongsTo(PassiveInvoice::class, 'passive_invoice_id');
     }
 
-    public function reInvoice()
+    // Correzione relazione reinvoice
+    public function reinvoiceInvoice()
     {
-        return $this->belongsTo(Invoice::class, 's_passive_invoice_id');
+        return $this->belongsTo(Invoice::class, 'reinvoice_id');
     }
 
-    public function shipmentInsertUser(){
+    // Relazioni utenti corrette
+    public function shipmentInsertUser()
+    {
         return $this->belongsTo(User::class, 'shipment_insert_user_id');
     }
 
-    public function notifyInsertUser(){
+    public function notifyInsertUser()
+    {
         return $this->belongsTo(User::class, 'notify_insert_user_id');
     }
 
-    public function paymentInsertUser(){
+    public function expenseInsertUser()
+    {
+        return $this->belongsTo(User::class, 'expense_insert_user_id');
+    }
+
+    public function paymentInsertUser()
+    {
         return $this->belongsTo(User::class, 'payment_insert_user_id');
     }
 
-    public function reinvoiceInsertUser(){
+    public function reinvoiceInsertUser()
+    {
         return $this->belongsTo(User::class, 'reinvoice_insert_user_id');
     }
 
-    public function notifyRegistrationUser(){
-        return $this->belongsTo(User::class, 'm_notify_registration_user_id');
+    public function reinvoiceRegistrationUser()
+    {
+        return $this->belongsTo(User::class, 'reinvoice_registration_user_id');
     }
 }
