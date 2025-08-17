@@ -40,10 +40,10 @@ class PostalExpensesRelationManager extends RelationManager
         return $form
             ->schema([
                 // SEZIONE: Informazioni Base e Identificazione
-                Forms\Components\Section::make('Informazioni Base e Tenant')
-                    ->description('Informazioni di base per l\'identificazione della spesa postale')
+                Forms\Components\Section::make('Informazioni di base per l\'identificazione della spesa postale')
                     ->icon('heroicon-o-identification')
-                    ->collapsible()
+                    ->collapsed(false)
+                    ->columns(12)
                     ->schema([
                         Forms\Components\Select::make('notify_type')->label('Tipo notifica')
                             ->required()
@@ -52,7 +52,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->live()
                             ->preload()
                             ->autofocus()
-                            ->columnSpanFull(),
+                            ->columnSpan(3),
 
                         Forms\Components\Select::make('new_contract_id')->label('Contratto')
                             ->relationship(
@@ -74,7 +74,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->live()
                             ->preload()
                             ->optionsLimit(5)
-                            ->columnSpanFull(),
+                            ->columnSpan(6),
 
                         Forms\Components\Select::make('tax_type')->label('Tipo entrata')
                             ->required()
@@ -82,15 +82,13 @@ class PostalExpensesRelationManager extends RelationManager
                             ->searchable()
                             ->live()
                             ->preload()
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(3),
+                            ->columnSpan(3),
+                    ]),
 
                 // SEZIONE: Dati di Invio e Protocollo
-                Forms\Components\Section::make('Riferimenti Invio e Classificazione Atto')
-                    ->description('Dati relativi al protocollo di invio e alla classificazione dell\'atto inviato in lavorazione/notifica')
+                Forms\Components\Section::make('Dati relativi al protocollo di invio e alla classificazione dell\'atto inviato in lavorazione/notifica')
                     ->icon('heroicon-o-paper-airplane')
-                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         Forms\Components\TextInput::make('send_protocol_number')->label('Numero protocollo invio')
                             ->maxLength(255),
@@ -162,10 +160,9 @@ class PostalExpensesRelationManager extends RelationManager
                     ->columns(3),
 
                 // SEZIONE: Lavorazione e Notifica
-                Forms\Components\Section::make('Lavorazione e Notifica Richiesta')
-                    ->description('Dati relativi alla lavorazione/notifica richiesta ed effettuata dal fornitore incaricato')
+                Forms\Components\Section::make('Dati relativi alla lavorazione/notifica richiesta ed effettuata dal fornitore incaricato')
                     ->icon('heroicon-o-bell-alert')
-                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
                             ->disk('public')
@@ -216,10 +213,9 @@ class PostalExpensesRelationManager extends RelationManager
                     ->columns(3),
 
                 // SEZIONE: Gestione Spese
-                Forms\Components\Section::make('Spese della Lavorazione/Notifica')
-                    ->description('Riferimenti alle spese della lavorazione/notifica richiesta')
+                Forms\Components\Section::make('Riferimenti alle spese della lavorazione/notifica richiesta')
                     ->icon('heroicon-o-currency-euro')
-                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         Forms\Components\Select::make('expense_type')->label('Tipologia spesa')
                             ->required()
@@ -230,7 +226,14 @@ class PostalExpensesRelationManager extends RelationManager
                             ->columnSpanFull(),
 
                         Forms\Components\Select::make('passive_invoice_id')->label('Fattura passiva')
-                            ->relationship('passiveInvoice', 'description')
+                            // ->relationship('passiveInvoice', 'description')
+                            ->options(function (Get $get): array {
+                                $supplierId = $get('supplier_id');
+                                if (!$supplierId) { return []; }
+                                return PassiveInvoice::where('supplier_id', $supplierId)
+                                    ->pluck('description', 'id')
+                                    ->toArray();
+                            })
                             ->searchable()
                             ->preload()
                             ->live()
@@ -279,10 +282,9 @@ class PostalExpensesRelationManager extends RelationManager
                     ->columns(3),
 
                 // SEZIONE: Pagamenti
-                Forms\Components\Section::make('Estremi del Pagamento')
-                    ->description('Informazioni relative ai pagamenti delle spese')
+                Forms\Components\Section::make('Informazioni relative ai pagamenti delle spese')
                     ->icon('heroicon-o-credit-card')
-                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         Forms\Components\Toggle::make('payed')
                             ->label('Spese pagate')
@@ -308,13 +310,18 @@ class PostalExpensesRelationManager extends RelationManager
                     ->columns(3),
 
                 // SEZIONE: Rifatturazione
-                Forms\Components\Section::make('Estremi della Rifatturazione')
-                    ->description('Estremi della rifatturazione delle spese della lavorazione/notifica')
+                Forms\Components\Section::make('Estremi della rifatturazione delle spese della lavorazione/notifica')
                     ->icon('heroicon-o-receipt-refund')
-                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         Forms\Components\Select::make('reinvoice_id')->label('Fattura emessa per rifatturazione')
-                            ->relationship('reinvoiceInvoice', 'description')
+                            // ->relationship('reInvoice', 'description')
+                            ->options(function (Get $get): array {
+                                return Invoice::where('client_id', $this->getOwnerRecord()->id)
+                                    ->whereNotNull('flow')
+                                    ->pluck('description', 'id')
+                                    ->toArray();
+                            })
                             ->searchable()
                             ->preload()
                             ->live()
@@ -354,10 +361,9 @@ class PostalExpensesRelationManager extends RelationManager
                     ->columns(3),
 
                 // SEZIONE: Registrazione e Allegati
-                Forms\Components\Section::make('Registrazione Data di Lavorazione/Modifica')
-                    ->description('Registrazione della data di lavorazione/modifica e allegati')
+                Forms\Components\Section::make('Registrazione della data di lavorazione/modifica e allegati')
                     ->icon('heroicon-o-document-text')
-                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         Forms\Components\FileUpload::make('reinvoice_attachment_path')->label('Allegato fattura emessa')
                             ->disk('public')
@@ -382,9 +388,8 @@ class PostalExpensesRelationManager extends RelationManager
 
                 // SEZIONE: Note
                 Forms\Components\Section::make('Note')
-                    ->description('Note aggiuntive')
                     ->icon('heroicon-o-chat-bubble-left-ellipsis')
-                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         Forms\Components\Textarea::make('note')->label('Note')
                             ->rows(3)
@@ -393,9 +398,8 @@ class PostalExpensesRelationManager extends RelationManager
 
                 // SEZIONE: Visualizzazione Allegati
                 Forms\Components\Section::make('Visualizza Allegati')
-                    ->description('Azioni per visualizzare gli allegati caricati')
                     ->icon('heroicon-o-paper-clip')
-                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         Forms\Components\Actions::make([
                             Forms\Components\Actions\Action::make('view_act_attachment')

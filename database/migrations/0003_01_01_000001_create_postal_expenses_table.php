@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users');                                  // fattura emessa da
         });
 
-        Schema::create('shipment_types', function (Blueprint $table) {                                  // tabella dei tipi di spedizioni per tabella spese postali
+        Schema::create('shipment_types', function (Blueprint $table) {                                  // tabella delle modalità di spedizioni per tabella spese postali
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onUpdate('cascade');             // tenant
             $table->string('name');

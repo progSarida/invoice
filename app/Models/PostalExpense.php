@@ -201,7 +201,7 @@ class PostalExpense extends Model
     }
 
     // Correzione relazione reinvoice
-    public function reinvoiceInvoice()
+    public function reInvoice()
     {
         return $this->belongsTo(Invoice::class, 'reinvoice_id');
     }
