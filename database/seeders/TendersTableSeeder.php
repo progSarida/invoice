@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class TendersTableSeeder extends Seeder
 {
@@ -14,12 +15,12 @@ class TendersTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
-        \DB::table('tenders')->delete();
-        
-        \DB::table('tenders')->insert(array (
-            0 => 
+
+        DB::table('tenders')->delete();
+
+        DB::table('tenders')->insert(array (
+            0 =>
             array (
                 'id' => 1,
                 'company_id' => 1,
@@ -37,7 +38,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 13:06:19',
             ),
-            1 => 
+            1 =>
             array (
                 'id' => 2,
                 'company_id' => 1,
@@ -55,7 +56,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            2 => 
+            2 =>
             array (
                 'id' => 3,
                 'company_id' => 1,
@@ -73,7 +74,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            3 => 
+            3 =>
             array (
                 'id' => 4,
                 'company_id' => 1,
@@ -91,7 +92,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            4 => 
+            4 =>
             array (
                 'id' => 5,
                 'company_id' => 1,
@@ -109,7 +110,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            5 => 
+            5 =>
             array (
                 'id' => 6,
                 'company_id' => 1,
@@ -127,7 +128,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            6 => 
+            6 =>
             array (
                 'id' => 7,
                 'company_id' => 1,
@@ -145,7 +146,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            7 => 
+            7 =>
             array (
                 'id' => 8,
                 'company_id' => 1,
@@ -163,7 +164,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            8 => 
+            8 =>
             array (
                 'id' => 9,
                 'company_id' => 1,
@@ -181,7 +182,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            9 => 
+            9 =>
             array (
                 'id' => 10,
                 'company_id' => 1,
@@ -199,7 +200,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            10 => 
+            10 =>
             array (
                 'id' => 11,
                 'company_id' => 1,
@@ -217,7 +218,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            11 => 
+            11 =>
             array (
                 'id' => 12,
                 'company_id' => 1,
@@ -235,7 +236,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            12 => 
+            12 =>
             array (
                 'id' => 13,
                 'company_id' => 1,
@@ -253,7 +254,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            13 => 
+            13 =>
             array (
                 'id' => 14,
                 'company_id' => 1,
@@ -271,7 +272,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            14 => 
+            14 =>
             array (
                 'id' => 15,
                 'company_id' => 1,
@@ -289,7 +290,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            15 => 
+            15 =>
             array (
                 'id' => 16,
                 'company_id' => 1,
@@ -307,7 +308,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            16 => 
+            16 =>
             array (
                 'id' => 17,
                 'company_id' => 1,
@@ -325,7 +326,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            17 => 
+            17 =>
             array (
                 'id' => 18,
                 'company_id' => 1,
@@ -343,7 +344,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            18 => 
+            18 =>
             array (
                 'id' => 19,
                 'company_id' => 1,
@@ -361,7 +362,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            19 => 
+            19 =>
             array (
                 'id' => 20,
                 'company_id' => 1,
@@ -379,7 +380,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            20 => 
+            20 =>
             array (
                 'id' => 21,
                 'company_id' => 1,
@@ -397,7 +398,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            21 => 
+            21 =>
             array (
                 'id' => 22,
                 'company_id' => 1,
@@ -415,7 +416,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            22 => 
+            22 =>
             array (
                 'id' => 23,
                 'company_id' => 1,
@@ -433,7 +434,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            23 => 
+            23 =>
             array (
                 'id' => 24,
                 'company_id' => 1,
@@ -451,7 +452,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            24 => 
+            24 =>
             array (
                 'id' => 25,
                 'company_id' => 1,
@@ -469,7 +470,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            25 => 
+            25 =>
             array (
                 'id' => 26,
                 'company_id' => 1,
@@ -487,7 +488,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            26 => 
+            26 =>
             array (
                 'id' => 27,
                 'company_id' => 1,
@@ -505,7 +506,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            27 => 
+            27 =>
             array (
                 'id' => 28,
                 'company_id' => 1,
@@ -523,7 +524,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            28 => 
+            28 =>
             array (
                 'id' => 29,
                 'company_id' => 1,
@@ -541,7 +542,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            29 => 
+            29 =>
             array (
                 'id' => 30,
                 'company_id' => 1,
@@ -559,7 +560,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            30 => 
+            30 =>
             array (
                 'id' => 31,
                 'company_id' => 1,
@@ -577,7 +578,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            31 => 
+            31 =>
             array (
                 'id' => 32,
                 'company_id' => 1,
@@ -595,7 +596,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            32 => 
+            32 =>
             array (
                 'id' => 33,
                 'company_id' => 1,
@@ -613,7 +614,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            33 => 
+            33 =>
             array (
                 'id' => 34,
                 'company_id' => 1,
@@ -631,7 +632,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            34 => 
+            34 =>
             array (
                 'id' => 35,
                 'company_id' => 1,
@@ -649,7 +650,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            35 => 
+            35 =>
             array (
                 'id' => 36,
                 'company_id' => 1,
@@ -667,7 +668,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            36 => 
+            36 =>
             array (
                 'id' => 37,
                 'company_id' => 1,
@@ -685,7 +686,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            37 => 
+            37 =>
             array (
                 'id' => 38,
                 'company_id' => 1,
@@ -703,7 +704,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            38 => 
+            38 =>
             array (
                 'id' => 39,
                 'company_id' => 1,
@@ -721,7 +722,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            39 => 
+            39 =>
             array (
                 'id' => 40,
                 'company_id' => 1,
@@ -739,7 +740,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            40 => 
+            40 =>
             array (
                 'id' => 41,
                 'company_id' => 1,
@@ -757,7 +758,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            41 => 
+            41 =>
             array (
                 'id' => 42,
                 'company_id' => 1,
@@ -775,7 +776,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            42 => 
+            42 =>
             array (
                 'id' => 43,
                 'company_id' => 1,
@@ -793,7 +794,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            43 => 
+            43 =>
             array (
                 'id' => 44,
                 'company_id' => 1,
@@ -811,7 +812,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            44 => 
+            44 =>
             array (
                 'id' => 45,
                 'company_id' => 1,
@@ -829,7 +830,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            45 => 
+            45 =>
             array (
                 'id' => 46,
                 'company_id' => 1,
@@ -847,7 +848,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            46 => 
+            46 =>
             array (
                 'id' => 47,
                 'company_id' => 1,
@@ -865,7 +866,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            47 => 
+            47 =>
             array (
                 'id' => 48,
                 'company_id' => 1,
@@ -883,7 +884,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            48 => 
+            48 =>
             array (
                 'id' => 49,
                 'company_id' => 1,
@@ -901,7 +902,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            49 => 
+            49 =>
             array (
                 'id' => 50,
                 'company_id' => 1,
@@ -919,7 +920,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            50 => 
+            50 =>
             array (
                 'id' => 51,
                 'company_id' => 1,
@@ -937,7 +938,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            51 => 
+            51 =>
             array (
                 'id' => 52,
                 'company_id' => 1,
@@ -955,7 +956,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            52 => 
+            52 =>
             array (
                 'id' => 53,
                 'company_id' => 1,
@@ -973,7 +974,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            53 => 
+            53 =>
             array (
                 'id' => 54,
                 'company_id' => 1,
@@ -991,7 +992,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            54 => 
+            54 =>
             array (
                 'id' => 55,
                 'company_id' => 1,
@@ -1009,7 +1010,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            55 => 
+            55 =>
             array (
                 'id' => 56,
                 'company_id' => 1,
@@ -1027,7 +1028,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            56 => 
+            56 =>
             array (
                 'id' => 57,
                 'company_id' => 1,
@@ -1045,7 +1046,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            57 => 
+            57 =>
             array (
                 'id' => 58,
                 'company_id' => 1,
@@ -1063,7 +1064,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            58 => 
+            58 =>
             array (
                 'id' => 59,
                 'company_id' => 1,
@@ -1081,7 +1082,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            59 => 
+            59 =>
             array (
                 'id' => 60,
                 'company_id' => 1,
@@ -1099,7 +1100,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            60 => 
+            60 =>
             array (
                 'id' => 61,
                 'company_id' => 1,
@@ -1117,7 +1118,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            61 => 
+            61 =>
             array (
                 'id' => 62,
                 'company_id' => 1,
@@ -1135,7 +1136,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            62 => 
+            62 =>
             array (
                 'id' => 63,
                 'company_id' => 1,
@@ -1153,7 +1154,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            63 => 
+            63 =>
             array (
                 'id' => 64,
                 'company_id' => 1,
@@ -1171,7 +1172,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            64 => 
+            64 =>
             array (
                 'id' => 65,
                 'company_id' => 1,
@@ -1189,7 +1190,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            65 => 
+            65 =>
             array (
                 'id' => 66,
                 'company_id' => 1,
@@ -1207,7 +1208,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            66 => 
+            66 =>
             array (
                 'id' => 67,
                 'company_id' => 1,
@@ -1225,7 +1226,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            67 => 
+            67 =>
             array (
                 'id' => 68,
                 'company_id' => 1,
@@ -1243,7 +1244,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            68 => 
+            68 =>
             array (
                 'id' => 71,
                 'company_id' => 1,
@@ -1261,7 +1262,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            69 => 
+            69 =>
             array (
                 'id' => 72,
                 'company_id' => 1,
@@ -1279,7 +1280,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            70 => 
+            70 =>
             array (
                 'id' => 73,
                 'company_id' => 1,
@@ -1297,7 +1298,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:31',
             ),
-            71 => 
+            71 =>
             array (
                 'id' => 74,
                 'company_id' => 1,
@@ -1315,7 +1316,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            72 => 
+            72 =>
             array (
                 'id' => 75,
                 'company_id' => 1,
@@ -1333,7 +1334,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            73 => 
+            73 =>
             array (
                 'id' => 76,
                 'company_id' => 1,
@@ -1351,7 +1352,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            74 => 
+            74 =>
             array (
                 'id' => 77,
                 'company_id' => 1,
@@ -1369,7 +1370,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            75 => 
+            75 =>
             array (
                 'id' => 78,
                 'company_id' => 1,
@@ -1387,7 +1388,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            76 => 
+            76 =>
             array (
                 'id' => 79,
                 'company_id' => 1,
@@ -1405,7 +1406,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            77 => 
+            77 =>
             array (
                 'id' => 82,
                 'company_id' => 1,
@@ -1423,7 +1424,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            78 => 
+            78 =>
             array (
                 'id' => 83,
                 'company_id' => 1,
@@ -1441,7 +1442,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            79 => 
+            79 =>
             array (
                 'id' => 84,
                 'company_id' => 1,
@@ -1459,7 +1460,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            80 => 
+            80 =>
             array (
                 'id' => 85,
                 'company_id' => 1,
@@ -1477,7 +1478,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            81 => 
+            81 =>
             array (
                 'id' => 86,
                 'company_id' => 1,
@@ -1495,7 +1496,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            82 => 
+            82 =>
             array (
                 'id' => 87,
                 'company_id' => 1,
@@ -1513,7 +1514,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            83 => 
+            83 =>
             array (
                 'id' => 88,
                 'company_id' => 1,
@@ -1531,7 +1532,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            84 => 
+            84 =>
             array (
                 'id' => 89,
                 'company_id' => 1,
@@ -1549,7 +1550,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            85 => 
+            85 =>
             array (
                 'id' => 90,
                 'company_id' => 1,
@@ -1567,7 +1568,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            86 => 
+            86 =>
             array (
                 'id' => 91,
                 'company_id' => 1,
@@ -1585,7 +1586,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            87 => 
+            87 =>
             array (
                 'id' => 92,
                 'company_id' => 1,
@@ -1603,7 +1604,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            88 => 
+            88 =>
             array (
                 'id' => 93,
                 'company_id' => 1,
@@ -1621,7 +1622,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            89 => 
+            89 =>
             array (
                 'id' => 94,
                 'company_id' => 1,
@@ -1639,7 +1640,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            90 => 
+            90 =>
             array (
                 'id' => 95,
                 'company_id' => 1,
@@ -1657,7 +1658,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            91 => 
+            91 =>
             array (
                 'id' => 96,
                 'company_id' => 1,
@@ -1675,7 +1676,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            92 => 
+            92 =>
             array (
                 'id' => 97,
                 'company_id' => 1,
@@ -1693,7 +1694,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            93 => 
+            93 =>
             array (
                 'id' => 98,
                 'company_id' => 1,
@@ -1711,7 +1712,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            94 => 
+            94 =>
             array (
                 'id' => 99,
                 'company_id' => 1,
@@ -1729,7 +1730,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            95 => 
+            95 =>
             array (
                 'id' => 100,
                 'company_id' => 1,
@@ -1747,7 +1748,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            96 => 
+            96 =>
             array (
                 'id' => 101,
                 'company_id' => 1,
@@ -1765,7 +1766,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            97 => 
+            97 =>
             array (
                 'id' => 102,
                 'company_id' => 1,
@@ -1783,7 +1784,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            98 => 
+            98 =>
             array (
                 'id' => 103,
                 'company_id' => 1,
@@ -1801,7 +1802,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            99 => 
+            99 =>
             array (
                 'id' => 104,
                 'company_id' => 1,
@@ -1819,7 +1820,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            100 => 
+            100 =>
             array (
                 'id' => 105,
                 'company_id' => 1,
@@ -1837,7 +1838,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            101 => 
+            101 =>
             array (
                 'id' => 106,
                 'company_id' => 1,
@@ -1855,7 +1856,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            102 => 
+            102 =>
             array (
                 'id' => 107,
                 'company_id' => 1,
@@ -1873,7 +1874,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            103 => 
+            103 =>
             array (
                 'id' => 108,
                 'company_id' => 1,
@@ -1891,7 +1892,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            104 => 
+            104 =>
             array (
                 'id' => 109,
                 'company_id' => 1,
@@ -1909,7 +1910,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            105 => 
+            105 =>
             array (
                 'id' => 110,
                 'company_id' => 1,
@@ -1927,7 +1928,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            106 => 
+            106 =>
             array (
                 'id' => 111,
                 'company_id' => 1,
@@ -1945,7 +1946,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            107 => 
+            107 =>
             array (
                 'id' => 112,
                 'company_id' => 1,
@@ -1963,7 +1964,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            108 => 
+            108 =>
             array (
                 'id' => 113,
                 'company_id' => 1,
@@ -1981,7 +1982,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            109 => 
+            109 =>
             array (
                 'id' => 114,
                 'company_id' => 1,
@@ -1999,7 +2000,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            110 => 
+            110 =>
             array (
                 'id' => 115,
                 'company_id' => 1,
@@ -2017,7 +2018,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            111 => 
+            111 =>
             array (
                 'id' => 116,
                 'company_id' => 1,
@@ -2035,7 +2036,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            112 => 
+            112 =>
             array (
                 'id' => 118,
                 'company_id' => 1,
@@ -2053,7 +2054,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            113 => 
+            113 =>
             array (
                 'id' => 119,
                 'company_id' => 1,
@@ -2071,7 +2072,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            114 => 
+            114 =>
             array (
                 'id' => 120,
                 'company_id' => 1,
@@ -2089,7 +2090,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            115 => 
+            115 =>
             array (
                 'id' => 121,
                 'company_id' => 1,
@@ -2107,7 +2108,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            116 => 
+            116 =>
             array (
                 'id' => 122,
                 'company_id' => 1,
@@ -2125,7 +2126,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            117 => 
+            117 =>
             array (
                 'id' => 123,
                 'company_id' => 1,
@@ -2143,7 +2144,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            118 => 
+            118 =>
             array (
                 'id' => 124,
                 'company_id' => 1,
@@ -2161,7 +2162,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            119 => 
+            119 =>
             array (
                 'id' => 125,
                 'company_id' => 1,
@@ -2179,7 +2180,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            120 => 
+            120 =>
             array (
                 'id' => 126,
                 'company_id' => 1,
@@ -2197,7 +2198,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            121 => 
+            121 =>
             array (
                 'id' => 127,
                 'company_id' => 1,
@@ -2215,7 +2216,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            122 => 
+            122 =>
             array (
                 'id' => 128,
                 'company_id' => 1,
@@ -2233,7 +2234,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            123 => 
+            123 =>
             array (
                 'id' => 129,
                 'company_id' => 1,
@@ -2251,7 +2252,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            124 => 
+            124 =>
             array (
                 'id' => 130,
                 'company_id' => 1,
@@ -2269,7 +2270,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            125 => 
+            125 =>
             array (
                 'id' => 131,
                 'company_id' => 1,
@@ -2287,7 +2288,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            126 => 
+            126 =>
             array (
                 'id' => 132,
                 'company_id' => 1,
@@ -2305,7 +2306,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            127 => 
+            127 =>
             array (
                 'id' => 133,
                 'company_id' => 1,
@@ -2323,7 +2324,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            128 => 
+            128 =>
             array (
                 'id' => 134,
                 'company_id' => 1,
@@ -2341,7 +2342,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            129 => 
+            129 =>
             array (
                 'id' => 135,
                 'company_id' => 1,
@@ -2359,7 +2360,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            130 => 
+            130 =>
             array (
                 'id' => 136,
                 'company_id' => 1,
@@ -2377,7 +2378,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            131 => 
+            131 =>
             array (
                 'id' => 137,
                 'company_id' => 1,
@@ -2395,7 +2396,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            132 => 
+            132 =>
             array (
                 'id' => 138,
                 'company_id' => 1,
@@ -2413,7 +2414,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            133 => 
+            133 =>
             array (
                 'id' => 139,
                 'company_id' => 1,
@@ -2431,7 +2432,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            134 => 
+            134 =>
             array (
                 'id' => 140,
                 'company_id' => 1,
@@ -2449,7 +2450,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            135 => 
+            135 =>
             array (
                 'id' => 141,
                 'company_id' => 1,
@@ -2467,7 +2468,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            136 => 
+            136 =>
             array (
                 'id' => 142,
                 'company_id' => 1,
@@ -2485,7 +2486,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            137 => 
+            137 =>
             array (
                 'id' => 143,
                 'company_id' => 1,
@@ -2503,7 +2504,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            138 => 
+            138 =>
             array (
                 'id' => 144,
                 'company_id' => 1,
@@ -2521,7 +2522,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            139 => 
+            139 =>
             array (
                 'id' => 145,
                 'company_id' => 1,
@@ -2539,7 +2540,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            140 => 
+            140 =>
             array (
                 'id' => 147,
                 'company_id' => 1,
@@ -2557,7 +2558,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            141 => 
+            141 =>
             array (
                 'id' => 148,
                 'company_id' => 1,
@@ -2575,7 +2576,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            142 => 
+            142 =>
             array (
                 'id' => 149,
                 'company_id' => 1,
@@ -2593,7 +2594,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            143 => 
+            143 =>
             array (
                 'id' => 151,
                 'company_id' => 1,
@@ -2611,7 +2612,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            144 => 
+            144 =>
             array (
                 'id' => 152,
                 'company_id' => 1,
@@ -2629,7 +2630,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            145 => 
+            145 =>
             array (
                 'id' => 153,
                 'company_id' => 1,
@@ -2647,7 +2648,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            146 => 
+            146 =>
             array (
                 'id' => 154,
                 'company_id' => 1,
@@ -2665,7 +2666,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            147 => 
+            147 =>
             array (
                 'id' => 155,
                 'company_id' => 1,
@@ -2683,7 +2684,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            148 => 
+            148 =>
             array (
                 'id' => 156,
                 'company_id' => 1,
@@ -2701,7 +2702,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            149 => 
+            149 =>
             array (
                 'id' => 157,
                 'company_id' => 1,
@@ -2719,7 +2720,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            150 => 
+            150 =>
             array (
                 'id' => 158,
                 'company_id' => 1,
@@ -2737,7 +2738,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            151 => 
+            151 =>
             array (
                 'id' => 159,
                 'company_id' => 1,
@@ -2755,7 +2756,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            152 => 
+            152 =>
             array (
                 'id' => 160,
                 'company_id' => 1,
@@ -2773,7 +2774,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            153 => 
+            153 =>
             array (
                 'id' => 161,
                 'company_id' => 1,
@@ -2791,7 +2792,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            154 => 
+            154 =>
             array (
                 'id' => 162,
                 'company_id' => 1,
@@ -2809,7 +2810,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            155 => 
+            155 =>
             array (
                 'id' => 163,
                 'company_id' => 1,
@@ -2827,7 +2828,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            156 => 
+            156 =>
             array (
                 'id' => 164,
                 'company_id' => 1,
@@ -2845,7 +2846,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            157 => 
+            157 =>
             array (
                 'id' => 165,
                 'company_id' => 1,
@@ -2863,7 +2864,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            158 => 
+            158 =>
             array (
                 'id' => 166,
                 'company_id' => 1,
@@ -2881,7 +2882,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            159 => 
+            159 =>
             array (
                 'id' => 167,
                 'company_id' => 1,
@@ -2899,7 +2900,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            160 => 
+            160 =>
             array (
                 'id' => 168,
                 'company_id' => 1,
@@ -2917,7 +2918,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            161 => 
+            161 =>
             array (
                 'id' => 169,
                 'company_id' => 1,
@@ -2935,7 +2936,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:32',
             ),
-            162 => 
+            162 =>
             array (
                 'id' => 170,
                 'company_id' => 1,
@@ -2953,7 +2954,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            163 => 
+            163 =>
             array (
                 'id' => 171,
                 'company_id' => 1,
@@ -2971,7 +2972,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            164 => 
+            164 =>
             array (
                 'id' => 172,
                 'company_id' => 1,
@@ -2989,7 +2990,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            165 => 
+            165 =>
             array (
                 'id' => 173,
                 'company_id' => 1,
@@ -3007,7 +3008,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            166 => 
+            166 =>
             array (
                 'id' => 174,
                 'company_id' => 1,
@@ -3025,7 +3026,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            167 => 
+            167 =>
             array (
                 'id' => 175,
                 'company_id' => 1,
@@ -3043,7 +3044,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            168 => 
+            168 =>
             array (
                 'id' => 176,
                 'company_id' => 1,
@@ -3061,7 +3062,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            169 => 
+            169 =>
             array (
                 'id' => 177,
                 'company_id' => 1,
@@ -3079,7 +3080,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            170 => 
+            170 =>
             array (
                 'id' => 178,
                 'company_id' => 1,
@@ -3097,7 +3098,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            171 => 
+            171 =>
             array (
                 'id' => 179,
                 'company_id' => 1,
@@ -3115,7 +3116,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            172 => 
+            172 =>
             array (
                 'id' => 180,
                 'company_id' => 1,
@@ -3133,7 +3134,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            173 => 
+            173 =>
             array (
                 'id' => 181,
                 'company_id' => 1,
@@ -3151,7 +3152,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            174 => 
+            174 =>
             array (
                 'id' => 182,
                 'company_id' => 1,
@@ -3169,7 +3170,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            175 => 
+            175 =>
             array (
                 'id' => 183,
                 'company_id' => 1,
@@ -3187,7 +3188,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            176 => 
+            176 =>
             array (
                 'id' => 184,
                 'company_id' => 1,
@@ -3205,7 +3206,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            177 => 
+            177 =>
             array (
                 'id' => 185,
                 'company_id' => 1,
@@ -3223,7 +3224,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            178 => 
+            178 =>
             array (
                 'id' => 186,
                 'company_id' => 1,
@@ -3241,7 +3242,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            179 => 
+            179 =>
             array (
                 'id' => 187,
                 'company_id' => 1,
@@ -3259,7 +3260,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            180 => 
+            180 =>
             array (
                 'id' => 188,
                 'company_id' => 1,
@@ -3277,7 +3278,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            181 => 
+            181 =>
             array (
                 'id' => 189,
                 'company_id' => 1,
@@ -3295,7 +3296,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            182 => 
+            182 =>
             array (
                 'id' => 190,
                 'company_id' => 1,
@@ -3313,7 +3314,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            183 => 
+            183 =>
             array (
                 'id' => 191,
                 'company_id' => 1,
@@ -3331,7 +3332,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            184 => 
+            184 =>
             array (
                 'id' => 194,
                 'company_id' => 1,
@@ -3349,7 +3350,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            185 => 
+            185 =>
             array (
                 'id' => 195,
                 'company_id' => 1,
@@ -3367,7 +3368,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            186 => 
+            186 =>
             array (
                 'id' => 196,
                 'company_id' => 1,
@@ -3385,7 +3386,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            187 => 
+            187 =>
             array (
                 'id' => 197,
                 'company_id' => 1,
@@ -3403,7 +3404,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            188 => 
+            188 =>
             array (
                 'id' => 198,
                 'company_id' => 1,
@@ -3421,7 +3422,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            189 => 
+            189 =>
             array (
                 'id' => 199,
                 'company_id' => 1,
@@ -3439,7 +3440,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            190 => 
+            190 =>
             array (
                 'id' => 200,
                 'company_id' => 1,
@@ -3457,7 +3458,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            191 => 
+            191 =>
             array (
                 'id' => 201,
                 'company_id' => 1,
@@ -3475,7 +3476,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            192 => 
+            192 =>
             array (
                 'id' => 202,
                 'company_id' => 1,
@@ -3493,7 +3494,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            193 => 
+            193 =>
             array (
                 'id' => 203,
                 'company_id' => 1,
@@ -3511,7 +3512,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            194 => 
+            194 =>
             array (
                 'id' => 204,
                 'company_id' => 1,
@@ -3529,7 +3530,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            195 => 
+            195 =>
             array (
                 'id' => 205,
                 'company_id' => 1,
@@ -3547,7 +3548,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            196 => 
+            196 =>
             array (
                 'id' => 206,
                 'company_id' => 1,
@@ -3565,7 +3566,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            197 => 
+            197 =>
             array (
                 'id' => 207,
                 'company_id' => 1,
@@ -3583,7 +3584,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            198 => 
+            198 =>
             array (
                 'id' => 208,
                 'company_id' => 1,
@@ -3601,7 +3602,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            199 => 
+            199 =>
             array (
                 'id' => 209,
                 'company_id' => 1,
@@ -3619,7 +3620,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            200 => 
+            200 =>
             array (
                 'id' => 210,
                 'company_id' => 1,
@@ -3637,7 +3638,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            201 => 
+            201 =>
             array (
                 'id' => 211,
                 'company_id' => 1,
@@ -3655,7 +3656,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            202 => 
+            202 =>
             array (
                 'id' => 212,
                 'company_id' => 1,
@@ -3673,7 +3674,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            203 => 
+            203 =>
             array (
                 'id' => 213,
                 'company_id' => 1,
@@ -3691,7 +3692,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            204 => 
+            204 =>
             array (
                 'id' => 214,
                 'company_id' => 1,
@@ -3709,7 +3710,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            205 => 
+            205 =>
             array (
                 'id' => 215,
                 'company_id' => 1,
@@ -3727,7 +3728,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            206 => 
+            206 =>
             array (
                 'id' => 216,
                 'company_id' => 1,
@@ -3745,7 +3746,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            207 => 
+            207 =>
             array (
                 'id' => 217,
                 'company_id' => 1,
@@ -3763,7 +3764,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            208 => 
+            208 =>
             array (
                 'id' => 218,
                 'company_id' => 1,
@@ -3781,7 +3782,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            209 => 
+            209 =>
             array (
                 'id' => 219,
                 'company_id' => 1,
@@ -3799,7 +3800,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            210 => 
+            210 =>
             array (
                 'id' => 220,
                 'company_id' => 1,
@@ -3817,7 +3818,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            211 => 
+            211 =>
             array (
                 'id' => 221,
                 'company_id' => 1,
@@ -3835,7 +3836,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            212 => 
+            212 =>
             array (
                 'id' => 222,
                 'company_id' => 1,
@@ -3853,7 +3854,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            213 => 
+            213 =>
             array (
                 'id' => 223,
                 'company_id' => 1,
@@ -3871,7 +3872,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            214 => 
+            214 =>
             array (
                 'id' => 224,
                 'company_id' => 1,
@@ -3889,7 +3890,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            215 => 
+            215 =>
             array (
                 'id' => 225,
                 'company_id' => 1,
@@ -3907,7 +3908,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            216 => 
+            216 =>
             array (
                 'id' => 226,
                 'company_id' => 1,
@@ -3925,7 +3926,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            217 => 
+            217 =>
             array (
                 'id' => 227,
                 'company_id' => 1,
@@ -3943,7 +3944,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            218 => 
+            218 =>
             array (
                 'id' => 229,
                 'company_id' => 1,
@@ -3961,7 +3962,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            219 => 
+            219 =>
             array (
                 'id' => 230,
                 'company_id' => 1,
@@ -3979,7 +3980,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            220 => 
+            220 =>
             array (
                 'id' => 231,
                 'company_id' => 1,
@@ -3997,7 +3998,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            221 => 
+            221 =>
             array (
                 'id' => 232,
                 'company_id' => 1,
@@ -4015,7 +4016,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            222 => 
+            222 =>
             array (
                 'id' => 233,
                 'company_id' => 1,
@@ -4033,7 +4034,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            223 => 
+            223 =>
             array (
                 'id' => 234,
                 'company_id' => 1,
@@ -4051,7 +4052,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            224 => 
+            224 =>
             array (
                 'id' => 235,
                 'company_id' => 1,
@@ -4069,7 +4070,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            225 => 
+            225 =>
             array (
                 'id' => 236,
                 'company_id' => 1,
@@ -4087,7 +4088,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            226 => 
+            226 =>
             array (
                 'id' => 237,
                 'company_id' => 1,
@@ -4105,7 +4106,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            227 => 
+            227 =>
             array (
                 'id' => 238,
                 'company_id' => 1,
@@ -4123,7 +4124,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            228 => 
+            228 =>
             array (
                 'id' => 239,
                 'company_id' => 1,
@@ -4141,7 +4142,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            229 => 
+            229 =>
             array (
                 'id' => 240,
                 'company_id' => 1,
@@ -4159,7 +4160,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            230 => 
+            230 =>
             array (
                 'id' => 241,
                 'company_id' => 1,
@@ -4177,7 +4178,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            231 => 
+            231 =>
             array (
                 'id' => 242,
                 'company_id' => 1,
@@ -4195,7 +4196,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            232 => 
+            232 =>
             array (
                 'id' => 243,
                 'company_id' => 1,
@@ -4213,7 +4214,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            233 => 
+            233 =>
             array (
                 'id' => 244,
                 'company_id' => 1,
@@ -4231,7 +4232,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            234 => 
+            234 =>
             array (
                 'id' => 245,
                 'company_id' => 1,
@@ -4249,7 +4250,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            235 => 
+            235 =>
             array (
                 'id' => 246,
                 'company_id' => 1,
@@ -4267,7 +4268,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            236 => 
+            236 =>
             array (
                 'id' => 247,
                 'company_id' => 1,
@@ -4285,7 +4286,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            237 => 
+            237 =>
             array (
                 'id' => 248,
                 'company_id' => 1,
@@ -4303,7 +4304,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            238 => 
+            238 =>
             array (
                 'id' => 249,
                 'company_id' => 1,
@@ -4321,7 +4322,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            239 => 
+            239 =>
             array (
                 'id' => 250,
                 'company_id' => 1,
@@ -4339,7 +4340,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            240 => 
+            240 =>
             array (
                 'id' => 251,
                 'company_id' => 1,
@@ -4357,7 +4358,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            241 => 
+            241 =>
             array (
                 'id' => 252,
                 'company_id' => 1,
@@ -4375,7 +4376,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            242 => 
+            242 =>
             array (
                 'id' => 253,
                 'company_id' => 1,
@@ -4393,7 +4394,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            243 => 
+            243 =>
             array (
                 'id' => 254,
                 'company_id' => 1,
@@ -4411,7 +4412,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            244 => 
+            244 =>
             array (
                 'id' => 255,
                 'company_id' => 1,
@@ -4429,7 +4430,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            245 => 
+            245 =>
             array (
                 'id' => 256,
                 'company_id' => 1,
@@ -4447,7 +4448,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            246 => 
+            246 =>
             array (
                 'id' => 257,
                 'company_id' => 1,
@@ -4465,7 +4466,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            247 => 
+            247 =>
             array (
                 'id' => 258,
                 'company_id' => 1,
@@ -4483,7 +4484,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            248 => 
+            248 =>
             array (
                 'id' => 259,
                 'company_id' => 1,
@@ -4501,7 +4502,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            249 => 
+            249 =>
             array (
                 'id' => 260,
                 'company_id' => 1,
@@ -4519,7 +4520,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            250 => 
+            250 =>
             array (
                 'id' => 261,
                 'company_id' => 1,
@@ -4537,7 +4538,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            251 => 
+            251 =>
             array (
                 'id' => 262,
                 'company_id' => 1,
@@ -4555,7 +4556,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            252 => 
+            252 =>
             array (
                 'id' => 263,
                 'company_id' => 1,
@@ -4573,7 +4574,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            253 => 
+            253 =>
             array (
                 'id' => 264,
                 'company_id' => 1,
@@ -4591,7 +4592,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            254 => 
+            254 =>
             array (
                 'id' => 265,
                 'company_id' => 1,
@@ -4609,7 +4610,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            255 => 
+            255 =>
             array (
                 'id' => 266,
                 'company_id' => 1,
@@ -4627,7 +4628,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            256 => 
+            256 =>
             array (
                 'id' => 267,
                 'company_id' => 1,
@@ -4645,7 +4646,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            257 => 
+            257 =>
             array (
                 'id' => 268,
                 'company_id' => 1,
@@ -4663,7 +4664,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            258 => 
+            258 =>
             array (
                 'id' => 269,
                 'company_id' => 1,
@@ -4681,7 +4682,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            259 => 
+            259 =>
             array (
                 'id' => 270,
                 'company_id' => 1,
@@ -4699,7 +4700,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            260 => 
+            260 =>
             array (
                 'id' => 271,
                 'company_id' => 1,
@@ -4717,7 +4718,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            261 => 
+            261 =>
             array (
                 'id' => 272,
                 'company_id' => 1,
@@ -4735,7 +4736,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            262 => 
+            262 =>
             array (
                 'id' => 273,
                 'company_id' => 1,
@@ -4753,7 +4754,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            263 => 
+            263 =>
             array (
                 'id' => 274,
                 'company_id' => 1,
@@ -4771,7 +4772,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            264 => 
+            264 =>
             array (
                 'id' => 275,
                 'company_id' => 1,
@@ -4789,7 +4790,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            265 => 
+            265 =>
             array (
                 'id' => 276,
                 'company_id' => 1,
@@ -4807,7 +4808,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            266 => 
+            266 =>
             array (
                 'id' => 277,
                 'company_id' => 1,
@@ -4825,7 +4826,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            267 => 
+            267 =>
             array (
                 'id' => 278,
                 'company_id' => 1,
@@ -4843,7 +4844,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            268 => 
+            268 =>
             array (
                 'id' => 279,
                 'company_id' => 1,
@@ -4861,7 +4862,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            269 => 
+            269 =>
             array (
                 'id' => 280,
                 'company_id' => 1,
@@ -4879,7 +4880,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            270 => 
+            270 =>
             array (
                 'id' => 281,
                 'company_id' => 1,
@@ -4897,7 +4898,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            271 => 
+            271 =>
             array (
                 'id' => 282,
                 'company_id' => 1,
@@ -4915,7 +4916,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            272 => 
+            272 =>
             array (
                 'id' => 283,
                 'company_id' => 1,
@@ -4933,7 +4934,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            273 => 
+            273 =>
             array (
                 'id' => 284,
                 'company_id' => 1,
@@ -4951,7 +4952,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            274 => 
+            274 =>
             array (
                 'id' => 285,
                 'company_id' => 1,
@@ -4969,7 +4970,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            275 => 
+            275 =>
             array (
                 'id' => 286,
                 'company_id' => 1,
@@ -4987,7 +4988,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            276 => 
+            276 =>
             array (
                 'id' => 287,
                 'company_id' => 1,
@@ -5005,7 +5006,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            277 => 
+            277 =>
             array (
                 'id' => 288,
                 'company_id' => 1,
@@ -5023,7 +5024,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            278 => 
+            278 =>
             array (
                 'id' => 289,
                 'company_id' => 1,
@@ -5041,7 +5042,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            279 => 
+            279 =>
             array (
                 'id' => 290,
                 'company_id' => 1,
@@ -5059,7 +5060,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            280 => 
+            280 =>
             array (
                 'id' => 291,
                 'company_id' => 1,
@@ -5077,7 +5078,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            281 => 
+            281 =>
             array (
                 'id' => 292,
                 'company_id' => 1,
@@ -5095,7 +5096,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            282 => 
+            282 =>
             array (
                 'id' => 293,
                 'company_id' => 1,
@@ -5113,7 +5114,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            283 => 
+            283 =>
             array (
                 'id' => 294,
                 'company_id' => 1,
@@ -5131,7 +5132,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            284 => 
+            284 =>
             array (
                 'id' => 295,
                 'company_id' => 1,
@@ -5149,7 +5150,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            285 => 
+            285 =>
             array (
                 'id' => 296,
                 'company_id' => 1,
@@ -5167,7 +5168,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            286 => 
+            286 =>
             array (
                 'id' => 297,
                 'company_id' => 1,
@@ -5185,7 +5186,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            287 => 
+            287 =>
             array (
                 'id' => 298,
                 'company_id' => 1,
@@ -5203,7 +5204,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            288 => 
+            288 =>
             array (
                 'id' => 299,
                 'company_id' => 1,
@@ -5221,7 +5222,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            289 => 
+            289 =>
             array (
                 'id' => 300,
                 'company_id' => 1,
@@ -5239,7 +5240,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            290 => 
+            290 =>
             array (
                 'id' => 301,
                 'company_id' => 1,
@@ -5257,7 +5258,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            291 => 
+            291 =>
             array (
                 'id' => 302,
                 'company_id' => 1,
@@ -5275,7 +5276,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            292 => 
+            292 =>
             array (
                 'id' => 303,
                 'company_id' => 1,
@@ -5293,7 +5294,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            293 => 
+            293 =>
             array (
                 'id' => 304,
                 'company_id' => 1,
@@ -5311,7 +5312,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            294 => 
+            294 =>
             array (
                 'id' => 305,
                 'company_id' => 1,
@@ -5329,7 +5330,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            295 => 
+            295 =>
             array (
                 'id' => 306,
                 'company_id' => 1,
@@ -5347,7 +5348,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            296 => 
+            296 =>
             array (
                 'id' => 307,
                 'company_id' => 1,
@@ -5365,7 +5366,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            297 => 
+            297 =>
             array (
                 'id' => 308,
                 'company_id' => 1,
@@ -5383,7 +5384,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            298 => 
+            298 =>
             array (
                 'id' => 309,
                 'company_id' => 1,
@@ -5401,7 +5402,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            299 => 
+            299 =>
             array (
                 'id' => 310,
                 'company_id' => 1,
@@ -5419,7 +5420,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            300 => 
+            300 =>
             array (
                 'id' => 311,
                 'company_id' => 1,
@@ -5437,7 +5438,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            301 => 
+            301 =>
             array (
                 'id' => 312,
                 'company_id' => 1,
@@ -5455,7 +5456,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            302 => 
+            302 =>
             array (
                 'id' => 313,
                 'company_id' => 1,
@@ -5473,7 +5474,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            303 => 
+            303 =>
             array (
                 'id' => 314,
                 'company_id' => 1,
@@ -5491,7 +5492,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            304 => 
+            304 =>
             array (
                 'id' => 315,
                 'company_id' => 1,
@@ -5509,7 +5510,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            305 => 
+            305 =>
             array (
                 'id' => 316,
                 'company_id' => 1,
@@ -5527,7 +5528,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            306 => 
+            306 =>
             array (
                 'id' => 317,
                 'company_id' => 1,
@@ -5545,7 +5546,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            307 => 
+            307 =>
             array (
                 'id' => 318,
                 'company_id' => 1,
@@ -5563,7 +5564,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            308 => 
+            308 =>
             array (
                 'id' => 319,
                 'company_id' => 1,
@@ -5581,7 +5582,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            309 => 
+            309 =>
             array (
                 'id' => 320,
                 'company_id' => 1,
@@ -5599,7 +5600,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            310 => 
+            310 =>
             array (
                 'id' => 321,
                 'company_id' => 1,
@@ -5617,7 +5618,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            311 => 
+            311 =>
             array (
                 'id' => 322,
                 'company_id' => 1,
@@ -5635,7 +5636,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            312 => 
+            312 =>
             array (
                 'id' => 323,
                 'company_id' => 1,
@@ -5653,7 +5654,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            313 => 
+            313 =>
             array (
                 'id' => 324,
                 'company_id' => 1,
@@ -5671,7 +5672,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            314 => 
+            314 =>
             array (
                 'id' => 325,
                 'company_id' => 1,
@@ -5689,7 +5690,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            315 => 
+            315 =>
             array (
                 'id' => 326,
                 'company_id' => 1,
@@ -5707,7 +5708,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            316 => 
+            316 =>
             array (
                 'id' => 327,
                 'company_id' => 1,
@@ -5725,7 +5726,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            317 => 
+            317 =>
             array (
                 'id' => 328,
                 'company_id' => 1,
@@ -5743,7 +5744,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            318 => 
+            318 =>
             array (
                 'id' => 329,
                 'company_id' => 1,
@@ -5761,7 +5762,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            319 => 
+            319 =>
             array (
                 'id' => 330,
                 'company_id' => 1,
@@ -5779,7 +5780,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            320 => 
+            320 =>
             array (
                 'id' => 331,
                 'company_id' => 1,
@@ -5797,7 +5798,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            321 => 
+            321 =>
             array (
                 'id' => 332,
                 'company_id' => 1,
@@ -5815,7 +5816,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            322 => 
+            322 =>
             array (
                 'id' => 333,
                 'company_id' => 1,
@@ -5833,7 +5834,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            323 => 
+            323 =>
             array (
                 'id' => 334,
                 'company_id' => 1,
@@ -5851,7 +5852,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            324 => 
+            324 =>
             array (
                 'id' => 335,
                 'company_id' => 1,
@@ -5869,7 +5870,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            325 => 
+            325 =>
             array (
                 'id' => 336,
                 'company_id' => 1,
@@ -5887,7 +5888,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            326 => 
+            326 =>
             array (
                 'id' => 337,
                 'company_id' => 1,
@@ -5905,7 +5906,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            327 => 
+            327 =>
             array (
                 'id' => 338,
                 'company_id' => 1,
@@ -5923,7 +5924,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            328 => 
+            328 =>
             array (
                 'id' => 339,
                 'company_id' => 1,
@@ -5941,7 +5942,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            329 => 
+            329 =>
             array (
                 'id' => 340,
                 'company_id' => 1,
@@ -5959,7 +5960,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            330 => 
+            330 =>
             array (
                 'id' => 341,
                 'company_id' => 1,
@@ -5977,7 +5978,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            331 => 
+            331 =>
             array (
                 'id' => 342,
                 'company_id' => 1,
@@ -5995,7 +5996,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            332 => 
+            332 =>
             array (
                 'id' => 343,
                 'company_id' => 1,
@@ -6013,7 +6014,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            333 => 
+            333 =>
             array (
                 'id' => 344,
                 'company_id' => 1,
@@ -6031,7 +6032,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            334 => 
+            334 =>
             array (
                 'id' => 345,
                 'company_id' => 1,
@@ -6049,7 +6050,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            335 => 
+            335 =>
             array (
                 'id' => 346,
                 'company_id' => 1,
@@ -6067,7 +6068,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            336 => 
+            336 =>
             array (
                 'id' => 347,
                 'company_id' => 1,
@@ -6085,7 +6086,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            337 => 
+            337 =>
             array (
                 'id' => 348,
                 'company_id' => 1,
@@ -6103,7 +6104,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            338 => 
+            338 =>
             array (
                 'id' => 349,
                 'company_id' => 1,
@@ -6121,7 +6122,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            339 => 
+            339 =>
             array (
                 'id' => 350,
                 'company_id' => 1,
@@ -6139,7 +6140,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            340 => 
+            340 =>
             array (
                 'id' => 351,
                 'company_id' => 1,
@@ -6157,7 +6158,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            341 => 
+            341 =>
             array (
                 'id' => 352,
                 'company_id' => 1,
@@ -6175,7 +6176,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            342 => 
+            342 =>
             array (
                 'id' => 353,
                 'company_id' => 1,
@@ -6193,7 +6194,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            343 => 
+            343 =>
             array (
                 'id' => 354,
                 'company_id' => 1,
@@ -6211,7 +6212,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            344 => 
+            344 =>
             array (
                 'id' => 355,
                 'company_id' => 1,
@@ -6229,7 +6230,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            345 => 
+            345 =>
             array (
                 'id' => 356,
                 'company_id' => 1,
@@ -6247,7 +6248,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            346 => 
+            346 =>
             array (
                 'id' => 357,
                 'company_id' => 1,
@@ -6265,7 +6266,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            347 => 
+            347 =>
             array (
                 'id' => 358,
                 'company_id' => 1,
@@ -6283,7 +6284,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            348 => 
+            348 =>
             array (
                 'id' => 359,
                 'company_id' => 1,
@@ -6301,7 +6302,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:34',
             ),
-            349 => 
+            349 =>
             array (
                 'id' => 360,
                 'company_id' => 1,
@@ -6319,7 +6320,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            350 => 
+            350 =>
             array (
                 'id' => 361,
                 'company_id' => 1,
@@ -6337,7 +6338,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            351 => 
+            351 =>
             array (
                 'id' => 362,
                 'company_id' => 1,
@@ -6355,7 +6356,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            352 => 
+            352 =>
             array (
                 'id' => 363,
                 'company_id' => 1,
@@ -6373,7 +6374,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            353 => 
+            353 =>
             array (
                 'id' => 364,
                 'company_id' => 1,
@@ -6391,7 +6392,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            354 => 
+            354 =>
             array (
                 'id' => 365,
                 'company_id' => 1,
@@ -6409,7 +6410,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            355 => 
+            355 =>
             array (
                 'id' => 366,
                 'company_id' => 1,
@@ -6427,7 +6428,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            356 => 
+            356 =>
             array (
                 'id' => 367,
                 'company_id' => 1,
@@ -6445,7 +6446,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            357 => 
+            357 =>
             array (
                 'id' => 368,
                 'company_id' => 1,
@@ -6463,7 +6464,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            358 => 
+            358 =>
             array (
                 'id' => 369,
                 'company_id' => 1,
@@ -6481,7 +6482,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            359 => 
+            359 =>
             array (
                 'id' => 370,
                 'company_id' => 1,
@@ -6499,7 +6500,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            360 => 
+            360 =>
             array (
                 'id' => 371,
                 'company_id' => 1,
@@ -6517,7 +6518,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            361 => 
+            361 =>
             array (
                 'id' => 372,
                 'company_id' => 1,
@@ -6535,7 +6536,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            362 => 
+            362 =>
             array (
                 'id' => 373,
                 'company_id' => 1,
@@ -6553,7 +6554,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            363 => 
+            363 =>
             array (
                 'id' => 374,
                 'company_id' => 1,
@@ -6571,7 +6572,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            364 => 
+            364 =>
             array (
                 'id' => 375,
                 'company_id' => 1,
@@ -6589,7 +6590,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            365 => 
+            365 =>
             array (
                 'id' => 376,
                 'company_id' => 1,
@@ -6607,7 +6608,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            366 => 
+            366 =>
             array (
                 'id' => 377,
                 'company_id' => 1,
@@ -6625,7 +6626,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            367 => 
+            367 =>
             array (
                 'id' => 378,
                 'company_id' => 1,
@@ -6643,7 +6644,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            368 => 
+            368 =>
             array (
                 'id' => 379,
                 'company_id' => 1,
@@ -6661,7 +6662,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            369 => 
+            369 =>
             array (
                 'id' => 380,
                 'company_id' => 1,
@@ -6679,7 +6680,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            370 => 
+            370 =>
             array (
                 'id' => 381,
                 'company_id' => 1,
@@ -6697,7 +6698,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            371 => 
+            371 =>
             array (
                 'id' => 382,
                 'company_id' => 1,
@@ -6715,7 +6716,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            372 => 
+            372 =>
             array (
                 'id' => 383,
                 'company_id' => 1,
@@ -6733,7 +6734,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            373 => 
+            373 =>
             array (
                 'id' => 384,
                 'company_id' => 1,
@@ -6751,7 +6752,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            374 => 
+            374 =>
             array (
                 'id' => 385,
                 'company_id' => 1,
@@ -6769,7 +6770,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            375 => 
+            375 =>
             array (
                 'id' => 386,
                 'company_id' => 1,
@@ -6787,7 +6788,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            376 => 
+            376 =>
             array (
                 'id' => 387,
                 'company_id' => 1,
@@ -6805,7 +6806,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            377 => 
+            377 =>
             array (
                 'id' => 388,
                 'company_id' => 1,
@@ -6823,7 +6824,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            378 => 
+            378 =>
             array (
                 'id' => 389,
                 'company_id' => 1,
@@ -6841,7 +6842,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            379 => 
+            379 =>
             array (
                 'id' => 390,
                 'company_id' => 1,
@@ -6859,7 +6860,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            380 => 
+            380 =>
             array (
                 'id' => 391,
                 'company_id' => 1,
@@ -6877,7 +6878,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            381 => 
+            381 =>
             array (
                 'id' => 392,
                 'company_id' => 1,
@@ -6895,7 +6896,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            382 => 
+            382 =>
             array (
                 'id' => 393,
                 'company_id' => 1,
@@ -6913,7 +6914,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:35',
             ),
-            383 => 
+            383 =>
             array (
                 'id' => 394,
                 'company_id' => 1,
@@ -6931,7 +6932,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:33',
             ),
-            384 => 
+            384 =>
             array (
                 'id' => 395,
                 'company_id' => 1,
@@ -6949,7 +6950,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            385 => 
+            385 =>
             array (
                 'id' => 396,
                 'company_id' => 1,
@@ -6967,7 +6968,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            386 => 
+            386 =>
             array (
                 'id' => 397,
                 'company_id' => 1,
@@ -6985,7 +6986,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            387 => 
+            387 =>
             array (
                 'id' => 398,
                 'company_id' => 1,
@@ -7003,7 +7004,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            388 => 
+            388 =>
             array (
                 'id' => 399,
                 'company_id' => 1,
@@ -7021,7 +7022,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            389 => 
+            389 =>
             array (
                 'id' => 400,
                 'company_id' => 1,
@@ -7039,7 +7040,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            390 => 
+            390 =>
             array (
                 'id' => 401,
                 'company_id' => 1,
@@ -7057,7 +7058,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            391 => 
+            391 =>
             array (
                 'id' => 402,
                 'company_id' => 1,
@@ -7075,7 +7076,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            392 => 
+            392 =>
             array (
                 'id' => 403,
                 'company_id' => 1,
@@ -7093,7 +7094,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            393 => 
+            393 =>
             array (
                 'id' => 404,
                 'company_id' => 1,
@@ -7111,7 +7112,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            394 => 
+            394 =>
             array (
                 'id' => 405,
                 'company_id' => 1,
@@ -7129,7 +7130,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            395 => 
+            395 =>
             array (
                 'id' => 406,
                 'company_id' => 1,
@@ -7147,7 +7148,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            396 => 
+            396 =>
             array (
                 'id' => 407,
                 'company_id' => 1,
@@ -7165,7 +7166,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            397 => 
+            397 =>
             array (
                 'id' => 408,
                 'company_id' => 1,
@@ -7183,7 +7184,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            398 => 
+            398 =>
             array (
                 'id' => 409,
                 'company_id' => 1,
@@ -7201,7 +7202,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            399 => 
+            399 =>
             array (
                 'id' => 410,
                 'company_id' => 1,
@@ -7219,7 +7220,7 @@ class TendersTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => '2025-05-21 06:41:36',
             ),
-            400 => 
+            400 =>
             array (
                 'id' => 411,
                 'company_id' => 1,
@@ -7238,7 +7239,7 @@ class TendersTableSeeder extends Seeder
                 'updated_at' => '2025-05-21 06:41:36',
             ),
         ));
-        
-        
+
+
     }
 }

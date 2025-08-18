@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DocTypeSectionalTableSeeder extends Seeder
 {
@@ -14,12 +15,12 @@ class DocTypeSectionalTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
-        \DB::table('doc_type_sectional')->delete();
-        
-        \DB::table('doc_type_sectional')->insert(array (
-            0 => 
+
+        DB::table('doc_type_sectional')->delete();
+
+        DB::table('doc_type_sectional')->insert(array (
+            0 =>
             array (
                 'id' => 1,
                 'sectional_id' => 1,
@@ -27,7 +28,7 @@ class DocTypeSectionalTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            1 => 
+            1 =>
             array (
                 'id' => 2,
                 'sectional_id' => 1,
@@ -35,7 +36,7 @@ class DocTypeSectionalTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            2 => 
+            2 =>
             array (
                 'id' => 3,
                 'sectional_id' => 1,
@@ -43,7 +44,7 @@ class DocTypeSectionalTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            3 => 
+            3 =>
             array (
                 'id' => 4,
                 'sectional_id' => 2,
@@ -51,7 +52,7 @@ class DocTypeSectionalTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            4 => 
+            4 =>
             array (
                 'id' => 5,
                 'sectional_id' => 2,
@@ -59,7 +60,7 @@ class DocTypeSectionalTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            5 => 
+            5 =>
             array (
                 'id' => 6,
                 'sectional_id' => 2,
@@ -68,7 +69,7 @@ class DocTypeSectionalTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-        
-        
+
+
     }
 }

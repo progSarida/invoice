@@ -12,38 +12,38 @@ use Illuminate\Database\Eloquent\Model;
 class PostalExpense extends Model
 {
     protected $fillable = [
-        // Informazioni base
+        // informazioni base
         'company_id',
         'notify_type',
         'new_contract_id',
         'client_id',
         'tax_type',
-        
-        // Protocollo e invio
+
+        // protocollo e invio
         'send_protocol_number',
         'send_protocol_date',
         'shipment_type_id',
         'supplier_id',
         'supplier',
         'recipient',
-        
-        // Gestione anni
+
+        // gestione anni
         'manage_year',
         'notify_year',
         'notify_month',
-        
-        // Classificazione atto
+
+        // classificazione atto
         'act_type_id',
         'act_id',
         'act_year',
         'act_attachment_path',
         'act_attachment_date',
-        
-        // Utente inserimento spedizione
+
+        // utente inserimento spedizione
         'shipment_insert_user_id',
         'shipment_insert_date',
-        
-        // Lavorazione e notifica
+
+        // lavorazione e notifica
         'notify_attachment_path',
         'notify_attachment_date',
         'order_rif',
@@ -52,12 +52,12 @@ class PostalExpense extends Model
         'receive_protocol_date',
         'notify_amount',
         'amount_registration_date',
-        
-        // Utente inserimento notifica
+
+        // utente inserimento notifica
         'notify_insert_user_id',
         'notify_insert_date',
-        
-        // Gestione spese
+
+        // gestione spese
         'expense_type',
         'passive_invoice_id',
         'notify_expense_amount',
@@ -67,52 +67,52 @@ class PostalExpense extends Model
         'shipment_doc_number',
         'shipment_doc_date',
         'iban',
-        
-        // Utente inserimento spese
+
+        // utente inserimento spese
         'expense_insert_user_id',
         'expense_insert_date',
-        
-        // Pagamenti
+
+        // pagamenti
         'payed',
         'payment_date',
         'payment_total',
-        
-        // Utente inserimento pagamento
+
+        // utente inserimento pagamento
         'payment_insert_user_id',
         'payment_insert_date',
-        
-        // Rifatturazione
+
+        // rifatturazione
         'reinvoice_id',
         'reinvoice_number',
         'reinvoice_date',
         'reinvoice_amount',
-        
-        // Utente inserimento rifatturazione
+
+        // utente inserimento rifatturazione
         'reinvoice_insert_user_id',
         'reinvoice_insert_date',
-        
-        // Allegati e registrazione
+
+        // allegati e registrazione
         'reinvoice_attachment_path',
         'reinvoice_attachment_date',
         'notify_date_registration_date',
-        
-        // Utente registrazione
+
+        // utente registrazione
         'reinvoice_registration_user_id',
         'reinvoice_registration_date',
-        
-        // Note
+
+        // note
         'note',
     ];
 
     protected $casts = [
-        // Enums
+        // enum
         'notify_type' => NotifyType::class,
         'tax_type' => TaxType::class,
         'expense_type' => ExpenseType::class,
         'shipment_doc_type' => ShipmentDocType::class,
         'notify_month' => Month::class,
-        
-        // Date fields
+
+        // date
         'send_protocol_date' => 'date',
         'act_attachment_date' => 'date',
         'shipment_insert_date' => 'date',
@@ -128,19 +128,19 @@ class PostalExpense extends Model
         'reinvoice_attachment_date' => 'date',
         'notify_date_registration_date' => 'date',
         'reinvoice_registration_date' => 'date',
-        
-        // Decimal fields
+
+        // decimali
         'notify_amount' => 'decimal:2',
         'notify_expense_amount' => 'decimal:2',
         'mark_expense_amount' => 'decimal:2',
         'payment_total' => 'decimal:2',
         'reinvoice_amount' => 'decimal:2',
-        
-        // Boolean fields
+
+        // bool
         'reinvoice' => 'boolean',
         'payed' => 'boolean',
-        
-        // Integer fields (Foreign Keys)
+
+        // interi (chiavi esterne)
         'company_id' => 'integer',
         'new_contract_id' => 'integer',
         'shipment_type_id' => 'integer',
@@ -155,14 +155,14 @@ class PostalExpense extends Model
         'reinvoice_id' => 'integer',
         'reinvoice_insert_user_id' => 'integer',
         'reinvoice_registration_user_id' => 'integer',
-        
-        // Integer fields (Years and IDs)
+
+        // interi (anni)
         'manage_year' => 'integer',
         'notify_year' => 'integer',
         'act_year' => 'integer',
     ];
 
-    // Relazioni esistenti corrette
+    // relazioni
     public function company()
     {
         return $this->belongsTo(Company::class);
@@ -188,25 +188,21 @@ class PostalExpense extends Model
         return $this->belongsTo(NewContract::class, 'new_contract_id');
     }
 
-    // Correzione relazione supplier
     public function supplier()
     {
         return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
-    // Correzione relazione passive invoice
     public function passiveInvoice()
     {
         return $this->belongsTo(PassiveInvoice::class, 'passive_invoice_id');
     }
 
-    // Correzione relazione reinvoice
     public function reInvoice()
     {
         return $this->belongsTo(Invoice::class, 'reinvoice_id');
     }
 
-    // Relazioni utenti corrette
     public function shipmentInsertUser()
     {
         return $this->belongsTo(User::class, 'shipment_insert_user_id');

@@ -39,5 +39,7 @@ class DatabaseSeeder extends Seeder
         $this->call(FiscalProfilesTableSeeder::class);
         $this->call(CompanyDocsTableSeeder::class);
         $this->call(DocTypeSectionalTableSeeder::class);
+        $this->call(ActTypesTableSeeder::class);
+        $this->call(ShipmentTypesTableSeeder::class);
     }
 }

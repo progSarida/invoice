@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class SectionalsTableSeeder extends Seeder
 {
@@ -14,12 +15,12 @@ class SectionalsTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
-        \DB::table('sectionals')->delete();
-        
-        \DB::table('sectionals')->insert(array (
-            0 => 
+
+        DB::table('sectionals')->delete();
+
+        DB::table('sectionals')->insert(array (
+            0 =>
             array (
                 'id' => 1,
                 'company_id' => 1,
@@ -31,7 +32,7 @@ class SectionalsTableSeeder extends Seeder
                 'created_at' => '2025-07-03 09:36:05',
                 'updated_at' => '2025-07-03 09:36:05',
             ),
-            1 => 
+            1 =>
             array (
                 'id' => 2,
                 'company_id' => 1,
@@ -44,7 +45,7 @@ class SectionalsTableSeeder extends Seeder
                 'updated_at' => '2025-07-03 09:36:21',
             ),
         ));
-        
-        
+
+
     }
 }

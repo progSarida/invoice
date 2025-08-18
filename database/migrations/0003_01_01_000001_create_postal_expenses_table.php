@@ -56,7 +56,7 @@ return new class extends Migration
             $table->foreign('supplier_id')->references('id')->on('suppliers');                  		// fornitore (mostrare se spedizione)
             $table->string('supplier')->nullable();                                            			// ente da rimborsare (mostrare se messo)
 
-            $table->string('recipient')->nullable();                                            		// destinatario notifica/trasgressore 
+            $table->string('recipient')->nullable();                                            		// destinatario notifica/trasgressore
 
             $table->string('tax_type');                                                         		// enum tipo entrata: TaxType
 
@@ -108,17 +108,17 @@ return new class extends Migration
 
             $table->boolean('reinvoice')->default(0);                                           		// bool per rifatturazione spese (da new_contract_id)
 
-            $table->string('shipment_doc_type');														// enum tipo documento: ShipmentDocType (fattura, doc da messo) 
+            $table->string('shipment_doc_type');														// enum tipo documento: ShipmentDocType (fattura, doc da messo)
 
-            $table->string('shipment_doc_number');														// numero documento (da passive_invoice_id, se spedizione) 
+            $table->string('shipment_doc_number');														// numero documento (da passive_invoice_id, se spedizione)
 
-            $table->string('shipment_doc_date');														// data documento (da passive_invoice_id, se spedizione) 
+            $table->string('shipment_doc_date');														// data documento (da passive_invoice_id, se spedizione)
 
             $table->string('iban')->nullable();                                                 		// iban (da passive_invoice_id, se spedizione)
 
             $table->unsignedBigInteger('expense_insert_user_id')->nullable();                  		    //
             $table->foreign('expense_insert_user_id')->references('id')->on('users');          		    // utente che ha inserito i dati precedenti
-            $table->date('expense_insert_date')->nullable();                                  		    // data inserimento dati precedenti            
+            $table->date('expense_insert_date')->nullable();                                  		    // data inserimento dati precedenti
 
             // Estremi del pagamento
             $table->boolean('payed')->default(0);                                               		// bool per spese pagate
@@ -142,7 +142,7 @@ return new class extends Migration
             $table->unsignedBigInteger('reinvoice_insert_user_id')->nullable();                 		//
             $table->foreign('reinvoice_insert_user_id')->references('id')->on('users');         		// utente che ha inserito i dati precedenti
             $table->date('reinvoice_insert_date')->nullable();                                          // data inserimento dati precedenti
-            
+
             // Registrazione della data di lavorazione/modifica
             $table->string('reinvoice_attachment_path')->nullable();                                    // percorso file scan fattura emessa caricato
             $table->date('reinvoice_attachment_date')->nullable();                                  	// data file scan fattura emessa caricato
@@ -166,6 +166,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
+        Schema::table('new_contracts', function (Blueprint $table) {
+            $table->dropColumn('reinvoice');                                                            // rimuovo il campo 'reinvoice' dalla tabella 'new_contracts'
+        });
+        Schema::table('invoices', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);                                                           //
+            $table->dropColumn('user_id');                                                              // rimuovo la chiave esterna e il campo 'user_id' dalla tabella 'invoices'
+        });
         Schema::dropIfExists('postal_expenses');
         Schema::dropIfExists('shipment_types');
         Schema::dropIfExists('act_types');

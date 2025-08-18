@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class StampDutiesTableSeeder extends Seeder
 {
@@ -14,12 +15,12 @@ class StampDutiesTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
-        \DB::table('stamp_duties')->delete();
-        
-        \DB::table('stamp_duties')->insert(array (
-            0 => 
+
+        DB::table('stamp_duties')->delete();
+
+        DB::table('stamp_duties')->insert(array (
+            0 =>
             array (
                 'id' => 1,
                 'company_id' => 1,
@@ -34,7 +35,7 @@ class StampDutiesTableSeeder extends Seeder
                 'updated_at' => '2025-07-03 09:36:21',
             ),
         ));
-        
-        
+
+
     }
 }

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CompanyDocsTableSeeder extends Seeder
 {
@@ -14,12 +15,12 @@ class CompanyDocsTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
-        \DB::table('company_docs')->delete();
-        
-        \DB::table('company_docs')->insert(array (
-            0 => 
+
+        DB::table('company_docs')->delete();
+
+        DB::table('company_docs')->insert(array (
+            0 =>
             array (
                 'id' => 1,
                 'company_id' => 1,
@@ -27,7 +28,7 @@ class CompanyDocsTableSeeder extends Seeder
                 'created_at' => '2025-07-03 09:16:34',
                 'updated_at' => '2025-07-03 09:16:34',
             ),
-            1 => 
+            1 =>
             array (
                 'id' => 2,
                 'company_id' => 1,
@@ -35,7 +36,7 @@ class CompanyDocsTableSeeder extends Seeder
                 'created_at' => '2025-07-03 09:16:34',
                 'updated_at' => '2025-07-03 09:16:34',
             ),
-            2 => 
+            2 =>
             array (
                 'id' => 3,
                 'company_id' => 1,
@@ -44,7 +45,7 @@ class CompanyDocsTableSeeder extends Seeder
                 'updated_at' => '2025-07-03 09:16:34',
             ),
         ));
-        
-        
+
+
     }
 }

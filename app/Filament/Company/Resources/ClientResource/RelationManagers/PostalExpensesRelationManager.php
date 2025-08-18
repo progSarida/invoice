@@ -11,6 +11,7 @@ use App\Models\ActType;
 use App\Models\Invoice;
 use App\Models\NewContract;
 use App\Models\PassiveInvoice;
+use App\Models\PostalExpense;
 use App\Models\ShipmentType;
 use App\Models\Supplier;
 use Filament\Forms;
@@ -23,6 +24,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class PostalExpensesRelationManager extends RelationManager
@@ -91,17 +93,29 @@ class PostalExpensesRelationManager extends RelationManager
                     ->collapsed()
                     ->schema([
                         Forms\Components\TextInput::make('send_protocol_number')->label('Numero protocollo invio')
-                            ->maxLength(255),
+                            ->required()
+                            ->maxLength(255)
+                            ->default(function () {
+                                $maxProtocolNumber = \App\Models\PostalExpense::query()
+                                    ->selectRaw('MAX(CAST(send_protocol_number AS UNSIGNED)) as max_number')
+                                    ->value('max_number');
 
-                        Forms\Components\DatePicker::make('send_protocol_date')->label('Data protocollo invio'),
+                                return $maxProtocolNumber ? $maxProtocolNumber + 1 : 1;
+                            }),
+
+                        Forms\Components\DatePicker::make('send_protocol_date')->label('Data protocollo invio')
+                            ->required()
+                            ->default(now()),
 
                         Forms\Components\Select::make('shipment_type_id')->label('Modalità di invio')
+                            ->required()
                             ->relationship('shipmentType', 'name')
                             ->searchable()
                             ->preload(),
 
                         Forms\Components\TextInput::make('recipient')->label('Destinatario notifica/trasgressore')
                             ->maxLength(255)
+                            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                             ->columnSpanFull(),
 
                         // Fornitore/Supplier condizionale
@@ -123,39 +137,54 @@ class PostalExpensesRelationManager extends RelationManager
 
                         // Gestione anni
                         Forms\Components\TextInput::make('manage_year')->label('Anno di gestione')
+                            ->required()
                             ->numeric()
                             ->rules(['digits:4'])
                             ->default(now()->year),
 
                         Forms\Components\Select::make('act_type_id')->label('Tipo atto')
+                            ->required()
                             ->relationship('actType', 'name')
                             ->searchable()
                             ->preload(),
 
                         Forms\Components\TextInput::make('act_id')->label('ID atto')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->visible(false),
 
                         Forms\Components\TextInput::make('act_year')->label('Anno atto')
                             ->numeric()
                             ->rules(['digits:4'])
-                            ->default(now()->year),
+                            ->default(now()->year)
+                            ->visible(false),
 
                         Forms\Components\FileUpload::make('act_attachment_path')->label('Allegato atto')
                             ->disk('public')
                             ->directory('postal-act-attachments')
                             ->visibility('public')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                             ->maxSize(10240),
 
-                        Forms\Components\DatePicker::make('act_attachment_date')->label('Data allegato atto'),
+                        Forms\Components\DatePicker::make('act_attachment_date')->label('Data allegato atto')
+                            ->required()
+                            ->visible(function (Get $get, $record): bool {
+                                $hasUploadedFile = !empty($get('act_attachment_path'));
+                                $hasSavedFile = $record && !empty($record->act_attachment_path);
+                                return $hasUploadedFile || $hasSavedFile;
+                            }),
 
                         Forms\Components\Select::make('shipment_insert_user_id')->label('Utente inserimento dati')
+                            ->required()
                             ->relationship('shipmentInsertUser', 'name')
                             ->searchable()
                             ->preload()
+                            ->default(Auth::id())
                             ->optionsLimit(5),
 
-                        Forms\Components\DatePicker::make('shipment_insert_date')->label('Data inserimento dati'),
+                        Forms\Components\DatePicker::make('shipment_insert_date')->label('Data inserimento dati')
+                            ->required()
+                            ->default(now()),
                     ])
                     ->columns(3),
 
@@ -165,13 +194,20 @@ class PostalExpensesRelationManager extends RelationManager
                     ->collapsed()
                     ->schema([
                         Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
+                            ->required()
                             ->disk('public')
                             ->directory('postal-notify-attachments')
                             ->visibility('public')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->maxSize(10240),
 
-                        Forms\Components\DatePicker::make('notify_attachment_date')->label('Data allegato notifica'),
+                        Forms\Components\DatePicker::make('notify_attachment_date')->label('Data allegato notifica')
+                            ->required()
+                            ->visible(function (Get $get, $record): bool {
+                                $hasUploadedFile = !empty($get('notify_attachment_path'));
+                                $hasSavedFile = $record && !empty($record->notify_attachment_path);
+                                return $hasUploadedFile || $hasSavedFile;
+                            }),
 
                         Forms\Components\TextInput::make('order_rif')->label('Riferimento commessa')
                             ->maxLength(255),
@@ -180,9 +216,12 @@ class PostalExpensesRelationManager extends RelationManager
                             ->maxLength(255),
 
                         Forms\Components\TextInput::make('receive_protocol_number')->label('Numero protocollo ricezione')
-                            ->maxLength(255),
+                            ->required()
+                            ->maxLength(255)
+                            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value),
 
-                        Forms\Components\DatePicker::make('receive_protocol_date')->label('Data protocollo ricezione'),
+                        Forms\Components\DatePicker::make('receive_protocol_date')->label('Data protocollo ricezione')
+                            ->required(),
 
                         Forms\Components\TextInput::make('notify_year')->label('Anno notifica')
                             ->numeric()
@@ -195,20 +234,24 @@ class PostalExpensesRelationManager extends RelationManager
                             ->preload(),
 
                         Forms\Components\TextInput::make('notify_amount')->label('Importo notifica')
+                            ->required()
                             ->numeric()
                             ->inputMode('decimal')
                             ->step(0.01)
                             ->suffix('€'),
 
-                        Forms\Components\DatePicker::make('amount_registration_date')->label('Data registrazione importo'),
+                        Forms\Components\DatePicker::make('amount_registration_date')->label('Data registrazione importo')
+                            ->required(),
 
                         Forms\Components\Select::make('notify_insert_user_id')->label('Utente inserimento notifica')
+                            ->required()
                             ->relationship('notifyInsertUser', 'name')
                             ->searchable()
                             ->preload()
                             ->optionsLimit(5),
 
-                        Forms\Components\DatePicker::make('notify_insert_date')->label('Data inserimento notifica'),
+                        Forms\Components\DatePicker::make('notify_insert_date')->label('Data inserimento notifica')
+                            ->required(),
                     ])
                     ->columns(3),
 
@@ -396,10 +439,11 @@ class PostalExpensesRelationManager extends RelationManager
                             ->columnSpanFull(),
                     ]),
 
-                // SEZIONE: Visualizzazione Allegati
+                // SEZIONE: Visualizzazione Allegati (nascosta se non ci sono allegati)
                 Forms\Components\Section::make('Visualizza Allegati')
                     ->icon('heroicon-o-paper-clip')
                     ->collapsed()
+                    ->visible(fn($record): bool => $record && ($record->act_attachment_path || $record->notify_attachment_path || $record->reinvoice_attachment_path))
                     ->schema([
                         Forms\Components\Actions::make([
                             Forms\Components\Actions\Action::make('view_act_attachment')
@@ -407,23 +451,23 @@ class PostalExpensesRelationManager extends RelationManager
                                 ->icon('heroicon-o-eye')
                                 ->url(fn($record): ?string => $record && $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
                                 ->openUrlInNewTab()
-                                ->disabled(fn($record): bool => !$record || !$record->act_attachment_path)
+                                ->visible(fn($record): bool => $record && $record->act_attachment_path)
                                 ->color('primary'),
-                            
+
                             Forms\Components\Actions\Action::make('view_notify_attachment')
                                 ->label('Visualizza Allegato Notifica')
                                 ->icon('heroicon-o-eye')
                                 ->url(fn($record): ?string => $record && $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
                                 ->openUrlInNewTab()
-                                ->disabled(fn($record): bool => !$record || !$record->notify_attachment_path)
+                                ->visible(fn($record): bool => $record && $record->notify_attachment_path)
                                 ->color('secondary'),
-                            
+
                             Forms\Components\Actions\Action::make('view_reinvoice_attachment')
                                 ->label('Visualizza Allegato Rifatturazione')
                                 ->icon('heroicon-o-eye')
                                 ->url(fn($record): ?string => $record && $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
                                 ->openUrlInNewTab()
-                                ->disabled(fn($record): bool => !$record || !$record->reinvoice_attachment_path)
+                                ->visible(fn($record): bool => $record && $record->reinvoice_attachment_path)
                                 ->color('success'),
                         ])->columnSpanFull()
                     ]),
@@ -487,19 +531,19 @@ class PostalExpensesRelationManager extends RelationManager
                         ->icon('heroicon-o-document')
                         ->url(fn($record): ?string => $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
                         ->openUrlInNewTab()
-                        ->visible(fn($record): bool => (bool)$record->act_attachment_path),
+                        ->visible(fn($record): bool => (bool)$record->act_attachment_path),             // Nascondo se l'allegato non esiste
                     Tables\Actions\Action::make('view_notify_attachment')
                         ->label('Allegato Notifica')
                         ->icon('heroicon-o-bell')
                         ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
                         ->openUrlInNewTab()
-                        ->visible(fn($record): bool => (bool)$record->notify_attachment_path),
+                        ->visible(fn($record): bool => (bool)$record->notify_attachment_path),          // Nascondo se l'allegato non esiste
                     Tables\Actions\Action::make('view_reinvoice_attachment')
                         ->label('Allegato Rifatturazione')
                         ->icon('heroicon-o-receipt-tax')
                         ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
                         ->openUrlInNewTab()
-                        ->visible(fn($record): bool => (bool)$record->reinvoice_attachment_path),
+                        ->visible(fn($record): bool => (bool)$record->reinvoice_attachment_path),       // Nascondo se l'allegato non esiste
                 ])
                 ->label('Allegati')
                 ->icon('heroicon-o-paper-clip')

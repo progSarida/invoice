@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class StatesTableSeeder extends Seeder
 {
@@ -14,12 +15,12 @@ class StatesTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
-        \DB::table('states')->delete();
-        
-        \DB::table('states')->insert(array (
-            0 => 
+
+        DB::table('states')->delete();
+
+        DB::table('states')->insert(array (
+            0 =>
             array (
                 'id' => 1,
                 'name' => 'Afghanistan',
@@ -34,7 +35,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 34,
                 'intermediate_region_code' => NULL,
             ),
-            1 => 
+            1 =>
             array (
                 'id' => 2,
                 'name' => 'Åland Islands',
@@ -49,7 +50,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            2 => 
+            2 =>
             array (
                 'id' => 3,
                 'name' => 'Albania',
@@ -64,7 +65,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            3 => 
+            3 =>
             array (
                 'id' => 4,
                 'name' => 'Algeria',
@@ -79,7 +80,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 15,
                 'intermediate_region_code' => NULL,
             ),
-            4 => 
+            4 =>
             array (
                 'id' => 5,
                 'name' => 'American Samoa',
@@ -94,7 +95,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 61,
                 'intermediate_region_code' => NULL,
             ),
-            5 => 
+            5 =>
             array (
                 'id' => 6,
                 'name' => 'Andorra',
@@ -109,7 +110,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            6 => 
+            6 =>
             array (
                 'id' => 7,
                 'name' => 'Angola',
@@ -124,7 +125,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 17,
             ),
-            7 => 
+            7 =>
             array (
                 'id' => 8,
                 'name' => 'Anguilla',
@@ -139,7 +140,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            8 => 
+            8 =>
             array (
                 'id' => 9,
                 'name' => 'Antarctica',
@@ -154,7 +155,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => NULL,
                 'intermediate_region_code' => NULL,
             ),
-            9 => 
+            9 =>
             array (
                 'id' => 10,
                 'name' => 'Antigua and Barbuda',
@@ -169,7 +170,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            10 => 
+            10 =>
             array (
                 'id' => 11,
                 'name' => 'Argentina',
@@ -184,7 +185,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            11 => 
+            11 =>
             array (
                 'id' => 12,
                 'name' => 'Armenia',
@@ -199,7 +200,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            12 => 
+            12 =>
             array (
                 'id' => 13,
                 'name' => 'Aruba',
@@ -214,7 +215,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            13 => 
+            13 =>
             array (
                 'id' => 14,
                 'name' => 'Australia',
@@ -229,7 +230,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 53,
                 'intermediate_region_code' => NULL,
             ),
-            14 => 
+            14 =>
             array (
                 'id' => 15,
                 'name' => 'Austria',
@@ -244,7 +245,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 155,
                 'intermediate_region_code' => NULL,
             ),
-            15 => 
+            15 =>
             array (
                 'id' => 16,
                 'name' => 'Azerbaijan',
@@ -259,7 +260,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            16 => 
+            16 =>
             array (
                 'id' => 17,
                 'name' => 'Bahamas',
@@ -274,7 +275,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            17 => 
+            17 =>
             array (
                 'id' => 18,
                 'name' => 'Bahrain',
@@ -289,7 +290,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            18 => 
+            18 =>
             array (
                 'id' => 19,
                 'name' => 'Bangladesh',
@@ -304,7 +305,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 34,
                 'intermediate_region_code' => NULL,
             ),
-            19 => 
+            19 =>
             array (
                 'id' => 20,
                 'name' => 'Barbados',
@@ -319,7 +320,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            20 => 
+            20 =>
             array (
                 'id' => 21,
                 'name' => 'Belarus',
@@ -334,7 +335,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 151,
                 'intermediate_region_code' => NULL,
             ),
-            21 => 
+            21 =>
             array (
                 'id' => 22,
                 'name' => 'Belgium',
@@ -349,7 +350,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 155,
                 'intermediate_region_code' => NULL,
             ),
-            22 => 
+            22 =>
             array (
                 'id' => 23,
                 'name' => 'Belize',
@@ -364,7 +365,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 13,
             ),
-            23 => 
+            23 =>
             array (
                 'id' => 24,
                 'name' => 'Benin',
@@ -379,7 +380,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            24 => 
+            24 =>
             array (
                 'id' => 25,
                 'name' => 'Bermuda',
@@ -394,7 +395,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 21,
                 'intermediate_region_code' => NULL,
             ),
-            25 => 
+            25 =>
             array (
                 'id' => 26,
                 'name' => 'Bhutan',
@@ -409,7 +410,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 34,
                 'intermediate_region_code' => NULL,
             ),
-            26 => 
+            26 =>
             array (
                 'id' => 27,
             'name' => 'Bolivia (Plurinational State of)',
@@ -424,7 +425,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            27 => 
+            27 =>
             array (
                 'id' => 28,
                 'name' => 'Bonaire, Sint Eustatius and Saba',
@@ -439,7 +440,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            28 => 
+            28 =>
             array (
                 'id' => 29,
                 'name' => 'Bosnia and Herzegovina',
@@ -454,7 +455,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            29 => 
+            29 =>
             array (
                 'id' => 30,
                 'name' => 'Botswana',
@@ -469,7 +470,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 18,
             ),
-            30 => 
+            30 =>
             array (
                 'id' => 31,
                 'name' => 'Bouvet Island',
@@ -484,7 +485,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => NULL,
                 'intermediate_region_code' => NULL,
             ),
-            31 => 
+            31 =>
             array (
                 'id' => 32,
                 'name' => 'Brazil',
@@ -499,7 +500,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            32 => 
+            32 =>
             array (
                 'id' => 33,
                 'name' => 'British Indian Ocean Territory',
@@ -514,7 +515,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            33 => 
+            33 =>
             array (
                 'id' => 34,
                 'name' => 'Brunei Darussalam',
@@ -529,7 +530,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            34 => 
+            34 =>
             array (
                 'id' => 35,
                 'name' => 'Bulgaria',
@@ -544,7 +545,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 151,
                 'intermediate_region_code' => NULL,
             ),
-            35 => 
+            35 =>
             array (
                 'id' => 36,
                 'name' => 'Burkina Faso',
@@ -559,7 +560,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            36 => 
+            36 =>
             array (
                 'id' => 37,
                 'name' => 'Burundi',
@@ -574,7 +575,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            37 => 
+            37 =>
             array (
                 'id' => 38,
                 'name' => 'Cabo Verde',
@@ -589,7 +590,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            38 => 
+            38 =>
             array (
                 'id' => 39,
                 'name' => 'Cambodia',
@@ -604,7 +605,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            39 => 
+            39 =>
             array (
                 'id' => 40,
                 'name' => 'Cameroon',
@@ -619,7 +620,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 17,
             ),
-            40 => 
+            40 =>
             array (
                 'id' => 41,
                 'name' => 'Canada',
@@ -634,7 +635,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 21,
                 'intermediate_region_code' => NULL,
             ),
-            41 => 
+            41 =>
             array (
                 'id' => 42,
                 'name' => 'Cayman Islands',
@@ -649,7 +650,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            42 => 
+            42 =>
             array (
                 'id' => 43,
                 'name' => 'Central African Republic',
@@ -664,7 +665,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 17,
             ),
-            43 => 
+            43 =>
             array (
                 'id' => 44,
                 'name' => 'Chad',
@@ -679,7 +680,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 17,
             ),
-            44 => 
+            44 =>
             array (
                 'id' => 45,
                 'name' => 'Chile',
@@ -694,7 +695,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            45 => 
+            45 =>
             array (
                 'id' => 46,
                 'name' => 'China',
@@ -709,7 +710,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 30,
                 'intermediate_region_code' => NULL,
             ),
-            46 => 
+            46 =>
             array (
                 'id' => 47,
                 'name' => 'Christmas Island',
@@ -724,7 +725,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 53,
                 'intermediate_region_code' => NULL,
             ),
-            47 => 
+            47 =>
             array (
                 'id' => 48,
             'name' => 'Cocos (Keeling) Islands',
@@ -739,7 +740,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 53,
                 'intermediate_region_code' => NULL,
             ),
-            48 => 
+            48 =>
             array (
                 'id' => 49,
                 'name' => 'Colombia',
@@ -754,7 +755,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            49 => 
+            49 =>
             array (
                 'id' => 50,
                 'name' => 'Comoros',
@@ -769,7 +770,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            50 => 
+            50 =>
             array (
                 'id' => 51,
                 'name' => 'Congo',
@@ -784,7 +785,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 17,
             ),
-            51 => 
+            51 =>
             array (
                 'id' => 52,
                 'name' => 'Congo, Democratic Republic of the',
@@ -799,7 +800,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 17,
             ),
-            52 => 
+            52 =>
             array (
                 'id' => 53,
                 'name' => 'Cook Islands',
@@ -814,7 +815,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 61,
                 'intermediate_region_code' => NULL,
             ),
-            53 => 
+            53 =>
             array (
                 'id' => 54,
                 'name' => 'Costa Rica',
@@ -829,7 +830,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 13,
             ),
-            54 => 
+            54 =>
             array (
                 'id' => 55,
                 'name' => 'Côte d\'Ivoire',
@@ -844,7 +845,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            55 => 
+            55 =>
             array (
                 'id' => 56,
                 'name' => 'Croatia',
@@ -859,7 +860,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            56 => 
+            56 =>
             array (
                 'id' => 57,
                 'name' => 'Cuba',
@@ -874,7 +875,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            57 => 
+            57 =>
             array (
                 'id' => 58,
                 'name' => 'Curaçao',
@@ -889,7 +890,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            58 => 
+            58 =>
             array (
                 'id' => 59,
                 'name' => 'Cyprus',
@@ -904,7 +905,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            59 => 
+            59 =>
             array (
                 'id' => 60,
                 'name' => 'Czechia',
@@ -919,7 +920,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 151,
                 'intermediate_region_code' => NULL,
             ),
-            60 => 
+            60 =>
             array (
                 'id' => 61,
                 'name' => 'Denmark',
@@ -934,7 +935,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            61 => 
+            61 =>
             array (
                 'id' => 62,
                 'name' => 'Djibouti',
@@ -949,7 +950,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            62 => 
+            62 =>
             array (
                 'id' => 63,
                 'name' => 'Dominica',
@@ -964,7 +965,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            63 => 
+            63 =>
             array (
                 'id' => 64,
                 'name' => 'Dominican Republic',
@@ -979,7 +980,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            64 => 
+            64 =>
             array (
                 'id' => 65,
                 'name' => 'Ecuador',
@@ -994,7 +995,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            65 => 
+            65 =>
             array (
                 'id' => 66,
                 'name' => 'Egypt',
@@ -1009,7 +1010,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 15,
                 'intermediate_region_code' => NULL,
             ),
-            66 => 
+            66 =>
             array (
                 'id' => 67,
                 'name' => 'El Salvador',
@@ -1024,7 +1025,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 13,
             ),
-            67 => 
+            67 =>
             array (
                 'id' => 68,
                 'name' => 'Equatorial Guinea',
@@ -1039,7 +1040,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 17,
             ),
-            68 => 
+            68 =>
             array (
                 'id' => 69,
                 'name' => 'Eritrea',
@@ -1054,7 +1055,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            69 => 
+            69 =>
             array (
                 'id' => 70,
                 'name' => 'Estonia',
@@ -1069,7 +1070,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            70 => 
+            70 =>
             array (
                 'id' => 71,
                 'name' => 'Eswatini',
@@ -1084,7 +1085,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 18,
             ),
-            71 => 
+            71 =>
             array (
                 'id' => 72,
                 'name' => 'Ethiopia',
@@ -1099,7 +1100,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            72 => 
+            72 =>
             array (
                 'id' => 73,
             'name' => 'Falkland Islands (Malvinas)',
@@ -1114,7 +1115,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            73 => 
+            73 =>
             array (
                 'id' => 74,
                 'name' => 'Faroe Islands',
@@ -1129,7 +1130,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            74 => 
+            74 =>
             array (
                 'id' => 75,
                 'name' => 'Fiji',
@@ -1144,7 +1145,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 54,
                 'intermediate_region_code' => NULL,
             ),
-            75 => 
+            75 =>
             array (
                 'id' => 76,
                 'name' => 'Finland',
@@ -1159,7 +1160,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            76 => 
+            76 =>
             array (
                 'id' => 77,
                 'name' => 'France',
@@ -1174,7 +1175,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 155,
                 'intermediate_region_code' => NULL,
             ),
-            77 => 
+            77 =>
             array (
                 'id' => 78,
                 'name' => 'French Guiana',
@@ -1189,7 +1190,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            78 => 
+            78 =>
             array (
                 'id' => 79,
                 'name' => 'French Polynesia',
@@ -1204,7 +1205,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 61,
                 'intermediate_region_code' => NULL,
             ),
-            79 => 
+            79 =>
             array (
                 'id' => 80,
                 'name' => 'French Southern Territories',
@@ -1219,7 +1220,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => NULL,
                 'intermediate_region_code' => NULL,
             ),
-            80 => 
+            80 =>
             array (
                 'id' => 81,
                 'name' => 'Gabon',
@@ -1234,7 +1235,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 17,
             ),
-            81 => 
+            81 =>
             array (
                 'id' => 82,
                 'name' => 'Gambia',
@@ -1249,7 +1250,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            82 => 
+            82 =>
             array (
                 'id' => 83,
                 'name' => 'Georgia',
@@ -1264,7 +1265,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            83 => 
+            83 =>
             array (
                 'id' => 84,
                 'name' => 'Germany',
@@ -1279,7 +1280,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 155,
                 'intermediate_region_code' => NULL,
             ),
-            84 => 
+            84 =>
             array (
                 'id' => 85,
                 'name' => 'Ghana',
@@ -1294,7 +1295,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            85 => 
+            85 =>
             array (
                 'id' => 86,
                 'name' => 'Gibraltar',
@@ -1309,7 +1310,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            86 => 
+            86 =>
             array (
                 'id' => 87,
                 'name' => 'Greece',
@@ -1324,7 +1325,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            87 => 
+            87 =>
             array (
                 'id' => 88,
                 'name' => 'Greenland',
@@ -1339,7 +1340,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 21,
                 'intermediate_region_code' => NULL,
             ),
-            88 => 
+            88 =>
             array (
                 'id' => 89,
                 'name' => 'Grenada',
@@ -1354,7 +1355,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            89 => 
+            89 =>
             array (
                 'id' => 90,
                 'name' => 'Guadeloupe',
@@ -1369,7 +1370,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            90 => 
+            90 =>
             array (
                 'id' => 91,
                 'name' => 'Guam',
@@ -1384,7 +1385,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 57,
                 'intermediate_region_code' => NULL,
             ),
-            91 => 
+            91 =>
             array (
                 'id' => 92,
                 'name' => 'Guatemala',
@@ -1399,7 +1400,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 13,
             ),
-            92 => 
+            92 =>
             array (
                 'id' => 93,
                 'name' => 'Guernsey',
@@ -1414,7 +1415,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            93 => 
+            93 =>
             array (
                 'id' => 94,
                 'name' => 'Guinea',
@@ -1429,7 +1430,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            94 => 
+            94 =>
             array (
                 'id' => 95,
                 'name' => 'Guinea-Bissau',
@@ -1444,7 +1445,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            95 => 
+            95 =>
             array (
                 'id' => 96,
                 'name' => 'Guyana',
@@ -1459,7 +1460,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            96 => 
+            96 =>
             array (
                 'id' => 97,
                 'name' => 'Haiti',
@@ -1474,7 +1475,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            97 => 
+            97 =>
             array (
                 'id' => 98,
                 'name' => 'Heard Island and McDonald Islands',
@@ -1489,7 +1490,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 53,
                 'intermediate_region_code' => NULL,
             ),
-            98 => 
+            98 =>
             array (
                 'id' => 99,
                 'name' => 'Holy See',
@@ -1504,7 +1505,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            99 => 
+            99 =>
             array (
                 'id' => 100,
                 'name' => 'Honduras',
@@ -1519,7 +1520,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 13,
             ),
-            100 => 
+            100 =>
             array (
                 'id' => 101,
                 'name' => 'Hong Kong',
@@ -1534,7 +1535,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 30,
                 'intermediate_region_code' => NULL,
             ),
-            101 => 
+            101 =>
             array (
                 'id' => 102,
                 'name' => 'Hungary',
@@ -1549,7 +1550,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 151,
                 'intermediate_region_code' => NULL,
             ),
-            102 => 
+            102 =>
             array (
                 'id' => 103,
                 'name' => 'Iceland',
@@ -1564,7 +1565,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            103 => 
+            103 =>
             array (
                 'id' => 104,
                 'name' => 'India',
@@ -1579,7 +1580,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 34,
                 'intermediate_region_code' => NULL,
             ),
-            104 => 
+            104 =>
             array (
                 'id' => 105,
                 'name' => 'Indonesia',
@@ -1594,7 +1595,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            105 => 
+            105 =>
             array (
                 'id' => 106,
             'name' => 'Iran (Islamic Republic of)',
@@ -1609,7 +1610,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 34,
                 'intermediate_region_code' => NULL,
             ),
-            106 => 
+            106 =>
             array (
                 'id' => 107,
                 'name' => 'Iraq',
@@ -1624,7 +1625,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            107 => 
+            107 =>
             array (
                 'id' => 108,
                 'name' => 'Ireland',
@@ -1639,7 +1640,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            108 => 
+            108 =>
             array (
                 'id' => 109,
                 'name' => 'Isle of Man',
@@ -1654,7 +1655,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            109 => 
+            109 =>
             array (
                 'id' => 110,
                 'name' => 'Israel',
@@ -1669,7 +1670,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            110 => 
+            110 =>
             array (
                 'id' => 111,
                 'name' => 'Italy',
@@ -1684,7 +1685,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            111 => 
+            111 =>
             array (
                 'id' => 112,
                 'name' => 'Jamaica',
@@ -1699,7 +1700,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            112 => 
+            112 =>
             array (
                 'id' => 113,
                 'name' => 'Japan',
@@ -1714,7 +1715,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 30,
                 'intermediate_region_code' => NULL,
             ),
-            113 => 
+            113 =>
             array (
                 'id' => 114,
                 'name' => 'Jersey',
@@ -1729,7 +1730,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            114 => 
+            114 =>
             array (
                 'id' => 115,
                 'name' => 'Jordan',
@@ -1744,7 +1745,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            115 => 
+            115 =>
             array (
                 'id' => 116,
                 'name' => 'Kazakhstan',
@@ -1759,7 +1760,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 143,
                 'intermediate_region_code' => NULL,
             ),
-            116 => 
+            116 =>
             array (
                 'id' => 117,
                 'name' => 'Kenya',
@@ -1774,7 +1775,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            117 => 
+            117 =>
             array (
                 'id' => 118,
                 'name' => 'Kiribati',
@@ -1789,7 +1790,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 57,
                 'intermediate_region_code' => NULL,
             ),
-            118 => 
+            118 =>
             array (
                 'id' => 119,
             'name' => 'Korea (Democratic People\'s Republic of)',
@@ -1804,7 +1805,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 30,
                 'intermediate_region_code' => NULL,
             ),
-            119 => 
+            119 =>
             array (
                 'id' => 120,
                 'name' => 'Korea, Republic of',
@@ -1819,7 +1820,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 30,
                 'intermediate_region_code' => NULL,
             ),
-            120 => 
+            120 =>
             array (
                 'id' => 121,
                 'name' => 'Kuwait',
@@ -1834,7 +1835,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            121 => 
+            121 =>
             array (
                 'id' => 122,
                 'name' => 'Kyrgyzstan',
@@ -1849,7 +1850,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 143,
                 'intermediate_region_code' => NULL,
             ),
-            122 => 
+            122 =>
             array (
                 'id' => 123,
                 'name' => 'Lao People\'s Democratic Republic',
@@ -1864,7 +1865,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            123 => 
+            123 =>
             array (
                 'id' => 124,
                 'name' => 'Latvia',
@@ -1879,7 +1880,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            124 => 
+            124 =>
             array (
                 'id' => 125,
                 'name' => 'Lebanon',
@@ -1894,7 +1895,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            125 => 
+            125 =>
             array (
                 'id' => 126,
                 'name' => 'Lesotho',
@@ -1909,7 +1910,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 18,
             ),
-            126 => 
+            126 =>
             array (
                 'id' => 127,
                 'name' => 'Liberia',
@@ -1924,7 +1925,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            127 => 
+            127 =>
             array (
                 'id' => 128,
                 'name' => 'Libya',
@@ -1939,7 +1940,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 15,
                 'intermediate_region_code' => NULL,
             ),
-            128 => 
+            128 =>
             array (
                 'id' => 129,
                 'name' => 'Liechtenstein',
@@ -1954,7 +1955,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 155,
                 'intermediate_region_code' => NULL,
             ),
-            129 => 
+            129 =>
             array (
                 'id' => 130,
                 'name' => 'Lithuania',
@@ -1969,7 +1970,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            130 => 
+            130 =>
             array (
                 'id' => 131,
                 'name' => 'Luxembourg',
@@ -1984,7 +1985,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 155,
                 'intermediate_region_code' => NULL,
             ),
-            131 => 
+            131 =>
             array (
                 'id' => 132,
                 'name' => 'Macao',
@@ -1999,7 +2000,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 30,
                 'intermediate_region_code' => NULL,
             ),
-            132 => 
+            132 =>
             array (
                 'id' => 133,
                 'name' => 'Madagascar',
@@ -2014,7 +2015,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            133 => 
+            133 =>
             array (
                 'id' => 134,
                 'name' => 'Malawi',
@@ -2029,7 +2030,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            134 => 
+            134 =>
             array (
                 'id' => 135,
                 'name' => 'Malaysia',
@@ -2044,7 +2045,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            135 => 
+            135 =>
             array (
                 'id' => 136,
                 'name' => 'Maldives',
@@ -2059,7 +2060,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 34,
                 'intermediate_region_code' => NULL,
             ),
-            136 => 
+            136 =>
             array (
                 'id' => 137,
                 'name' => 'Mali',
@@ -2074,7 +2075,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            137 => 
+            137 =>
             array (
                 'id' => 138,
                 'name' => 'Malta',
@@ -2089,7 +2090,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            138 => 
+            138 =>
             array (
                 'id' => 139,
                 'name' => 'Marshall Islands',
@@ -2104,7 +2105,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 57,
                 'intermediate_region_code' => NULL,
             ),
-            139 => 
+            139 =>
             array (
                 'id' => 140,
                 'name' => 'Martinique',
@@ -2119,7 +2120,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            140 => 
+            140 =>
             array (
                 'id' => 141,
                 'name' => 'Mauritania',
@@ -2134,7 +2135,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            141 => 
+            141 =>
             array (
                 'id' => 142,
                 'name' => 'Mauritius',
@@ -2149,7 +2150,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            142 => 
+            142 =>
             array (
                 'id' => 143,
                 'name' => 'Mayotte',
@@ -2164,7 +2165,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            143 => 
+            143 =>
             array (
                 'id' => 144,
                 'name' => 'Mexico',
@@ -2179,7 +2180,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 13,
             ),
-            144 => 
+            144 =>
             array (
                 'id' => 145,
             'name' => 'Micronesia (Federated States of)',
@@ -2194,7 +2195,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 57,
                 'intermediate_region_code' => NULL,
             ),
-            145 => 
+            145 =>
             array (
                 'id' => 146,
                 'name' => 'Moldova, Republic of',
@@ -2209,7 +2210,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 151,
                 'intermediate_region_code' => NULL,
             ),
-            146 => 
+            146 =>
             array (
                 'id' => 147,
                 'name' => 'Monaco',
@@ -2224,7 +2225,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 155,
                 'intermediate_region_code' => NULL,
             ),
-            147 => 
+            147 =>
             array (
                 'id' => 148,
                 'name' => 'Mongolia',
@@ -2239,7 +2240,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 30,
                 'intermediate_region_code' => NULL,
             ),
-            148 => 
+            148 =>
             array (
                 'id' => 149,
                 'name' => 'Montenegro',
@@ -2254,7 +2255,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            149 => 
+            149 =>
             array (
                 'id' => 150,
                 'name' => 'Montserrat',
@@ -2269,7 +2270,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            150 => 
+            150 =>
             array (
                 'id' => 151,
                 'name' => 'Morocco',
@@ -2284,7 +2285,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 15,
                 'intermediate_region_code' => NULL,
             ),
-            151 => 
+            151 =>
             array (
                 'id' => 152,
                 'name' => 'Mozambique',
@@ -2299,7 +2300,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            152 => 
+            152 =>
             array (
                 'id' => 153,
                 'name' => 'Myanmar',
@@ -2314,7 +2315,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            153 => 
+            153 =>
             array (
                 'id' => 154,
                 'name' => 'Namibia',
@@ -2329,7 +2330,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 18,
             ),
-            154 => 
+            154 =>
             array (
                 'id' => 155,
                 'name' => 'Nauru',
@@ -2344,7 +2345,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 57,
                 'intermediate_region_code' => NULL,
             ),
-            155 => 
+            155 =>
             array (
                 'id' => 156,
                 'name' => 'Nepal',
@@ -2359,7 +2360,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 34,
                 'intermediate_region_code' => NULL,
             ),
-            156 => 
+            156 =>
             array (
                 'id' => 157,
                 'name' => 'Netherlands',
@@ -2374,7 +2375,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 155,
                 'intermediate_region_code' => NULL,
             ),
-            157 => 
+            157 =>
             array (
                 'id' => 158,
                 'name' => 'New Caledonia',
@@ -2389,7 +2390,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 54,
                 'intermediate_region_code' => NULL,
             ),
-            158 => 
+            158 =>
             array (
                 'id' => 159,
                 'name' => 'New Zealand',
@@ -2404,7 +2405,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 53,
                 'intermediate_region_code' => NULL,
             ),
-            159 => 
+            159 =>
             array (
                 'id' => 160,
                 'name' => 'Nicaragua',
@@ -2419,7 +2420,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 13,
             ),
-            160 => 
+            160 =>
             array (
                 'id' => 161,
                 'name' => 'Niger',
@@ -2434,7 +2435,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            161 => 
+            161 =>
             array (
                 'id' => 162,
                 'name' => 'Nigeria',
@@ -2449,7 +2450,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            162 => 
+            162 =>
             array (
                 'id' => 163,
                 'name' => 'Niue',
@@ -2464,7 +2465,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 61,
                 'intermediate_region_code' => NULL,
             ),
-            163 => 
+            163 =>
             array (
                 'id' => 164,
                 'name' => 'Norfolk Island',
@@ -2479,7 +2480,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 53,
                 'intermediate_region_code' => NULL,
             ),
-            164 => 
+            164 =>
             array (
                 'id' => 165,
                 'name' => 'North Macedonia',
@@ -2494,7 +2495,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            165 => 
+            165 =>
             array (
                 'id' => 166,
                 'name' => 'Northern Mariana Islands',
@@ -2509,7 +2510,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 57,
                 'intermediate_region_code' => NULL,
             ),
-            166 => 
+            166 =>
             array (
                 'id' => 167,
                 'name' => 'Norway',
@@ -2524,7 +2525,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            167 => 
+            167 =>
             array (
                 'id' => 168,
                 'name' => 'Oman',
@@ -2539,7 +2540,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            168 => 
+            168 =>
             array (
                 'id' => 169,
                 'name' => 'Pakistan',
@@ -2554,7 +2555,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 34,
                 'intermediate_region_code' => NULL,
             ),
-            169 => 
+            169 =>
             array (
                 'id' => 170,
                 'name' => 'Palau',
@@ -2569,7 +2570,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 57,
                 'intermediate_region_code' => NULL,
             ),
-            170 => 
+            170 =>
             array (
                 'id' => 171,
                 'name' => 'Palestine, State of',
@@ -2584,7 +2585,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            171 => 
+            171 =>
             array (
                 'id' => 172,
                 'name' => 'Panama',
@@ -2599,7 +2600,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 13,
             ),
-            172 => 
+            172 =>
             array (
                 'id' => 173,
                 'name' => 'Papua New Guinea',
@@ -2614,7 +2615,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 54,
                 'intermediate_region_code' => NULL,
             ),
-            173 => 
+            173 =>
             array (
                 'id' => 174,
                 'name' => 'Paraguay',
@@ -2629,7 +2630,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            174 => 
+            174 =>
             array (
                 'id' => 175,
                 'name' => 'Peru',
@@ -2644,7 +2645,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            175 => 
+            175 =>
             array (
                 'id' => 176,
                 'name' => 'Philippines',
@@ -2659,7 +2660,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            176 => 
+            176 =>
             array (
                 'id' => 177,
                 'name' => 'Pitcairn',
@@ -2674,7 +2675,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 61,
                 'intermediate_region_code' => NULL,
             ),
-            177 => 
+            177 =>
             array (
                 'id' => 178,
                 'name' => 'Poland',
@@ -2689,7 +2690,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 151,
                 'intermediate_region_code' => NULL,
             ),
-            178 => 
+            178 =>
             array (
                 'id' => 179,
                 'name' => 'Portugal',
@@ -2704,7 +2705,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            179 => 
+            179 =>
             array (
                 'id' => 180,
                 'name' => 'Puerto Rico',
@@ -2719,7 +2720,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            180 => 
+            180 =>
             array (
                 'id' => 181,
                 'name' => 'Qatar',
@@ -2734,7 +2735,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            181 => 
+            181 =>
             array (
                 'id' => 182,
                 'name' => 'Réunion',
@@ -2749,7 +2750,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            182 => 
+            182 =>
             array (
                 'id' => 183,
                 'name' => 'Romania',
@@ -2764,7 +2765,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 151,
                 'intermediate_region_code' => NULL,
             ),
-            183 => 
+            183 =>
             array (
                 'id' => 184,
                 'name' => 'Russian Federation',
@@ -2779,7 +2780,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 151,
                 'intermediate_region_code' => NULL,
             ),
-            184 => 
+            184 =>
             array (
                 'id' => 185,
                 'name' => 'Rwanda',
@@ -2794,7 +2795,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            185 => 
+            185 =>
             array (
                 'id' => 186,
                 'name' => 'Saint Barthélemy',
@@ -2809,7 +2810,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            186 => 
+            186 =>
             array (
                 'id' => 187,
                 'name' => 'Saint Helena, Ascension and Tristan da Cunha',
@@ -2824,7 +2825,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            187 => 
+            187 =>
             array (
                 'id' => 188,
                 'name' => 'Saint Kitts and Nevis',
@@ -2839,7 +2840,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            188 => 
+            188 =>
             array (
                 'id' => 189,
                 'name' => 'Saint Lucia',
@@ -2854,7 +2855,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            189 => 
+            189 =>
             array (
                 'id' => 190,
             'name' => 'Saint Martin (French part)',
@@ -2869,7 +2870,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            190 => 
+            190 =>
             array (
                 'id' => 191,
                 'name' => 'Saint Pierre and Miquelon',
@@ -2884,7 +2885,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 21,
                 'intermediate_region_code' => NULL,
             ),
-            191 => 
+            191 =>
             array (
                 'id' => 192,
                 'name' => 'Saint Vincent and the Grenadines',
@@ -2899,7 +2900,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            192 => 
+            192 =>
             array (
                 'id' => 193,
                 'name' => 'Samoa',
@@ -2914,7 +2915,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 61,
                 'intermediate_region_code' => NULL,
             ),
-            193 => 
+            193 =>
             array (
                 'id' => 194,
                 'name' => 'San Marino',
@@ -2929,7 +2930,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            194 => 
+            194 =>
             array (
                 'id' => 195,
                 'name' => 'Sao Tome and Principe',
@@ -2944,7 +2945,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 17,
             ),
-            195 => 
+            195 =>
             array (
                 'id' => 196,
                 'name' => 'Saudi Arabia',
@@ -2959,7 +2960,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            196 => 
+            196 =>
             array (
                 'id' => 197,
                 'name' => 'Senegal',
@@ -2974,7 +2975,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            197 => 
+            197 =>
             array (
                 'id' => 198,
                 'name' => 'Serbia',
@@ -2989,7 +2990,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            198 => 
+            198 =>
             array (
                 'id' => 199,
                 'name' => 'Seychelles',
@@ -3004,7 +3005,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            199 => 
+            199 =>
             array (
                 'id' => 200,
                 'name' => 'Sierra Leone',
@@ -3019,7 +3020,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            200 => 
+            200 =>
             array (
                 'id' => 201,
                 'name' => 'Singapore',
@@ -3034,7 +3035,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            201 => 
+            201 =>
             array (
                 'id' => 202,
             'name' => 'Sint Maarten (Dutch part)',
@@ -3049,7 +3050,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            202 => 
+            202 =>
             array (
                 'id' => 203,
                 'name' => 'Slovakia',
@@ -3064,7 +3065,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 151,
                 'intermediate_region_code' => NULL,
             ),
-            203 => 
+            203 =>
             array (
                 'id' => 204,
                 'name' => 'Slovenia',
@@ -3079,7 +3080,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            204 => 
+            204 =>
             array (
                 'id' => 205,
                 'name' => 'Solomon Islands',
@@ -3094,7 +3095,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 54,
                 'intermediate_region_code' => NULL,
             ),
-            205 => 
+            205 =>
             array (
                 'id' => 206,
                 'name' => 'Somalia',
@@ -3109,7 +3110,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            206 => 
+            206 =>
             array (
                 'id' => 207,
                 'name' => 'South Africa',
@@ -3124,7 +3125,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 18,
             ),
-            207 => 
+            207 =>
             array (
                 'id' => 208,
                 'name' => 'South Georgia and the South Sandwich Islands',
@@ -3139,7 +3140,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            208 => 
+            208 =>
             array (
                 'id' => 209,
                 'name' => 'South Sudan',
@@ -3154,7 +3155,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            209 => 
+            209 =>
             array (
                 'id' => 210,
                 'name' => 'Spain',
@@ -3169,7 +3170,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 39,
                 'intermediate_region_code' => NULL,
             ),
-            210 => 
+            210 =>
             array (
                 'id' => 211,
                 'name' => 'Sri Lanka',
@@ -3184,7 +3185,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 34,
                 'intermediate_region_code' => NULL,
             ),
-            211 => 
+            211 =>
             array (
                 'id' => 212,
                 'name' => 'Sudan',
@@ -3199,7 +3200,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 15,
             ),
-            212 => 
+            212 =>
             array (
                 'id' => 213,
                 'name' => 'Suriname',
@@ -3214,7 +3215,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            213 => 
+            213 =>
             array (
                 'id' => 214,
                 'name' => 'Svalbard and Jan Mayen',
@@ -3229,7 +3230,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            214 => 
+            214 =>
             array (
                 'id' => 215,
                 'name' => 'Sweden',
@@ -3244,7 +3245,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            215 => 
+            215 =>
             array (
                 'id' => 216,
                 'name' => 'Switzerland',
@@ -3259,7 +3260,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 155,
                 'intermediate_region_code' => NULL,
             ),
-            216 => 
+            216 =>
             array (
                 'id' => 217,
                 'name' => 'Syrian Arab Republic',
@@ -3274,7 +3275,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            217 => 
+            217 =>
             array (
                 'id' => 218,
                 'name' => 'Taiwan, Province of China',
@@ -3289,7 +3290,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 30,
                 'intermediate_region_code' => NULL,
             ),
-            218 => 
+            218 =>
             array (
                 'id' => 219,
                 'name' => 'Tajikistan',
@@ -3304,7 +3305,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 143,
                 'intermediate_region_code' => NULL,
             ),
-            219 => 
+            219 =>
             array (
                 'id' => 220,
                 'name' => 'Tanzania, United Republic of',
@@ -3319,7 +3320,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            220 => 
+            220 =>
             array (
                 'id' => 221,
                 'name' => 'Thailand',
@@ -3334,7 +3335,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            221 => 
+            221 =>
             array (
                 'id' => 222,
                 'name' => 'Timor-Leste',
@@ -3349,7 +3350,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            222 => 
+            222 =>
             array (
                 'id' => 223,
                 'name' => 'Togo',
@@ -3364,7 +3365,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 11,
             ),
-            223 => 
+            223 =>
             array (
                 'id' => 224,
                 'name' => 'Tokelau',
@@ -3379,7 +3380,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 61,
                 'intermediate_region_code' => NULL,
             ),
-            224 => 
+            224 =>
             array (
                 'id' => 225,
                 'name' => 'Tonga',
@@ -3394,7 +3395,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 61,
                 'intermediate_region_code' => NULL,
             ),
-            225 => 
+            225 =>
             array (
                 'id' => 226,
                 'name' => 'Trinidad and Tobago',
@@ -3409,7 +3410,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            226 => 
+            226 =>
             array (
                 'id' => 227,
                 'name' => 'Tunisia',
@@ -3424,7 +3425,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 15,
                 'intermediate_region_code' => NULL,
             ),
-            227 => 
+            227 =>
             array (
                 'id' => 228,
                 'name' => 'Turkey',
@@ -3439,7 +3440,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            228 => 
+            228 =>
             array (
                 'id' => 229,
                 'name' => 'Turkmenistan',
@@ -3454,7 +3455,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 143,
                 'intermediate_region_code' => NULL,
             ),
-            229 => 
+            229 =>
             array (
                 'id' => 230,
                 'name' => 'Turks and Caicos Islands',
@@ -3469,7 +3470,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            230 => 
+            230 =>
             array (
                 'id' => 231,
                 'name' => 'Tuvalu',
@@ -3484,7 +3485,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 61,
                 'intermediate_region_code' => NULL,
             ),
-            231 => 
+            231 =>
             array (
                 'id' => 232,
                 'name' => 'Uganda',
@@ -3499,7 +3500,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            232 => 
+            232 =>
             array (
                 'id' => 233,
                 'name' => 'Ukraine',
@@ -3514,7 +3515,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 151,
                 'intermediate_region_code' => NULL,
             ),
-            233 => 
+            233 =>
             array (
                 'id' => 234,
                 'name' => 'United Arab Emirates',
@@ -3529,7 +3530,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            234 => 
+            234 =>
             array (
                 'id' => 235,
                 'name' => 'United Kingdom of Great Britain and Northern Ireland',
@@ -3544,7 +3545,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 154,
                 'intermediate_region_code' => NULL,
             ),
-            235 => 
+            235 =>
             array (
                 'id' => 236,
                 'name' => 'United States of America',
@@ -3559,7 +3560,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 21,
                 'intermediate_region_code' => NULL,
             ),
-            236 => 
+            236 =>
             array (
                 'id' => 237,
                 'name' => 'United States Minor Outlying Islands',
@@ -3574,7 +3575,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 21,
                 'intermediate_region_code' => NULL,
             ),
-            237 => 
+            237 =>
             array (
                 'id' => 238,
                 'name' => 'Uruguay',
@@ -3589,7 +3590,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            238 => 
+            238 =>
             array (
                 'id' => 239,
                 'name' => 'Uzbekistan',
@@ -3604,7 +3605,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 143,
                 'intermediate_region_code' => NULL,
             ),
-            239 => 
+            239 =>
             array (
                 'id' => 240,
                 'name' => 'Vanuatu',
@@ -3619,7 +3620,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 54,
                 'intermediate_region_code' => NULL,
             ),
-            240 => 
+            240 =>
             array (
                 'id' => 241,
             'name' => 'Venezuela (Bolivarian Republic of)',
@@ -3634,7 +3635,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 5,
             ),
-            241 => 
+            241 =>
             array (
                 'id' => 242,
                 'name' => 'Viet Nam',
@@ -3649,7 +3650,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 35,
                 'intermediate_region_code' => NULL,
             ),
-            242 => 
+            242 =>
             array (
                 'id' => 243,
             'name' => 'Virgin Islands (British)',
@@ -3664,7 +3665,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            243 => 
+            243 =>
             array (
                 'id' => 244,
             'name' => 'Virgin Islands (U.S.)',
@@ -3679,7 +3680,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 419,
                 'intermediate_region_code' => 29,
             ),
-            244 => 
+            244 =>
             array (
                 'id' => 245,
                 'name' => 'Wallis and Futuna',
@@ -3694,7 +3695,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 61,
                 'intermediate_region_code' => NULL,
             ),
-            245 => 
+            245 =>
             array (
                 'id' => 246,
                 'name' => 'Western Sahara',
@@ -3709,7 +3710,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 15,
                 'intermediate_region_code' => NULL,
             ),
-            246 => 
+            246 =>
             array (
                 'id' => 247,
                 'name' => 'Yemen',
@@ -3724,7 +3725,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 145,
                 'intermediate_region_code' => NULL,
             ),
-            247 => 
+            247 =>
             array (
                 'id' => 248,
                 'name' => 'Zambia',
@@ -3739,7 +3740,7 @@ class StatesTableSeeder extends Seeder
                 'sub_region_code' => 202,
                 'intermediate_region_code' => 14,
             ),
-            248 => 
+            248 =>
             array (
                 'id' => 249,
                 'name' => 'Zimbabwe',
@@ -3755,7 +3756,7 @@ class StatesTableSeeder extends Seeder
                 'intermediate_region_code' => 14,
             ),
         ));
-        
-        
+
+
     }
 }
