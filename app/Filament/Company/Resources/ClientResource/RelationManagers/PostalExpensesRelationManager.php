@@ -53,7 +53,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->searchable()
                             ->live()
                             ->preload()
-                            ->autofocus()
+                            ->autofocus(fn($record): bool => !$record)
                             ->columnSpan(3),
 
                         Forms\Components\Select::make('new_contract_id')->label('Contratto')
@@ -90,7 +90,7 @@ class PostalExpensesRelationManager extends RelationManager
                 // SEZIONE: Dati di Invio e Protocollo
                 Forms\Components\Section::make('Dati relativi al protocollo di invio e alla classificazione dell\'atto inviato in lavorazione/notifica')
                     ->icon('heroicon-o-paper-airplane')
-                    ->collapsed()
+                    ->collapsed(fn($record): bool => $record && $record->shipmentInserted())
                     ->schema([
                         Forms\Components\TextInput::make('send_protocol_number')->label('Numero protocollo invio')
                             ->required()
@@ -105,7 +105,7 @@ class PostalExpensesRelationManager extends RelationManager
 
                         Forms\Components\DatePicker::make('send_protocol_date')->label('Data protocollo invio')
                             ->required()
-                            ->default(now()),
+                            ->default(now()->toDateString()),
 
                         Forms\Components\Select::make('shipment_type_id')->label('Modalità di invio')
                             ->required()
@@ -175,7 +175,9 @@ class PostalExpensesRelationManager extends RelationManager
                             }),
 
                         Forms\Components\Select::make('shipment_insert_user_id')->label('Utente inserimento dati')
-                            ->required()
+                            ->disabled()
+                            // ->dehydrated(fn($record): bool => $record && $record->shipmentInserted())
+                            ->dehydrated()
                             ->relationship('shipmentInsertUser', 'name')
                             ->searchable()
                             ->preload()
@@ -183,22 +185,29 @@ class PostalExpensesRelationManager extends RelationManager
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('shipment_insert_date')->label('Data inserimento dati')
-                            ->required()
-                            ->default(now()),
+                            ->readonly()
+                            // ->dehydrated(fn($record): bool => $record && $record->shipmentInserted())
+                            ->default(now()->toDateString()),
                     ])
                     ->columns(3),
 
                 // SEZIONE: Lavorazione e Notifica
                 Forms\Components\Section::make('Dati relativi alla lavorazione/notifica richiesta ed effettuata dal fornitore incaricato')
                     ->icon('heroicon-o-bell-alert')
-                    ->collapsed()
+                    ->collapsed(fn($record): bool => $record && $record->notificationInserted())
+                    ->visible(fn($record): bool => $record && ($record->shipment_insert_user_id && $record->shipment_insert_date))
                     ->schema([
                         Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
                             ->required()
+                            ->autofocus(fn($record): bool => $record && $record->shipmentInserted())
                             ->disk('public')
                             ->directory('postal-notify-attachments')
                             ->visibility('public')
-                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
+                                if (!empty($state)) {
+                                    $set('notify_attachment_date', now()->toDateString());
+                                }
+                            })
                             ->maxSize(10240),
 
                         Forms\Components\DatePicker::make('notify_attachment_date')->label('Data allegato notifica')
@@ -221,7 +230,15 @@ class PostalExpensesRelationManager extends RelationManager
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value),
 
                         Forms\Components\DatePicker::make('receive_protocol_date')->label('Data protocollo ricezione')
-                            ->required(),
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function (Set $set, $state) {
+                                if ($state) {
+                                    $date = \Carbon\Carbon::parse($state);
+                                    $set('notify_year', $date->year);
+                                    $set('notify_month', $date->month);
+                                }
+                            }),
 
                         Forms\Components\TextInput::make('notify_year')->label('Anno notifica')
                             ->numeric()
@@ -235,33 +252,44 @@ class PostalExpensesRelationManager extends RelationManager
 
                         Forms\Components\TextInput::make('notify_amount')->label('Importo notifica')
                             ->required()
-                            ->numeric()
                             ->inputMode('decimal')
                             ->step(0.01)
-                            ->suffix('€'),
+                            ->suffix('€')
+                            ->live()
+                            ->afterStateUpdated(function (Set $set, $state) {
+                                if ($state) {
+                                    $set('amount_registration_date', now()->toDateString());
+                                }
+                            }),
 
                         Forms\Components\DatePicker::make('amount_registration_date')->label('Data registrazione importo')
                             ->required(),
 
                         Forms\Components\Select::make('notify_insert_user_id')->label('Utente inserimento notifica')
-                            ->required()
+                            ->disabled()
+                            ->dehydrated(fn($record): bool => $record && $record->shipmentInserted())
                             ->relationship('notifyInsertUser', 'name')
                             ->searchable()
                             ->preload()
+                            ->default(Auth::id())
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('notify_insert_date')->label('Data inserimento notifica')
-                            ->required(),
+                            ->readonly()
+                            ->dehydrated(fn($record): bool => $record && $record->shipmentInserted())
+                            ->default(now()->toDateString()),
                     ])
                     ->columns(3),
 
                 // SEZIONE: Gestione Spese
                 Forms\Components\Section::make('Riferimenti alle spese della lavorazione/notifica richiesta')
                     ->icon('heroicon-o-currency-euro')
-                    ->collapsed()
+                    ->collapsed(fn($record): bool => $record && $record->expenseInserted())
+                    ->visible(fn($record): bool => $record && ($record->notify_insert_user_id && $record->notify_insert_date))
                     ->schema([
                         Forms\Components\Select::make('expense_type')->label('Tipologia spesa')
                             ->required()
+                            ->autofocus(fn($record): bool => $record && $record->notificationInserted())
                             ->options(ExpenseType::class)
                             ->searchable()
                             ->live()
@@ -315,22 +343,29 @@ class PostalExpensesRelationManager extends RelationManager
                             ->rules(['iban']),
 
                         Forms\Components\Select::make('expense_insert_user_id')->label('Utente inserimento spese')
+                            ->disabled()
+                            ->dehydrated(fn($record): bool => $record && $record->notificationInserted())
                             ->relationship('expenseInsertUser', 'name')
                             ->searchable()
                             ->preload()
+                            ->default(Auth::id())
                             ->optionsLimit(5),
 
-                        Forms\Components\DatePicker::make('expense_insert_date')->label('Data inserimento spese'),
+                        Forms\Components\DatePicker::make('expense_insert_date')->label('Data inserimento spese')
+                            ->readonly()
+                            ->dehydrated(fn($record): bool => $record && $record->notificationInserted())
+                            ->default(now()->toDateString()),
                     ])
                     ->columns(3),
 
                 // SEZIONE: Pagamenti
                 Forms\Components\Section::make('Informazioni relative ai pagamenti delle spese')
                     ->icon('heroicon-o-credit-card')
-                    ->collapsed()
+                    ->collapsed(fn($record): bool => $record && $record->paymentInserted())
+                    ->visible(fn($record): bool => $record && ($record->expense_insert_user_id && $record->expense_insert_date))
                     ->schema([
-                        Forms\Components\Toggle::make('payed')
-                            ->label('Spese pagate')
+                        Forms\Components\Toggle::make('payed')->label('Spese pagate')
+                            ->autofocus(fn($record): bool => $record && $record->expenseInserted())
                             ->live(),
 
                         Forms\Components\DatePicker::make('payment_date')->label('Data pagamento')
@@ -343,19 +378,26 @@ class PostalExpensesRelationManager extends RelationManager
                             ->suffix('€'),
 
                         Forms\Components\Select::make('payment_insert_user_id')->label('Utente inserimento pagamento')
+                            ->disabled()
+                            ->dehydrated(fn($record): bool => $record && $record->expenseInserted())
                             ->relationship('paymentInsertUser', 'name')
                             ->searchable()
                             ->preload()
+                            ->default(Auth::id())
                             ->optionsLimit(5),
 
-                        Forms\Components\DatePicker::make('payment_insert_date')->label('Data inserimento pagamento'),
+                        Forms\Components\DatePicker::make('payment_insert_date')->label('Data inserimento pagamento')
+                            ->readonly()
+                            // ->dehydrated(fn($record): bool => $record && $record->expenseInserted())
+                            ->default(now()->toDateString()),
                     ])
                     ->columns(3),
 
                 // SEZIONE: Rifatturazione
                 Forms\Components\Section::make('Estremi della rifatturazione delle spese della lavorazione/notifica')
                     ->icon('heroicon-o-receipt-refund')
-                    ->collapsed()
+                    ->collapsed(fn($record): bool => $record && $record->reinvoiceInserted())
+                    ->visible(fn($record): bool => $record && ($record->payment_insert_user_id && $record->payment_insert_date))
                     ->schema([
                         Forms\Components\Select::make('reinvoice_id')->label('Fattura emessa per rifatturazione')
                             // ->relationship('reInvoice', 'description')
@@ -365,6 +407,7 @@ class PostalExpensesRelationManager extends RelationManager
                                     ->pluck('description', 'id')
                                     ->toArray();
                             })
+                            ->autofocus(fn($record): bool => $record && $record->paymentInserted())
                             ->searchable()
                             ->preload()
                             ->live()
@@ -394,19 +437,26 @@ class PostalExpensesRelationManager extends RelationManager
                             ->suffix('€'),
 
                         Forms\Components\Select::make('reinvoice_insert_user_id')->label('Utente inserimento rifatturazione')
+                            ->disabled()
+                            ->dehydrated(fn($record): bool => $record && $record->paymentInserted())
                             ->relationship('reinvoiceInsertUser', 'name')
                             ->searchable()
                             ->preload()
+                            ->default(Auth::id())
                             ->optionsLimit(5),
 
-                        Forms\Components\DatePicker::make('reinvoice_insert_date')->label('Data inserimento rifatturazione'),
+                        Forms\Components\DatePicker::make('reinvoice_insert_date')->label('Data inserimento rifatturazione')
+                            ->readonly()
+                            // ->dehydrated(fn($record): bool => $record && $record->paymentInserted())
+                            ->default(now()->toDateString()),
                     ])
                     ->columns(3),
 
                 // SEZIONE: Registrazione e Allegati
                 Forms\Components\Section::make('Registrazione della data di lavorazione/modifica e allegati')
                     ->icon('heroicon-o-document-text')
-                    ->collapsed()
+                    ->collapsed(fn($record): bool => $record && $record->reinvoiceRegistered())
+                    ->visible(fn($record): bool => $record && ($record->reinvoice_insert_user_id && $record->reinvoice_insert_date))
                     ->schema([
                         Forms\Components\FileUpload::make('reinvoice_attachment_path')->label('Allegato fattura emessa')
                             ->disk('public')
@@ -415,24 +465,32 @@ class PostalExpensesRelationManager extends RelationManager
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->maxSize(10240),
 
-                        Forms\Components\DatePicker::make('reinvoice_attachment_date')->label('Data file fattura emessa caricato'),
+                        Forms\Components\DatePicker::make('reinvoice_attachment_date')->label('Data file fattura emessa caricato')
+                            ->autofocus(fn($record): bool => $record && $record->reinvoiceInserted()),
 
                         Forms\Components\DatePicker::make('notify_date_registration_date')->label('Data registrazione data di notifica'),
 
                         Forms\Components\Select::make('reinvoice_registration_user_id')->label('Utente registrazione')
+                            ->disabled()
+                            ->dehydrated(fn($record): bool => $record && $record->reinvoiceInserted())
                             ->relationship('reinvoiceRegistrationUser', 'name')
                             ->searchable()
                             ->preload()
+                            ->default(Auth::id())
                             ->optionsLimit(5),
 
-                        Forms\Components\DatePicker::make('reinvoice_registration_date')->label('Data inserimento registrazione'),
+                        Forms\Components\DatePicker::make('reinvoice_registration_date')->label('Data inserimento registrazione')
+                            ->readonly()
+                            // ->dehydrated(fn($record): bool => $record && $record->reinvoiceInserted())
+                            ->default(now()->toDateString()),
                     ])
                     ->columns(3),
 
                 // SEZIONE: Note
                 Forms\Components\Section::make('Note')
                     ->icon('heroicon-o-chat-bubble-left-ellipsis')
-                    ->collapsed()
+                    ->collapsed(false)
+                    ->visible()
                     ->schema([
                         Forms\Components\Textarea::make('note')->label('Note')
                             ->rows(3)
@@ -534,13 +592,13 @@ class PostalExpensesRelationManager extends RelationManager
                         ->visible(fn($record): bool => (bool)$record->act_attachment_path),             // Nascondo se l'allegato non esiste
                     Tables\Actions\Action::make('view_notify_attachment')
                         ->label('Allegato Notifica')
-                        ->icon('heroicon-o-bell')
+                        ->icon('heroicon-o-document')
                         ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
                         ->openUrlInNewTab()
                         ->visible(fn($record): bool => (bool)$record->notify_attachment_path),          // Nascondo se l'allegato non esiste
                     Tables\Actions\Action::make('view_reinvoice_attachment')
                         ->label('Allegato Rifatturazione')
-                        ->icon('heroicon-o-receipt-tax')
+                        ->icon('heroicon-o-document')
                         ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
                         ->openUrlInNewTab()
                         ->visible(fn($record): bool => (bool)$record->reinvoice_attachment_path),       // Nascondo se l'allegato non esiste

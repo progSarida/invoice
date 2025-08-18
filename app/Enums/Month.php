@@ -7,18 +7,18 @@ use Filament\Support\Contracts\HasLabel;
 
 enum Month: string implements HasLabel, HasDescription
 {
-    case JAN = "jan";
-    case FEB = "feb";
-    case MAR = "mar";
-    case APR = "apr";
-    case MAY = "may";
-    case JUN = "jun";
-    case JUL = "jul";
-    case AGO = "ago";
-    case SEP = "sep";
-    case OCT = "oct";
-    case NOV = "nov";
-    case DEC = "dec";
+    case JAN = "1";
+    case FEB = "2";
+    case MAR = "3";
+    case APR = "4";
+    case MAY = "5";
+    case JUN = "6";
+    case JUL = "7";
+    case AGO = "8";
+    case SEP = "9";
+    case OCT = "10";
+    case NOV = "11";
+    case DEC = "12";
 
     public function getDescription(): ?string
     {

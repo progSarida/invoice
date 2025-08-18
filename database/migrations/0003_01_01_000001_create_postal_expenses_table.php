@@ -97,7 +97,7 @@ return new class extends Migration
             $table->date('notify_insert_date')->nullable();                                  		    // data inserimento dati precedenti
 
             // Riferimento alle spese della lavorazione/notifica richiesta
-            $table->string('expense_type');                                                     		// enum tipologoa spesa: ExpenseType
+            $table->string('expense_type')->nullable();                                                 // enum tipologoa spesa: ExpenseType
 
             $table->unsignedBigInteger('passive_invoice_id')->nullable();              				    //
             $table->foreign('passive_invoice_id')->references('id')->on('passive_invoices');      		// notifica inserita da utente (mostrare se spedizione)
@@ -108,11 +108,11 @@ return new class extends Migration
 
             $table->boolean('reinvoice')->default(0);                                           		// bool per rifatturazione spese (da new_contract_id)
 
-            $table->string('shipment_doc_type');														// enum tipo documento: ShipmentDocType (fattura, doc da messo)
+            $table->string('shipment_doc_type')->nullable();											// enum tipo documento: ShipmentDocType (fattura, doc da messo)
 
-            $table->string('shipment_doc_number');														// numero documento (da passive_invoice_id, se spedizione)
+            $table->string('shipment_doc_number')->nullable();											// numero documento (da passive_invoice_id, se spedizione)
 
-            $table->string('shipment_doc_date');														// data documento (da passive_invoice_id, se spedizione)
+            $table->string('shipment_doc_date')->nullable();											// data documento (da passive_invoice_id, se spedizione)
 
             $table->string('iban')->nullable();                                                 		// iban (da passive_invoice_id, se spedizione)
 
@@ -135,8 +135,8 @@ return new class extends Migration
             $table->unsignedBigInteger('reinvoice_id')->nullable();                 		            //
             $table->foreign('reinvoice_id')->references('id')->on('invoices');                          // fattura -> numero, data, importo
 
-            $table->string('reinvoice_number');														    // numero fattura emessa per rifatturazione (da reinvoice_id)
-            $table->string('reinvoice_date');														    // data fattura emessa per rifatturazione (da reinvoice_id)
+            $table->string('reinvoice_number')->nullable();												// numero fattura emessa per rifatturazione (da reinvoice_id)
+            $table->string('reinvoice_date')->nullable();												// data fattura emessa per rifatturazione (da reinvoice_id)
             $table->decimal('reinvoice_amount',10,2)->nullable();                            		    // importo fattura emessa per rifatturazione (da reinvoice_id)
 
             $table->unsignedBigInteger('reinvoice_insert_user_id')->nullable();                 		//

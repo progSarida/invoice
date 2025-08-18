@@ -7,13 +7,15 @@ use App\Enums\Month;
 use App\Enums\NotifyType;
 use App\Enums\ShipmentDocType;
 use App\Enums\TaxType;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class PostalExpense extends Model
 {
     protected $fillable = [
         // informazioni base
-        'company_id',
+        // 'company_id',
         'notify_type',
         'new_contract_id',
         'client_id',
@@ -141,7 +143,7 @@ class PostalExpense extends Model
         'payed' => 'boolean',
 
         // interi (chiavi esterne)
-        'company_id' => 'integer',
+        // 'company_id' => 'integer',
         'new_contract_id' => 'integer',
         'shipment_type_id' => 'integer',
         'client_id' => 'integer',
@@ -231,5 +233,60 @@ class PostalExpense extends Model
     public function reinvoiceRegistrationUser()
     {
         return $this->belongsTo(User::class, 'reinvoice_registration_user_id');
+    }
+
+    public function shipmentInserted()                                                  // funzione che controlla la presenza dell'inserimento dell'invio
+    {
+        return !is_null($this->shipment_insert_user_id) && !is_null($this->shipment_insert_date);
+    }
+    
+    public function notificationInserted()                                              // funzione che controlla la presenza dell'inserimento della notifica
+    {
+        return $this->shipmentInserted() &&
+               (!is_null($this->notify_insert_user_id) && !is_null($this->notify_insert_date));
+    }
+
+    public function expenseInserted()                                                   // funzione che controlla la presenza dell'inserimento delle spese
+    {
+        return $this->notificationInserted() &&
+               (!is_null($this->expense_insert_user_id) && !is_null($this->expense_insert_date));
+    }
+
+    public function paymentInserted()                                                   // funzione che controlla la presenza dell'inserimento dei pagamenti
+    {
+        return $this->expenseInserted() &&
+               (!is_null($this->payment_insert_user_id) && !is_null($this->payment_insert_date));
+    }
+
+    public function reinvoiceInserted()                                                 // funzione che controlla la presenza dell'inserimento della rifatturazione
+    {
+        return $this->paymentInserted() &&
+               (!is_null($this->reinvoice_insert_user_id) && !is_null($this->reinvoice_insert_date));
+    }
+
+    public function reinvoiceRegistered()                                               // funzione che controlla la presenza della registrazione della rifatturazione
+    {
+        return $this->reinvoiceInserted() &&
+               (!is_null($this->reinvoice_registration_user_id) && !is_null($this->reinvoice_registration_date));
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($expense) {
+            $expense->company_id = Filament::getTenant()?->id;
+        });
+
+        static::created(function ($expense) {
+            //
+        });
+
+        static::updating(function ($expense) {
+            //
+        });
+
+        static::deleting(function ($expense) {
+            //
+        });
+
     }
 }
