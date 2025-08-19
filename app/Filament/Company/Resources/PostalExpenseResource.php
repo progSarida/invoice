@@ -12,6 +12,7 @@ use App\Enums\NotifyType;
 use App\Enums\ShipmentDocType;
 use App\Enums\TaxType;
 use App\Models\ActType;
+use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\NewContract;
 use App\Models\PassiveInvoice;
@@ -202,7 +203,7 @@ class PostalExpenseResource extends Resource
                                 $number = $get('send_protocol_number') ?? '******';                                 // numero protocollo invio
                                 $date = $get('send_protocol_date') ?? '******';                                     // data protocollo invio
                                 $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';   // modalità invio
-                                $client = $this->getOwnerRecord()->denomination;                                    // cliente
+                                $client = Client::find($get('client_id'))->denomination;                            // cliente
                                 $taxType = TaxType::from($get('tax_type'))->getLabel();                             // entrata
                                 $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                      // tipo atto
                                 $extension = $file->getClientOriginalExtension();                                   // estensione
