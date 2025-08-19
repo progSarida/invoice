@@ -21,7 +21,8 @@ class NewContract extends Model
         'cup_code',
         'office_code',
         'office_name',
-        'amount'
+        'amount',
+        'reinvoice'
     ];
 
     protected $casts = [
@@ -30,6 +31,7 @@ class NewContract extends Model
         'start_validity_date' => 'date',
         'end_validity_date' => 'date',
         'amount' => 'decimal:2',
+        'reinvoice' => 'boolean',
         // 'accrual_types' => 'array'
     ];
 

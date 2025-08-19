@@ -24,8 +24,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+
+use function PHPUnit\Framework\isNull;
 
 class PostalExpensesRelationManager extends RelationManager
 {
@@ -131,6 +134,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->columnSpanFull(),
 
                         Forms\Components\TextInput::make('supplier')->label('Ente da rimborsare')
+                            ->required()
                             ->maxLength(255)
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                             ->columnSpanFull(),
@@ -159,35 +163,49 @@ class PostalExpensesRelationManager extends RelationManager
                             ->visible(false),
 
                         Forms\Components\FileUpload::make('act_attachment_path')->label('Allegato atto')
+                            ->required()
                             ->disk('public')
                             ->directory('postal-act-attachments')
                             ->visibility('public')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
+                                if (!empty($state)) {
+                                    $set('act_attachment_date', now()->toDateString());
+                                }
+                            })
+                            ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, $get, $record) {
+                                // Genera un nome personalizzato per il file
+                                $notifyType = $get('notify_type') ?? 'unknown';
+                                $recordId = $record ? $record->id : 'new';
+                                $extension = $file->getClientOriginalExtension();
+                                $timestamp = now()->format('Ymd_His');
+
+                                // Esempio: "atto_MESSO_123_20250819_1146.pdf"
+                                return sprintf('atto_%s_%s_%s.%s', $notifyType, $recordId, $timestamp, $extension);
+                            })
                             ->maxSize(10240),
 
                         Forms\Components\DatePicker::make('act_attachment_date')->label('Data allegato atto')
                             ->required()
-                            ->visible(function (Get $get, $record): bool {
-                                $hasUploadedFile = !empty($get('act_attachment_path'));
-                                $hasSavedFile = $record && !empty($record->act_attachment_path);
-                                return $hasUploadedFile || $hasSavedFile;
-                            }),
+                            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value),
+                            // ->visible(function (Get $get, $record): bool {
+                            //     $hasUploadedFile = !empty($get('act_attachment_path'));
+                            //     $hasSavedFile = $record && !empty($record->act_attachment_path);
+                            //     return $hasUploadedFile || $hasSavedFile;
+                            // }),
 
                         Forms\Components\Select::make('shipment_insert_user_id')->label('Utente inserimento dati')
                             ->disabled()
-                            // ->dehydrated(fn($record): bool => $record && $record->shipmentInserted())
-                            ->dehydrated()
+                            ->visible(fn($record): bool => $record && $record->shipment_insert_user_id)
                             ->relationship('shipmentInsertUser', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(Auth::id())
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('shipment_insert_date')->label('Data inserimento dati')
-                            ->readonly()
-                            // ->dehydrated(fn($record): bool => $record && $record->shipmentInserted())
-                            ->default(now()->toDateString()),
+                            ->disabled()
+                            ->visible(fn($record): bool => $record && $record->shipment_insert_date),
                     ])
                     ->columns(3),
 
@@ -211,12 +229,12 @@ class PostalExpensesRelationManager extends RelationManager
                             ->maxSize(10240),
 
                         Forms\Components\DatePicker::make('notify_attachment_date')->label('Data allegato notifica')
-                            ->required()
-                            ->visible(function (Get $get, $record): bool {
-                                $hasUploadedFile = !empty($get('notify_attachment_path'));
-                                $hasSavedFile = $record && !empty($record->notify_attachment_path);
-                                return $hasUploadedFile || $hasSavedFile;
-                            }),
+                            ->required(),
+                            // ->visible(function (Get $get, $record): bool {
+                            //     $hasUploadedFile = !empty($get('notify_attachment_path'));
+                            //     $hasSavedFile = $record && !empty($record->notify_attachment_path);
+                            //     return $hasUploadedFile || $hasSavedFile;
+                            // }),
 
                         Forms\Components\TextInput::make('order_rif')->label('Riferimento commessa')
                             ->maxLength(255),
@@ -240,12 +258,12 @@ class PostalExpensesRelationManager extends RelationManager
                                 }
                             }),
 
-                        Forms\Components\TextInput::make('notify_year')->label('Anno notifica')
+                        Forms\Components\TextInput::make('notify_year')->label('Anno ricezione')
                             ->numeric()
                             ->rules(['digits:4'])
                             ->default(now()->year),
 
-                        Forms\Components\Select::make('notify_month')->label('Mese notifica')
+                        Forms\Components\Select::make('notify_month')->label('Mese ricezione')
                             ->options(Month::class)
                             ->searchable()
                             ->preload(),
@@ -267,17 +285,15 @@ class PostalExpensesRelationManager extends RelationManager
 
                         Forms\Components\Select::make('notify_insert_user_id')->label('Utente inserimento notifica')
                             ->disabled()
-                            ->dehydrated(fn($record): bool => $record && $record->shipmentInserted())
+                            ->visible(fn($record): bool => $record && $record->notify_insert_user_id)
                             ->relationship('notifyInsertUser', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(Auth::id())
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('notify_insert_date')->label('Data inserimento notifica')
-                            ->readonly()
-                            ->dehydrated(fn($record): bool => $record && $record->shipmentInserted())
-                            ->default(now()->toDateString()),
+                            ->disabled()
+                            ->visible(fn($record): bool => $record && $record->notify_insert_date),
                     ])
                     ->columns(3),
 
@@ -297,7 +313,9 @@ class PostalExpensesRelationManager extends RelationManager
                             ->columnSpanFull(),
 
                         Forms\Components\Select::make('passive_invoice_id')->label('Fattura passiva')
+                            ->required()
                             // ->relationship('passiveInvoice', 'description')
+                            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                             ->options(function (Get $get): array {
                                 $supplierId = $get('supplier_id');
                                 if (!$supplierId) { return []; }
@@ -308,22 +326,33 @@ class PostalExpensesRelationManager extends RelationManager
                             ->searchable()
                             ->preload()
                             ->live()
+                            ->afterStateUpdated(function (Set $set, $state) {
+                                if ($state) {
+                                    $passiveInvoice = PassiveInvoice::find($state);
+                                    $set('notify_expense_amount', $passiveInvoice->total);
+                                    $set('shipment_doc_number', $passiveInvoice->number);
+                                    $set('shipment_doc_date', $passiveInvoice->invoice_date->toDateString());
+                                }
+                            })
                             ->columnSpanFull(),
 
                         Forms\Components\TextInput::make('notify_expense_amount')->label('Importo spese notifica')
+                            ->required()
                             ->numeric()
                             ->inputMode('decimal')
                             ->step(0.01)
                             ->suffix('€'),
 
                         Forms\Components\TextInput::make('mark_expense_amount')->label('Importo spese contrassegno')
+                            ->required()
                             ->numeric()
                             ->inputMode('decimal')
                             ->step(0.01)
+                            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                             ->suffix('€'),
 
-                        Forms\Components\Toggle::make('reinvoice')
-                            ->label('Rifatturazione spese'),
+                        Forms\Components\Toggle::make('reinvoice')->label('Rifatturazione spese')
+                            ->disabled(),
 
                         Forms\Components\Select::make('shipment_doc_type')->label('Tipo documento spedizione')
                             ->required()
@@ -344,17 +373,15 @@ class PostalExpensesRelationManager extends RelationManager
 
                         Forms\Components\Select::make('expense_insert_user_id')->label('Utente inserimento spese')
                             ->disabled()
-                            ->dehydrated(fn($record): bool => $record && $record->notificationInserted())
+                            ->visible(fn($record): bool => $record && $record->expense_insert_user_id)
                             ->relationship('expenseInsertUser', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(Auth::id())
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('expense_insert_date')->label('Data inserimento spese')
-                            ->readonly()
-                            ->dehydrated(fn($record): bool => $record && $record->notificationInserted())
-                            ->default(now()->toDateString()),
+                            ->disabled()
+                            ->visible(fn($record): bool => $record && $record->expense_insert_date),
                     ])
                     ->columns(3),
 
@@ -369,6 +396,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->live(),
 
                         Forms\Components\DatePicker::make('payment_date')->label('Data pagamento')
+                            ->required()
                             ->helperText('In caso di più pagamenti, inserire la data dell\'ultimo pagamento'),
 
                         Forms\Components\TextInput::make('payment_total')->label('Totale pagamenti')
@@ -379,17 +407,15 @@ class PostalExpensesRelationManager extends RelationManager
 
                         Forms\Components\Select::make('payment_insert_user_id')->label('Utente inserimento pagamento')
                             ->disabled()
-                            ->dehydrated(fn($record): bool => $record && $record->expenseInserted())
+                            ->visible(fn($record): bool => $record && $record->payment_insert_user_id)
                             ->relationship('paymentInsertUser', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(Auth::id())
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('payment_insert_date')->label('Data inserimento pagamento')
-                            ->readonly()
-                            // ->dehydrated(fn($record): bool => $record && $record->expenseInserted())
-                            ->default(now()->toDateString()),
+                            ->disabled()
+                            ->visible(fn($record): bool => $record && $record->payment_insert_date),
                     ])
                     ->columns(3),
 
@@ -397,9 +423,10 @@ class PostalExpensesRelationManager extends RelationManager
                 Forms\Components\Section::make('Estremi della rifatturazione delle spese della lavorazione/notifica')
                     ->icon('heroicon-o-receipt-refund')
                     ->collapsed(fn($record): bool => $record && $record->reinvoiceInserted())
-                    ->visible(fn($record): bool => $record && ($record->payment_insert_user_id && $record->payment_insert_date))
+                    ->visible(fn($record): bool => $record && $record->reinvoice && ($record->payment_insert_user_id && $record->payment_insert_date))
                     ->schema([
                         Forms\Components\Select::make('reinvoice_id')->label('Fattura emessa per rifatturazione')
+                            ->required()
                             // ->relationship('reInvoice', 'description')
                             ->options(function (Get $get): array {
                                 return Invoice::where('client_id', $this->getOwnerRecord()->id)
@@ -431,6 +458,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->required(),
 
                         Forms\Components\TextInput::make('reinvoice_amount')->label('Importo fattura emessa')
+                            ->required()
                             ->numeric()
                             ->inputMode('decimal')
                             ->step(0.01)
@@ -438,51 +466,67 @@ class PostalExpensesRelationManager extends RelationManager
 
                         Forms\Components\Select::make('reinvoice_insert_user_id')->label('Utente inserimento rifatturazione')
                             ->disabled()
-                            ->dehydrated(fn($record): bool => $record && $record->paymentInserted())
+                            ->visible(fn($record): bool => $record && $record->reinvoice_insert_user_id)
                             ->relationship('reinvoiceInsertUser', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(Auth::id())
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('reinvoice_insert_date')->label('Data inserimento rifatturazione')
-                            ->readonly()
-                            // ->dehydrated(fn($record): bool => $record && $record->paymentInserted())
-                            ->default(now()->toDateString()),
+                            ->disabled()
+                            ->visible(fn($record): bool => $record && $record->reinvoice_insert_date),
                     ])
                     ->columns(3),
 
                 // SEZIONE: Registrazione e Allegati
                 Forms\Components\Section::make('Registrazione della data di lavorazione/modifica e allegati')
                     ->icon('heroicon-o-document-text')
-                    ->collapsed(fn($record): bool => $record && $record->reinvoiceRegistered())
+                    ->collapsed(false)
+                    // ->collapsed(fn($record): bool => $record && $record->reinvoiceRegistered())
                     ->visible(fn($record): bool => $record && ($record->reinvoice_insert_user_id && $record->reinvoice_insert_date))
+                    ->visible(function ($record) {
+                        // è un invio tramite messo
+                        $isMessenger = fn($record) => $record && $record->notify_type === NotifyType::MESSO->value;
+                        // è una spedizione di una raccomandata con ricevuta di ritorno o di un atto giudiziario
+                        $hasReceipt = fn ($record) => $record && $record->notify_type === NotifyType::SPEDIZIONE->value && in_array(
+                            ShipmentType::find($record->shipment_type_id)?->name,
+                            ['Raccomandata AR' , 'Atto giudiziario']
+                        );
+                        // le sezioni precedenti sono state inserite
+                        $isStep = fn ($record) => $record && ($record->reinvoice_insert_user_id && $record->reinvoice_insert_date); //
+
+                        return ($isMessenger($record) || $hasReceipt($record)) && $isStep($record);
+                    })
                     ->schema([
                         Forms\Components\FileUpload::make('reinvoice_attachment_path')->label('Allegato fattura emessa')
                             ->disk('public')
                             ->directory('postal-reinvoice-attachments')
                             ->visibility('public')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
-                            ->maxSize(10240),
+                            ->maxSize(10240)
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
+                                if (!empty($state)) {
+                                    $set('reinvoice_attachment_date', now()->toDateString());
+                                }
+                            })
+                            ->autofocus(fn($record): bool => $record && $record->reinvoiceInserted()),
 
                         Forms\Components\DatePicker::make('reinvoice_attachment_date')->label('Data file fattura emessa caricato')
-                            ->autofocus(fn($record): bool => $record && $record->reinvoiceInserted()),
+                            ->required(),
 
                         Forms\Components\DatePicker::make('notify_date_registration_date')->label('Data registrazione data di notifica'),
 
                         Forms\Components\Select::make('reinvoice_registration_user_id')->label('Utente registrazione')
                             ->disabled()
-                            ->dehydrated(fn($record): bool => $record && $record->reinvoiceInserted())
+                            ->visible(fn($record): bool => $record && $record->reinvoice_registration_user_id)
                             ->relationship('reinvoiceRegistrationUser', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(Auth::id())
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('reinvoice_registration_date')->label('Data inserimento registrazione')
-                            ->readonly()
-                            // ->dehydrated(fn($record): bool => $record && $record->reinvoiceInserted())
-                            ->default(now()->toDateString()),
+                            ->disabled()
+                            ->visible(fn($record): bool => $record && $record->reinvoice_registration_date),
                     ])
                     ->columns(3),
 
@@ -518,7 +562,7 @@ class PostalExpensesRelationManager extends RelationManager
                                 ->url(fn($record): ?string => $record && $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
                                 ->openUrlInNewTab()
                                 ->visible(fn($record): bool => $record && $record->notify_attachment_path)
-                                ->color('secondary'),
+                                ->color('primary'),
 
                             Forms\Components\Actions\Action::make('view_reinvoice_attachment')
                                 ->label('Visualizza Allegato Rifatturazione')
@@ -526,7 +570,7 @@ class PostalExpensesRelationManager extends RelationManager
                                 ->url(fn($record): ?string => $record && $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
                                 ->openUrlInNewTab()
                                 ->visible(fn($record): bool => $record && $record->reinvoice_attachment_path)
-                                ->color('success'),
+                                ->color('primary'),
                         ])->columnSpanFull()
                     ]),
             ]);
@@ -535,31 +579,43 @@ class PostalExpensesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('order_rif')
+            // ->recordTitleAttribute('order_rif')
             ->columns([
-                Tables\Columns\TextColumn::make('notify_type')
-                    ->label('Tipo Notifica')
-                    ->badge(),
-                Tables\Columns\TextColumn::make('order_rif')
-                    ->label('Rif. Commessa')
+                Tables\Columns\TextColumn::make('tax_type')
+                    // ->badge()
+                    ->label('Entrata'),
+                Tables\Columns\TextColumn::make('manage_year')
+                    ->label('Anno')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('list_rif')
-                    ->label('Rif. Distinta')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('contract.office_name')
-                    ->label('Contratto')
-                    ->limit(30),
-                Tables\Columns\TextColumn::make('recipient')
-                    ->label('Destinatario')
+                Tables\Columns\TextColumn::make('counterpart')
+                    ->label('Controparte')
+                    ->getStateUsing(function ($record) {
+                        $counterpart = "";
+                        if($record->supplier_id)
+                            $counterpart = Supplier::find($record->supplier_id)->denomination;
+                        else
+                            $counterpart = $record->supplier;
+                        return $counterpart;
+                    })
                     ->limit(20),
-                Tables\Columns\TextColumn::make('notify_amount')
-                    ->label('Importo')
+                Tables\Columns\TextColumn::make('amount')
+                    ->label('Importo da rimborsare')
+                    ->getStateUsing(function ($record) {
+                        $sum = ($record->notify_amount ?? 0) +
+                            ($record->notify_expense_amount ?? 0) +
+                            ($record->mark_expense_amount ?? 0);
+                        return $sum;
+                    })
                     ->money('EUR'),
-                Tables\Columns\IconColumn::make('payed')
-                    ->label('Pagato')
-                    ->boolean(),
                 Tables\Columns\IconColumn::make('reinvoice')
+                    ->label('Rifatturare')
+                    ->boolean(),
+                Tables\Columns\IconColumn::make('reinvoiced')
                     ->label('Rifatturato')
+                    ->getStateUsing(function ($record) {
+                        $reinvoice = Invoice::find($record->reinvoice_id);
+                        return !isNull($reinvoice);
+                    })
                     ->boolean(),
             ])
             ->filters([

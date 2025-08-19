@@ -239,7 +239,7 @@ class PostalExpense extends Model
     {
         return !is_null($this->shipment_insert_user_id) && !is_null($this->shipment_insert_date);
     }
-    
+
     public function notificationInserted()                                              // funzione che controlla la presenza dell'inserimento della notifica
     {
         return $this->shipmentInserted() &&
@@ -274,6 +274,18 @@ class PostalExpense extends Model
     {
         static::creating(function ($expense) {
             $expense->company_id = Filament::getTenant()?->id;
+            $expense->shipment_insert_user_id = Auth::id();
+            $expense->shipment_insert_date = today();
+
+            $contract = NewContract::find($expense->new_contract_id);
+            $expense->reinvoice = $contract->reinvoice;
+
+            if ($expense->notify_type === NotifyType::MESSO) {
+                $expense->shipment_doc_type = ShipmentDocType::MESSO->value;
+            }
+            if ($expense->notify_type  === NotifyType::SPEDIZIONE) {
+                $expense->shipment_doc_type = ShipmentDocType::SPEDIZIONE->value;
+            }
         });
 
         static::created(function ($expense) {
@@ -281,7 +293,26 @@ class PostalExpense extends Model
         });
 
         static::updating(function ($expense) {
-            //
+            if($expense->reinvoiceInserted()){
+                $expense->reinvoice_registration_user_id = Auth::id();
+                $expense->reinvoice_registration_date = today();
+            }
+            else if($expense->paymentInserted()){
+                $expense->reinvoice_insert_user_id = Auth::id();
+                $expense->reinvoice_insert_date = today();
+            }
+            else if($expense->expenseInserted()){
+                $expense->payment_insert_user_id = Auth::id();
+                $expense->payment_insert_date = today();
+            }
+            else if($expense->notificationInserted()){
+                $expense->expense_insert_user_id = Auth::id();
+                $expense->expense_insert_date = today();
+            }
+            else if($expense->shipmentInserted()){
+                $expense->notify_insert_user_id = Auth::id();
+                $expense->notify_insert_date = today();
+            }
         });
 
         static::deleting(function ($expense) {
