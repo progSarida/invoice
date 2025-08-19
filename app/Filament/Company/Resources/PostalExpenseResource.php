@@ -1,7 +1,11 @@
 <?php
 
-namespace App\Filament\Company\Resources\ClientResource\RelationManagers;
+namespace App\Filament\Company\Resources;
 
+use App\Filament\Company\Resources\PostalExpenseResource\Pages;
+use App\Filament\Company\Resources\PostalExpenseResource\RelationManagers;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Enums\ExpenseType;
 use App\Enums\Month;
 use App\Enums\NotifyType;
@@ -30,17 +34,21 @@ use Illuminate\Support\Facades\Storage;
 
 use function PHPUnit\Framework\isNull;
 
-class PostalExpensesRelationManager extends RelationManager
+class PostalExpenseResource extends Resource
 {
-    protected static string $relationship = 'postalExpenses';
+    protected static ?string $model = PostalExpense::class;
 
-    protected static ?string $pluralModelLabel = 'Spese postali';
+    public static ?string $pluralModelLabel = 'Spese di notifica';
 
-    protected static ?string $modelLabel = 'Spesa postale';
+    public static ?string $modelLabel = 'Spesa di notifica';
 
-    protected static ?string $title = 'Spese postali';
+    protected static ?string $navigationIcon = 'tabler-mail-dollar';
 
-    public function form(Form $form): Form
+    protected static ?string $navigationGroup = 'Fatturazione attiva';
+
+    protected static ?string $recordTitleAttribute = 'denomination';
+
+    public static function form(Form $form): Form
     {
         return $form
             ->schema([
@@ -50,19 +58,33 @@ class PostalExpensesRelationManager extends RelationManager
                     ->collapsed(false)
                     ->columns(12)
                     ->schema([
+                        Forms\Components\Select::make('client_id')->label('Cliente')
+                            ->relationship(name: 'client', titleAttribute: 'denomination')
+                            ->getOptionLabelFromRecordUsing(
+                                fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
+                            )
+                            ->required()
+                            ->searchable('denomination')
+                            ->live()
+                            ->placeholder('Seleziona')
+                            ->preload()
+                            ->optionsLimit(5)
+                            ->columnSpan(3)
+                            ->autofocus(fn($record): bool => !$record),
+
                         Forms\Components\Select::make('notify_type')->label('Tipo notifica')
                             ->required()
                             ->options(NotifyType::class)
                             ->searchable()
                             ->live()
+                            ->placeholder('Seleziona')
                             ->preload()
-                            ->autofocus(fn($record): bool => !$record)
-                            ->columnSpan(3),
+                            ->columnSpan(2),
 
                         Forms\Components\Select::make('new_contract_id')->label('Contratto')
                             ->relationship(
                                 name: 'contract',
-                                modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$this->getOwnerRecord()->id)
+                                modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$get('client_id'))
                             )
                             ->getOptionLabelFromRecordUsing(
                                 fn (Model $record) => "{$record->office_name} ({$record->office_code}) - TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
@@ -79,15 +101,16 @@ class PostalExpensesRelationManager extends RelationManager
                             ->live()
                             ->preload()
                             ->optionsLimit(5)
-                            ->columnSpan(6),
+                            ->columnSpan(5),
 
                         Forms\Components\Select::make('tax_type')->label('Tipo entrata')
                             ->required()
                             ->options(TaxType::class)
                             ->searchable()
                             ->live()
+                            ->placeholder('Seleziona')
                             ->preload()
-                            ->columnSpan(3),
+                            ->columnSpan(2),
                     ]),
 
                 // SEZIONE: Dati di Invio e Protocollo
@@ -602,17 +625,24 @@ class PostalExpensesRelationManager extends RelationManager
             ]);
     }
 
-    public function table(Table $table): Table
+    public static function table(Table $table): Table
     {
         return $table
             // ->recordTitleAttribute('order_rif')
             ->columns([
+                Tables\Columns\TextColumn::make('client.denomination')
+                    ->label('Cliente')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('tax_type')
                     // ->badge()
                     ->label('Entrata'),
                 Tables\Columns\TextColumn::make('manage_year')
                     ->label('Anno')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('actType.name')
+                    // ->badge()
+                    ->label('Tipo atto'),
                 Tables\Columns\TextColumn::make('counterpart')
                     ->label('Controparte')
                     ->getStateUsing(function ($record) {
@@ -652,13 +682,6 @@ class PostalExpensesRelationManager extends RelationManager
                 Tables\Filters\TernaryFilter::make('reinvoice')
                     ->label('Rifatturazione'),
             ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->modalWidth(MaxWidth::SevenExtraLarge)
-                    ->extraAttributes([
-                        'style' => 'max-width: min(95vw, 1600px) !important;'
-                    ]),
-            ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->modalWidth(MaxWidth::SevenExtraLarge)
@@ -696,5 +719,21 @@ class PostalExpensesRelationManager extends RelationManager
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListPostalExpenses::route('/'),
+            'create' => Pages\CreatePostalExpense::route('/create'),
+            'edit' => Pages\EditPostalExpense::route('/{record}/edit'),
+        ];
     }
 }

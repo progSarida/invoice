@@ -130,4 +130,9 @@ class Company extends Model
     {
         return $this->hasMany(InvoiceElement::class);
     }
+
+    public function postalExpenses()
+    {
+        return $this->hasMany(PostalExpense::class);
+    }
 }

@@ -12,17 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('new_contracts',function (Blueprint $table){
-            $table->boolean('reinvoice')->default(0)->after('payment_type');                            // rifatturazione spese postali del contratto
+            // $table->boolean('reinvoice')->default(0)->after('payment_type');                            // rifatturazione spese postali del contratto
         });
 
         Schema::table('invoices',function (Blueprint $table){
-            $table->unsignedBigInteger('user_id')->nullable();                                          //
-            $table->foreign('user_id')->references('id')->on('users');                                  // fattura emessa da
+            // $table->unsignedBigInteger('user_id')->nullable();                                          //
+            // $table->foreign('user_id')->references('id')->on('users');                                  // fattura emessa da
         });
 
         Schema::create('shipment_types', function (Blueprint $table) {                                  // tabella delle modalità di spedizioni per tabella spese postali
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onUpdate('cascade');             // tenant
+            $table->integer('order');                                                                   // posizione
             $table->string('name');
             $table->string('description')->nullable();
             $table->timestamps();
@@ -31,6 +32,7 @@ return new class extends Migration
         Schema::create('act_types', function (Blueprint $table) {                                       // tabella dei tipi di atto per tabella spese postali
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onUpdate('cascade');             // tenant
+            $table->integer('order');                                                                   // posizione
             $table->string('name');
             $table->string('description')->nullable();
             $table->timestamps();
@@ -166,13 +168,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::table('new_contracts', function (Blueprint $table) {
-            $table->dropColumn('reinvoice');                                                            // rimuovo il campo 'reinvoice' dalla tabella 'new_contracts'
-        });
-        Schema::table('invoices', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);                                                           //
-            $table->dropColumn('user_id');                                                              // rimuovo la chiave esterna e il campo 'user_id' dalla tabella 'invoices'
-        });
+        // Schema::table('new_contracts', function (Blueprint $table) {
+        //     $table->dropColumn('reinvoice');                                                            // rimuovo il campo 'reinvoice' dalla tabella 'new_contracts'
+        // });
+        // Schema::table('invoices', function (Blueprint $table) {
+        //     $table->dropForeign(['user_id']);                                                           //
+        //     $table->dropColumn('user_id');                                                              // rimuovo la chiave esterna e il campo 'user_id' dalla tabella 'invoices'
+        // });
         Schema::dropIfExists('postal_expenses');
         Schema::dropIfExists('shipment_types');
         Schema::dropIfExists('act_types');
