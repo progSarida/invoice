@@ -70,7 +70,7 @@ class PostalExpenseResource extends Resource
                             ->placeholder('Seleziona')
                             ->preload()
                             ->optionsLimit(5)
-                            ->columnSpan(3)
+                            ->columnSpan(12)
                             ->autofocus(fn($record): bool => !$record),
 
                         Forms\Components\Select::make('notify_type')->label('Tipo notifica')
@@ -80,7 +80,7 @@ class PostalExpenseResource extends Resource
                             ->live()
                             ->placeholder('Seleziona')
                             ->preload()
-                            ->columnSpan(2),
+                            ->columnSpan(3),
 
                         Forms\Components\Select::make('new_contract_id')->label('Contratto')
                             ->relationship(
@@ -102,7 +102,7 @@ class PostalExpenseResource extends Resource
                             ->live()
                             ->preload()
                             ->optionsLimit(5)
-                            ->columnSpan(5),
+                            ->columnSpan(6),
 
                         Forms\Components\Select::make('tax_type')->label('Tipo entrata')
                             ->required()
@@ -111,7 +111,7 @@ class PostalExpenseResource extends Resource
                             ->live()
                             ->placeholder('Seleziona')
                             ->preload()
-                            ->columnSpan(2),
+                            ->columnSpan(3),
                     ]),
 
                 // SEZIONE: Dati di Invio e Protocollo
@@ -207,7 +207,7 @@ class PostalExpenseResource extends Resource
                                 $taxType = TaxType::from($get('tax_type'))->getLabel();                             // entrata
                                 $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                      // tipo atto
                                 $extension = $file->getClientOriginalExtension();                                   // estensione
-                                
+
                                 return sprintf('%s_%s_REG-RIGHIESTA_%s_%s_%s_%s.%s', $number, $date, $shipmentType, $client, $taxType, $actType, $extension);
                             })
                             ->maxSize(10240),
@@ -241,41 +241,6 @@ class PostalExpenseResource extends Resource
                     ->collapsed(fn($record): bool => $record && $record->notificationInserted())
                     ->visible(fn($record): bool => $record && ($record->shipment_insert_user_id && $record->shipment_insert_date))
                     ->schema([
-                        Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
-                            ->required()
-                            ->autofocus(fn($record): bool => $record && $record->shipmentInserted())
-                            ->disk('public')
-                            ->directory('reg_post_richiesta')
-                            ->visibility('public')
-                            ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
-                                if (!empty($state)) {
-                                    $set('notify_attachment_date', now()->toDateString());
-                                }
-                            })
-                            ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
-                                // Genera un nome personalizzato per il file
-                                $date = $get('receive_protocol_date') ?? '******';                                                      // data protocollo ricezione
-                                $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';                       // modalità invio
-                                $client = $this->getOwnerRecord()->denomination;                                                        // cliente
-                                $taxType = TaxType::from($get('tax_type'))->getLabel();                                                 // entrata
-                                $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                                          // tipo atto
-                                $rifOrder = $get('order_rif');                                                                          // rif2 (commessa)
-                                $rifList = $get('list_rif');                                                                            // rif2 (distinta)
-                                $amount = ($record->notify_amount ?? 0);                                                                // importo
-                                $extension = $file->getClientOriginalExtension();                                                       // estensione
-                                
-                                return sprintf('%s_REG-POST-RIGHIESTA_%s_%s_%s_%s_%s_%s_%s.%s', $date, $shipmentType, $client, $taxType, $actType, $rifOrder, $rifList, $amount, $extension);
-                            })
-                            ->maxSize(10240),
-
-                        Forms\Components\DatePicker::make('notify_attachment_date')->label('Data allegato notifica')
-                            ->required(),
-                            // ->visible(function (Get $get, $record): bool {
-                            //     $hasUploadedFile = !empty($get('notify_attachment_path'));
-                            //     $hasSavedFile = $record && !empty($record->notify_attachment_path);
-                            //     return $hasUploadedFile || $hasSavedFile;
-                            // }),
-
                         Forms\Components\TextInput::make('order_rif')->label('Riferimento commessa')
                             ->maxLength(255),
 
@@ -322,6 +287,41 @@ class PostalExpenseResource extends Resource
 
                         Forms\Components\DatePicker::make('amount_registration_date')->label('Data registrazione importo')
                             ->required(),
+
+                            Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
+                            ->required()
+                            ->autofocus(fn($record): bool => $record && $record->shipmentInserted())
+                            ->disk('public')
+                            ->directory('reg_post_richiesta')
+                            ->visibility('public')
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
+                                if (!empty($state)) {
+                                    $set('notify_attachment_date', now()->toDateString());
+                                }
+                            })
+                            ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
+                                // Genera un nome personalizzato per il file
+                                $date = $get('receive_protocol_date') ?? '******';                                                      // data protocollo ricezione
+                                $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';                       // modalità invio
+                                $client = Client::find($get('client_id'))->denomination;                                                // cliente
+                                $taxType = TaxType::from($get('tax_type'))->getLabel();                                                 // entrata
+                                $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                                          // tipo atto
+                                $rifOrder = $get('order_rif');                                                                          // rif2 (commessa)
+                                $rifList = $get('list_rif');                                                                            // rif2 (distinta)
+                                $amount = ($record->notify_amount ?? 0);                                                                // importo
+                                $extension = $file->getClientOriginalExtension();                                                       // estensione
+
+                                return sprintf('%s_REG-POST-RIGHIESTA_%s_%s_%s_%s_%s_%s_%s.%s', $date, $shipmentType, $client, $taxType, $actType, $rifOrder, $rifList, $amount, $extension);
+                            })
+                            ->maxSize(10240),
+
+                        Forms\Components\DatePicker::make('notify_attachment_date')->label('Data allegato notifica')
+                            ->required(),
+                            // ->visible(function (Get $get, $record): bool {
+                            //     $hasUploadedFile = !empty($get('notify_attachment_path'));
+                            //     $hasSavedFile = $record && !empty($record->notify_attachment_path);
+                            //     return $hasUploadedFile || $hasSavedFile;
+                            // }),
 
                         Forms\Components\Select::make('notify_insert_user_id')->label('Utente inserimento notifica')
                             ->disabled()
@@ -462,14 +462,14 @@ class PostalExpenseResource extends Resource
                 // SEZIONE: Rifatturazione
                 Forms\Components\Section::make('Estremi della rifatturazione delle spese della lavorazione/notifica')
                     ->icon('heroicon-o-receipt-refund')
-                    ->collapsed(fn($record): bool => $record && $record->reinvoiceInserted())
+                    // ->collapsed(fn($record): bool => $record && $record->reinvoiceInserted())
                     ->visible(fn($record): bool => $record && $record->reinvoice && ($record->payment_insert_user_id && $record->payment_insert_date))
                     ->schema([
                         Forms\Components\Select::make('reinvoice_id')->label('Fattura emessa per rifatturazione')
                             ->required()
                             // ->relationship('reInvoice', 'description')
                             ->options(function (Get $get): array {
-                                return Invoice::where('client_id', $this->getOwnerRecord()->id)
+                                return Invoice::where('client_id', $get('client_id'))
                                     ->whereNotNull('flow')
                                     ->pluck('description', 'id')
                                     ->toArray();
@@ -538,6 +538,8 @@ class PostalExpenseResource extends Resource
                         return ($isMessenger($record) || $hasReceipt($record)) && $isStep($record);
                     })
                     ->schema([
+                        Forms\Components\DatePicker::make('notify_date_registration_date')->label('Data registrazione data di notifica'),
+
                         Forms\Components\FileUpload::make('reinvoice_attachment_path')->label('Allegato fattura emessa')
                             ->disk('public')
                             ->directory('reg_not_db')
@@ -556,15 +558,13 @@ class PostalExpenseResource extends Resource
                                 $taxType = TaxType::from($get('tax_type'))->getLabel();                                                 // entrata
                                 $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                                          // tipo atto
                                 $extension = $file->getClientOriginalExtension();                                                       // estensione
-                                
+
                                 return sprintf('%s_REG-POST-RIGHIESTA_%s_%s_%s.%s', $date, $client, $taxType, $actType, $extension);
                             })
                             ->autofocus(fn($record): bool => $record && $record->reinvoiceInserted()),
 
                         Forms\Components\DatePicker::make('reinvoice_attachment_date')->label('Data file fattura emessa caricato')
                             ->required(),
-
-                        Forms\Components\DatePicker::make('notify_date_registration_date')->label('Data registrazione data di notifica'),
 
                         Forms\Components\Select::make('reinvoice_registration_user_id')->label('Utente registrazione')
                             ->disabled()
@@ -671,7 +671,7 @@ class PostalExpenseResource extends Resource
                     ->label('Rifatturato')
                     ->getStateUsing(function ($record) {
                         $reinvoice = Invoice::find($record->reinvoice_id);
-                        return !isNull($reinvoice);
+                        return !is_null($reinvoice);
                     })
                     ->boolean(),
             ])

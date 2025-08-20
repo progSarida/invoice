@@ -16,4 +16,9 @@ class EditPostalExpense extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function getRedirectUrl(): ?string
+    {
+        return $this->getResource()::getUrl('edit', ['record' => $this->record]);
+    }
 }

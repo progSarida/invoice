@@ -276,15 +276,12 @@ class PostalExpense extends Model
             $expense->company_id = Filament::getTenant()?->id;
             $expense->shipment_insert_user_id = Auth::id();
             $expense->shipment_insert_date = today();
-
             $contract = NewContract::find($expense->new_contract_id);
-            $expense->reinvoice = $contract->reinvoice;
-
+            $expense->reinvoice = $contract->reinvoice ?? false;
             if ($expense->notify_type === NotifyType::MESSO) {
-                $expense->shipment_doc_type = ShipmentDocType::MESSO->value;
-            }
-            if ($expense->notify_type  === NotifyType::SPEDIZIONE) {
-                $expense->shipment_doc_type = ShipmentDocType::SPEDIZIONE->value;
+                $expense->shipment_doc_type = ShipmentDocType::MESSO;
+            } elseif ($expense->notify_type === NotifyType::SPEDIZIONE) {
+                $expense->shipment_doc_type = ShipmentDocType::SPEDIZIONE;
             }
         });
 
@@ -293,25 +290,19 @@ class PostalExpense extends Model
         });
 
         static::updating(function ($expense) {
-            if($expense->reinvoiceInserted()){
-                $expense->reinvoice_registration_user_id = Auth::id();
-                $expense->reinvoice_registration_date = today();
-            }
-            else if($expense->paymentInserted()){
-                $expense->reinvoice_insert_user_id = Auth::id();
-                $expense->reinvoice_insert_date = today();
-            }
-            else if($expense->expenseInserted()){
-                $expense->payment_insert_user_id = Auth::id();
-                $expense->payment_insert_date = today();
-            }
-            else if($expense->notificationInserted()){
-                $expense->expense_insert_user_id = Auth::id();
-                $expense->expense_insert_date = today();
-            }
-            else if($expense->shipmentInserted()){
-                $expense->notify_insert_user_id = Auth::id();
-                $expense->notify_insert_date = today();
+            $stages = [
+                'reinvoiceInserted' => ['reinvoice_registration_user_id', 'reinvoice_registration_date'],
+                'paymentInserted' => ['reinvoice_insert_user_id', 'reinvoice_insert_date'],
+                'expenseInserted' => ['payment_insert_user_id', 'payment_insert_date'],
+                'notificationInserted' => ['expense_insert_user_id', 'expense_insert_date'],
+                'shipmentInserted' => ['notify_insert_user_id', 'notify_insert_date'],
+            ];
+            foreach ($stages as $method => [$userField, $dateField]) {
+                if ($expense->$method()) {
+                    $expense->$userField = Auth::id();
+                    $expense->$dateField = today();
+                    break;
+                }
             }
         });
 
