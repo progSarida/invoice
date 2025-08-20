@@ -56,7 +56,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger('supplier_id')->nullable();                              		//
             $table->foreign('supplier_id')->references('id')->on('suppliers');                  		// fornitore (mostrare se spedizione)
-            $table->string('supplier')->nullable();                                            			// ente da rimborsare (mostrare se messo)
+            $table->string('supplier_name')->nullable();                                                // ente da rimborsare (mostrare se messo)
 
             $table->string('recipient')->nullable();                                            		// destinatario notifica/trasgressore
 
@@ -159,6 +159,11 @@ return new class extends Migration
             $table->string('note')->nullable();                                                 		// note
 
             $table->timestamps();
+        });
+
+        Schema::table('invoice_items',function (Blueprint $table){
+            $table->unsignedBigInteger('postal_expense_id')->nullable()->after('is_with_vat');          //
+            $table->foreign('postal_expense_id')->references('id')->on('postal_expenses');              // riferimento spesa di notifica
         });
     }
 

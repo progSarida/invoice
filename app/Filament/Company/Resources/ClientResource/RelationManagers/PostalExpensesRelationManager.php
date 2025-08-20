@@ -133,7 +133,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                             ->columnSpanFull(),
 
-                        Forms\Components\TextInput::make('supplier')->label('Ente da rimborsare')
+                        Forms\Components\TextInput::make('supplier_name')->label('Ente da rimborsare')
                             ->required()
                             ->maxLength(255)
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
@@ -319,14 +319,14 @@ class PostalExpensesRelationManager extends RelationManager
                     ->collapsed(fn($record): bool => $record && $record->expenseInserted())
                     ->visible(fn($record): bool => $record && ($record->notify_insert_user_id && $record->notify_insert_date))
                     ->schema([
-                        Forms\Components\Select::make('expense_type')->label('Tipologia spesa')
-                            ->required()
-                            ->autofocus(fn($record): bool => $record && $record->notificationInserted())
-                            ->options(ExpenseType::class)
-                            ->searchable()
-                            ->live()
-                            ->preload()
-                            ->columnSpanFull(),
+                        // Forms\Components\Select::make('expense_type')->label('Tipologia spesa')
+                        //     ->required()
+                        //     ->autofocus(fn($record): bool => $record && $record->notificationInserted())
+                        //     ->options(ExpenseType::class)
+                        //     ->searchable()
+                        //     ->live()
+                        //     ->preload()
+                        //     ->columnSpanFull(),
 
                         Forms\Components\Select::make('passive_invoice_id')->label('Fattura passiva')
                             ->required()
@@ -450,7 +450,7 @@ class PostalExpensesRelationManager extends RelationManager
                                     ->pluck('description', 'id')
                                     ->toArray();
                             })
-                            ->autofocus(fn($record): bool => $record && $record->paymentInserted())
+                            ->autofocus(fn($record): bool => $record && !$record->reinvoiceRegistered())
                             ->searchable()
                             ->preload()
                             ->live()
@@ -620,7 +620,7 @@ class PostalExpensesRelationManager extends RelationManager
                         if($record->supplier_id)
                             $counterpart = Supplier::find($record->supplier_id)->denomination;
                         else
-                            $counterpart = $record->supplier;
+                            $counterpart = $record->supplier_name;
                         return $counterpart;
                     })
                     ->limit(20),

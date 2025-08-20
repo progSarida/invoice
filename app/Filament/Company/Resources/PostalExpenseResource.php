@@ -157,7 +157,7 @@ class PostalExpenseResource extends Resource
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                             ->columnSpanFull(),
 
-                        Forms\Components\TextInput::make('supplier')->label('Ente da rimborsare')
+                        Forms\Components\TextInput::make('supplier_name')->label('Ente da rimborsare')
                             ->required()
                             ->maxLength(255)
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
@@ -343,14 +343,14 @@ class PostalExpenseResource extends Resource
                     ->collapsed(fn($record): bool => $record && $record->expenseInserted())
                     ->visible(fn($record): bool => $record && ($record->notify_insert_user_id && $record->notify_insert_date))
                     ->schema([
-                        Forms\Components\Select::make('expense_type')->label('Tipologia spesa')
-                            ->required()
-                            ->autofocus(fn($record): bool => $record && $record->notificationInserted())
-                            ->options(ExpenseType::class)
-                            ->searchable()
-                            ->live()
-                            ->preload()
-                            ->columnSpanFull(),
+                        // Forms\Components\Select::make('expense_type')->label('Tipologia spesa')
+                        //     ->required()
+                        //     ->autofocus(fn($record): bool => $record && $record->notificationInserted())
+                        //     ->options(ExpenseType::class)
+                        //     ->searchable()
+                        //     ->live()
+                        //     ->preload()
+                        //     ->columnSpanFull(),
 
                         Forms\Components\Select::make('passive_invoice_id')->label('Fattura passiva')
                             ->required()
@@ -474,7 +474,7 @@ class PostalExpenseResource extends Resource
                                     ->pluck('description', 'id')
                                     ->toArray();
                             })
-                            ->autofocus(fn($record): bool => $record && $record->paymentInserted())
+                            ->autofocus(fn($record): bool => $record && !$record->reinvoiceRegistered())
                             ->searchable()
                             ->preload()
                             ->live()
@@ -523,7 +523,7 @@ class PostalExpenseResource extends Resource
                     ->icon('heroicon-o-document-text')
                     ->collapsed(false)
                     // ->collapsed(fn($record): bool => $record && $record->reinvoiceRegistered())
-                    ->visible(fn($record): bool => $record && ($record->reinvoice_insert_user_id && $record->reinvoice_insert_date))
+                    // ->visible(fn($record): bool => $record && ($record->reinvoice_insert_user_id && $record->reinvoice_insert_date))
                     ->visible(function ($record) {
                         // è un invio tramite messo
                         $isMessenger = fn($record) => $record && $record->notify_type === NotifyType::MESSO->value;
@@ -651,7 +651,7 @@ class PostalExpenseResource extends Resource
                         if($record->supplier_id)
                             $counterpart = Supplier::find($record->supplier_id)->denomination;
                         else
-                            $counterpart = $record->supplier;
+                            $counterpart = $record->supplier_name;
                         return $counterpart;
                     })
                     ->limit(20),
@@ -736,5 +736,14 @@ class PostalExpenseResource extends Resource
             'create' => Pages\CreatePostalExpense::route('/create'),
             'edit' => Pages\EditPostalExpense::route('/{record}/edit'),
         ];
+    }
+
+    public static function modalForm(Form $form): Form
+    {
+        return $form
+            ->columns(12)
+            ->schema([
+                //
+            ]);
     }
 }

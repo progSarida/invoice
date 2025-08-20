@@ -26,7 +26,7 @@ class PostalExpense extends Model
         'send_protocol_date',
         'shipment_type_id',
         'supplier_id',
-        'supplier',
+        'supplier_name',
         'recipient',
 
         // gestione anni

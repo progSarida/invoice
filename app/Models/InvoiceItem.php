@@ -27,7 +27,8 @@ class InvoiceItem extends Model
         'amount',
         'total',
         'vat_code_type',
-        'auto',                              // campo per distiguere tra voci inserite dalll'operatore e voci ritenute, riepiloghi e cassa perv. inserite auttomaticamente
+        'auto',                             // campo per distiguere tra voci inserite dalll'operatore e voci ritenute, riepiloghi e cassa perv. inserite auttomaticamente
+        'postal_expense_id'                 // riferimento alla  spesa di notifica
     ];
 
     protected $casts = [
@@ -45,6 +46,11 @@ class InvoiceItem extends Model
     public function invoiceElement()
     {
         return $this->belongsTo(InvoiceElement::class, 'invoice_element_id', 'id');
+    }
+
+    public function postalExpense()
+    {
+        return $this->belongsTo(PostalExpense::class, 'postal_expense_id', 'id');
     }
 
     protected static function booted()

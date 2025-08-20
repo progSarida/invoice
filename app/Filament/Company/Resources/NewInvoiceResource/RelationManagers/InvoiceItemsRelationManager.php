@@ -12,10 +12,12 @@ use App\Enums\VatCodeType;
 use Filament\Tables\Table;
 use App\Models\InvoiceItem;
 use App\Models\InvoiceElement;
+use App\Models\PostalExpense;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
+use Illuminate\Support\Facades\Auth;
 
 class InvoiceItemsRelationManager extends RelationManager
 {
@@ -281,6 +283,122 @@ class InvoiceItemsRelationManager extends RelationManager
                         $item->autoInsert();
                         return $item;
                     }),
+                Tables\Actions\Action::make('Spese di notifica')
+                    ->form([
+                        Forms\Components\Repeater::make('postal_expenses')
+                            ->label('Spese postali')
+                            ->schema([
+                                Forms\Components\TextInput::make('description')
+                                    ->label('Descrizione')
+                                    ->disabled()
+                                    ->columnSpan(6),
+                                Forms\Components\TextInput::make('amount')
+                                    ->label('Importo')
+                                    ->disabled()
+                                    ->prefix('€')
+                                    ->live(debounce: 500)
+                                    ->columnSpan(2),
+                                Forms\Components\DatePicker::make('date')
+                                    ->label('Data')
+                                    ->disabled()
+                                    ->columnSpan(2),
+                                Forms\Components\Checkbox::make('selected')
+                                    ->label('Fattura')
+                                    ->columnSpan(2),
+                            ])
+                            ->columns(12)
+                            ->defaultItems(0)
+                            ->addable(false)
+                            ->deletable(false)
+                            ->reorderable(false)
+                            ->mutateRelationshipDataBeforeFillUsing(function (array $data): array {
+                                // Qui puoi modificare i dati se necessario
+                                $data['selected'] = false; // Default non selezionato
+                                return $data;
+                            })
+                    ])
+                    ->modalWidth('5xl')
+                    ->fillForm(function (): array {
+                        $contractId = $this->getOwnerRecord()->contract_id;
+                        $postalExpenses = PostalExpense::where('new_contract_id', $contractId)
+                            ->where('reinvoice_id', null)
+                            ->get();
+                        
+                        
+                        return [
+                            'postal_expenses' => $postalExpenses->map(function ($expense) {
+                                $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                                
+                                return [
+                                    'id' => $expense->id,
+                                    'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier_name),
+                                    // 'amount' => $expense->amount,
+                                    'amount' => number_format($amount, 2, ',', '.'),
+                                    'date' => $expense->created_at?->format('Y-m-d'),
+                                    'selected' => true,
+                                ];
+                            })->toArray()
+                        ];
+                    })
+                    ->action(function (array $data): void {
+                        $selectedExpenses = collect($data['postal_expenses'])
+                            ->filter(fn($expense) => $expense['selected'] === true);
+                        
+                        if ($selectedExpenses->isEmpty()) {
+                            // Notifica se nessun elemento è stato selezionato
+                            \Filament\Notifications\Notification::make()
+                                ->title('Nessuna spesa selezionata')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+                        
+                        // Crea gli invoice items per le spese selezionate
+                        $invoice = $this->getOwnerRecord();
+                        // dd($selectedExpenses);
+                        foreach ($selectedExpenses as $expenseData) {
+                            $expense = PostalExpense::find($expenseData['id']);
+                            $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                            
+                            if ($expense) {
+                                // Crea l'invoice item
+                                $invoiceItem = InvoiceItem::create([
+                                    'invoice_id' => $invoice->id,
+                                    'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier),
+                                    'amount' => $amount,
+                                    'total' => $amount,
+                                    'vat_code_type' => VatCodeType::VC06,
+                                    'auto' => false,
+                                    'postal_expense_id' => $expense->id
+                                ]);
+                                
+                                $invoiceItem->calculateTotal();
+                                $invoiceItem->save();
+                                $invoiceItem->checkStampDuty();
+                                $invoiceItem->autoInsert();
+                                
+                                // Aggiorna la spesa postale con l'ID della fattura
+                                $expense->update([
+                                    'reinvoice_id' => $invoice->id,
+                                    'reinvoice_number' => $invoice->number,
+                                    'reinvoice_date' => $invoice->invoice_date,
+                                    // 'reinvoice_amount' => $invoice->total,
+                                    'reinvoice_insert_user_id' => Auth::id(),
+                                    'reinvoice_insert_date' => today()
+                                ]);
+                            }
+                        }
+                        
+                        // Notifica di successo
+                        \Filament\Notifications\Notification::make()
+                            ->title('Spese aggiunte alla fattura')
+                            ->success()
+                            ->send();
+                    })
+                    ->modalHeading('Seleziona spese di notifica')
+                    ->modalDescription('Seleziona le spese postali da aggiungere alla fattura')
+                    ->modalSubmitActionLabel('Aggiungi alla fattura')
+                    ->modalCancelActionLabel('Annulla')
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
@@ -295,11 +413,27 @@ class InvoiceItemsRelationManager extends RelationManager
                 Tables\Actions\DeleteAction::make()
                     ->visible(fn ($record) => $record->vat_code_type !== VatCodeType::VC06A && $record->auto !== true)
                     ->using(function (InvoiceItem $record): InvoiceItem {
-                            $invoice = $record->invoice;
-                            $record->delete();
-                            $invoice->checkStampDuty();
-                            $record->autoInsert();
-                            return $record;
+                        $invoice = $record->invoice;
+                        
+                        if ($record->postal_expense_id) {
+                            $postalExpense = PostalExpense::find($record->postal_expense_id);
+                            if ($postalExpense) {
+                                $postalExpense->update([
+                                    'reinvoice_id' => null,
+                                    'reinvoice_number' => null,
+                                    'reinvoice_date' => null,
+                                    'reinvoice_amount' => null,
+                                    'reinvoice_insert_user_id' => null,
+                                    'reinvoice_insert_date' => null
+                                ]);
+                            }
+                        }
+                        
+                        $record->delete();
+                        $invoice->checkStampDuty();
+                        $record->autoInsert();
+                        
+                        return $record;
                     }),
                 // Tables\Actions\DeleteAction::make(),                                                                            // solo per test
             ])
