@@ -323,12 +323,12 @@ class InvoiceItemsRelationManager extends RelationManager
                         $postalExpenses = PostalExpense::where('new_contract_id', $contractId)
                             ->where('reinvoice_id', null)
                             ->get();
-                        
-                        
+
+
                         return [
                             'postal_expenses' => $postalExpenses->map(function ($expense) {
                                 $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
-                                
+
                                 return [
                                     'id' => $expense->id,
                                     'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier_name),
@@ -343,7 +343,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->action(function (array $data): void {
                         $selectedExpenses = collect($data['postal_expenses'])
                             ->filter(fn($expense) => $expense['selected'] === true);
-                        
+
                         if ($selectedExpenses->isEmpty()) {
                             // Notifica se nessun elemento è stato selezionato
                             \Filament\Notifications\Notification::make()
@@ -352,14 +352,14 @@ class InvoiceItemsRelationManager extends RelationManager
                                 ->send();
                             return;
                         }
-                        
+
                         // Crea gli invoice items per le spese selezionate
                         $invoice = $this->getOwnerRecord();
                         // dd($selectedExpenses);
                         foreach ($selectedExpenses as $expenseData) {
                             $expense = PostalExpense::find($expenseData['id']);
                             $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
-                            
+
                             if ($expense) {
                                 // Crea l'invoice item
                                 $invoiceItem = InvoiceItem::create([
@@ -371,24 +371,24 @@ class InvoiceItemsRelationManager extends RelationManager
                                     'auto' => false,
                                     'postal_expense_id' => $expense->id
                                 ]);
-                                
+
                                 $invoiceItem->calculateTotal();
                                 $invoiceItem->save();
                                 $invoiceItem->checkStampDuty();
                                 $invoiceItem->autoInsert();
-                                
+
                                 // Aggiorna la spesa postale con l'ID della fattura
                                 $expense->update([
                                     'reinvoice_id' => $invoice->id,
                                     'reinvoice_number' => $invoice->number,
                                     'reinvoice_date' => $invoice->invoice_date,
-                                    // 'reinvoice_amount' => $invoice->total,
+                                    'reinvoice_amount' => $invoice->total,
                                     'reinvoice_insert_user_id' => Auth::id(),
                                     'reinvoice_insert_date' => today()
                                 ]);
                             }
                         }
-                        
+
                         // Notifica di successo
                         \Filament\Notifications\Notification::make()
                             ->title('Spese aggiunte alla fattura')
@@ -414,25 +414,28 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->visible(fn ($record) => $record->vat_code_type !== VatCodeType::VC06A && $record->auto !== true)
                     ->using(function (InvoiceItem $record): InvoiceItem {
                         $invoice = $record->invoice;
-                        
+
                         if ($record->postal_expense_id) {
                             $postalExpense = PostalExpense::find($record->postal_expense_id);
                             if ($postalExpense) {
-                                $postalExpense->update([
-                                    'reinvoice_id' => null,
-                                    'reinvoice_number' => null,
-                                    'reinvoice_date' => null,
-                                    'reinvoice_amount' => null,
-                                    'reinvoice_insert_user_id' => null,
-                                    'reinvoice_insert_date' => null
-                                ]);
+                                // Disabilita gli observer
+                                PostalExpense::withoutEvents(function () use ($postalExpense) {
+                                    $postalExpense->update([
+                                        'reinvoice_id' => null,
+                                        'reinvoice_number' => null,
+                                        'reinvoice_date' => null,
+                                        'reinvoice_amount' => null,
+                                        'reinvoice_insert_user_id' => null,
+                                        'reinvoice_insert_date' => null
+                                    ]);
+                                });
                             }
                         }
-                        
+
                         $record->delete();
                         $invoice->checkStampDuty();
                         $record->autoInsert();
-                        
+
                         return $record;
                     }),
                 // Tables\Actions\DeleteAction::make(),                                                                            // solo per test

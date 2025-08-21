@@ -7,6 +7,7 @@ use App\Enums\Month;
 use App\Enums\NotifyType;
 use App\Enums\ShipmentDocType;
 use App\Enums\TaxType;
+use App\Enums\VatCodeType;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -290,19 +291,64 @@ class PostalExpense extends Model
         });
 
         static::updating(function ($expense) {
-            $stages = [
-                'reinvoiceInserted' => ['reinvoice_registration_user_id', 'reinvoice_registration_date'],
-                'paymentInserted' => ['reinvoice_insert_user_id', 'reinvoice_insert_date'],
-                'expenseInserted' => ['payment_insert_user_id', 'payment_insert_date'],
-                'notificationInserted' => ['expense_insert_user_id', 'expense_insert_date'],
-                'shipmentInserted' => ['notify_insert_user_id', 'notify_insert_date'],
-            ];
-            foreach ($stages as $method => [$userField, $dateField]) {
-                if ($expense->$method()) {
-                    $expense->$userField = Auth::id();
-                    $expense->$dateField = today();
-                    break;
-                }
+            // $stages = [
+            //     'reinvoiceInserted' => ['reinvoice_registration_user_id', 'reinvoice_registration_date'],
+            //     'paymentInserted' => ['reinvoice_insert_user_id', 'reinvoice_insert_date'],
+            //     'expenseInserted' => ['payment_insert_user_id', 'payment_insert_date'],
+            //     'notificationInserted' => ['expense_insert_user_id', 'expense_insert_date'],
+            //     'shipmentInserted' => ['notify_insert_user_id', 'notify_insert_date'],
+            // ];
+            // foreach ($stages as $method => [$userField, $dateField]) {
+            //     if ($expense->$method()) {
+            //         $expense->$userField = Auth::id();
+            //         $expense->$dateField = today();
+            //         break;
+            //     }
+            // }
+            // avanzamento
+            if ($expense->reinvoiceInserted() && ($expense->notify_date_registration_date || $expense->reinvoice_attachment_path)) {
+                $expense->reinvoice_registration_user_id = Auth::id();
+                $expense->reinvoice_registration_date = today();
+            }
+            else if($expense->paymentInserted()){
+                $expense->reinvoice_insert_user_id = Auth::id();
+                $expense->reinvoice_insert_date = today();
+            }
+            else if($expense->expenseInserted()){
+                $expense->payment_insert_user_id = Auth::id();
+                $expense->payment_insert_date = today();
+            }
+            else if($expense->notificationInserted()){
+                $expense->expense_insert_user_id = Auth::id();
+                $expense->expense_insert_date = today();
+            }
+            else if($expense->shipmentInserted()){
+                $expense->notify_insert_user_id = Auth::id();
+                $expense->notify_insert_date = today();
+            }
+            // creazione voce fattura
+            if($expense->reinvoice_id){
+                $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                $invoiceItem = InvoiceItem::create([
+                    'invoice_id' => $expense->reinvoice_id,
+                    'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier),
+                    'amount' => $amount,
+                    'total' => $amount,
+                    'vat_code_type' => VatCodeType::VC06,
+                    'auto' => false,
+                    'postal_expense_id' => $expense->id
+                ]);
+
+                $invoiceItem->calculateTotal();
+                $invoiceItem->save();
+                $invoiceItem->checkStampDuty();
+                $invoiceItem->autoInsert();
+
+                PostalExpense::withoutEvents(function () use ($expense) {
+                        $expense->update([
+                            'reinvoice_amount' => $expense->reInvoice->total,
+                        ]);
+                    });
             }
         });
 
