@@ -378,14 +378,25 @@ class InvoiceItemsRelationManager extends RelationManager
                                 $invoiceItem->autoInsert();
 
                                 // Aggiorna la spesa postale con l'ID della fattura
-                                $expense->update([
-                                    'reinvoice_id' => $invoice->id,
-                                    'reinvoice_number' => $invoice->number,
-                                    'reinvoice_date' => $invoice->invoice_date,
-                                    'reinvoice_amount' => $invoice->total,
-                                    'reinvoice_insert_user_id' => Auth::id(),
-                                    'reinvoice_insert_date' => today()
-                                ]);
+                                PostalExpense::withoutEvents(function () use ($expense, $invoice) {
+                                    $expense->update([
+                                        'reinvoice_id' => $invoice->id,
+                                        'reinvoice_number' => $invoice->number,
+                                        'reinvoice_date' => $invoice->invoice_date,
+                                        'reinvoice_amount' => $invoice->total,
+                                        'reinvoice_insert_user_id' => Auth::id(),
+                                        'reinvoice_insert_date' => today()
+                                    ]);
+                                });
+                                
+                                // $expense->update([
+                                //     'reinvoice_id' => $invoice->id,
+                                //     'reinvoice_number' => $invoice->number,
+                                //     'reinvoice_date' => $invoice->invoice_date,
+                                //     'reinvoice_amount' => $invoice->total,
+                                //     'reinvoice_insert_user_id' => Auth::id(),
+                                //     'reinvoice_insert_date' => today()
+                                // ]);
                             }
                         }
 

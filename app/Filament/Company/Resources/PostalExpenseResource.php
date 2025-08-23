@@ -26,6 +26,7 @@ use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -679,13 +680,511 @@ class PostalExpenseResource extends Resource
                     ->boolean(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('notify_type')
-                    ->options(NotifyType::class),
-                Tables\Filters\TernaryFilter::make('payed')
-                    ->label('Pagato'),
-                Tables\Filters\TernaryFilter::make('reinvoice')
-                    ->label('Rifatturazione'),
-            ])
+                // SEZIONE: Identificazione
+                Tables\Filters\Filter::make('identificazione')
+                    ->form([
+                        Forms\Components\Section::make('Informazioni di base per l\'identificazione della spesa postale')
+                            ->collapsed()
+                            ->columns(12)
+                            ->schema([
+                                Forms\Components\Select::make('client_id')
+                                    ->label('Cliente')
+                                    ->relationship(name: 'client', titleAttribute: 'denomination')
+                                    ->getOptionLabelFromRecordUsing(
+                                        fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
+                                    )
+                                    ->searchable()
+                                    ->placeholder('')
+                                    ->preload()
+                                    ->columnSpan(4),
+                                Forms\Components\Select::make('notify_type')
+                                    ->label('Tipo notifica')
+                                    ->options(NotifyType::class)
+                                    ->searchable()
+                                    ->placeholder('')
+                                    ->preload()
+                                    ->columnSpan(2),
+                                Forms\Components\Select::make('new_contract_id')
+                                    ->label('Contratto')
+                                    ->relationship(name: 'contract', titleAttribute: 'office_name')
+                                    ->getOptionLabelFromRecordUsing(
+                                        fn (Model $record) => "{$record->office_name} ({$record->office_code}) - TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
+                                    )
+                                    ->searchable()
+                                    ->placeholder('')
+                                    ->preload()
+                                    ->optionsLimit(5)
+                                    ->columnSpan(4),
+                                Forms\Components\Select::make('tax_type')
+                                    ->label('Tipo entrata')
+                                    ->options(TaxType::class)
+                                    ->searchable()
+                                    ->placeholder('')
+                                    ->preload()
+                                    ->columnSpan(2),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['client_id'] ?? null, fn ($q, $v) => $q->where('client_id', $v))
+                            ->when($data['notify_type'] ?? null, fn ($q, $v) => $q->where('notify_type', $v))
+                            ->when($data['new_contract_id'] ?? null, fn ($q, $v) => $q->where('new_contract_id', $v))
+                            ->when($data['tax_type'] ?? null, fn ($q, $v) => $q->where('tax_type', $v));
+                    }),
+                // SEZIONE: Dati di Invio e Protocollo
+                Tables\Filters\Filter::make('invio_protocollo')
+                    ->form([
+                        Forms\Components\Section::make('Dati di invio e protocollo')
+                            ->collapsed()
+                            ->columns(12)
+                            ->schema([
+                                Forms\Components\TextInput::make('send_protocol_number')
+                                    ->label('Numero protocollo invio')
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('send_protocol_date_from')
+                                    ->label('Data protocollo invio da')
+                                    ->columnSpan(2),
+                                Forms\Components\DatePicker::make('send_protocol_date_to')
+                                    ->label('Data protocollo invio a')
+                                    ->columnSpan(2),
+                                Forms\Components\Select::make('shipment_type_id')
+                                    ->label('Modalità di invio')
+                                    ->relationship('shipmentType', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('manage_year')
+                                    ->label('Anno di gestione')
+                                    ->numeric()
+                                    ->rules(['digits:4'])
+                                    ->columnSpan(2),
+                                Forms\Components\Select::make('supplier_id')
+                                    ->label('Fornitore')
+                                    ->relationship('supplier', 'denomination')
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(4),
+                                Forms\Components\TextInput::make('recipient')
+                                    ->label('Destinatario notifica/trasgressore')
+                                    ->maxLength(255)
+                                    ->columnSpan(4),
+                                Forms\Components\TextInput::make('supplier_name')
+                                    ->label('Ente da rimborsare')
+                                    ->maxLength(255)
+                                    ->columnSpan(4),
+                                Forms\Components\Select::make('act_type_id')
+                                    ->label('Tipo atto')
+                                    ->relationship('actType', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(4),
+                                Forms\Components\TextInput::make('act_id')
+                                    ->label('ID atto')
+                                    ->maxLength(255)
+                                    ->columnSpan(2),
+                                Forms\Components\TextInput::make('act_year')
+                                    ->label('Anno atto')
+                                    ->numeric()
+                                    ->rules(['digits:4'])
+                                    ->columnSpan(2),
+                                Forms\Components\DatePicker::make('act_attachment_date_from')
+                                    ->label('Data allegato atto da')
+                                    ->columnSpan(2),
+                                Forms\Components\DatePicker::make('act_attachment_date_to')
+                                    ->label('Data allegato atto a')
+                                    ->columnSpan(2),
+                                Forms\Components\Select::make('shipment_insert_user_id')
+                                    ->label('Utente inserimento dati')
+                                    ->relationship('shipmentInsertUser', 'name')
+                                    ->searchable()
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->preload()
+                                    ->optionsLimit(5)
+                                    ->columnSpan(4),
+                                Forms\Components\DatePicker::make('shipment_insert_date_from')
+                                    ->label('Data inserimento dati')
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('shipment_insert_date_to')
+                                    ->label('Data inserimento dati')
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['send_protocol_number'] ?? null, fn ($q, $v) => $q->where('send_protocol_number', 'like', "%{$v}%"))
+                            ->when($data['send_protocol_date_from'] ?? null, fn ($q, $v) => $q->whereDate('send_protocol_date', '>=', $v))
+                            ->when($data['send_protocol_date_to'] ?? null, fn ($q, $v) => $q->whereDate('send_protocol_date', '<', $v))
+                            ->when($data['shipment_type_id'] ?? null, fn ($q, $v) => $q->where('shipment_type_id', $v))
+                            ->when($data['recipient'] ?? null, fn ($q, $v) => $q->where('recipient', 'like', "%{$v}%"))
+                            ->when($data['supplier_id'] ?? null, fn ($q, $v) => $q->where('supplier_id', $v))
+                            ->when($data['supplier_name'] ?? null, fn ($q, $v) => $q->where('supplier_name', 'like', "%{$v}%"))
+                            ->when($data['manage_year'] ?? null, fn ($q, $v) => $q->where('manage_year', $v))
+                            ->when($data['act_type_id'] ?? null, fn ($q, $v) => $q->where('act_type_id', $v))
+                            ->when($data['act_id'] ?? null, fn ($q, $v) => $q->where('act_id', 'like', "%{$v}%"))
+                            ->when($data['act_year'] ?? null, fn ($q, $v) => $q->where('act_year', $v))
+                            ->when($data['act_attachment_date_from'] ?? null, fn ($q, $v) => $q->whereDate('act_attachment_date', '>=', $v))
+                            ->when($data['act_attachment_date_to'] ?? null, fn ($q, $v) => $q->whereDate('act_attachment_date', '<', $v))
+                            ->when($data['shipment_insert_user_id'] ?? null, fn ($q, $v) => $q->where('shipment_insert_user_id', $v))
+                            ->when($data['shipment_insert_date_from'] ?? null, fn ($q, $v) => $q->whereDate('shipment_insert_date', '>=', $v))
+                            ->when($data['shipment_insert_date_to'] ?? null, fn ($q, $v) => $q->whereDate('shipment_insert_date', '<', $v));
+                    }),
+                // SEZIONE: Lavorazione e Notifica
+                Tables\Filters\Filter::make('notifica')
+                    ->form([
+                        Forms\Components\Section::make('Lavorazione e Notifica')
+                            ->collapsed()
+                            ->columns(12)
+                            ->schema([
+                                Forms\Components\TextInput::make('order_rif')
+                                    ->label('Riferimento commessa')
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('list_rif')
+                                    ->label('Riferimento distinta')
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('receive_protocol_number')
+                                    ->label('Numero prot. ricezione')
+                                    ->maxLength(255)
+                                    ->columnSpan(2),
+                                Forms\Components\DatePicker::make('receive_protocol_date_from')
+                                    ->label('Data prot. ricezione da')
+                                    ->columnSpan(2),
+                                Forms\Components\DatePicker::make('receive_protocol_date_to')
+                                    ->label('Data prot. ricezione a')
+                                    ->columnSpan(2),
+                                Forms\Components\Select::make('notify_month')
+                                    ->label('Mese ricezione')
+                                    ->options(Month::class)
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('notify_year')
+                                    ->label('Anno ricezione')
+                                    ->numeric()
+                                    ->rules(['digits:4'])
+                                    ->columnSpan(3),
+                                
+                                Forms\Components\TextInput::make('notify_amount')
+                                    ->label('Importo notifica')
+                                    ->numeric()
+                                    ->inputMode('decimal')
+                                    ->step(0.01)
+                                    ->suffix('€')
+                                    ->visible(false)
+                                    ->columnSpan(4),
+                                Forms\Components\DatePicker::make('amount_registration_date')
+                                    ->label('Data registrazione importo')
+                                    ->visible(false)
+                                    ->columnSpan(4),
+                                Forms\Components\DatePicker::make('notify_attachment_date_from')
+                                    ->label('Data allegato notifica da')
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('notify_attachment_date_to')
+                                    ->label('Data allegato notifica a')
+                                    ->columnSpan(3),
+                                Forms\Components\Select::make('notify_insert_user_id')
+                                    ->label('Utente inserimento notifica')
+                                    ->relationship('notifyInsertUser', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->optionsLimit(5)
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(4),
+                                Forms\Components\DatePicker::make('notify_insert_date')
+                                    ->label('Data inserimento notifica')
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('notify_insert_date')
+                                    ->label('Data inserimento notifica')
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['order_rif'] ?? null, fn ($q, $v) => $q->where('order_rif', 'like', "%{$v}%"))
+                            ->when($data['list_rif'] ?? null, fn ($q, $v) => $q->where('list_rif', 'like', "%{$v}%"))
+                            ->when($data['receive_protocol_number'] ?? null, fn ($q, $v) => $q->where('receive_protocol_number', 'like', "%{$v}%"))
+                            ->when($data['receive_protocol_date_from'] ?? null, fn ($q, $v) => $q->whereDate('receive_protocol_date', '>=', $v))
+                            ->when($data['receive_protocol_date_to'] ?? null, fn ($q, $v) => $q->whereDate('receive_protocol_date', '<', $v))
+                            ->when($data['notify_year'] ?? null, fn ($q, $v) => $q->where('notify_year', $v))
+                            ->when($data['notify_month'] ?? null, fn ($q, $v) => $q->where('notify_month', $v))
+                            ->when($data['notify_amount'] ?? null, fn ($q, $v) => $q->where('notify_amount', $v))
+                            ->when($data['amount_registration_date'] ?? null, fn ($q, $v) => $q->whereDate('amount_registration_date', $v))
+                            ->when($data['notify_attachment_date_from'] ?? null, fn ($q, $v) => $q->whereDate('notify_attachment_date', '>=', $v))
+                            ->when($data['notify_attachment_date_to'] ?? null, fn ($q, $v) => $q->whereDate('notify_attachment_date', '<', $v))
+                            ->when($data['notify_insert_user_id'] ?? null, fn ($q, $v) => $q->where('notify_insert_user_id', $v))
+                            ->when($data['notify_insert_date_from'] ?? null, fn ($q, $v) => $q->whereDate('notify_insert_date', '>=', $v))
+                            ->when($data['notify_insert_date_to'] ?? null, fn ($q, $v) => $q->whereDate('notify_insert_date', '<', $v));
+                    }),
+                // SEZIONE: Gestione Spese
+                Tables\Filters\Filter::make('spese')
+                    ->form([
+                        Forms\Components\Section::make('Gestione Spese')
+                            ->collapsed()
+                            ->columns(12)
+                            ->schema([
+                                Forms\Components\Toggle::make('reinvoice')
+                                    ->label('Rifatturazione spese')
+                                    ->columnSpan(4),
+                                Forms\Components\Select::make('passive_invoice_id')
+                                    ->label('Fattura passiva')
+                                    ->options(function (Get $get): array {
+                                        $supplierId = $get('supplier_id');
+                                        if (!$supplierId) {
+                                            return [];
+                                        }
+                                        return PassiveInvoice::where('supplier_id', $get('supplier_id'))
+                                            ->pluck('description', 'id')
+                                            ->toArray();
+                                    })
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(8),
+                                Forms\Components\TextInput::make('notify_expense_amount')
+                                    ->label('Importo spese notifica')
+                                    ->numeric()
+                                    ->visible(false)
+                                    ->inputMode('decimal')
+                                    ->step(0.01)
+                                    ->suffix('€')
+                                    ->columnSpan(4),
+                                Forms\Components\TextInput::make('mark_expense_amount')
+                                    ->label('Importo spese contrassegno')
+                                    ->numeric()
+                                    ->visible(false)
+                                    ->inputMode('decimal')
+                                    ->step(0.01)
+                                    ->suffix('€')
+                                    ->columnSpan(4),
+                                
+                                Forms\Components\Select::make('shipment_doc_type')
+                                    ->label('Tipo documento spedizione')
+                                    ->options(ShipmentDocType::class)
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('shipment_doc_number')
+                                    ->label('Numero documento')
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('shipment_doc_date_from')
+                                    ->label('Data documento da')
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('shipment_doc_date to')
+                                    ->label('Data documento a')
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('iban')
+                                    ->label('IBAN')
+                                    ->maxLength(255)
+                                    ->rules(['iban'])
+                                    ->columnSpan(3),
+                                Forms\Components\Select::make('expense_insert_user_id')
+                                    ->label('Utente inserimento spese')
+                                    ->relationship('expenseInsertUser', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->optionsLimit(5)
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('expense_insert_date_from')
+                                    ->label('Data inserimento spese da')
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('expense_insert_date_to')
+                                    ->label('Data inserimento spese a')
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['passive_invoice_id'] ?? null, fn ($q, $v) => $q->where('passive_invoice_id', $v))
+                            ->when($data['notify_expense_amount'] ?? null, fn ($q, $v) => $q->where('notify_expense_amount', $v))
+                            ->when($data['mark_expense_amount'] ?? null, fn ($q, $v) => $q->where('mark_expense_amount', $v))
+                            ->when($data['reinvoice'] ?? null, fn ($q, $v) => $q->where('reinvoice', $v))
+                            ->when($data['shipment_doc_type'] ?? null, fn ($q, $v) => $q->where('shipment_doc_type', $v))
+                            ->when($data['shipment_doc_number'] ?? null, fn ($q, $v) => $q->where('shipment_doc_number', 'like', "%{$v}%"))
+                            ->when($data['shipment_doc_date_from'] ?? null, fn ($q, $v) => $q->whereDate('shipment_doc_date', '>=', $v))
+                            ->when($data['shipment_doc_date_to'] ?? null, fn ($q, $v) => $q->whereDate('shipment_doc_date', '<', $v))
+                            ->when($data['iban'] ?? null, fn ($q, $v) => $q->where('iban', 'like', "%{$v}%"))
+                            ->when($data['expense_insert_user_id'] ?? null, fn ($q, $v) => $q->where('expense_insert_user_id', $v))
+                            ->when($data['expense_insert_date_from'] ?? null, fn ($q, $v) => $q->whereDate('expense_insert_date', '>=', $v))
+                            ->when($data['expense_insert_date_to'] ?? null, fn ($q, $v) => $q->whereDate('expense_insert_date', '<', $v));
+                    }),
+                // SEZIONE: Pagamenti
+                Tables\Filters\Filter::make('pagamenti')
+                    ->form([
+                        Forms\Components\Section::make('Pagamenti')
+                            ->collapsed()
+                            ->columns(12)
+                            ->schema([
+                                Forms\Components\Toggle::make('payed')
+                                    ->label('Spese pagate')
+                                    ->columnSpan(4),
+                                Forms\Components\DatePicker::make('payment_date_from')
+                                    ->label('Data pagamento da')
+                                    ->columnSpan(4),
+                                Forms\Components\DatePicker::make('payment_date_to')
+                                    ->label('Data pagamento a')
+                                    ->columnSpan(4),
+                                Forms\Components\TextInput::make('payment_total')
+                                    ->label('Totale pagamenti')
+                                    ->numeric()
+                                    ->visible(false)
+                                    ->inputMode('decimal')
+                                    ->step(0.01)
+                                    ->suffix('€')
+                                    ->columnSpan(4),
+                                Forms\Components\Select::make('payment_insert_user_id')
+                                    ->label('Utente inserimento pagamento')
+                                    ->relationship('paymentInsertUser', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->optionsLimit(5)
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(4),
+                                Forms\Components\DatePicker::make('payment_insert_date_from')
+                                    ->label('Data inserimento pagamento da')
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('payment_insert_date_to')
+                                    ->label('Data inserimento pagamento a')
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['payed'] ?? null, fn ($q, $v) => $q->where('payed', $v))
+                            ->when($data['payment_date_from'] ?? null, fn ($q, $v) => $q->whereDate('payment_date', '>=', $v))
+                            ->when($data['payment_date_to'] ?? null, fn ($q, $v) => $q->whereDate('payment_date', '<', $v))
+                            ->when($data['payment_total'] ?? null, fn ($q, $v) => $q->where('payment_total', $v))
+                            ->when($data['payment_insert_user_id'] ?? null, fn ($q, $v) => $q->where('payment_insert_user_id', $v))
+                            ->when($data['payment_insert_date_from'] ?? null, fn ($q, $v) => $q->whereDate('payment_insert_date', '>=', $v))
+                            ->when($data['payment_insert_date_to'] ?? null, fn ($q, $v) => $q->whereDate('payment_insert_date', '<', $v));
+                    }),
+                // SEZIONE: Rifatturazione
+                Tables\Filters\Filter::make('rifatturazione')
+                    ->form([
+                        Forms\Components\Section::make('Rifatturazione')
+                            ->collapsed()
+                            ->columns(12)
+                            ->schema([
+                                Forms\Components\Select::make('reinvoice_id')
+                                    ->label('Fattura emessa per rifatturazione')
+                                    ->options(function (Get $get): array {
+                                        return Invoice::where('client_id', $get('client_id'))
+                                            ->whereNotNull('flow')
+                                            ->pluck('description', 'id')
+                                            ->toArray();
+                                    })
+                                    ->searchable()
+                                    ->preload()
+                                    ->columnSpan(6),
+                                Forms\Components\TextInput::make('reinvoice_number')
+                                    ->label('Numero fattura emessa')
+                                    ->maxLength(255)
+                                    ->columnSpan(2),
+                                Forms\Components\DatePicker::make('reinvoice_date_from')
+                                    ->label('Data fattura emessa da')
+                                    ->columnSpan(2),
+                                Forms\Components\DatePicker::make('reinvoice_date_tm')
+                                    ->label('Data fattura emessa a')
+                                    ->columnSpan(2),
+                                Forms\Components\TextInput::make('reinvoice_amount')
+                                    ->label('Importo fattura emessa')
+                                    ->numeric()
+                                    ->visible(false)
+                                    ->inputMode('decimal')
+                                    ->step(0.01)
+                                    ->suffix('€')
+                                    ->columnSpan(4),
+                                Forms\Components\Select::make('reinvoice_insert_user_id')
+                                    ->label('Utente inserimento rifatturazione')
+                                    ->relationship('reinvoiceInsertUser', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->optionsLimit(5)
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('reinvoice_insert_date_from')
+                                    ->label('Data inserimento rifatturazione da')
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                                Forms\Components\DatePicker::make('reinvoice_insert_date_to')
+                                    ->label('Data inserimento rifatturazione a')
+                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->columnSpan(3),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['reinvoice_id'] ?? null, fn ($q, $v) => $q->where('reinvoice_id', $v))
+                            ->when($data['reinvoice_number'] ?? null, fn ($q, $v) => $q->where('reinvoice_number', 'like', "%{$v}%"))
+                            ->when($data['reinvoice_date_from'] ?? null, fn ($q, $v) => $q->whereDate('reinvoice_date', '>=', $v))
+                            ->when($data['reinvoice_date_to'] ?? null, fn ($q, $v) => $q->whereDate('reinvoice_date', '<', $v))
+                            ->when($data['reinvoice_amount'] ?? null, fn ($q, $v) => $q->where('reinvoice_amount', $v))
+                            ->when($data['reinvoice_insert_user_id'] ?? null, fn ($q, $v) => $q->where('reinvoice_insert_user_id', $v))
+                            ->when($data['reinvoice_insert_date_from'] ?? null, fn ($q, $v) => $q->whereDate('reinvoice_insert_date', '>=', $v))
+                            ->when($data['reinvoice_insert_date_to'] ?? null, fn ($q, $v) => $q->whereDate('reinvoice_insert_date', '<', $v));
+                    }),
+                // SEZIONE: Registrazione e Allegati
+                // Tables\Filters\Filter::make('registrazione_allegati')
+                //     ->form([
+                //         Forms\Components\Section::make('Registrazione e Allegati')
+                //             ->collapsed()
+                //             ->visible(false)
+                //             ->columns(12)
+                //             ->schema([
+                //                 Forms\Components\DatePicker::make('notify_date_registration_date')
+                //                     ->label('Data registrazione data di notifica')
+                //                     ->columnSpan(4),
+                //                 Forms\Components\DatePicker::make('reinvoice_attachment_date')
+                //                     ->label('Data file fattura emessa caricato')
+                //                     ->columnSpan(4),
+                //                 Forms\Components\Select::make('reinvoice_registration_user_id')
+                //                     ->label('Utente registrazione')
+                //                     ->relationship('reinvoiceRegistrationUser', 'name')
+                //                     ->searchable()
+                //                     ->preload()
+                //                     ->optionsLimit(5)
+                //                     ->columnSpan(4),
+                //                 Forms\Components\DatePicker::make('reinvoice_registration_date')
+                //                     ->label('Data registrazione')
+                //                     ->columnSpan(4),
+                //             ]),
+                //     ])
+                //     ->query(function (Builder $query, array $data): Builder {
+                //         return $query
+                //             ->when($data['notify_date_registration_date'] ?? null, fn ($q, $v) => $q->whereDate('notify_date_registration_date', $v))
+                //             ->when($data['reinvoice_attachment_date'] ?? null, fn ($q, $v) => $q->whereDate('reinvoice_attachment_date', $v))
+                //             ->when($data['reinvoice_registration_user_id'] ?? null, fn ($q, $v) => $q->where('reinvoice_registration_user_id', $v))
+                //             ->when($data['reinvoice_registration_date'] ?? null, fn ($q, $v) => $q->whereDate('reinvoice_registration_date', $v));
+                //     }),
+                // SEZIONE: Note
+                Tables\Filters\Filter::make('note')
+                    ->form([
+                        // Forms\Components\Section::make('Note')
+                        //     ->collapsed()
+                        //     ->schema([
+                                Forms\Components\TextInput::make('note')
+                                    ->label('Note')
+                                    ->columnSpanFull(),
+                            // ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['note'] ?? null, fn ($q, $v) => $q->where('note', 'like', "%{$v}%"));
+                    }),
+            ], layout: FiltersLayout::Modal)
+            ->filtersFormColumns(1)
+            ->persistFiltersInSession()
+            ->filtersFormWidth(MaxWidth::SevenExtraLarge)
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->modalWidth(MaxWidth::SevenExtraLarge)
