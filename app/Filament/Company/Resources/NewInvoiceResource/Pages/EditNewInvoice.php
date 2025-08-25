@@ -59,10 +59,10 @@ class EditNewInvoice extends EditRecord
                         foreach ($items as $key => $item) {                                 // duplico gli InvoiceItem collegati
                             $newItem = $item->replicate();
                             $newItem->invoice_id = $newInvoice->id;
-                            $newItem->quantity = 0;
-                            $newItem->amount = 0;
-                            $newItem->taxable = 0;
-                            $newItem->total = 0;
+                            $newItem->quantity = 0.00;
+                            $newItem->amount = 0.00;
+                            $newItem->taxable = 0.00;
+                            $newItem->total = 0.00;
                             $newItem->save();
 
                             if ($key === $lastKey) {
