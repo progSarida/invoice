@@ -5,6 +5,7 @@ namespace App\Filament\Company\Resources;
 use App\Filament\Company\Resources\ShipmentTypeResource\Pages;
 use App\Filament\Company\Resources\ShipmentTypeResource\RelationManagers;
 use App\Models\ShipmentType;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class ShipmentTypeResource extends Resource
 {
@@ -24,6 +26,24 @@ class ShipmentTypeResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    /**
+     * Controlla se mostrare questa risorsa nella navigazione
+     * Visibile solo per admin globali e manager del tenant corrente
+     */
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        $tenant = Filament::getTenant();
+
+        if (!$user) { return false;   }                                         // nessun utente autenticato
+
+        // if ($user->is_admin) { return true; }                                // admin vedono sempre
+
+        if ($tenant && $user->isManagerOf($tenant)) { return true; }            // manager del tenant corrente possono vedere
+
+        return false;                                                           // utenti normali non vedono
+    }
 
     public static function form(Form $form): Form
     {

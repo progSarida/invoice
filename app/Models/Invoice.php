@@ -15,6 +15,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\VatEnforceType;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Invoice extends Model
 {
@@ -266,6 +267,7 @@ class Invoice extends Model
         static::creating(function ($invoice) {
             $invoice->contract_detail_id = $invoice->updatedContract()->id; // Cristallizza nella fattura lo stato dei dettagli del contratto
             $invoice->flow = 'out';                                         // Indica che la fattura è in uscita (attiva)
+            // $invoice->user_id = Auth::id();                                 // Registro l'utente che crea la fattura
         });
 
         static::created(function ($invoice) {

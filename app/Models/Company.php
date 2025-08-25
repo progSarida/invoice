@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Company extends Model
 {
-    //
     protected $fillable = [
         'name',
         'vat_number',
@@ -32,10 +31,18 @@ class Company extends Model
         'liquidation'
     ];
 
-    public function users(){
-        return $this->belongsToMany(User::class);
+    public function users()
+    {
+        return $this->belongsToMany(User::class)->withPivot('is_manager')->withTimestamps();
     }
 
+    // Metodo helper per ottenere i manager della company
+    public function managers()
+    {
+        return $this->users()->wherePivot('is_manager', true);
+    }
+
+    // Resto delle relazioni esistenti...
     public function city()
     {
         return $this->belongsTo(City::class, 'city_code', 'code');
@@ -91,27 +98,33 @@ class Company extends Model
         return $this->hasMany(Sectional::class);
     }
 
-    public function bankAccounts(){
+    public function bankAccounts()
+    {
         return $this->hasMany(BankAccount::class);
     }
 
-    public function invoices(){
+    public function invoices()
+    {
         return $this->hasMany(Invoice::class);
     }
 
-    public function activePayments(){
+    public function activePayments()
+    {
         return $this->hasMany(ActivePayments::class);
     }
 
-    public function passivePayments(){
+    public function passivePayments()
+    {
         return $this->hasMany(PassivePayment::class);
     }
 
-    public function registerProvince(){
+    public function registerProvince()
+    {
         return $this->belongsTo(Province::class, 'register_province_id');
     }
 
-    public function reaProvince(){
+    public function reaProvince()
+    {
         return $this->belongsTo(Province::class, 'rea_province_id');
     }
 
