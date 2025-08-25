@@ -28,72 +28,81 @@ class EditNewInvoice extends EditRecord
         return [
             Actions\DeleteAction::make()
                 ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE),
-            // Actions\Action::make('stampa_pdf')
-            //     ->label('Stampa PDF')
-            //     ->icon('heroicon-o-printer')
-            //     ->color('primary')
-            //     ->action(function (Invoice $record) {
-            //         $vats = $record->vatResume();
-            //         $grouped = collect($vats)
-            //             ->groupBy('%')
-            //             ->map(function ($items, $percent) {
-            //                 return [
-            //                     '%' => $percent,
-            //                     'taxable' => $items->sum('taxable'),
-            //                     'vat' => $items->sum('vat'),
-            //                     'total' => $items->sum('total'),
-            //                     'norm' => $items->first()['norm'],
-            //                     'free' => $items->first()['free'],
-            //                 ];
-            //             })
-            //             ->values()
-            //             ->toArray();
-            //         return response()->streamDownload(function () use ($record, $grouped) {
-            //             echo Pdf::loadView('pdf.invoice', [ 'invoice' => $record, 'vats' => $grouped ])->stream();
-            //         }, 'fattura-' . $record->printNumber() . '.pdf');
-            //     }),
+            
+            Actions\Action::make('duplica_fattura')
+                ->label('Duplica Fattura')
+                ->icon('heroicon-o-document-duplicate')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalHeading('Duplica Fattura')
+                ->modalDescription('Vuoi creare una copia di questa fattura? La nuova fattura avrà un nuovo numero, una nuova data e gli importi delle voci a zero.')
+                ->modalSubmitActionLabel('Duplica')
+                ->action(function (Invoice $record) {
+                    try {
+                        $newInvoice = $record->replicate();                                 // creo una nuova istanza della fattura
+                        
+                        $newInvoice->sdi_status = SdiStatus::DA_INVIARE;                    // resetto i campi che devono essere unici o specifici della nuova fattura
+                        $newInvoice->service_code = null;
+                        $newInvoice->sdi_code = null;
+                        $newInvoice->sdi_date = null;
+                        
+                        $newInvoice->year = now()->year;                                    // imposto anno corrente
+                        $newInvoice->number = $newInvoice->calculateNextInvoiceNumber();    // genero il numero fattura
+                        
+                        $newInvoice->invoice_date = now()->format('Y-m-d');                 // imposto la data di oggi
+                        
+                        $newInvoice->save();                                                // salvo la nuova fattura (il boot method genererà automaticamente invoice_uid)
+                        
+                        $items = $record->invoiceItems->all();
+                        $lastKey = array_key_last($items);
 
-            // Actions\Action::make('stampa_pdf')
-            //     ->label('Stampa PDF')
-            //     ->icon('heroicon-o-printer')
-            //     ->color('primary')
-            //     ->action(function (Invoice $record) {
-            //         $vats = $record->vatResume();
-            //         $grouped = collect($vats)
-            //             ->groupBy('%')
-            //             ->map(function ($items, $percent) {
-            //                 return [
-            //                     '%' => $percent,
-            //                     'taxable' => $items->sum('taxable'),
-            //                     'vat' => $items->sum('vat'),
-            //                     'total' => $items->sum('total'),
-            //                     'norm' => $items->first()['norm'],
-            //                     'free' => $items->first()['free'],
-            //                 ];
-            //             })
-            //             ->values()
-            //             ->toArray();
-            //         return response()->streamDownload(function () use ($record, $grouped) {
-            //             echo Pdf::loadView('pdf.invoice', [
-            //                 'invoice' => $record,
-            //                 'vats' => $grouped
-            //             ])->output(); // <- usa output() al posto di stream()
-            //         }, 'fattura-' . $record->printNumber() . '.pdf');
-            //     }),
+                        foreach ($items as $key => $item) {                                 // duplico gli InvoiceItem collegati
+                            $newItem = $item->replicate();
+                            $newItem->invoice_id = $newInvoice->id;
+                            $newItem->quantity = 0;
+                            $newItem->amount = 0;
+                            $newItem->taxable = 0;
+                            $newItem->total = 0;
+                            $newItem->save();
+
+                            if ($key === $lastKey) {
+                                $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
+                                $newInvoice->checkStampDuty();                              // verifico e inserisco eventuale imposta di bollo (non fa nulla)
+                                $newItem->autoInsert();                                     // crea voci fattura di ritenute, riepiloghi e casse previdenziali
+                            }
+                        }
+                        
+                        Notification::make()
+                            ->title('Fattura duplicata con successo')
+                            ->body('Nuova fattura creata con numero: ' . $newInvoice->getNewInvoiceNumber())
+                            ->success()
+                            ->send();
+                            
+                        // Reindirizza alla nuova fattura
+                        return redirect($this->getResource()::getUrl('edit', ['record' => $newInvoice]));
+                        
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Errore nella duplicazione')
+                            ->body('Si è verificato un errore: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }),
 
             Actions\Action::make('stampa_pdf')
                 ->label('Stampa PDF')
                 ->icon('heroicon-o-printer')
                 ->color('primary')
                 ->action(function (Invoice $record) {
-                    $vats = $record->vatResume();                                   // Creazione array con dati riepiloghi IVA
+                    $vats = $record->vatResume();                                           // Creazione array con dati riepiloghi IVA
                     // dd($vats);
-                    $funds = $record->getFundBreakdown();                           // Creazione array con dati casse previdenziali
+                    $funds = $record->getFundBreakdown();                                   // Creazione array con dati casse previdenziali
                     // dd($funds);
                     if(count($funds) > 0)
-                        $vats = $record->updateResume($vats, $funds);               // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
+                        $vats = $record->updateResume($vats, $funds);                       // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
                     // dd($vats);
-                    $grouped = collect($vats)                                       // Raggruppamento dati riepilochi IVA in base a aliquota
+                    $grouped = collect($vats)                                               // Raggruppamento dati riepilochi IVA in base a aliquota
                         ->groupBy('%')
                         ->where('auto', false)
                         ->map(function ($items, $percent) {

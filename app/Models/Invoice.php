@@ -472,4 +472,40 @@ class Invoice extends Model
             }
         }
     }
+
+    public function calculateNextInvoiceNumber(): ?int
+    {
+        $year = $this->year;
+        $sectionalId = $this->sectional_id;
+        $art73 = $this->art_73;
+        $invoiceDate = $this->invoice_date;
+
+        if ($art73) {
+            $maxNumber = \App\Models\Invoice::where('invoice_date', $invoiceDate)
+                ->where('art_73', true)
+                ->where('company_id', Filament::getTenant()->id)
+                ->max('number');
+
+            if ($maxNumber !== null) {
+                return $maxNumber + 1;
+            }
+
+            return 1;
+        }
+        else if ($year && $sectionalId) {
+            $maxNumber = \App\Models\Invoice::where('year', $year)
+                ->where('sectional_id', $sectionalId)
+                ->where('company_id', Filament::getTenant()->id)
+                ->max('number');
+
+            if ($maxNumber !== null) {
+                return $maxNumber + 1;
+            }
+
+            $sectional = \App\Models\Sectional::find($sectionalId);
+            return $sectional?->progressive;
+        }
+
+        return null;
+    }
 }
