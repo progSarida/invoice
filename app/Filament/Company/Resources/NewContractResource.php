@@ -144,6 +144,7 @@ class NewContractResource extends Resource
                 //     ->columnSpan(2),
                 Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
                     // ->required()
+                    ->live()
                     ->disk('public')
                     ->directory('new_contracts')
                     ->visibility('public')
@@ -180,7 +181,7 @@ class NewContractResource extends Resource
                     ->dehydrated()
                     ->label('Data caricamento')
                     ->date()
-                    ->visible(fn($record): bool => $record && $record->new_contract_copy_path)
+                    ->visible(fn(Get $get, $record): bool => $record && $record->new_contract_copy_path || $get('new_contract_copy_path'))
                     ->columnSpan(2),
 
             ]);
@@ -345,7 +346,57 @@ class NewContractResource extends Resource
                     ->label('CUP')
                     ->required()
                     ->columnSpan(2),
+                Forms\Components\Select::make('invoicing_cycle')
+                    ->label('Periodicità fatturazione')
+                    ->options(InvoicingCicle::class)
+                    ->required()
+                    // ->searchable()
+                    ->preload()
+                    ->columnSpan(3),
+                // Placeholder::make('')
+                //     ->content('')
+                //     ->columnSpan(2),
+                Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
+                    // ->required()
+                    ->live()
+                    ->disk('public')
+                    ->directory('new_contracts')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['application/pdf', 'image/*'])
+                    ->afterStateUpdated(function (Set $set, $state) {
+                        if (!empty($state)) {
+                            $set('new_contract_copy_date', now()->toDateString());
+                        } else {
+                            $set('new_contract_copy_date', null);
+                        }
+                    })
+                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
+                        // Genera un nome personalizzato per il file
+                        $client = Client::find($get('client_id'))->denomination;                            // cliente
+                        $taxType = TaxType::from($get('tax_type'))->getLabel();                             // entrata
+                        $cig = $get('cig_code');                                                            // cig
+                        $extension = $file->getClientOriginalExtension();                                   // estensione
 
+                        return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxType, $cig, $extension);
+                    })
+                    ->columnSpan(5),
+                Forms\Components\Actions::make([
+                    Forms\Components\Actions\Action::make('view_new_contract_copy')
+                        ->label('Visualizza')
+                        ->icon('heroicon-o-eye')
+                        ->url(fn($record): ?string => $record && $record->new_contract_copy_path ? Storage::url($record->new_contract_copy_path) : null)
+                        ->openUrlInNewTab()
+                        ->visible(fn($record): bool => $record && $record->new_contract_copy_path)
+                        ->color('primary'),
+                ])
+                ->columnSpan(2),
+                DatePicker::make('new_contract_copy_date')
+                    ->readonly()
+                    ->dehydrated()
+                    ->label('Data caricamento')
+                    ->date()
+                    ->visible(fn(Get $get, $record): bool => $record && $record->new_contract_copy_path || $get('new_contract_copy_path'))
+                    ->columnSpan(2),
             ]);
 
     }
@@ -388,6 +439,7 @@ class NewContractResource extends Resource
         $contract->amount = $data['amount'];
         $contract->invoicing_cycle = $data['invoicing_cycle'] ?? null;
         $contract->new_contract_copy_path = $data['new_contract_copy_path'] ?? null;
+        $contract->new_contract_copy_date = $data['new_contract_copy_date'] ?? null;
         $contract->reinvoice = $data['reinvoice'] ?? false;
 
         $contract->save();
