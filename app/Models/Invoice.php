@@ -53,6 +53,7 @@ class Invoice extends Model
         'reference_date_to',
         'reference_number_from',
         'reference_number_to',
+        'total_number',
         'description',
         'free_description',
         'vat',

@@ -15,9 +15,11 @@ use Filament\Forms\Set;
 use App\Enums\SdiStatus;
 use Filament\Forms\Form;
 use App\Enums\ClientType;
+use App\Enums\InvoiceReference;
 use App\Enums\TimingType;
 use App\Models\Sectional;
 use App\Enums\InvoiceType;
+use App\Enums\InvoicingCicle;
 use App\Enums\PaymentMode;
 use App\Enums\PaymentType;
 use App\Models\ManageType;
@@ -52,6 +54,8 @@ use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\ActivePay
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\SdiNotificationsRelationManager;
 use App\Models\SocialContribution;
 use App\Models\Withholding;
+use Exception;
+use Filament\Forms\Components\Placeholder;
 
 class NewInvoiceResource extends Resource
 {
@@ -655,6 +659,49 @@ class NewInvoiceResource extends Resource
                                     return ManageType::orderBy('order')->pluck('name', 'id');
                                 })
                                 ->columnSpan(3),
+                            Forms\Components\Select::make('invoice_reference')
+                                ->label('Riferimento')
+                                ->required()
+                                ->live()
+                                ->options(InvoiceReference::class)
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->preload()
+                                ->columnSpan(2),
+
+                            Forms\Components\DatePicker::make('reference_date_from')
+                                ->label('Da data')
+                                // ->required()
+                                ->live()
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->visible(fn (Get $get): bool => $get('invoice_reference') !== InvoiceReference::NUMBER->value)
+                                ->columnSpan(2),
+
+                            Forms\Components\DatePicker::make('reference_date_to')
+                                ->label('A data')
+                                // ->required()
+                                ->live()
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->visible(fn (Get $get): bool => $get('invoice_reference') !== InvoiceReference::NUMBER->value)
+                                ->columnSpan(2),
+                            Placeholder::make('')
+                                ->content('')
+                                ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
+                                ->columnSpan(1),
+                            Forms\Components\TextInput::make('reference_number_from')->label('Dal numero')
+                                // ->required()
+                                ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->columnSpan(1),
+                            Forms\Components\TextInput::make('reference_number_to')->label('Al numero')
+                                // ->required()
+                                ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->columnSpan(1),
+                            Forms\Components\TextInput::make('reference_number_to')->label('Totali')
+                                // ->required()
+                                ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->columnSpan(1),
                         ]),
 
                     Section::make('Descrizioni')
@@ -1327,5 +1374,59 @@ class NewInvoiceResource extends Resource
         }
 
         return null;
+    }
+
+    protected static function updateDescription(Get $get, Set $set): void
+    {
+        $description = '';
+
+        $invoiceReference = $get('invoice_reference');
+        if ($invoiceReference) {
+            try {
+                $description = InvoiceReference::from($invoiceReference)->getDescription();
+            } catch (Exception $e) {
+                $description = '';
+            }
+
+            $dateFrom = $get('reference_date_from');
+            $dateTo = $get('reference_date_to');
+            if ($dateFrom) {
+                $description .= ' dal ' . static::formatDate($dateFrom);
+
+                if ($dateTo) {
+                    $description .= ' al ' . static::formatDate($dateTo);
+                }
+            }
+
+            $numberFrom = $get('reference_number_from');
+            $numberTo = $get('reference_number_to');
+            if ($numberFrom) {
+                $description .= ' dal numero ' . $numberFrom;
+
+                if ($numberTo) {
+                    $description .= ' al numero ' . $numberTo;
+                }
+            }
+
+            $total = $get('total_number');
+            if ($total) {
+                $description .= ' di ' . $numberFrom . 'verbali';
+            }
+        }
+
+        $set('description', trim($description));
+    }
+
+    protected static function formatDate($date): string
+    {
+        if (is_string($date)) {
+            return \Carbon\Carbon::parse($date)->format('d/m/Y');
+        }
+
+        if ($date instanceof \Carbon\Carbon || $date instanceof \DateTime) {
+            return $date->format('d/m/Y');
+        }
+
+        return (string) $date;
     }
 }
