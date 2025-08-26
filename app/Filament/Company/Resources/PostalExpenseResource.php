@@ -194,9 +194,12 @@ class PostalExpenseResource extends Resource
                             ->visibility('public')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                            ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
                                     $set('act_attachment_date', now()->toDateString());
+                                } else {
+                                    $set('act_attachment_date', null);
                                 }
                             })
                             ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
@@ -298,6 +301,8 @@ class PostalExpenseResource extends Resource
                             ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
                                     $set('notify_attachment_date', now()->toDateString());
+                                } else {
+                                    $set('notify_attachment_date', null);
                                 }
                             })
                             ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
@@ -552,6 +557,8 @@ class PostalExpenseResource extends Resource
                             ->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
                                     $set('reinvoice_attachment_date', now()->toDateString());
+                                } else {
+                                    $set('reinvoice_attachment_date', null);
                                 }
                             })
                             ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
@@ -867,7 +874,7 @@ class PostalExpenseResource extends Resource
                                     ->numeric()
                                     ->rules(['digits:4'])
                                     ->columnSpan(3),
-                                
+
                                 Forms\Components\TextInput::make('notify_amount')
                                     ->label('Importo notifica')
                                     ->numeric()
@@ -961,7 +968,7 @@ class PostalExpenseResource extends Resource
                                     ->step(0.01)
                                     ->suffix('€')
                                     ->columnSpan(4),
-                                
+
                                 Forms\Components\Select::make('shipment_doc_type')
                                     ->label('Tipo documento spedizione')
                                     ->options(ShipmentDocType::class)

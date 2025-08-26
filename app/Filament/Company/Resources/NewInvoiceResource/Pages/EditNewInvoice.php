@@ -28,9 +28,9 @@ class EditNewInvoice extends EditRecord
         return [
             Actions\DeleteAction::make()
                 ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE),
-            
+
             Actions\Action::make('duplica_fattura')
-                ->label('Duplica Fattura')
+                ->label('Duplica')
                 ->icon('heroicon-o-document-duplicate')
                 ->color('warning')
                 ->requiresConfirmation()
@@ -40,19 +40,19 @@ class EditNewInvoice extends EditRecord
                 ->action(function (Invoice $record) {
                     try {
                         $newInvoice = $record->replicate();                                 // creo una nuova istanza della fattura
-                        
+
                         $newInvoice->sdi_status = SdiStatus::DA_INVIARE;                    // resetto i campi che devono essere unici o specifici della nuova fattura
                         $newInvoice->service_code = null;
                         $newInvoice->sdi_code = null;
                         $newInvoice->sdi_date = null;
-                        
+
                         $newInvoice->year = now()->year;                                    // imposto anno corrente
                         $newInvoice->number = $newInvoice->calculateNextInvoiceNumber();    // genero il numero fattura
-                        
+
                         $newInvoice->invoice_date = now()->format('Y-m-d');                 // imposto la data di oggi
-                        
+
                         $newInvoice->save();                                                // salvo la nuova fattura (il boot method genererà automaticamente invoice_uid)
-                        
+
                         $items = $record->invoiceItems->all();
                         $lastKey = array_key_last($items);
 
@@ -71,16 +71,16 @@ class EditNewInvoice extends EditRecord
                                 $newItem->autoInsert();                                     // crea voci fattura di ritenute, riepiloghi e casse previdenziali
                             }
                         }
-                        
+
                         Notification::make()
                             ->title('Fattura duplicata con successo')
                             ->body('Nuova fattura creata con numero: ' . $newInvoice->getNewInvoiceNumber())
                             ->success()
                             ->send();
-                            
+
                         // Reindirizza alla nuova fattura
                         return redirect($this->getResource()::getUrl('edit', ['record' => $newInvoice]));
-                        
+
                     } catch (\Exception $e) {
                         Notification::make()
                             ->title('Errore nella duplicazione')
@@ -91,7 +91,7 @@ class EditNewInvoice extends EditRecord
                 }),
 
             Actions\Action::make('stampa_pdf')
-                ->label('Stampa PDF')
+                ->label('Stampa')
                 ->icon('heroicon-o-printer')
                 ->color('primary')
                 ->action(function (Invoice $record) {
@@ -134,7 +134,8 @@ class EditNewInvoice extends EditRecord
                 }),
 
             Actions\Action::make('sendInvoice')
-                ->label('Invia Fattura a SDI')
+                ->label('Invia a SDI')
+                ->icon('heroicon-o-paper-airplane')
                 ->action(function (Invoice $record, array $data) {
                     $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
                         ? $record->invoiceItems->where('auto', false)

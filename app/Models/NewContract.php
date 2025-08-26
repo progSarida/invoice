@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InvoicingCicle;
 use App\Enums\TaxType;
 use App\Enums\TenderPaymentType;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +23,9 @@ class NewContract extends Model
         'office_code',
         'office_name',
         'amount',
+        'invoicing_cycle',
+        'new_contract_copy_path',
+        'new_contract_copy_date',
         'reinvoice'
     ];
 
@@ -31,6 +35,8 @@ class NewContract extends Model
         'start_validity_date' => 'date',
         'end_validity_date' => 'date',
         'amount' => 'decimal:2',
+        'invoicing_cycle' => InvoicingCicle::class,
+        'new_contract_copy_date' => 'date',
         'reinvoice' => 'boolean',
         // 'accrual_types' => 'array'
     ];

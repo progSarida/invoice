@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources;
 
+use App\Enums\InvoicingCicle;
 use Filament\Forms;
 use Filament\Tables;
 use App\Enums\TaxType;
@@ -29,6 +30,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\NewContractResource\Pages;
 use App\Filament\Company\Resources\NewContractResource\RelationManagers;
 use App\Filament\Company\Resources\ContractDetailsResource\RelationManagers\ContractDetailsRelationManager;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class NewContractResource extends Resource
 {
@@ -128,6 +131,56 @@ class NewContractResource extends Resource
                 Forms\Components\TextInput::make('cup_code')
                     ->label('CUP')
                     ->required()
+                    ->columnSpan(2),
+                Forms\Components\Select::make('invoicing_cycle')
+                    ->label('Periodicità fatturazione')
+                    ->options(InvoicingCicle::class)
+                    ->required()
+                    // ->searchable()
+                    ->preload()
+                    ->columnSpan(3),
+                // Placeholder::make('')
+                //     ->content('')
+                //     ->columnSpan(2),
+                Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
+                    // ->required()
+                    ->disk('public')
+                    ->directory('new_contracts')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['application/pdf', 'image/*'])
+                    ->afterStateUpdated(function (Set $set, $state) {
+                        if (!empty($state)) {
+                            $set('new_contract_copy_date', now()->toDateString());
+                        } else {
+                            $set('new_contract_copy_date', null);
+                        }
+                    })
+                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
+                        // Genera un nome personalizzato per il file
+                        $client = Client::find($get('client_id'))->denomination;                            // cliente
+                        $taxType = TaxType::from($get('tax_type'))->getLabel();                             // entrata
+                        $cig = $get('cig_code');                                                            // cig
+                        $extension = $file->getClientOriginalExtension();                                   // estensione
+
+                        return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxType, $cig, $extension);
+                    })
+                    ->columnSpan(5),
+                Forms\Components\Actions::make([
+                    Forms\Components\Actions\Action::make('view_new_contract_copy')
+                        ->label('Visualizza')
+                        ->icon('heroicon-o-eye')
+                        ->url(fn($record): ?string => $record && $record->new_contract_copy_path ? Storage::url($record->new_contract_copy_path) : null)
+                        ->openUrlInNewTab()
+                        ->visible(fn($record): bool => $record && $record->new_contract_copy_path)
+                        ->color('primary'),
+                ])
+                ->columnSpan(2),
+                DatePicker::make('new_contract_copy_date')
+                    ->readonly()
+                    ->dehydrated()
+                    ->label('Data caricamento')
+                    ->date()
+                    ->visible(fn($record): bool => $record && $record->new_contract_copy_path)
                     ->columnSpan(2),
 
             ]);
@@ -333,9 +386,12 @@ class NewContractResource extends Resource
         $contract->office_code = $data['office_code'];
         $contract->office_name = $data['office_name'];
         $contract->amount = $data['amount'];
+        $contract->invoicing_cycle = $data['invoicing_cycle'] ?? null;
+        $contract->new_contract_copy_path = $data['new_contract_copy_path'] ?? null;
+        $contract->reinvoice = $data['reinvoice'] ?? false;
+
         $contract->save();
 
-        // Set the newly created client_id in the form
         $set('contract_id', $contract->id);
 
         Notification::make()

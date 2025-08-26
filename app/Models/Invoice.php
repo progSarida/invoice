@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceReference;
 use App\Enums\TaxType;
 use App\Enums\SdiStatus;
 // use App\Enums\AccrualType;
@@ -47,6 +48,11 @@ class Invoice extends Model
         'accrual_year',
         'accrual_type_id',
         'manage_type_id',
+        'invoice_reference',
+        'reference_date_from',
+        'reference_date_to',
+        'reference_number_from',
+        'reference_number_to',
         'description',
         'free_description',
         'vat',
@@ -70,6 +76,9 @@ class Invoice extends Model
         'vat_enforce_type' => VatEnforceType::class,
         // 'accrual_type' => AccrualType::class,
         'invoice_date' => 'date',
+        'invoice_reference' =>  InvoiceReference::class,
+        'reference_date_from' => 'date',
+        'reference_date_to' => 'date',
         'payment_status' => PaymentStatus::class,
         'payment_type' => PaymentType::class,
         'last_payment_date' => 'date',
