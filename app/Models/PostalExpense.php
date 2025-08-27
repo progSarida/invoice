@@ -310,7 +310,7 @@ class PostalExpense extends Model
                 $expense->reinvoice_registration_user_id = Auth::id();
                 $expense->reinvoice_registration_date = today();
             }
-            else if($expense->paymentInserted()){
+            else if($expense->paymentInserted() && $expense->reinvoice_id){
                 $expense->reinvoice_insert_user_id = Auth::id();
                 $expense->reinvoice_insert_date = today();
             }

@@ -271,6 +271,7 @@ class InvoiceItemsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->hidden(fn() => !is_null($this->getOwnerRecord()->parent_id))
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['invoice_id'] = $this->getOwnerRecord()->id;
                         return $data;
@@ -284,6 +285,7 @@ class InvoiceItemsRelationManager extends RelationManager
                         return $item;
                     }),
                 Tables\Actions\Action::make('Spese di notifica')
+                    ->hidden(fn() => !is_null($this->getOwnerRecord()->parent_id))
                     ->form([
                         Forms\Components\Repeater::make('postal_expenses')
                             ->label('Spese postali')
@@ -428,10 +430,10 @@ class InvoiceItemsRelationManager extends RelationManager
                                 if($invoice->invoice){
                                     PostalExpense::withoutEvents(function () use ($postalExpense, $invoice) {
                                         $postalExpense->update([
-                                            'reinvoice_id' => $invoice->id,
-                                            'reinvoice_number' => $invoice->number,
-                                            'reinvoice_date' => $invoice->invoice_date,
-                                            'reinvoice_amount' => $invoice->total,
+                                            'reinvoice_id' => $invoice->parent_id,
+                                            'reinvoice_number' => $invoice->invoice->number,
+                                            'reinvoice_date' => $invoice->invoice->invoice_date,
+                                            'reinvoice_amount' => $invoice->invoice->total,
                                             'reinvoice_insert_user_id' => Auth::id(),
                                             'reinvoice_insert_date' => today()
                                         ]);

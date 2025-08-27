@@ -30,6 +30,7 @@ class EditNewInvoice extends EditRecord
                 ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE),
 
             Actions\Action::make('duplica_fattura')
+                ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
                 ->label('Duplica')
                 ->icon('heroicon-o-document-duplicate')
                 ->color('warning')

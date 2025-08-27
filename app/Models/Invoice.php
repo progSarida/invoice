@@ -319,6 +319,18 @@ class Invoice extends Model
 
         static::deleted(function ($invoice) {
             if ($invoice->invoice) {
+                $postalExpenseItems = $invoice->invoiceItems()->whereNotNull('postal_expense_id')->get() ?? [];
+                foreach ($postalExpenseItems as $item) {
+                    $postalExpense = PostalExpense::find($item->postal_expense_id);
+                    $postalExpense->update([
+                        'reinvoice_id' => $invoice->invoice->id,
+                        'reinvoice_number' => $invoice->invoice->number,
+                        'reinvoice_date' => $invoice->invoice->invoice_date,
+                        'reinvoice_amount' => $invoice->invoice->total,
+                        'reinvoice_insert_user_id' => Auth::id(),
+                        'reinvoice_insert_date' => today()
+                    ]);
+                }
                 $invoice->invoice->updateTotalNotes();                      // Tiene aggiornato il totale delle note di credito della fattura parent (nel caso di nota di credito) se eliminata una esistente
             }
         });
