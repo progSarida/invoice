@@ -726,7 +726,7 @@ class NewInvoiceResource extends Resource
                                 ->required()
                                 ->columnSpanFull(),
                             Forms\Components\Textarea::make('free_description')->label('Descrizione libera')
-                                ->required()
+                                // ->required()
                                 ->columnSpanFull(),
                         ]),
 
@@ -1393,20 +1393,29 @@ class NewInvoiceResource extends Resource
 
     protected static function updateDescription(Get $get, Set $set): void
     {
-        $description = '';
+        $description = 'Corrispettivo per ';
+        $accrualType = $get('accrual_type_id') ?? null;
+        $accrualType = $accrualType ? AccrualType::find($accrualType)?->name : '';
+        $description .= strtolower($accrualType) . ' ';
+        $manageType = $get('manage_type_id') ?? null;
+        $manageType = $manageType ? ManageType::find($manageType)?->name : '';
+        $description .= strtolower($manageType) . ' ';
+        $taxType = $get('tax_type') ?? null;
+        $taxType = $taxType ? TaxType::from($taxType)->getLabel() : '';
+        $description .= strtolower($taxType) . ' ';
 
         $invoiceReference = $get('invoice_reference');
         if ($invoiceReference) {
-            try {
-                $description = InvoiceReference::from($invoiceReference)->getDescription();
-            } catch (Exception $e) {
-                $description = '';
-            }
+            // try {
+            //     $description = InvoiceReference::from($invoiceReference)->getDescription();
+            // } catch (Exception $e) {
+            //     $description = '';
+            // }
 
             $dateFrom = $get('reference_date_from');
             $dateTo = $get('reference_date_to');
             if ($dateFrom) {
-                $description .= ' dal ' . static::formatDate($dateFrom);
+                $description .= 'dal ' . static::formatDate($dateFrom);
 
                 if ($dateTo) {
                     $description .= ' al ' . static::formatDate($dateTo);
@@ -1416,7 +1425,7 @@ class NewInvoiceResource extends Resource
             $numberFrom = $get('reference_number_from');
             $numberTo = $get('reference_number_to');
             if ($numberFrom) {
-                $description .= ' dal numero ' . $numberFrom;
+                $description .= 'dal numero ' . $numberFrom;
 
                 if ($numberTo) {
                     $description .= ' al numero ' . $numberTo;
@@ -1427,6 +1436,9 @@ class NewInvoiceResource extends Resource
             if ($total) {
                 $description .= ' di ' . $numberFrom . 'verbali';
             }
+        }
+        else {
+            $description = '';
         }
 
         $set('description', trim($description));
