@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('reference_date_to')->nullable()->after('reference_date_from');                // data fine periodo di fatturazione
             $table->integer('reference_number_from')->nullable()->after('reference_date_to');           // primo verbale fatturato
             $table->integer('reference_number_to')->nullable()->after('reference_number_from');         // ultimo verbale fatturato
-            $table->integer('total_number')->nullable()->after('reference_number_to');                         // numero totale verbali fatturati
+            $table->integer('total_number')->nullable()->after('reference_number_to');                  // numero totale verbali fatturati
         });
     }
 

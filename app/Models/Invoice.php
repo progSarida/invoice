@@ -282,12 +282,33 @@ class Invoice extends Model
 
         static::created(function ($invoice) {
             if ($invoice->invoice) {
+
+                $items = $invoice->invoice->invoiceItems;                   // Creo le voci della nota di credito copiando quelle della fattura parent
+                foreach($items as $item){
+                    $newItem = $item->replicate();
+                    $newItem->invoice_id = $invoice->id;
+                    $newItem->save();
+                }
+
                 $invoice->invoice->updateTotalNotes();                      // Tiene aggiornato il totale delle note di credito della fattura parent (nel caso di nota di credito) se creata una nuova
             }
         });
 
         static::updating(function ($invoice) {
-            //
+            if($invoice->invoice){                                          // Rendo rifatturabili le spese di notifica in una nota di credito (usato in creazione nota di credito normale)
+                $postalExpenseItems = $invoice->invoiceItems()->whereNotNull('postal_expense_id')->get() ?? [];
+                foreach ($postalExpenseItems as $item) {
+                    $postalExpense = PostalExpense::find($item->postal_expense_id);
+                    $postalExpense->update([
+                        'reinvoice_id' => null,
+                        'reinvoice_number' => null,
+                        'reinvoice_date' => null,
+                        'reinvoice_amount' => null,
+                        'reinvoice_insert_user_id' => null,
+                        'reinvoice_insert_date' => null
+                    ]);
+                }
+            }
         });
 
         static::updated(function ($invoice) {

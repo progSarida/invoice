@@ -311,11 +311,6 @@ class InvoiceItemsRelationManager extends RelationManager
                             ->addable(false)
                             ->deletable(false)
                             ->reorderable(false)
-                            ->mutateRelationshipDataBeforeFillUsing(function (array $data): array {
-                                // Qui puoi modificare i dati se necessario
-                                $data['selected'] = false; // Default non selezionato
-                                return $data;
-                            })
                     ])
                     ->modalWidth('5xl')
                     ->fillForm(function (): array {
@@ -364,7 +359,7 @@ class InvoiceItemsRelationManager extends RelationManager
                                 // Crea l'invoice item
                                 $invoiceItem = InvoiceItem::create([
                                     'invoice_id' => $invoice->id,
-                                    'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier),
+                                    'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier_name),
                                     'amount' => $amount,
                                     'total' => $amount,
                                     'vat_code_type' => VatCodeType::VC06,
@@ -372,10 +367,11 @@ class InvoiceItemsRelationManager extends RelationManager
                                     'postal_expense_id' => $expense->id
                                 ]);
 
-                                $invoiceItem->calculateTotal();
+                                // $invoiceItem->invoice->updateTotal();
                                 $invoiceItem->save();
                                 $invoiceItem->checkStampDuty();
                                 $invoiceItem->autoInsert();
+                                $invoiceItem->invoice->updateTotal();
 
                                 // Aggiorna la spesa postale con l'ID della fattura
                                 PostalExpense::withoutEvents(function () use ($expense, $invoice) {
@@ -388,7 +384,7 @@ class InvoiceItemsRelationManager extends RelationManager
                                         'reinvoice_insert_date' => today()
                                     ]);
                                 });
-                                
+
                                 // $expense->update([
                                 //     'reinvoice_id' => $invoice->id,
                                 //     'reinvoice_number' => $invoice->number,
@@ -429,27 +425,43 @@ class InvoiceItemsRelationManager extends RelationManager
                         if ($record->postal_expense_id) {
                             $postalExpense = PostalExpense::find($record->postal_expense_id);
                             if ($postalExpense) {
-                                // Disabilita gli observer
-                                PostalExpense::withoutEvents(function () use ($postalExpense) {
-                                    $postalExpense->update([
-                                        'reinvoice_id' => null,
-                                        'reinvoice_number' => null,
-                                        'reinvoice_date' => null,
-                                        'reinvoice_amount' => null,
-                                        'reinvoice_insert_user_id' => null,
-                                        'reinvoice_insert_date' => null
-                                    ]);
-                                });
+                                if($invoice->invoice){
+                                    PostalExpense::withoutEvents(function () use ($postalExpense, $invoice) {
+                                        $postalExpense->update([
+                                            'reinvoice_id' => $invoice->id,
+                                            'reinvoice_number' => $invoice->number,
+                                            'reinvoice_date' => $invoice->invoice_date,
+                                            'reinvoice_amount' => $invoice->total,
+                                            'reinvoice_insert_user_id' => Auth::id(),
+                                            'reinvoice_insert_date' => today()
+                                        ]);
+                                    });
+                                }
+                                else{
+                                    PostalExpense::withoutEvents(function () use ($postalExpense) {                                 // Disabilita gli observer
+                                        $postalExpense->update([
+                                            'reinvoice_id' => null,
+                                            'reinvoice_number' => null,
+                                            'reinvoice_date' => null,
+                                            'reinvoice_amount' => null,
+                                            'reinvoice_insert_user_id' => null,
+                                            'reinvoice_insert_date' => null
+                                        ]);
+                                    });
+                                }
+
                             }
                         }
 
+                        // $invoice->updateTotal();
                         $record->delete();
                         $invoice->checkStampDuty();
                         $record->autoInsert();
+                        $invoice->updateTotal();
 
                         return $record;
                     }),
-                // Tables\Actions\DeleteAction::make(),                                                                            // solo per test
+                // Tables\Actions\DeleteAction::make(),                                                                             // solo per test
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

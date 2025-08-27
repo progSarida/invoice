@@ -53,7 +53,9 @@ class UserResource extends Resource
                     ->dehydrated(fn ($state) => filled($state))
                     ->helperText(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord ? '' : ''),
 
-                Forms\Components\Section::make('Aziende e Permessi')->schema([
+                Forms\Components\Section::make('Aziende e Permessi')
+                    ->collapsed()
+                    ->schema([
                     Repeater::make('company_assignments')
                         ->label('')
                         ->schema([

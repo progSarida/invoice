@@ -34,7 +34,10 @@ use App\Filament\Company\Resources\ClientResource;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Filament\Company\Resources\NewContractResource;
+use App\Models\InvoiceItem;
+use App\Models\PostalExpense;
 use Filament\Resources\RelationManagers\RelationManager;
+use Illuminate\Support\Facades\Auth;
 
 class CreditNotesRelationManager extends RelationManager
 {
@@ -698,10 +701,57 @@ class CreditNotesRelationManager extends RelationManager
                             ->collapsible()
                             ->collapsed()
                             ->relationship('invoiceItems')
+                            ->deleteAction(function ($action) {
+                                return $action->after(function ($livewire, $record) {
+                                    // Ottieni il record dell'invoice associato
+                                    // $record = $livewire->getRecord();
+                                    if ($record) {
+                                        $invoice = $record->invoice;
+
+                                            if ($record->postal_expense_id) {
+                                                $postalExpense = PostalExpense::find($record->postal_expense_id);
+                                                if ($postalExpense) {
+                                                    if($invoice->docType->name === 'TD04'){
+                                                        PostalExpense::withoutEvents(function () use ($postalExpense, $invoice) {
+                                                            $postalExpense->update([
+                                                                'reinvoice_id' => $invoice->id,
+                                                                'reinvoice_number' => $invoice->number,
+                                                                'reinvoice_date' => $invoice->invoice_date,
+                                                                'reinvoice_amount' => $invoice->total,
+                                                                'reinvoice_insert_user_id' => Auth::id(),
+                                                                'reinvoice_insert_date' => today()
+                                                            ]);
+                                                        });
+                                                    }
+                                                    else{
+                                                        PostalExpense::withoutEvents(function () use ($postalExpense) {                                 // Disabilita gli observer
+                                                            $postalExpense->update([
+                                                                'reinvoice_id' => null,
+                                                                'reinvoice_number' => null,
+                                                                'reinvoice_date' => null,
+                                                                'reinvoice_amount' => null,
+                                                                'reinvoice_insert_user_id' => null,
+                                                                'reinvoice_insert_date' => null
+                                                            ]);
+                                                        });
+                                                    }
+
+                                                }
+                                            }
+
+                                        $invoice->checkStampDuty();
+                                        $record->autoInsert();
+                                        $invoice->updateTotal();
+                                        if ($record->invoice) {
+                                            $record->invoice->updateTotalNotes();
+                                        }
+                                    }
+                                });
+                            })
                             ->schema([
                                 Forms\Components\Select::make('invoice_element_id')
                                     ->label('Elemento')
-                                    ->required()
+                                    // ->required()
                                     ->live()
                                     ->options(InvoiceElement::pluck('name', 'id'))
                                     ->searchable()
@@ -932,34 +982,37 @@ class CreditNotesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
-                ->modalWidth('7xl')
-                ->action(function ($livewire, Get $get) {
-                $owner = $livewire->getOwnerRecord();
+                // Tables\Actions\CreateAction::make()
+                //     ->modalWidth('7xl')
+                //     ->action(function (array $data, $livewire) {
+                //         $owner = $livewire->getOwnerRecord();
 
-                $accepted = $owner->sdi_status == SdiStatus::ACCETTATA->value;
-                if($accepted)
-                    \Filament\Notifications\Notification::make()
-                        ->title('')
-                        ->body('Attenzione! Stai creando una nota di credito su una fattura accettata.')
-                        ->warning()
-                        ->duration(10000)
-                        ->send();
+                //         $accepted = $owner->sdi_status == SdiStatus::ACCETTATA->value;
+                //         if($accepted) {
+                //             \Filament\Notifications\Notification::make()
+                //                 ->title('')
+                //                 ->body('Attenzione! Stai creando una nota di credito su una fattura accettata.')
+                //                 ->warning()
+                //                 ->duration(10000)
+                //                 ->send();
 
-                if ($owner->total_payment >= $owner->total) {
-                    Notification::make()
-                        ->title('')
-                        ->body('Attenzione! stai creando una nota di credito su una fattura pagata.')
-                        ->warning()
-                        ->send();
+                //             return;
+                //         }
+                //         if ($owner->total_payment >= $owner->total) {
+                //             Notification::make()
+                //                 ->title('')
+                //                 ->body('Attenzione! stai creando una nota di credito su una fattura pagata.')
+                //                 ->warning()
+                //                 ->send();
 
-                    // Interrompi l'esecuzione dell'action
-                    return;
-                }
+                //             return;
+                //         }
 
-                // Altrimenti, procedi con la creazione (se necessario puoi ritornare true o qualcosa)
-                // oppure puoi chiamare un metodo personalizzato
-            }),
+                //         $record = $livewire->getRelationship()->create($data);
+
+                //         return $record;
+
+                //     }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->modalWidth('7xl'),

@@ -78,7 +78,22 @@ class NewInvoiceResource extends Resource
                     Section::make('Destinatario')
                         ->collapsible()
                         ->schema([
+                            // Placeholder::make('')
+                            // ->hidden(function ($record) {
+                            //     if ($record && $record->parent_id) {
+                            //         Notification::make('refused_status')
+                            //             ->title('Dopo aver selezionato le voci da stornare salvare la nota di credito')
+                            //             ->color('warning')
+                            //             ->icon('gmdi-block')
+                            //             ->persistent()
+                            //             ->send();
+                            //         return true;
+                            //     }
 
+                            //     return true;
+                            // })
+                            // ->content('')
+                            // ->columnSpan(1),
                             Forms\Components\Select::make('client_id')->label('Cliente')
                                 ->hintAction(
                                     Action::make('Nuovo')
@@ -474,8 +489,8 @@ class NewInvoiceResource extends Resource
                                 ->required()
                                 ->live()
                                 ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
-                                    $docType = DocType::with('docGroup')->find($state);
-                                    if($docType->docGroup?->name !== 'Preavviso di fattura'){
+                                    $docType = DocType::find($state);
+                                    if($docType?->name === 'TD00'){
                                         $set('number', 0);
                                     }
                                     else if (!$docType || $docType->docGroup?->name !== 'Note di variazione') {

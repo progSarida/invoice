@@ -66,9 +66,10 @@ class EditNewInvoice extends EditRecord
                             $newItem->save();
 
                             if ($key === $lastKey) {
-                                $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
+                                // $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
                                 $newInvoice->checkStampDuty();                              // verifico e inserisco eventuale imposta di bollo (non fa nulla)
                                 $newItem->autoInsert();                                     // crea voci fattura di ritenute, riepiloghi e casse previdenziali
+                                $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
                             }
                         }
 
