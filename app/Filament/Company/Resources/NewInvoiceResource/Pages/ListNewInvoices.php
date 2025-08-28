@@ -32,9 +32,9 @@ class ListNewInvoices extends ListRecords
                 ->label('Controllo contratti da fatturare')
                 ->action(function () {
                     $activeContracts = $this->getActiveContractsData();
-                    $invoicingContracts = $this->getInvoicingContracts($activeContracts);
+                    $contracts = $this->getInvoicingContracts($activeContracts);
                     $user = Auth::user();
-                    foreach ($invoicingContracts as $contract) {
+                    foreach ($contracts['to_invoice'] as $contract) {
                         $user->notify(
                             Notification::make()
                                 ->title('Il contratto con ' . $contract->client->denomination . ' (' . $contract->tax_type->getLabel() . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
@@ -43,11 +43,16 @@ class ListNewInvoices extends ListRecords
                                 ->warning()
                                 ->toDatabase(),
                         );
-                        // Notification::make('invoicing_'.$contract->id)                                          // notifica a schermo
-                        //     ->title('Il contratto con ' . $contract->client->denomination . ' deve essere fatturato')
-                        //     ->warning()
-                        //     ->persistent()
-                        //     ->send();
+                    }
+                    foreach ($contracts['partial'] as $contract) {
+                        $user->notify(
+                            Notification::make()
+                                ->title('Il contratto con ' . $contract->client->denomination . ' (' . $contract->tax_type->getLabel() . ' - ' . $contract->cig_code . ') ' . 'ha una fattura parzialmente stornata')
+                                // ->body('TESTBODY')
+                                ->icon('heroicon-o-exclamation-triangle')
+                                ->warning()
+                                ->toDatabase(),
+                        );
                     }
                 }),
             Actions\CreateAction::make()
@@ -412,12 +417,17 @@ class ListNewInvoices extends ListRecords
                     ->where('flow', 'out')
                     ->orderBy('invoice_date', 'desc')
                     ->first();
-
-                $contract->total_invoiced = $totalInvoiced;                                     //
-                $contract->last_invoice_date = $lastInvoice?->invoice_date;                     //
-                $contract->last_invoice_number = $lastInvoice?->number;                         // aggiungo i dati calcolati al contratto
-                $contract->last_invoice_sectional_id = $lastInvoice?->sectional_id;             //
-                $contract->last_invoice_year = $lastInvoice?->year;                             //
+                                                                                                // aggiungo i dati calcolati al contratto
+                $contract->total_invoiced = $totalInvoiced;                                     // totale fatturato
+                $contract->last_invoice_date = $lastInvoice?->invoice_date;                     // data ultima fattura
+                $contract->last_invoice_number = $lastInvoice?->number;                         // numero ultima fattura
+                $contract->last_invoice_sectional_id = $lastInvoice?->sectional_id;             // sezionario ultima fattura
+                $contract->last_invoice_year = $lastInvoice?->year;                             // anno ultima fattura
+                if($contract->client?->type?->value == 'public')
+                    $contract->last_invoice_total = $lastInvoice?->no_vat_total;                // totale senza iva ultima fattura
+                else
+                    $contract->last_invoice_total = $lastInvoice?->total;                       // totale ultima fattura
+                $contract->last_invoice_notes = $lastInvoice?->total_notes;                     // totale note di credito su ultima fattura
 
                 $activeContracts->push($contract);                                              // aggiungo alla collezione dei contratti validi
             }
@@ -431,17 +441,15 @@ class ListNewInvoices extends ListRecords
     private function getInvoicingContracts($activeContracts)                                    // recupero i contratti da fatturare
     {
         $invoicingContracts = collect();
+        $partialinvoicingContracts = collect();
 
         foreach($activeContracts as $contract) {
             $invoicingCycle = $contract->invoicing_cycle;
 
-            if ($invoicingCycle instanceof InvoicingCicle) {
-                $cycle = $invoicingCycle;
-            } else {
-                $cycle = InvoicingCicle::from($invoicingCycle);
-            }
+            if ($invoicingCycle instanceof InvoicingCicle) { $cycle = $invoicingCycle; } 
+            else { $cycle = InvoicingCicle::from($invoicingCycle); }
 
-            $shouldInvoice = match($cycle) {                                                    // controllo se il termine di fatturazione è passato
+            $invoiceTime = match($cycle) {                                                      // controllo se il termine di fatturazione è passato
                 InvoicingCicle::MONTHLY => $this->checkMonthlyInvoicing($contract),
                 InvoicingCicle::BIMONTHLY => $this->checkBimonthlyInvoicing($contract),
                 InvoicingCicle::QUARTERLY => $this->checkQuarterlyInvoicing($contract),
@@ -449,12 +457,18 @@ class ListNewInvoices extends ListRecords
                 InvoicingCicle::ANNUALLY => $this->checkAnnuallyInvoicing($contract),
             };
 
-            if ($shouldInvoice) {
-                $invoicingContracts->push($contract);
+            if ($invoiceTime) {
+                if($contract->last_invoice_notes > 0 && $contract->last_invoice_notes < $contract->last_invoice_total)
+                    $partialinvoicingContracts->push($contract);                                // se notes non è zero ma è minore di total => partialinvoicingContracts
+                else
+                $invoicingContracts->push($contract);                                           // se notes è zero o (maggiore o uguale a total) => invoicingContract
             }
         }
 
-        return $invoicingContracts;
+        $output['to_invoice'] = $invoicingContracts;
+        $output['partial'] = $partialinvoicingContracts;
+
+        return $output;
     }
 
     private function checkMonthlyInvoicing($contract): bool
