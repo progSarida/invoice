@@ -62,7 +62,7 @@ class CompanyPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->databaseNotifications()
-            ->databaseNotificationsPolling(null)
+            ->databaseNotificationsPolling(5)
             ->authMiddleware([
                 Authenticate::class,
             ])

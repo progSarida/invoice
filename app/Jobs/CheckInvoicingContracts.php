@@ -31,15 +31,18 @@ class CheckInvoicingContracts implements ShouldQueue
     {
         $activeContracts = $this->getActiveContractsData();
         $invoicingContracts = $this->getInvoicingContracts($activeContracts);
+        $users = User::all();
 
-        if ($invoicingContracts->isNotEmpty()) {
-            $users = User::all();
+        foreach($invoicingContracts as $contract) {
             foreach ($users as $user) {
-                Notification::make()
-                    ->title('Contratti da fatturare')
-                    ->body('Ci sono ' . $invoicingContracts->count() . ' contratti da fatturare.')
-                    ->warning()
-                    ->sendToDatabase($user);
+                $user->notify(
+                    Notification::make()
+                        ->title('Il contratto con ' . $contract->client->denomination . ' (' . $contract->tax_type->getLabel() . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
+                        // ->body('TESTBODY')
+                        ->icon('heroicon-o-exclamation-triangle')
+                        ->warning()
+                        ->toDatabase(),
+                );
             }
         }
     }

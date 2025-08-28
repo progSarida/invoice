@@ -98,4 +98,12 @@ return [
 
     'system_route_prefix' => 'filament',
 
+    // 'notifications' => [
+    //     'enabled' => true,
+    //     'database' => [
+    //         'enabled' => true,
+    //         'polling_interval' => '5s', // Aggiorna ogni 5 secondi per i test
+    //     ],
+    // ],
+
 ];

@@ -18,6 +18,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Exports\NewInvoiceExporter;
 use App\Filament\Company\Resources\NewInvoiceResource;
+use Illuminate\Support\Facades\DB;
 
 class ListNewInvoices extends ListRecords
 {
@@ -31,20 +32,17 @@ class ListNewInvoices extends ListRecords
                 ->label('Controllo contratti da fatturare')
                 ->action(function () {
                     $activeContracts = $this->getActiveContractsData();
-
                     $invoicingContracts = $this->getInvoicingContracts($activeContracts);
-
-                    $users = User::where('company_id', Filament::getTenant());
+                    $user = Auth::user();
                     foreach ($invoicingContracts as $contract) {
-
-                        foreach($users as $user){                                                               // notifica su db
-                            Notification::make('invoicing_'.$contract->id)
-                            ->title('Il contratto con ' . $contract->client->denomination . ' deve essere fatturato')
-                            ->warning()
-                            ->persistent()
-                            ->sendToDatabase($user, isEventDispatched: true);
-                        }
-
+                        $user->notify(
+                            Notification::make()
+                                ->title('Il contratto con ' . $contract->client->denomination . ' (' . $contract->tax_type->getLabel() . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
+                                // ->body('TESTBODY')
+                                ->icon('heroicon-o-exclamation-triangle')
+                                ->warning()
+                                ->toDatabase(),
+                        );
                         // Notification::make('invoicing_'.$contract->id)                                          // notifica a schermo
                         //     ->title('Il contratto con ' . $contract->client->denomination . ' deve essere fatturato')
                         //     ->warning()
@@ -405,7 +403,7 @@ class ListNewInvoices extends ListRecords
         foreach ($contracts as $contract) {                                                     // per ogni contratto calcoliamo le informazioni aggiuntive
 
             $totalInvoiced = Invoice::where('contract_id', $contract->id)                       // calcolo il totale fatturato
-                ->where('flow', 'out')
+                // ->where('flow', 'out')                                                          // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
                 ->sum('total') ?? 0;
 
             if ($contract->amount > $totalInvoiced) {                                           // verifico se il contratto soddisfa la condizione

@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // Qui configurerai lo scheduler per il tuo job
-        $schedule->job(new \App\Jobs\CheckInvoicingContracts)->daily();
+        // $schedule->job(new \App\Jobs\CheckInvoicingContracts)->daily();
     }
 
     /**
