@@ -3,10 +3,16 @@
 namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 
 use Carbon\Carbon;
+use App\Models\User;
 use Filament\Actions;
+use App\Models\Invoice;
+use App\Models\NewContract;
+use App\Enums\InvoicingCicle;
+use Filament\Facades\Filament;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\ExportAction;
 use Filament\Support\Enums\MaxWidth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -20,6 +26,32 @@ class ListNewInvoices extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('checkInvoicing')
+                // ->hidden()
+                ->label('Controllo contratti da fatturare')
+                ->action(function () {
+                    $activeContracts = $this->getActiveContractsData();
+
+                    $invoicingContracts = $this->getInvoicingContracts($activeContracts);
+
+                    $users = User::where('company_id', Filament::getTenant());
+                    foreach ($invoicingContracts as $contract) {
+
+                        foreach($users as $user){                                                               // notifica su db
+                            Notification::make('invoicing_'.$contract->id)
+                            ->title('Il contratto con ' . $contract->client->denomination . ' deve essere fatturato')
+                            ->warning()
+                            ->persistent()
+                            ->sendToDatabase($user);
+                        }
+
+                        Notification::make('invoicing_'.$contract->id)                                          // notifica a schermo
+                            ->title('Il contratto con ' . $contract->client->denomination . ' deve essere fatturato')
+                            ->warning()
+                            ->persistent()
+                            ->send();
+                    }
+                }),
             Actions\CreateAction::make()
                 /*->hidden(function () {
                     // Fatture rifiutate
@@ -140,10 +172,18 @@ class ListNewInvoices extends ListRecords
                     return ($refusedHide || $discardedHide || $lateHide || $silentHide);
                 })*/
                 ->hidden(function () {
-                    $refusedHide = $this->refusedHide();
-                    $discardedHide = $this->discardedHide();
-                    $lateHide = $this->lateHide();
-                    $silentHide = $this->silentHide();
+                    // Controlli per bloccare l'inserimento di nuove fatture
+                    $refusedHide = $this->refusedHide();                                                        // controllo fatture rifiutate
+                    $discardedHide = $this->discardedHide();                                                    // controllo fatture scartate
+                    $lateHide = $this->lateHide();                                                              // controllo fatture non inviate
+                    $silentHide = $this->silentHide();                                                          // controllo fatture senza esito
+
+                    // Controllo su contratti da fatturare in base a periodicità
+                    // $activeContracts = $this->getActiveContracts();                                             // recupero contratti attivi
+                    // $activeContracts = $this->getActiveContractsData();                                         // recupero contratti attivi con dati ultima fattura
+                    // $invoicingContracts = $this->getInvoicingContracts($activeContracts);                       // recupero i contratti da fatturare
+
+                    // creo notifica su tabella notifications
 
                     return ($refusedHide || $discardedHide || $lateHide || $silentHide);
                 })
@@ -325,8 +365,162 @@ class ListNewInvoices extends ListRecords
         return false;
     }
 
-    private function checkInvoicingCicles()
+    private function getActiveContracts()                                                       // recupera i contratti ancora attivi
     {
-        //
+        $today = now()->format('Y-m-d');
+
+        $contracts = NewContract::leftJoin('invoices', function($join) {                        // recupero i contratti attivi
+                $join->on('new_contracts.id', '=', 'invoices.contract_id')
+                    ->where('invoices.flow', '=', 'out');                                       // controllo solo sulle fatture nuove
+            })
+            ->select('new_contracts.*')
+            ->selectRaw('COALESCE(SUM(invoices.total), 0) as total_invoiced')
+            ->where('new_contracts.start_validity_date', '<=', $today)                          // recupero i contratti iniziati
+            ->where(function ($query) use ($today) {
+                $query->whereNull('new_contracts.end_validity_date')                            // recupero i contratti senza data di termine
+                    ->orWhere('new_contracts.end_validity_date', '>=', $today);                 // recupero i contratti per cui non si è raggiunta la data di termine
+            })
+            ->groupBy('new_contracts.id')
+            ->havingRaw('new_contracts.amount > total_invoiced')                                // recupero quelli per cui non si è raggiunto l'importo massimo
+            ->get();
+
+        // dd($contracts);
+
+        return $contracts;
+    }
+
+    private function getActiveContractsData()                                                   // recupera i contratti ancora attivi con data, numero, sezionario e anno dell'ultima fattura emessa
+    {
+        $today = now()->format('Y-m-d');
+
+        $contracts = NewContract::where('start_validity_date', '<=', $today)                    // seleziono i contratti base
+            ->where(function ($query) use ($today) {
+                $query->whereNull('end_validity_date')
+                    ->orWhere('end_validity_date', '>=', $today);
+            })
+            ->get();
+
+        $activeContracts = collect();
+
+        foreach ($contracts as $contract) {                                                     // per ogni contratto calcoliamo le informazioni aggiuntive
+
+            $totalInvoiced = Invoice::where('contract_id', $contract->id)                       // calcolo il totale fatturato
+                ->where('flow', 'out')
+                ->sum('total') ?? 0;
+
+            if ($contract->amount > $totalInvoiced) {                                           // verifico se il contratto soddisfa la condizione
+
+                $lastInvoice = Invoice::where('contract_id', $contract->id)                     // rovo l'ultima fattura
+                    ->where('flow', 'out')
+                    ->orderBy('invoice_date', 'desc')
+                    ->first();
+
+                $contract->total_invoiced = $totalInvoiced;                                     //
+                $contract->last_invoice_date = $lastInvoice?->invoice_date;                     //
+                $contract->last_invoice_number = $lastInvoice?->number;                         // aggiungo i dati calcolati al contratto
+                $contract->last_invoice_sectional_id = $lastInvoice?->sectional_id;             //
+                $contract->last_invoice_year = $lastInvoice?->year;                             //
+
+                $activeContracts->push($contract);                                              // aggiungo alla collezione dei contratti validi
+            }
+        }
+
+        // dd($activeContracts);
+
+        return $activeContracts;
+    }
+
+    private function getInvoicingContracts($activeContracts)                                    // recupero i contratti da fatturare
+    {
+        $invoicingContracts = collect();
+
+        foreach($activeContracts as $contract) {
+            $invoicingCycle = $contract->invoicing_cycle;
+
+            if ($invoicingCycle instanceof InvoicingCicle) {
+                $cycle = $invoicingCycle;
+            } else {
+                $cycle = InvoicingCicle::from($invoicingCycle);
+            }
+
+            $shouldInvoice = match($cycle) {                                                    // controllo se il termine di fatturazione è passato
+                InvoicingCicle::MONTHLY => $this->checkMonthlyInvoicing($contract),
+                InvoicingCicle::BIMONTHLY => $this->checkBimonthlyInvoicing($contract),
+                InvoicingCicle::QUARTERLY => $this->checkQuarterlyInvoicing($contract),
+                InvoicingCicle::SEMIANNUALLY => $this->checkSemiannuallyInvoicing($contract),
+                InvoicingCicle::ANNUALLY => $this->checkAnnuallyInvoicing($contract),
+            };
+
+            if ($shouldInvoice) {
+                $invoicingContracts->push($contract);
+            }
+        }
+
+        return $invoicingContracts;
+    }
+
+    private function checkMonthlyInvoicing($contract): bool
+    {
+        $today = now();
+
+        if (is_null($contract->last_invoice_date)) {                                            // se non ci sono fatture precedenti
+            $startDate = Carbon::parse($contract->start_validity_date);
+            return $startDate->diffInMonths($today) > 1;                                        // controllo che sia passato un mese dalla data di inizio del contratto
+        } else {
+            $lastInvoiceDate = Carbon::parse($contract->last_invoice_date);
+            return $lastInvoiceDate->diffInMonths($today) > 1;                                  // controllo che sia passato un mese dalla data dell'ultima fattura
+        }
+    }
+
+    private function checkBimonthlyInvoicing($contract): bool
+    {
+        $today = now();
+
+        if (is_null($contract->last_invoice_date)) {                                            // se non ci sono fatture precedenti
+            $startDate = Carbon::parse($contract->start_validity_date);
+            return $startDate->diffInMonths($today) > 2;                                        // controllo che siano passati due mesi dalla data di inizio del contratto
+        } else {
+            $lastInvoiceDate = Carbon::parse($contract->last_invoice_date);
+            return $lastInvoiceDate->diffInMonths($today) > 2;                                  // controllo che siano passati due mesi dalla data dell'ultima fattura
+        }
+    }
+
+    private function checkQuarterlyInvoicing($contract): bool
+    {
+        $today = now();
+
+        if (is_null($contract->last_invoice_date)) {                                            // se non ci sono fatture precedenti
+            $startDate = Carbon::parse($contract->start_validity_date);
+            return $startDate->diffInMonths($today) > 3;                                        // controllo siano passati tre mesi dalla data di inizio del contratto
+        } else {
+            $lastInvoiceDate = Carbon::parse($contract->last_invoice_date);
+            return $lastInvoiceDate->diffInMonths($today) > 3;                                  // controllo che siano passati tre mesi dalla data dell'ultima fattura
+        }
+    }
+
+    private function checkSemiannuallyInvoicing($contract): bool
+    {
+        $today = now();
+
+        if (is_null($contract->last_invoice_date)) {                                            // se non ci sono fatture precedenti
+            $startDate = Carbon::parse($contract->start_validity_date);
+            return $startDate->diffInMonths($today) > 6;                                        // controllo che siano passati sei mesi dalla data di inizio del contratto
+        } else {
+            $lastInvoiceDate = Carbon::parse($contract->last_invoice_date);
+            return $lastInvoiceDate->diffInMonths($today) > 6;                                  // controllo che siano passati sei mesi dalla data dell'ultima fattura
+        }
+    }
+
+    private function checkAnnuallyInvoicing($contract): bool
+    {
+        $today = now();
+
+        if (is_null($contract->last_invoice_date)) {                                            // se non ci sono fatture precedenti
+            $startDate = Carbon::parse($contract->start_validity_date);
+            return $startDate->diffInMonths($today) > 12;                                       // controllo che sia passato un anno dalla data di inizio del contratto
+        } else {
+            $lastInvoiceDate = Carbon::parse($contract->last_invoice_date);
+            return $lastInvoiceDate->diffInMonths($today) > 12;                                 // controllo che sia passato un anno dalla data dell'ultima fattura
+        }
     }
 }

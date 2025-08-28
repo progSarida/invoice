@@ -307,48 +307,61 @@ class PostalExpense extends Model
             // }
             // avanzamento
             if ($expense->reinvoiceInserted() && ($expense->notify_date_registration_date || $expense->reinvoice_attachment_path)) {
-                $expense->reinvoice_registration_user_id = Auth::id();
-                $expense->reinvoice_registration_date = today();
+                PostalExpense::withoutEvents(function () use ($expense) {
+                    $expense->reinvoice_registration_user_id = Auth::id();
+                    $expense->reinvoice_registration_date = today();
+                });
             }
             else if($expense->paymentInserted() && $expense->reinvoice_id){
-                $expense->reinvoice_insert_user_id = Auth::id();
-                $expense->reinvoice_insert_date = today();
+                PostalExpense::withoutEvents(function () use ($expense) {
+                    $expense->reinvoice_insert_user_id = Auth::id();
+                    $expense->reinvoice_insert_date = today();
+                });
             }
             else if($expense->expenseInserted()){
-                $expense->payment_insert_user_id = Auth::id();
-                $expense->payment_insert_date = today();
+                PostalExpense::withoutEvents(function () use ($expense) {
+                    $expense->payment_insert_user_id = Auth::id();
+                    $expense->payment_insert_date = today();
+                });
             }
             else if($expense->notificationInserted()){
-                $expense->expense_insert_user_id = Auth::id();
-                $expense->expense_insert_date = today();
+                PostalExpense::withoutEvents(function () use ($expense) {
+                    $expense->expense_insert_user_id = Auth::id();
+                    $expense->expense_insert_date = today();
+                });
             }
             else if($expense->shipmentInserted()){
-                $expense->notify_insert_user_id = Auth::id();
-                $expense->notify_insert_date = today();
+                PostalExpense::withoutEvents(function () use ($expense) {
+                    $expense->notify_insert_user_id = Auth::id();
+                    $expense->notify_insert_date = today();
+                });
             }
             // creazione voce fattura
-            if($expense->reinvoice_id){
+            if($expense->reinvoice_id && !$expense->reinvoice_registration_user_id){
                 $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
-                $invoiceItem = InvoiceItem::create([
-                    'invoice_id' => $expense->reinvoice_id,
-                    'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier),
-                    'amount' => $amount,
-                    'total' => $amount,
-                    'vat_code_type' => VatCodeType::VC06,
-                    'auto' => false,
-                    'postal_expense_id' => $expense->id
-                ]);
+                $checkInvoiceItems = InvoiceItem::where('postal_expense_id', $expense->id)->first();
+                if(!$checkInvoiceItems){
+                    $invoiceItem = InvoiceItem::create([
+                        'invoice_id' => $expense->reinvoice_id,
+                        'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier),
+                        'amount' => $amount,
+                        'total' => $amount,
+                        'vat_code_type' => VatCodeType::VC06,
+                        'auto' => false,
+                        'postal_expense_id' => $expense->id
+                    ]);
 
-                $invoiceItem->calculateTotal();
-                $invoiceItem->save();
-                $invoiceItem->checkStampDuty();
-                $invoiceItem->autoInsert();
+                    $invoiceItem->calculateTotal();
+                    $invoiceItem->save();
+                    $invoiceItem->checkStampDuty();
+                    $invoiceItem->autoInsert();
 
-                PostalExpense::withoutEvents(function () use ($expense) {
-                        $expense->update([
-                            'reinvoice_amount' => $expense->reInvoice->total,
-                        ]);
-                    });
+                    PostalExpense::withoutEvents(function () use ($expense) {
+                            $expense->update([
+                                'reinvoice_amount' => $expense->reInvoice->total,
+                            ]);
+                        });
+                }
             }
         });
 

@@ -50,6 +50,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->databaseNotifications()
+            ->databaseNotificationsPolling(null)
             ->login() // Abilita la pagina di login
             // ->registration() // Opzionale: abilita la registrazione
             ->passwordReset() // Opzionale: abilita il reset della password
