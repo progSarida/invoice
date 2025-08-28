@@ -42,14 +42,14 @@ class ListNewInvoices extends ListRecords
                             ->title('Il contratto con ' . $contract->client->denomination . ' deve essere fatturato')
                             ->warning()
                             ->persistent()
-                            ->sendToDatabase($user);
+                            ->sendToDatabase($user, isEventDispatched: true);
                         }
 
-                        Notification::make('invoicing_'.$contract->id)                                          // notifica a schermo
-                            ->title('Il contratto con ' . $contract->client->denomination . ' deve essere fatturato')
-                            ->warning()
-                            ->persistent()
-                            ->send();
+                        // Notification::make('invoicing_'.$contract->id)                                          // notifica a schermo
+                        //     ->title('Il contratto con ' . $contract->client->denomination . ' deve essere fatturato')
+                        //     ->warning()
+                        //     ->persistent()
+                        //     ->send();
                     }
                 }),
             Actions\CreateAction::make()
