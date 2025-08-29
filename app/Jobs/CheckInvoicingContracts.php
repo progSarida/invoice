@@ -31,9 +31,9 @@ class CheckInvoicingContracts implements ShouldQueue
     {
         $activeContracts = $this->getActiveContractsData();
         $invoicingContracts = $this->getInvoicingContracts($activeContracts);
-        $users = User::all();
 
         foreach($invoicingContracts as $contract) {
+            $users = $contract->company->users;
             foreach ($users as $user) {
                 $user->notify(
                     Notification::make()
