@@ -6,6 +6,7 @@ use Filament\Support\Contracts\HasLabel;
 
 enum InvoicingCicle: string implements HasLabel
 {
+    case ONCE = 'once';
     case MONTHLY = 'monthly';
     case BIMONTHLY = 'bimonthly';
     case QUARTERLY = 'quarterly';
@@ -15,6 +16,7 @@ enum InvoicingCicle: string implements HasLabel
     public function getLabel(): string
     {
         return match($this) {
+            self::ONCE => 'Una tantum',
             self::MONTHLY => 'Mensile',
             self::BIMONTHLY => 'Bimestrale',
             self::QUARTERLY => 'Trimestrale',

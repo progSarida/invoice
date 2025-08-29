@@ -126,6 +126,7 @@ class CheckInvoicingContracts implements ShouldQueue
             }
 
             $shouldInvoice = match($cycle) {                                                    // controllo se il termine di fatturazione è passato
+                InvoicingCicle::ONCE => false,
                 InvoicingCicle::MONTHLY => $this->checkMonthlyInvoicing($contract),
                 InvoicingCicle::BIMONTHLY => $this->checkBimonthlyInvoicing($contract),
                 InvoicingCicle::QUARTERLY => $this->checkQuarterlyInvoicing($contract),
