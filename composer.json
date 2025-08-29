@@ -32,6 +32,8 @@
         "orangehill/iseed": "^3.1",
         "owenvoke/blade-fontawesome": "^2.9",
         "secondnetwork/blade-tabler-icons": "^3.34",
+        "setasign/fpdf": "^1.8",
+        "setasign/fpdi": "^2.6",
         "troccoli/blade-health-icons": "^5.0"
     },
     "require-dev": {

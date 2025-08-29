@@ -16,9 +16,9 @@ enum TenderPaymentType: string implements HasLabel, HasColor, HasDescription
     public function getLabel(): string
     {
         return match($this) {
-            self::AGGIO => 'AGGIO',
-            self::SERVIZIO => 'SERVIZIO',
-            self::CANONE => 'CANONE',
+            self::AGGIO => 'Aggio',
+            self::SERVIZIO => 'Servizio',
+            self::CANONE => 'Canone',
         };
     }
 

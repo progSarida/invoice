@@ -102,7 +102,7 @@ class NewContractResource extends Resource
                     ->preload()
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('amount')
-                    ->label('Importo')
+                    ->label('Capienza')
                     ->required()
                     ->columnSpan(3)
                     ->inputMode('decimal')
