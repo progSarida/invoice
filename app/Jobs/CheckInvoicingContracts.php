@@ -7,6 +7,7 @@ use App\Models\NewContract;
 use App\Enums\InvoicingCicle;
 use App\Models\Invoice;
 use Carbon\Carbon;
+use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -30,14 +31,28 @@ class CheckInvoicingContracts implements ShouldQueue
     public function handle()
     {
         $activeContracts = $this->getActiveContractsData();
-        $invoicingContracts = $this->getInvoicingContracts($activeContracts);
+        $contracts = $this->getInvoicingContracts($activeContracts);
 
-        foreach($invoicingContracts as $contract) {
+        foreach($contracts['to_invoice'] as $contract) {
             $users = $contract->company->users;
             foreach ($users as $user) {
                 $user->notify(
                     Notification::make()
                         ->title('Il contratto con ' . $contract->client->denomination . ' (' . $contract->tax_type->getLabel() . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
+                        // ->body('TESTBODY')
+                        ->icon('heroicon-o-exclamation-triangle')
+                        ->warning()
+                        ->toDatabase(),
+                );
+            }
+        }
+
+        foreach($contracts['partial'] as $contract) {
+            $users = $contract->company->users;
+            foreach ($users as $user) {
+                $user->notify(
+                    Notification::make()
+                        ->title('Il contratto con ' . $contract->client->denomination . ' (' . $contract->tax_type->getLabel() . ' - ' . $contract->cig_code . ') ' . 'ha una fattura parzialmente stornata')
                         // ->body('TESTBODY')
                         ->icon('heroicon-o-exclamation-triangle')
                         ->warning()
@@ -76,6 +91,7 @@ class CheckInvoicingContracts implements ShouldQueue
         $today = now()->format('Y-m-d');
 
         $contracts = NewContract::where('start_validity_date', '<=', $today)                    // seleziono i contratti base
+            ->where('company_id', Filament::getTenant()->id)
             ->where(function ($query) use ($today) {
                 $query->whereNull('end_validity_date')
                     ->orWhere('end_validity_date', '>=', $today);
@@ -87,7 +103,7 @@ class CheckInvoicingContracts implements ShouldQueue
         foreach ($contracts as $contract) {                                                     // per ogni contratto calcoliamo le informazioni aggiuntive
 
             $totalInvoiced = Invoice::where('contract_id', $contract->id)                       // calcolo il totale fatturato
-                ->where('flow', 'out')
+                ->where('flow', 'out')                                                          // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
                 ->sum('total') ?? 0;
 
             if ($contract->amount > $totalInvoiced) {                                           // verifico se il contratto soddisfa la condizione
@@ -96,12 +112,17 @@ class CheckInvoicingContracts implements ShouldQueue
                     ->where('flow', 'out')
                     ->orderBy('invoice_date', 'desc')
                     ->first();
-
-                $contract->total_invoiced = $totalInvoiced;                                     //
-                $contract->last_invoice_date = $lastInvoice?->invoice_date;                     //
-                $contract->last_invoice_number = $lastInvoice?->number;                         // aggiungo i dati calcolati al contratto
-                $contract->last_invoice_sectional_id = $lastInvoice?->sectional_id;             //
-                $contract->last_invoice_year = $lastInvoice?->year;                             //
+                                                                                                // aggiungo i dati calcolati al contratto
+                $contract->total_invoiced = $totalInvoiced;                                     // totale fatturato
+                $contract->last_invoice_date = $lastInvoice?->invoice_date;                     // data ultima fattura
+                $contract->last_invoice_number = $lastInvoice?->number;                         // numero ultima fattura
+                $contract->last_invoice_sectional_id = $lastInvoice?->sectional_id;             // sezionario ultima fattura
+                $contract->last_invoice_year = $lastInvoice?->year;                             // anno ultima fattura
+                if($contract->client?->type?->value == 'public')
+                    $contract->last_invoice_total = $lastInvoice?->no_vat_total;                // totale senza iva ultima fattura
+                else
+                    $contract->last_invoice_total = $lastInvoice?->total;                       // totale ultima fattura
+                $contract->last_invoice_notes = $lastInvoice?->total_notes;                     // totale note di credito su ultima fattura
 
                 $activeContracts->push($contract);                                              // aggiungo alla collezione dei contratti validi
             }
@@ -115,17 +136,15 @@ class CheckInvoicingContracts implements ShouldQueue
     private function getInvoicingContracts($activeContracts)                                    // recupero i contratti da fatturare
     {
         $invoicingContracts = collect();
+        $partialinvoicingContracts = collect();
 
         foreach($activeContracts as $contract) {
             $invoicingCycle = $contract->invoicing_cycle;
 
-            if ($invoicingCycle instanceof InvoicingCicle) {
-                $cycle = $invoicingCycle;
-            } else {
-                $cycle = InvoicingCicle::from($invoicingCycle);
-            }
+            if ($invoicingCycle instanceof InvoicingCicle) { $cycle = $invoicingCycle; }
+            else { $cycle = InvoicingCicle::from($invoicingCycle); }
 
-            $shouldInvoice = match($cycle) {                                                    // controllo se il termine di fatturazione è passato
+            $invoiceTime = match($cycle) {                                                      // controllo se il termine di fatturazione è passato
                 InvoicingCicle::ONCE => false,
                 InvoicingCicle::MONTHLY => $this->checkMonthlyInvoicing($contract),
                 InvoicingCicle::BIMONTHLY => $this->checkBimonthlyInvoicing($contract),
@@ -134,12 +153,18 @@ class CheckInvoicingContracts implements ShouldQueue
                 InvoicingCicle::ANNUALLY => $this->checkAnnuallyInvoicing($contract),
             };
 
-            if ($shouldInvoice) {
-                $invoicingContracts->push($contract);
+            if ($invoiceTime) {
+                if($contract->last_invoice_notes > 0 && $contract->last_invoice_notes < $contract->last_invoice_total && !$this->notificationExpired($contract))
+                    $partialinvoicingContracts->push($contract);                                // se notes non è zero ma è minore di total e lo storno ha meno di sei mesi => partialinvoicingContracts
+                else
+                $invoicingContracts->push($contract);                                           // se notes è zero o (maggiore o uguale a total) => invoicingContract
             }
         }
 
-        return $invoicingContracts;
+        $output['to_invoice'] = $invoicingContracts;
+        $output['partial'] = $partialinvoicingContracts;
+
+        return $output;
     }
 
     private function checkMonthlyInvoicing($contract): bool
@@ -205,5 +230,11 @@ class CheckInvoicingContracts implements ShouldQueue
             $lastInvoiceDate = Carbon::parse($contract->last_invoice_date);
             return $today->diffInMonths($lastInvoiceDate) > 12;                                 // controllo che sia passato un anno dalla data dell'ultima fattura
         }
+    }
+
+    private function notificationExpired($contract): bool
+    {
+        $lastInvoiceDate = Carbon::parse($contract->last_invoice_date);
+        return $lastInvoiceDate->diffInMonths(now()) > 6;                                       // controllo che siano passati sei mesi dalla data dell'ultima fattura
     }
 }

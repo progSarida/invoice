@@ -291,7 +291,7 @@ class ListNewInvoices extends ListRecords
         foreach ($contracts as $contract) {                                                     // per ogni contratto calcoliamo le informazioni aggiuntive
 
             $totalInvoiced = Invoice::where('contract_id', $contract->id)                       // calcolo il totale fatturato
-                // ->where('flow', 'out')                                                          // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
+                ->where('flow', 'out')                                                          // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
                 ->sum('total') ?? 0;
 
             if ($contract->amount > $totalInvoiced) {                                           // verifico se il contratto soddisfa la condizione
@@ -342,8 +342,8 @@ class ListNewInvoices extends ListRecords
             };
 
             if ($invoiceTime) {
-                if($contract->last_invoice_notes > 0 && $contract->last_invoice_notes < $contract->last_invoice_total)
-                    $partialinvoicingContracts->push($contract);                                // se notes non è zero ma è minore di total => partialinvoicingContracts
+                if($contract->last_invoice_notes > 0 && $contract->last_invoice_notes < $contract->last_invoice_total && !$this->notificationExpired($contract))
+                    $partialinvoicingContracts->push($contract);                                // se notes non è zero ma è minore di total e lo storno ha meno di sei mesi => partialinvoicingContracts
                 else
                 $invoicingContracts->push($contract);                                           // se notes è zero o (maggiore o uguale a total) => invoicingContract
             }
@@ -418,5 +418,11 @@ class ListNewInvoices extends ListRecords
             $lastInvoiceDate = Carbon::parse($contract->last_invoice_date);
             return $lastInvoiceDate->diffInMonths($today) > 12;                                 // controllo che sia passato un anno dalla data dell'ultima fattura
         }
+    }
+
+    private function notificationExpired($contract): bool
+    {
+        $lastInvoiceDate = Carbon::parse($contract->last_invoice_date);
+        return $lastInvoiceDate->diffInMonths(now()) > 6;                                       // controllo che siano passati sei mesi dalla data dell'ultima fattura
     }
 }
