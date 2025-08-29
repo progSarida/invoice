@@ -397,6 +397,7 @@ class ListNewInvoices extends ListRecords
         $today = now()->format('Y-m-d');
 
         $contracts = NewContract::where('start_validity_date', '<=', $today)                    // seleziono i contratti base
+            ->where('company_id', Filament::getTenant()->id)
             ->where(function ($query) use ($today) {
                 $query->whereNull('end_validity_date')
                     ->orWhere('end_validity_date', '>=', $today);
@@ -446,7 +447,7 @@ class ListNewInvoices extends ListRecords
         foreach($activeContracts as $contract) {
             $invoicingCycle = $contract->invoicing_cycle;
 
-            if ($invoicingCycle instanceof InvoicingCicle) { $cycle = $invoicingCycle; } 
+            if ($invoicingCycle instanceof InvoicingCicle) { $cycle = $invoicingCycle; }
             else { $cycle = InvoicingCicle::from($invoicingCycle); }
 
             $invoiceTime = match($cycle) {                                                      // controllo se il termine di fatturazione è passato
