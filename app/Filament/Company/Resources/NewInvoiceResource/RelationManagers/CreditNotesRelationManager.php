@@ -950,7 +950,7 @@ class CreditNotesRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
                     ->searchable()
-                    ->badge()
+                    // ->badge()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total')->label('Importo')
@@ -964,7 +964,9 @@ class CreditNotesRelationManager extends RelationManager
                     ->alignRight()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('sdi_status')->label('Status')
-                    ->searchable()->badge()->sortable(),
+                    ->searchable()
+                    // ->badge()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('sdi_date')->label('Data status')
                     ->date()
                     ->sortable()

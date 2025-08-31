@@ -41,7 +41,7 @@ class SdiNotificationsRelationManager extends RelationManager
             ->recordTitleAttribute('status')
             ->columns([
                 Tables\Columns\TextColumn::make('status')
-                    ->badge()
+                    // ->badge()
                     ->formatStateUsing(function ( SdiNotification $sdi) {
                         return $sdi->status->getDescription();
                     }),

@@ -63,7 +63,7 @@ class ContractsRelationManager extends RelationManager
                 //     ->badge()
                 //     ->sortable(),
                 Tables\Columns\TextColumn::make('type')->label('Tipo')
-                    ->badge()
+                    // ->badge()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('number')->label('Numero')

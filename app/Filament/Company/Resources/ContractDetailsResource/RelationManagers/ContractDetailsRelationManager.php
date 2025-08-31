@@ -57,7 +57,7 @@ class ContractDetailsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('contract_type')
                     ->label('Tipo')
                     ->searchable()
-                    ->badge()
+                    // ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date')
                     ->label('Data')
