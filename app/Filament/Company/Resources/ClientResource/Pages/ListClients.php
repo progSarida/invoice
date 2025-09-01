@@ -66,13 +66,13 @@ class ListClients extends ListRecords
                         ->success()
                         ->send();
                 }),
-                Actions\Action::make('ledger')
+            Actions\Action::make('ledger')
                 ->icon('carbon-compare')
-                ->label('Comparata')
-                ->tooltip('Stampa fatturazione comparata')
+                ->label('Partitario')
+                ->tooltip('Stampa partitario clienti')
                 ->color('primary')
                 ->modalWidth('6xl')
-                ->modalHeading('Fattura comparata')
+                ->modalHeading('Partitario')
                 ->form([
                     \Filament\Forms\Components\Grid::make(12)
                         ->schema([
