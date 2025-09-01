@@ -2,12 +2,14 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 
+use App\Enums\ContractType;
 use Carbon\Carbon;
 use App\Models\User;
 use Filament\Actions;
 use App\Models\Invoice;
 use App\Models\NewContract;
 use App\Enums\InvoicingCicle;
+use App\Enums\TaxType;
 use Filament\Facades\Filament;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\ExportAction;
@@ -18,6 +20,10 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Exports\NewInvoiceExporter;
 use App\Filament\Company\Resources\NewInvoiceResource;
+use App\Models\ManageType;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Facades\DB;
 
 class ListNewInvoices extends ListRecords
@@ -56,6 +62,7 @@ class ListNewInvoices extends ListRecords
                     }
                 }),
             Actions\CreateAction::make()
+                // ->keyBindings(['alt+n'])
                 ->hidden(function () {
                     // Controlli per bloccare l'inserimento di nuove fatture
                     $refusedHide = $this->refusedHide();                                                        // controllo fatture rifiutate
@@ -71,9 +78,7 @@ class ListNewInvoices extends ListRecords
                     // creo notifica su tabella notifications
 
                     return ($refusedHide || $discardedHide || $lateHide || $silentHide);
-                })
-                // ->keyBindings(['alt+n'])
-                ,
+                }),
             Actions\Action::make('stampa')
                 ->icon('heroicon-o-printer')
                 ->label('Stampa')
@@ -119,8 +124,191 @@ class ListNewInvoices extends ListRecords
                 ->color('primary')
                 ->exporter(NewInvoiceExporter::class)
                 // ->keyBindings(['alt+e'])
-
                 ,
+            Actions\Action::make('compare')
+                ->icon('carbon-compare')
+                ->label('Comparata')
+                ->tooltip('Stampa fatturazione comparata')
+                ->color('primary')
+                ->modalWidth('6xl')
+                ->modalHeading('Fattura comparata')
+                ->form([
+                    \Filament\Forms\Components\Grid::make(12)
+                        ->schema([
+                            TextInput::make('accrual_year_1')
+                                ->label('Anno competenza 1')
+                                ->columnSpan(3)
+                                ->required()
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue(date('Y') + 1)
+                                ->default(date('Y') - 1)
+                                ->rules(['different:accrual_year_1']),
+                            TextInput::make('accrual_year_2')
+                                ->label('Anno competenza 2')
+                                ->columnSpan(3)
+                                ->required()
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue(date('Y') + 1)
+                                ->default(date('Y')),
+                            Select::make('doc_type_id')
+                                ->label('Tipo documento')
+                                ->columnSpan(6)
+                                ->options(function () {
+                                    $docs = \Filament\Facades\Filament::getTenant()
+                                        ->docTypes()
+                                        ->select('doc_types.id', 'doc_types.description')
+                                        ->get();
+                                    return $docs->pluck('description', 'id')->toArray();
+                                })
+                                ->searchable()
+                                ->preload(),
+                            Select::make('tax_type')
+                                ->label('Entrata')
+                                ->columnSpan(3)
+                                ->options(TaxType::class)
+                                ->searchable()
+                                ->preload(),
+                            Select::make('client_id')
+                                ->label('Cliente')
+                                ->columnSpan(5)
+                                ->options(function () {
+                                    $docs = \Filament\Facades\Filament::getTenant()->clients()->select('clients.id', 'clients.denomination')->get();
+                                    return $docs->pluck('denomination', 'id')->toArray();
+                                })
+                                ->searchable('denomination')
+                                ->preload()
+                                ->optionsLimit(5),
+                            Select::make('manage_type_id')
+                                ->label('Tipo di gestione')
+                                ->columnSpan(4)
+                                ->options(function () {
+                                    return ManageType::orderBy('order')->pluck('name', 'id');
+                                })
+                                ->searchable()
+                                ->preload(),
+                            TextInput::make('from_budget_year')
+                                ->label('Anno bilancio da')
+                                ->columnSpan(2)
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue(date('Y') + 1),
+                            TextInput::make('to_budget_year')
+                                ->label('Anno bilancio a')
+                                ->columnSpan(2)
+                                ->numeric()
+                                ->minValue(1900)
+                                ->maxValue(date('Y') + 1),
+                            DatePicker::make('from_invoice_date')
+                                ->label('Data fatturazione da')
+                                ->columnSpan(2),
+                            DatePicker::make('to_invoice_date')
+                                ->label('Data fatturazione a')
+                                ->columnSpan(2),
+                            Select::make('contract_type')
+                                ->label('Tipo contratto')
+                                ->options(ContractType::class)
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(3),
+                        ]),
+                ])
+                ->action(function ($data) {
+                    // Recupero i dati dalla form
+                    $clientId = $data['client_id'] ?? null;
+                    $taxType = $data['tax_type'] ?? null;
+                    $contractType = $data['contract_type'] ?? null;
+                    $docTypeId = $data['doc_type_id'] ?? null;
+                    $manageTypeId = $data['manage_type_id'] ?? null;
+                    $accrualYear1 = $data['accrual_year_1'] ?? null;
+                    $accrualYear2 = $data['accrual_year_2'] ?? null;
+                    $fromBudgetYear = $data['from_budget_year'] ?? null;
+                    $toBudgetYear = $data['to_budget_year'] ?? null;
+                    $fromInvoiceDate = $data['from_invoice_date'] ?? null;
+                    $toInvoiceDate = $data['to_invoice_date'] ?? null;
+
+                    // Log dei filtri
+                    // \Log::info('Filtri ricevuti:', $data);
+
+                    // Query contratti con relazioni caricate
+                    $contracts = \Filament\Facades\Filament::getTenant()
+                        ->newContracts()
+                        ->with([
+                            'invoices' => function ($query) use ($docTypeId, $manageTypeId, $fromBudgetYear, $toBudgetYear, $fromInvoiceDate, $toInvoiceDate) {
+                                $query->with([
+                                    'client.city', // Aggiungi questa relazione
+                                    'docType',
+                                    'contract'
+                                ])
+                                    ->whereNotNull('client_id')
+                                    ->when($docTypeId, fn($q) => $q->where('doc_type_id', $docTypeId))
+                                    ->when($manageTypeId, fn($q) => $q->where('manage_type_id', $manageTypeId))
+                                    ->when($fromBudgetYear, fn($q) => $q->where('budget_year', '>=', (int)$fromBudgetYear))
+                                    ->when($toBudgetYear, fn($q) => $q->where('budget_year', '<=', (int)$toBudgetYear))
+                                    ->when($fromInvoiceDate, fn($q) => $q->where('invoice_date', '>=', $fromInvoiceDate))
+                                    ->when($toInvoiceDate, fn($q) => $q->where('invoice_date', '<=', $toInvoiceDate));
+                            },
+                            'client.city' // Aggiungi anche qui per sicurezza
+                        ])
+                        ->when($clientId, fn($q) => $q->where('client_id', $clientId))
+                        ->when($taxType, fn($q) => $q->whereHas('invoices', fn($q) => $q->where('tax_type', $taxType)))
+                        ->when($contractType, fn($q) => $q->whereHas('lastDetail', fn($q) => $q->where('contract_type', $contractType)))
+                        ->get();
+
+                    // Log dei contratti recuperati
+                    // \Log::info('Contratti recuperati:', $contracts->toArray());
+
+                    // Raggruppamento per comune
+                    $param = [];
+                    foreach ($contracts as $contract) {
+                        $invoicesYear1 = $contract->invoices->where('accrual_year', '=', (int)$accrualYear1);
+                        $invoicesYear2 = $contract->invoices->where('accrual_year', '=', (int)$accrualYear2);
+
+                        // Log delle fatture per anno
+                        // \Log::info("Fatture anno {$accrualYear1}:", $invoicesYear1->toArray());
+                        // \Log::info("Fatture anno {$accrualYear2}:", $invoicesYear2->toArray());
+
+                        $year1Data = $this->calculateYearData($invoicesYear1, $contract, $accrualYear1);
+                        $year2Data = $this->calculateYearData($invoicesYear2, $contract, $accrualYear2);
+
+                        foreach ($year1Data as $data1) {
+                            $comune = $data1['comune'] ?: 'N/D';
+                            $param[$comune][1][] = $data1;
+                        }
+                        foreach ($year2Data as $data2) {
+                            $comune = $data2['comune'] ?: 'N/D';
+                            $param[$comune][2][] = $data2;
+                        }
+                    }
+
+                    // Log del risultato finale
+                    // \Log::info('Param:', $param);
+
+                    // Elimina comuni senza fatture per entrambi gli anni
+                    $param = array_filter($param, function ($comuneData) {
+                        return !empty($comuneData[1]) || !empty($comuneData[2]);
+                    });
+
+                    // Log del risultato filtrato
+                    // \Log::info('Param filtrato:', $param);
+
+                    return response()->streamDownload(function () use ($param, $data) {
+                        echo Pdf::loadHTML(
+                            Blade::render('pdf.compare', [
+                                'data' => $param,
+                                'filters' => $data,
+                            ])
+                        )
+                            ->setPaper('A4', 'landscape')
+                            ->stream();
+                    }, 'Fatturazione_Comparata.pdf');
+
+                    Notification::make()
+                        ->title('Stampa avviata')
+                        ->success()
+                        ->send();
+                }),
         ];
     }
 
@@ -424,5 +612,77 @@ class ListNewInvoices extends ListRecords
     {
         $lastInvoiceDate = Carbon::parse($contract->last_invoice_date);
         return $lastInvoiceDate->diffInMonths(now()) > 6;                                       // controllo che siano passati sei mesi dalla data dell'ultima fattura
+    }
+
+    private function calculateYearData($invoices, $contract, $accrualYear)
+    {
+        if ($invoices->isEmpty()) {
+            return [];
+        }
+
+        $result = [];
+
+        // Raggruppa per codice città
+        $byComune = $invoices->groupBy(function ($invoice) {
+            if (!$invoice->client) {
+                return 'N/D';
+            }
+            return $invoice->client->city && $invoice->client->city->code
+                ? $invoice->client->city->code
+                : ($invoice->client->comune ?? $invoice->client->denomination ?? 'N/D');
+        });
+
+        foreach ($byComune as $comune => $invoicesByComune) {
+            // AGGIUNTO: Raggruppa per anno di bilancio
+            $byBudgetYear = $invoicesByComune->groupBy(function ($invoice) {
+                return $invoice->budget_year ?? 'N/D';
+            });
+
+            foreach ($byBudgetYear as $budgetYear => $invoicesByBudgetYear) {
+                // Raggruppa per tributo
+                $byTributo = $invoicesByBudgetYear->groupBy(function ($invoice) {
+                    return $invoice->tax_type ? ($invoice->tax_type->value ?? '') : '';
+                });
+
+                foreach ($byTributo as $tributo => $invoicesByTributo) {
+                    // Raggruppa per payment_type (dal contratto)
+                    $byTipoGestione = $invoicesByTributo->groupBy(function ($invoice) {
+                        return $invoice->contract ? ($invoice->contract->payment_type ?? '') : '';
+                    });
+
+                    foreach ($byTipoGestione as $tipo_gestione => $invoicesByTipoGestione) {
+                        // Raggruppa per tipo_fattura
+                        $byTipoFattura = $invoicesByTipoGestione->groupBy(function ($invoice) {
+                            return $invoice->doc_type_id ?? '';
+                        });
+
+                        foreach ($byTipoFattura as $tipo_fattura => $invoicesGroup) {
+                            $total = $invoicesGroup->sum(function ($invoice) use ($contract) {
+                                return $contract->client && $contract->client->type === 'public'
+                                    ? ($invoice->no_vat_total ?? 0)
+                                    : ($invoice->total ?? 0);
+                            });
+                            $accredito = $invoicesGroup->sum('total_payment');
+                            $nota_credito = $invoicesGroup->sum('total_notes');
+
+                            $result[] = [
+                                'invoices' => $invoicesGroup->toArray(),
+                                'comune' => $comune,
+                                'anno' => $budgetYear, // Usa l'anno di bilancio dal raggruppamento
+                                'tributo' => $tributo,
+                                'tipo_gestione' => $tipo_gestione,
+                                'tipo_fattura' => $tipo_fattura,
+                                'importo' => $total,
+                                'accredito' => $accredito,
+                                'nota_credito' => $nota_credito,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        // \Log::info('Risultato calculateYearData:', $result);
+        return $result;
     }
 }
