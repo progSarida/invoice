@@ -18,9 +18,11 @@ class Bail extends Model
         'bill_number',                                          // numero polizza
         'bill_date',                                            // data polizza
         'bill_attachment_path',                                 // percorso file polizza
-        'duration',                                             // durata polizza
         'bill_start',                                           // inizio polizza
         'bill_deadline',                                        // scadenza polizza
+        'year_duration',                                        // durata polizza
+        'month_duration',                                       // durata polizza
+        'day_duration',                                         // durata polizza
         'original_premium',                                     // importo
         'original_pay_date',                                    // data pagamento premio originario
         'bail_status',                                          // stato cauzione (Enum)

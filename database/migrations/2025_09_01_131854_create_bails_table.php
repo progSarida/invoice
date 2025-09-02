@@ -22,7 +22,7 @@ return new class extends Migration
             $table->unsignedBigInteger('contract_id')->nullable();                              // contratto
             $table->foreign('contract_id')->references('id')->on('new_contracts')
                 ->onUpdate('cascade')->onDelete('cascade');
-                
+
             $table->string('cig_code')->nullable();                                             // codice identificativo gara
             $table->string('tax_type')->nullable();                                             // tipo entrata (Enum)
             $table->string('insurance')->nullable();                                            // assicurazione
@@ -31,14 +31,16 @@ return new class extends Migration
             $table->date('bill_date')->nullable();                                              // data polizza
             $table->string('bill_attachment_path')->nullable();                                 // percorso file polizza
             $table->date('bill_start')->nullable();                                             // inizio polizza
-            $table->string('duration')->nullable();                                             // durata polizza
             $table->date('bill_deadline')->nullable();                                          // scadenza polizza
-            $table->decimal('original_premium',10,2)->nullable();                               // importo
+            $table->string('year_duration')->nullable();                                        // anni polizza
+            $table->string('month_duration')->nullable();                                       // mesi polizza
+            $table->string('day_duration')->nullable();                                         // giorni polizza
+            $table->decimal('original_premium',10,2)->nullable();                               // premio originale
             $table->date('original_pay_date')->nullable();                                      // data pagamento premio originario
             $table->string('bail_status')->nullable();                                          // stato cauzione (Enum)
             $table->date('release_date')->nullable();                                           // scadenza polizza
-            $table->decimal('renew_premium',10,2)->nullable();                                  // importo
-            $table->date('renew_date')->nullable();                                             // scadenza polizza
+            $table->decimal('renew_premium',10,2)->nullable();                                  // premio rinnovo
+            $table->date('renew_date')->nullable();                                             // data rinnovo
             $table->string('receipt_attachment_path')->nullable();                              // percorso file ricevuta di quietanza
             $table->string('note')->nullable();                                                 // note
             $table->timestamps();

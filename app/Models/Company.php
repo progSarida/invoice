@@ -148,4 +148,9 @@ class Company extends Model
     {
         return $this->hasMany(PostalExpense::class);
     }
+
+    public function bails()
+    {
+        return $this->hasMany(Bail::class);
+    }
 }
