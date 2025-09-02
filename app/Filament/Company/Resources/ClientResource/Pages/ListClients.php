@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Company\Resources\ClientResource;
 use App\Filament\Exports\ClientExporter;
 use App\Models\ManageType;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -67,20 +68,59 @@ class ListClients extends ListRecords
                         ->send();
                 }),
             Actions\Action::make('ledger')
-                ->icon('carbon-compare')
+                ->icon('tabler-report-search')
                 ->label('Partitario')
                 ->tooltip('Stampa partitario clienti')
                 ->color('primary')
-                ->modalWidth('6xl')
+                ->modalWidth('5xl')
                 ->modalHeading('Partitario')
                 ->form([
                     \Filament\Forms\Components\Grid::make(12)
                         ->schema([
-                            //
+                            Select::make('client_id')
+                                ->label('Cliente')
+                                ->columnSpan(5)
+                                ->options(function () {
+                                    $docs = \Filament\Facades\Filament::getTenant()->clients()->select('clients.id', 'clients.denomination')->get();
+                                    return $docs->pluck('denomination', 'id')->toArray();
+                                })
+                                ->searchable('denomination')
+                                ->preload()
+                                ->optionsLimit(5),
+                            DatePicker::make('from_date')
+                                ->label('Da data')
+                                ->columnSpan(2),
+                            DatePicker::make('to_date')
+                                ->label('A data')
+                                ->columnSpan(2),
+                            Checkbox::make('prec_residue')
+                                ->label('Con residuo precedente')
+                                ->columnSpan(3)
+                                ->default(false)
                         ]),
                 ])
                 ->action(function ($data) {
-                    //
+                    // dd($data);
+                    $clientId = $data['client_id'] ?? null;
+                    $fromDate = $data['from_date'] ?? null;
+                    $toDate = $data['to_date'] ?? null;
+                    $precResidue = $data['prec_residue'] ?? null;
+
+                    $invoices = \Filament\Facades\Filament::getTenant()
+                        ->invoices()
+                        ->with([
+                            'activePayments' => function ($query) use ($fromDate, $toDate) {
+                                $query->when($fromDate, fn($q) => $q->where('payment_date', '>=', $fromDate))
+                                    ->when($toDate, fn($q) => $q->where('payment_date', '<=', $toDate));
+                            },
+                            'docType',
+                            'invoice',
+                        ])
+                        ->when($clientId, fn($q) => $q->where('client_id', $clientId))
+                        ->when($fromDate, fn($q) => $q->whereHas('invoices', fn($q) => $q->where('invoice_date', '>=', $fromDate)))
+                        ->when($toDate, fn($q) => $q->whereHas('lastDetail', fn($q) => $q->where('invoice_date', '<=', $toDate)))
+                        ->get();
+                    dd($invoices);
                 }),
             ExportAction::make('esporta')
                 ->icon('phosphor-export')

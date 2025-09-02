@@ -551,4 +551,31 @@ class Invoice extends Model
 
         return null;
     }
+
+    public function invoiceNumber(){
+
+        if($this->art_73) {
+            $number = "";
+            $date = $this->invoice_date;
+            for($i=strlen($this->number);$i<3;$i++)
+            {
+                $number.= "0";
+            }
+            $number = $number.$this->number;
+            return $number."/".$date;
+        }
+        else if(!$this->number || !$this->sectional_id || !$this->year)
+            return null;
+        else{
+            $number = "";
+            $sectional = Sectional::find($this->sectional_id)->description;
+            for($i=strlen($this->number);$i<3;$i++)
+            {
+                $number.= "0";
+            }
+            $number = $number.$this->number;
+            return $number."/".$sectional."/".$this->year;
+        }
+
+    }
 }

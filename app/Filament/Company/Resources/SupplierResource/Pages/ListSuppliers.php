@@ -14,6 +14,22 @@ class ListSuppliers extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\Action::make('ledger')
+                ->icon('tabler-report-search')
+                ->label('Partitario')
+                ->tooltip('Stampa partitario fornitori')
+                ->color('primary')
+                ->modalWidth('6xl')
+                ->modalHeading('Partitario')
+                ->form([
+                    \Filament\Forms\Components\Grid::make(12)
+                        ->schema([
+                            //
+                        ]),
+                ])
+                ->action(function ($data) {
+                    //
+                }),
         ];
     }
 }
