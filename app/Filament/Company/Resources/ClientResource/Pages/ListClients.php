@@ -104,7 +104,7 @@ class ListClients extends ListRecords
                     $clientId = $data['client_id'] ?? null;
                     $fromDate = $data['from_date'] ?? null;
                     $toDate = $data['to_date'] ?? null;
-                    $precResidue = $data['prec_residue'] ?? null;
+                    $precResidue = $data['prec_residue'];
 
                     $invoices = \Filament\Facades\Filament::getTenant()
                         ->invoices()
@@ -112,15 +112,89 @@ class ListClients extends ListRecords
                             'activePayments' => function ($query) use ($fromDate, $toDate) {
                                 $query->when($fromDate, fn($q) => $q->where('payment_date', '>=', $fromDate))
                                     ->when($toDate, fn($q) => $q->where('payment_date', '<=', $toDate));
+                                    // ->orderBy('updated_at');
                             },
                             'docType',
                             'invoice',
                         ])
                         ->when($clientId, fn($q) => $q->where('client_id', $clientId))
-                        ->when($fromDate, fn($q) => $q->whereHas('invoices', fn($q) => $q->where('invoice_date', '>=', $fromDate)))
-                        ->when($toDate, fn($q) => $q->whereHas('lastDetail', fn($q) => $q->where('invoice_date', '<=', $toDate)))
+                        ->when($fromDate, fn($q) => $q->where('invoice_date', '>=', $fromDate))
+                        ->when($toDate, fn($q) => $q->where('invoice_date', '<=', $toDate))
+                        ->where('flow', 'out')
+                        // ->orderBy('updated_at')
                         ->get();
-                    dd($invoices);
+                    // dd($invoices);
+
+                    $param = [];
+                    $residue = $this->getPrecResidue($data);                                                            // residuo precedente
+                    $saldo = $precResidue ? $residue : 0;                                                               // saldo iniziale 
+                    $index = 0;
+                    foreach($invoices as $key => $invoice) {
+                        $param[$index]['order'] = \Carbon\Carbon::parse($invoice->updated_at)->valueOf();
+                        $param[$index]['reg'] = \Carbon\Carbon::parse($invoice->updated_at)->format('d/m/Y');
+                        $param[$index]['cliente'] = $invoice->client->denomination;
+                        $param[$index]['num_doc'] = $invoice->invoiceNumber();
+                        $param[$index]['data_doc'] = \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y');
+                        $param[$index]['desc'] = $invoice->description;
+                        $amount = $invoice->client?->type?->value == 'public' ? $invoice->no_vat_total : $invoice->total
+;                       switch($invoice->docType->name) {
+                            case 'TD02':                                                                                // acconti/anticipi su fattura
+                            case 'TD03':                                                                                // acconti/anticipi su parcella
+                            case 'TD04':                                                                                // nota di credito
+                                // $saldo -= $amount;
+                                $param[$index]['dare'] = 0;
+                                $param[$index]['avere'] = $amount;
+                                // $param[$index]['saldo'] = $saldo;
+                                break;
+                            default:                                                                                    // tutta gli altri tipi di documento
+                                // $saldo += $amount;
+                                $param[$index]['dare'] = $amount;
+                                $param[$index]['avere'] = 0;
+                                // $param[$index]['saldo'] = $saldo;
+                                break;
+                        }
+                        if($invoice->activePayments) {
+                            foreach($invoice->activePayments as $payment){
+                                $index++;
+                                $param[$index]['order'] = \Carbon\Carbon::parse($payment->updated_at)->valueOf();
+                                $param[$index]['reg'] = \Carbon\Carbon::parse($payment->updated_at)->format('d/m/Y');
+                                $param[$index]['cliente'] = $payment->invoice->client->denomination;
+                                $param[$index]['num_doc'] = '';
+                                $param[$index]['data_doc'] = '';
+                                $param[$index]['desc'] = 'Pagamento da ' . $payment->invoice->client->denomination;
+                                // $saldo -= $payment->amount;
+                                $param[$index]['dare'] = 0;
+                                $param[$index]['avere'] = $payment->amount;
+                                // $param[$index]['saldo'] = $saldo;
+                            }
+                        }
+                        $index++;
+                    }
+
+                    usort($param, function ($a, $b) {                                                                   // ordino gli elementi per data di registrazione
+                        return $a['order'] <=> $b['order'];
+                    });
+
+                    // $saldo = $precResidue ? $residue : 0;
+                    foreach ($param as &$item) {                                                                        // creo la colonna del saldo
+                        $saldo += $item['dare'];
+                        $saldo -= $item['avere'];
+                        $item['saldo'] = $saldo;
+                    }
+
+                    dd($param);
+
+                    return response()->streamDownload(function () use ($data, $residue, $param) {
+                        echo Pdf::loadHTML(
+                            Blade::render('pdf.ledger', [
+                                'filters' => $data,
+                                'residue' => $residue,
+                                'data' => $param,
+                            ])
+                        )
+                            ->setPaper('A4', 'landscape')
+                            ->stream();
+                    }, 'Partitario.pdf');
                 }),
             ExportAction::make('esporta')
                 ->icon('phosphor-export')
@@ -130,5 +204,13 @@ class ListClients extends ListRecords
                 ->exporter(ClientExporter::class)
                 // ->keyBindings(['alt+e'])
         ];
+    }
+
+    private function getPrecResidue($data) {                                                                            // calcolo residuo precedente
+        $residue = 0;
+
+        //
+
+        return $residue;
     }
 }
