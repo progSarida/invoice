@@ -79,6 +79,7 @@ class ListClients extends ListRecords
                         ->schema([
                             Select::make('client_id')
                                 ->label('Cliente')
+                                ->placeholder('Tutti')
                                 ->columnSpan(5)
                                 ->options(function () {
                                     $docs = \Filament\Facades\Filament::getTenant()->clients()->select('clients.id', 'clients.denomination')->get();
@@ -127,27 +128,51 @@ class ListClients extends ListRecords
 
                     $param = [];
                     $residue = $this->getPrecResidue($data);                                                            // residuo precedente
-                    $saldo = $precResidue ? $residue : 0;                                                               // saldo iniziale 
+                    $saldo = $precResidue ? $residue : 0;                                                               // saldo iniziale
                     $index = 0;
                     foreach($invoices as $key => $invoice) {
                         $param[$index]['order'] = \Carbon\Carbon::parse($invoice->updated_at)->valueOf();
                         $param[$index]['reg'] = \Carbon\Carbon::parse($invoice->updated_at)->format('d/m/Y');
-                        $param[$index]['cliente'] = $invoice->client->denomination;
+                        $param[$index]['cliente']['nome'] = $invoice->client->denomination;
+                        $param[$index]['cliente']['pi'] = $invoice->client->vat_code;
+                        $param[$index]['cliente']['cf'] = $invoice->client->tax_code;
                         $param[$index]['num_doc'] = $invoice->invoiceNumber();
                         $param[$index]['data_doc'] = \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y');
                         $param[$index]['desc'] = $invoice->description;
                         $amount = $invoice->client?->type?->value == 'public' ? $invoice->no_vat_total : $invoice->total
 ;                       switch($invoice->docType->name) {
                             case 'TD02':                                                                                // acconti/anticipi su fattura
-                            case 'TD03':                                                                                // acconti/anticipi su parcella
-                            case 'TD04':                                                                                // nota di credito
                                 // $saldo -= $amount;
+                                $param[$index]['desc'] = 'Acconto<br>Doc. orig. ' . $invoice->invoiceNumber();
                                 $param[$index]['dare'] = 0;
                                 $param[$index]['avere'] = $amount;
                                 // $param[$index]['saldo'] = $saldo;
                                 break;
+                            case 'TD03':                                                                                // acconti/anticipi su parcella
+                                // $saldo -= $amount;
+                                $param[$index]['desc'] = 'Acconto su parcella';
+                                $param[$index]['dare'] = 0;
+                                $param[$index]['avere'] = $amount;
+                                // $param[$index]['saldo'] = $saldo;
+                                break;
+                            case 'TD04':                                                                                // nota di credito
+                                // $saldo -= $amount;
+                                // dd($invoice);
+                                $param[$index]['desc'] = 'N.C. su ' . $invoice->invoice->invoiceNumber() . '<br>Doc. orig. ' . $invoice->invoiceNumber();
+                                $param[$index]['dare'] = 0;
+                                $param[$index]['avere'] = $amount;
+                                // $param[$index]['saldo'] = $saldo;
+                                break;
+                            case 'TD01':                                                                                // fattura
+                                // $saldo += $amount;
+                                $param[$index]['desc'] = 'Ns. Fattura<br>Doc. orig. ' . $invoice->invoiceNumber();
+                                $param[$index]['dare'] = $amount;
+                                $param[$index]['avere'] = 0;
+                                // $param[$index]['saldo'] = $saldo;
+                                break;
                             default:                                                                                    // tutta gli altri tipi di documento
                                 // $saldo += $amount;
+                                $param[$index]['desc'] = $invoice->description;
                                 $param[$index]['dare'] = $amount;
                                 $param[$index]['avere'] = 0;
                                 // $param[$index]['saldo'] = $saldo;
@@ -161,7 +186,7 @@ class ListClients extends ListRecords
                                 $param[$index]['cliente'] = $payment->invoice->client->denomination;
                                 $param[$index]['num_doc'] = '';
                                 $param[$index]['data_doc'] = '';
-                                $param[$index]['desc'] = 'Pagamento da ' . $payment->invoice->client->denomination;
+                                $param[$index]['desc'] = 'S/DO FATTURA ' . $payment->invoice->client->denomination . '<br>Doc. orig. ' . $payment->invoice->invoiceNumber();
                                 // $saldo -= $payment->amount;
                                 $param[$index]['dare'] = 0;
                                 $param[$index]['avere'] = $payment->amount;
@@ -170,6 +195,19 @@ class ListClients extends ListRecords
                         }
                         $index++;
                     }
+
+                    // $originalParam = $param;                                                                            //
+                    // $duplicates = 15;                                                                                   //
+                    // $param = [];                                                                                        //
+                    // $index = 0;                                                                                         //
+                    // foreach ($originalParam as $item) {                                                                 //
+                    //     for ($i = 0; $i < $duplicates; $i++) {                                                          // duplicazione elementi
+                    //         $param[$index] = $item;                                                                     // usata per test
+                    //         $param[$index]['order'] = $item['order'] + ($i * 86400000);                                 //
+                    //         $param[$index]['reg'] = \Carbon\Carbon::parse($item['reg'])->addDays($i)->format('d/m/Y');  //
+                    //         $index++;                                                                                   //
+                    //     }                                                                                               //
+                    // }                                                                                                   //
 
                     usort($param, function ($a, $b) {                                                                   // ordino gli elementi per data di registrazione
                         return $a['order'] <=> $b['order'];
@@ -182,17 +220,20 @@ class ListClients extends ListRecords
                         $item['saldo'] = $saldo;
                     }
 
-                    dd($param);
+                    // dd($param);
 
-                    return response()->streamDownload(function () use ($data, $residue, $param) {
+                    $tenant = \Filament\Facades\Filament::getTenant();
+
+                    return response()->streamDownload(function () use ($data, $residue, $param, $tenant) {
                         echo Pdf::loadHTML(
                             Blade::render('pdf.ledger', [
+                                'company' => $tenant,
                                 'filters' => $data,
                                 'residue' => $residue,
                                 'data' => $param,
                             ])
                         )
-                            ->setPaper('A4', 'landscape')
+                            ->setPaper('A4', 'portrait')
                             ->stream();
                     }, 'Partitario.pdf');
                 }),
