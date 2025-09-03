@@ -78,16 +78,16 @@
                 <p>Cliente: {{ $data[0]['cliente']['nome'] }}</p>
                 <p>Partita iva: {{ $data[0]['cliente']['pi'] }} - Codice fiscale: {{ $data[0]['cliente']['cf'] }}</p>
             @endif
-            @if ($filters['prec_residue'] && isset($residue))
+            <!-- @if ($filters['prec_residue'] && isset($residue))
                 <p>Residuo Precedente: € {{ number_format($residue, 2, ',', '.') }}</p>
-            @endif
+            @endif -->
         </div>
 
         <!-- Table -->
         <div class="table-container">
             <table>
                 <tr class="no-border">
-                    <td colspan="6" class="text-right">Saldo precedente:</td>
+                    <td colspan="6" class="text-right">Residuo precedente:</td>
                     <td class="text-right no-border">€ {{ $filters['prec_residue'] ? number_format($residue, 2, ',', '.') : 0 }}</td>
                 </tr>
                 <thead>

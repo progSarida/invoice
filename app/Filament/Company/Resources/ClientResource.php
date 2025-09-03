@@ -186,12 +186,26 @@ class ClientResource extends Resource
                     ->label('')
                     ->content('')
                     ->visible(fn (callable $get) => $get('type') !== 'private' || ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
-                    ->columnspan(6),
+                    ->columnspan(1),
                 Forms\Components\Placeholder::make('ipa_code')
                     ->label('')
                     ->content('')
                     ->visible(fn (callable $get) => $get('type') !== 'private')
                     ->columnspan(2),
+                Forms\Components\Toggle::make('is_historical')
+                    ->label('Cliente storico')
+                    ->live()
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->columnspan(2),
+                Forms\Components\TextInput::make('residue')->label('Residuo al 31/12/2024')
+                    ->maxLength(255)
+                    ->visible(fn (callable $get) => $get('is_historical'))
+                    ->columnspan(3),
+                Forms\Components\Placeholder::make('residue')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => !$get('is_historical'))
+                    ->columnspan(3),
                 Forms\Components\TextInput::make('phone')->label('Tel.')
                     ->maxLength(255)
                     ->columnspan(2),

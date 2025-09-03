@@ -16,6 +16,7 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Company\Resources\ClientResource;
 use App\Filament\Exports\ClientExporter;
+use App\Models\Client;
 use App\Models\ManageType;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
@@ -247,11 +248,57 @@ class ListClients extends ListRecords
         ];
     }
 
-    private function getPrecResidue($data) {                                                                            // calcolo residuo precedente
+    private function getPrecResidue($data)																		// calcolo residuo precedente
+    {
         $residue = 0;
+        $historicResidue = 0;
 
-        //
+        if ($data['client_id']) {																				// è stato selezionato un cliente
+            $client = Client::find($data['client_id']);
+            $historicResidue = $client ? $client->residue : 0;													// residuo storico del cliente
+        } else {																								// nessun cliente selezionato
+            $historicResidue = Client::sum('residue');															// residuo storico totale									
+        }
+
+        $invoices = \Filament\Facades\Filament::getTenant()													    // fatture su cui fare il calcolo
+                ->invoices()
+                ->where('flow', 'out')                                                                          // solo fatture nuove
+                ->whereHas('docType', fn($q) => $q->where('name', 'TD01'))                                      // recupero solo le fatture
+                ->when($data['from_date'], fn($q) => $q->where('invoice_date', '<', $data['from_date']))
+                ->when(!$data['from_date'], fn($q) => $q->whereRaw('1 = 0'))
+                ->when($data['client_id'], fn($q) => $q->where('client_id', $data['client_id']));
+
+        $residue = $historicResidue 																			// al residuo storico
+            + $invoices->sum('total')                                                                           // sommo i totali delle fatture
+            - $invoices->sum('total_notes')                                                                     // sottraggo i totali delle note di credito delle fatture
+            - $invoices->sum('total_payment');                                                                  // sottraggo i totali dei pagamenti delle fatture
+
+        // dd($residue);
+
+        $totals = $invoices->selectRaw('
+                SUM(CASE 
+                    WHEN clients.type = \'public\' 
+                    THEN invoices.no_vat_total 
+                    ELSE invoices.total 
+                END) as total_sum,
+                SUM(total_notes) as notes_sum,
+                SUM(total_payment) as payment_sum
+            ')
+            ->join('clients', 'invoices.client_id', '=', 'clients.id')
+            ->first();
+
+        $residue = $historicResidue                                                                             // al residuo storico
+            + ($totals->total_sum ?? 0)                                                                         // sommo i totali delle fatture (con logica condizionale)
+            - ($totals->notes_sum ?? 0)                                                                         // sottraggo i totali delle note di credito
+            - ($totals->payment_sum ?? 0);                                                                      // sottraggo i totali dei pagamenti
+
+        return (float) $residue;
 
         return $residue;
+    }
+
+    private function closeOpen($index, $param, $invoice)												        // controllo se devo inserire la chiusura del bilancio
+    {
+        // se updated_at di index-1 e upfated_at di $index sono di due anni diversi
     }
 }

@@ -23,6 +23,8 @@ class Client extends Model
         'birth_place',
         'tax_code',
         'vat_code',
+        'is_historical',
+        'residue',
         'phone',
         'email',
         'pec',

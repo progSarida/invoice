@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ClientsTableSeeder extends Seeder
 {
@@ -15,12 +14,12 @@ class ClientsTableSeeder extends Seeder
      */
     public function run()
     {
+        
 
-
-        DB::table('clients')->delete();
-
-        DB::table('clients')->insert(array (
-            0 =>
+        \DB::table('clients')->delete();
+        
+        \DB::table('clients')->insert(array (
+            0 => 
             array (
                 'id' => 1,
                 'company_id' => 1,
@@ -36,14 +35,16 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00859380107',
                 'vat_code' => '00859380107',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
                 'ipa_code' => NULL,
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-09-03 13:10:16',
             ),
-            1 =>
+            1 => 
             array (
                 'id' => 2,
                 'company_id' => 1,
@@ -59,14 +60,16 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00081170086',
                 'vat_code' => '00260750088',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
                 'ipa_code' => NULL,
                 'created_at' => NULL,
-                'updated_at' => NULL,
+                'updated_at' => '2025-09-03 13:22:27',
             ),
-            2 =>
+            2 => 
             array (
                 'id' => 3,
                 'company_id' => 1,
@@ -82,6 +85,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00360660419',
                 'vat_code' => '00360660419',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -89,7 +94,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            3 =>
+            3 => 
             array (
                 'id' => 4,
                 'company_id' => 1,
@@ -105,6 +110,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00661110239',
                 'vat_code' => '00661110239',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -112,7 +119,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            4 =>
+            4 => 
             array (
                 'id' => 5,
                 'company_id' => 1,
@@ -128,6 +135,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00867140105',
                 'vat_code' => '00867140105',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -135,7 +144,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            5 =>
+            5 => 
             array (
                 'id' => 6,
                 'company_id' => 1,
@@ -151,6 +160,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00465390102',
                 'vat_code' => '00169000999',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -158,7 +169,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            6 =>
+            6 => 
             array (
                 'id' => 7,
                 'company_id' => 1,
@@ -174,6 +185,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00945110104',
                 'vat_code' => '00174060996',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -181,7 +194,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            7 =>
+            7 => 
             array (
                 'id' => 8,
                 'company_id' => 1,
@@ -197,6 +210,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83002510010',
                 'vat_code' => '03802700017',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -204,7 +219,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            8 =>
+            8 => 
             array (
                 'id' => 9,
                 'company_id' => 1,
@@ -220,6 +235,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80027490160',
                 'vat_code' => '00722500162',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -227,7 +244,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            9 =>
+            9 => 
             array (
                 'id' => 10,
                 'company_id' => 1,
@@ -243,6 +260,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00650430101',
                 'vat_code' => '00170730998',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -250,7 +269,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            10 =>
+            10 => 
             array (
                 'id' => 11,
                 'company_id' => 1,
@@ -266,6 +285,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83004430100',
                 'vat_code' => '00209950997',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -273,7 +294,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            11 =>
+            11 => 
             array (
                 'id' => 12,
                 'company_id' => 1,
@@ -289,6 +310,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00108010117',
                 'vat_code' => '00108010117',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -296,7 +319,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            12 =>
+            12 => 
             array (
                 'id' => 13,
                 'company_id' => 1,
@@ -312,6 +335,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00928960103',
                 'vat_code' => '00173750993',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -319,7 +344,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            13 =>
+            13 => 
             array (
                 'id' => 14,
                 'company_id' => 1,
@@ -335,6 +360,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00373340025',
                 'vat_code' => '00373340025',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -342,7 +369,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            14 =>
+            14 => 
             array (
                 'id' => 15,
                 'company_id' => 1,
@@ -358,6 +385,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00453890170',
                 'vat_code' => '00564120988',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -365,7 +394,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            15 =>
+            15 => 
             array (
                 'id' => 16,
                 'company_id' => 1,
@@ -381,6 +410,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00427670344',
                 'vat_code' => '00427670344',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -388,7 +419,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            16 =>
+            16 => 
             array (
                 'id' => 17,
                 'company_id' => 1,
@@ -404,6 +435,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '84503000154',
                 'vat_code' => '05050540151',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -411,7 +444,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            17 =>
+            17 => 
             array (
                 'id' => 18,
                 'company_id' => 1,
@@ -427,6 +460,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '03990160164',
                 'vat_code' => '03990160164',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -434,7 +469,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            18 =>
+            18 => 
             array (
                 'id' => 19,
                 'company_id' => 1,
@@ -450,6 +485,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00342670163',
                 'vat_code' => '00342670163',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -457,7 +494,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            19 =>
+            19 => 
             array (
                 'id' => 20,
                 'company_id' => 1,
@@ -473,6 +510,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00970030151',
                 'vat_code' => '00970030151',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -480,7 +519,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            20 =>
+            20 => 
             array (
                 'id' => 21,
                 'company_id' => 1,
@@ -496,6 +535,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00661030239',
                 'vat_code' => '00661030239',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -503,7 +544,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            21 =>
+            21 => 
             array (
                 'id' => 22,
                 'company_id' => 1,
@@ -519,6 +560,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83000910147',
                 'vat_code' => '00073290140',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -526,7 +569,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            22 =>
+            22 => 
             array (
                 'id' => 23,
                 'company_id' => 1,
@@ -542,6 +585,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00427030341',
                 'vat_code' => '00427030341',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -549,7 +594,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            23 =>
+            23 => 
             array (
                 'id' => 24,
                 'company_id' => 1,
@@ -565,6 +610,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00217170349',
                 'vat_code' => '00217170349',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -572,7 +619,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            24 =>
+            24 => 
             array (
                 'id' => 25,
                 'company_id' => 1,
@@ -588,6 +635,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00905900106',
                 'vat_code' => '00905900106',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -595,7 +644,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            25 =>
+            25 => 
             array (
                 'id' => 26,
                 'company_id' => 1,
@@ -611,6 +660,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00412900102',
                 'vat_code' => '00168110997',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -618,7 +669,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            26 =>
+            26 => 
             array (
                 'id' => 27,
                 'company_id' => 1,
@@ -634,6 +685,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00734460108',
                 'vat_code' => '00734460108',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -641,7 +694,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            27 =>
+            27 => 
             array (
                 'id' => 28,
                 'company_id' => 1,
@@ -657,6 +710,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '81000450494',
                 'vat_code' => '00345300495',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -664,7 +719,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            28 =>
+            28 => 
             array (
                 'id' => 29,
                 'company_id' => 1,
@@ -680,6 +735,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80005370137',
                 'vat_code' => '00417480134',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -687,7 +744,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            29 =>
+            29 => 
             array (
                 'id' => 30,
                 'company_id' => 1,
@@ -703,6 +760,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83000250163',
                 'vat_code' => '00373090166',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -710,7 +769,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            30 =>
+            30 => 
             array (
                 'id' => 31,
                 'company_id' => 1,
@@ -726,6 +785,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00342890167',
                 'vat_code' => '00342890167',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -733,7 +794,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            31 =>
+            31 => 
             array (
                 'id' => 32,
                 'company_id' => 1,
@@ -749,6 +810,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00465640100',
                 'vat_code' => '01101320990',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -756,7 +819,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            32 =>
+            32 => 
             array (
                 'id' => 33,
                 'company_id' => 1,
@@ -772,6 +835,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00473900181',
                 'vat_code' => '00473900181',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -779,7 +844,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            33 =>
+            33 => 
             array (
                 'id' => 34,
                 'company_id' => 1,
@@ -795,6 +860,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '81001030204',
                 'vat_code' => '00521810200',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -802,7 +869,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            34 =>
+            34 => 
             array (
                 'id' => 35,
                 'company_id' => 1,
@@ -818,6 +885,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00299440198',
                 'vat_code' => '00299440198',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -825,7 +894,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            35 =>
+            35 => 
             array (
                 'id' => 36,
                 'company_id' => 1,
@@ -841,6 +910,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '82502070152',
                 'vat_code' => '07862160152',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -848,7 +919,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            36 =>
+            36 => 
             array (
                 'id' => 37,
                 'company_id' => 1,
@@ -864,6 +935,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '84000590186',
                 'vat_code' => '00475090189',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -871,7 +944,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            37 =>
+            37 => 
             array (
                 'id' => 38,
                 'company_id' => 1,
@@ -887,6 +960,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00710830167',
                 'vat_code' => '00710830167',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -894,7 +969,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            38 =>
+            38 => 
             array (
                 'id' => 39,
                 'company_id' => 1,
@@ -910,6 +985,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00232910166',
                 'vat_code' => '00232910166',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -917,7 +994,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            39 =>
+            39 => 
             array (
                 'id' => 40,
                 'company_id' => 1,
@@ -933,6 +1010,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00661130237',
                 'vat_code' => '00661130237',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -940,7 +1019,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            40 =>
+            40 => 
             array (
                 'id' => 41,
                 'company_id' => 1,
@@ -956,6 +1035,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00286540166',
                 'vat_code' => '00286540166',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -963,7 +1044,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            41 =>
+            41 => 
             array (
                 'id' => 42,
                 'company_id' => 1,
@@ -979,6 +1060,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00869010173',
                 'vat_code' => '00869010173',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -986,7 +1069,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            42 =>
+            42 => 
             array (
                 'id' => 43,
                 'company_id' => 1,
@@ -1002,6 +1085,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00658150230',
                 'vat_code' => '00658150230',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1009,7 +1094,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            43 =>
+            43 => 
             array (
                 'id' => 44,
                 'company_id' => 1,
@@ -1025,6 +1110,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00325740199',
                 'vat_code' => '00325740199',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1032,7 +1119,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            44 =>
+            44 => 
             array (
                 'id' => 45,
                 'company_id' => 1,
@@ -1048,6 +1135,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00419930235',
                 'vat_code' => '00419930235',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1055,7 +1144,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            45 =>
+            45 => 
             array (
                 'id' => 46,
                 'company_id' => 1,
@@ -1071,6 +1160,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00368800173',
                 'vat_code' => '00557820982',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1078,7 +1169,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            46 =>
+            46 => 
             array (
                 'id' => 47,
                 'company_id' => 1,
@@ -1094,6 +1185,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00553860172',
                 'vat_code' => '00570180984',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1101,7 +1194,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            47 =>
+            47 => 
             array (
                 'id' => 48,
                 'company_id' => 1,
@@ -1117,6 +1210,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '84502880150',
                 'vat_code' => '05040110156',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1124,7 +1219,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            48 =>
+            48 => 
             array (
                 'id' => 49,
                 'company_id' => 1,
@@ -1140,6 +1235,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00240870162',
                 'vat_code' => '00240870162',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1147,7 +1244,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            49 =>
+            49 => 
             array (
                 'id' => 50,
                 'company_id' => 1,
@@ -1163,6 +1260,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00855780177',
                 'vat_code' => '00583110986',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1170,7 +1269,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            50 =>
+            50 => 
             array (
                 'id' => 51,
                 'company_id' => 1,
@@ -1186,6 +1285,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00323920199',
                 'vat_code' => '00323920199',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1193,7 +1294,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            51 =>
+            51 => 
             array (
                 'id' => 52,
                 'company_id' => 1,
@@ -1209,6 +1310,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '84002150161',
                 'vat_code' => '00719460164',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1216,7 +1319,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            52 =>
+            52 => 
             array (
                 'id' => 53,
                 'company_id' => 1,
@@ -1232,6 +1335,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00839700176',
                 'vat_code' => '00581050986',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1239,7 +1344,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            53 =>
+            53 => 
             array (
                 'id' => 54,
                 'company_id' => 1,
@@ -1255,6 +1360,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80018630170',
                 'vat_code' => '01806080170',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1262,7 +1369,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            54 =>
+            54 => 
             array (
                 'id' => 55,
                 'company_id' => 1,
@@ -1278,6 +1385,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '82000590164',
                 'vat_code' => '00655980167',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1285,7 +1394,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            55 =>
+            55 => 
             array (
                 'id' => 56,
                 'company_id' => 1,
@@ -1301,6 +1410,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00459830188',
                 'vat_code' => '00459830188',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1308,7 +1419,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            56 =>
+            56 => 
             array (
                 'id' => 57,
                 'company_id' => 1,
@@ -1324,6 +1435,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80001170788',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1331,7 +1444,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            57 =>
+            57 => 
             array (
                 'id' => 58,
                 'company_id' => 1,
@@ -1347,6 +1460,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '82002530101',
                 'vat_code' => '00209440999',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1354,7 +1469,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            58 =>
+            58 => 
             array (
                 'id' => 59,
                 'company_id' => 1,
@@ -1370,6 +1485,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00843000175',
                 'vat_code' => '00581440989',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1377,7 +1494,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            59 =>
+            59 => 
             array (
                 'id' => 60,
                 'company_id' => 1,
@@ -1393,6 +1510,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00854930179',
                 'vat_code' => '00582930988',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1400,7 +1519,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            60 =>
+            60 => 
             array (
                 'id' => 61,
                 'company_id' => 1,
@@ -1416,6 +1535,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00261520233',
                 'vat_code' => '00261520233',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1423,7 +1544,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            61 =>
+            61 => 
             array (
                 'id' => 62,
                 'company_id' => 1,
@@ -1439,6 +1560,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00796760239',
                 'vat_code' => '00796760239',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1446,7 +1569,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            62 =>
+            62 => 
             array (
                 'id' => 63,
                 'company_id' => 1,
@@ -1462,6 +1585,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00240820183',
                 'vat_code' => '00240820183',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1469,7 +1594,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            63 =>
+            63 => 
             array (
                 'id' => 64,
                 'company_id' => 1,
@@ -1485,6 +1610,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00855080172',
                 'vat_code' => '00855080172',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1492,7 +1619,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            64 =>
+            64 => 
             array (
                 'id' => 65,
                 'company_id' => 1,
@@ -1508,6 +1635,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00485150189',
                 'vat_code' => '00485150189',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1515,7 +1644,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            65 =>
+            65 => 
             array (
                 'id' => 66,
                 'company_id' => 1,
@@ -1531,6 +1660,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '92539460151',
                 'vat_code' => '03485390961',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1538,7 +1669,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            66 =>
+            66 => 
             array (
                 'id' => 67,
                 'company_id' => 1,
@@ -1554,6 +1685,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00212370092',
                 'vat_code' => '00212370092',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1561,7 +1694,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            67 =>
+            67 => 
             array (
                 'id' => 68,
                 'company_id' => 1,
@@ -1577,6 +1710,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '82002550109',
                 'vat_code' => '00209450998',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1584,7 +1719,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            68 =>
+            68 => 
             array (
                 'id' => 69,
                 'company_id' => 1,
@@ -1600,6 +1735,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80004220333',
                 'vat_code' => '00777240334',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1607,7 +1744,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            69 =>
+            69 => 
             array (
                 'id' => 70,
                 'company_id' => 1,
@@ -1623,6 +1760,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00860890102',
                 'vat_code' => '00860890102',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1630,7 +1769,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            70 =>
+            70 => 
             array (
                 'id' => 71,
                 'company_id' => 1,
@@ -1646,6 +1785,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00213300114',
                 'vat_code' => '00213300114',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1653,7 +1794,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            71 =>
+            71 => 
             array (
                 'id' => 72,
                 'company_id' => 1,
@@ -1669,6 +1810,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80011530336',
                 'vat_code' => '00878080332',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1676,7 +1819,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            72 =>
+            72 => 
             array (
                 'id' => 73,
                 'company_id' => 1,
@@ -1692,6 +1835,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80007310107',
                 'vat_code' => '00912760105',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1699,7 +1844,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            73 =>
+            73 => 
             array (
                 'id' => 74,
                 'company_id' => 1,
@@ -1715,6 +1860,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80007330105',
                 'vat_code' => '00864610100',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1722,7 +1869,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            74 =>
+            74 => 
             array (
                 'id' => 75,
                 'company_id' => 1,
@@ -1738,6 +1885,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00432840106',
                 'vat_code' => '00168500999',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1745,7 +1894,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            75 =>
+            75 => 
             array (
                 'id' => 76,
                 'company_id' => 1,
@@ -1761,6 +1910,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00232910091',
                 'vat_code' => '00232910091',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1768,7 +1919,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            76 =>
+            76 => 
             array (
                 'id' => 77,
                 'company_id' => 1,
@@ -1784,6 +1935,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '81001590090',
                 'vat_code' => '00338430093',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1791,7 +1944,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            77 =>
+            77 => 
             array (
                 'id' => 78,
                 'company_id' => 1,
@@ -1807,6 +1960,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '09456750158',
                 'vat_code' => '09456750158',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1814,7 +1969,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            78 =>
+            78 => 
             array (
                 'id' => 79,
                 'company_id' => 1,
@@ -1830,6 +1985,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00231170333',
                 'vat_code' => '00231170333',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1837,7 +1994,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            79 =>
+            79 => 
             array (
                 'id' => 80,
                 'company_id' => 1,
@@ -1853,6 +2010,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '02340990189',
                 'vat_code' => '02340990189',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1860,7 +2019,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            80 =>
+            80 => 
             array (
                 'id' => 81,
                 'company_id' => 1,
@@ -1876,6 +2035,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '81000250787',
                 'vat_code' => '01498550787',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1883,7 +2044,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            81 =>
+            81 => 
             array (
                 'id' => 82,
                 'company_id' => 1,
@@ -1899,6 +2060,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '86001750586',
                 'vat_code' => '02145941007',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1906,7 +2069,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            82 =>
+            82 => 
             array (
                 'id' => 83,
                 'company_id' => 1,
@@ -1922,6 +2085,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00296440092',
                 'vat_code' => '00296440092',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1929,7 +2094,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            83 =>
+            83 => 
             array (
                 'id' => 84,
                 'company_id' => 1,
@@ -1945,6 +2110,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83503490159',
                 'vat_code' => '04999560156',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1952,7 +2119,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            84 =>
+            84 => 
             array (
                 'id' => 85,
                 'company_id' => 1,
@@ -1968,6 +2135,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00338310097',
                 'vat_code' => '00338310097',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1975,7 +2144,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            85 =>
+            85 => 
             array (
                 'id' => 86,
                 'company_id' => 1,
@@ -1991,6 +2160,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80109890154',
                 'vat_code' => '04181870157',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -1998,7 +2169,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            86 =>
+            86 => 
             array (
                 'id' => 87,
                 'company_id' => 1,
@@ -2014,6 +2185,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00244820080',
                 'vat_code' => '00244820080',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2021,7 +2194,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            87 =>
+            87 => 
             array (
                 'id' => 88,
                 'company_id' => 1,
@@ -2037,6 +2210,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00246620082',
                 'vat_code' => '00246620082',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2044,7 +2219,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            88 =>
+            88 => 
             array (
                 'id' => 89,
                 'company_id' => 1,
@@ -2060,6 +2235,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00390050839',
                 'vat_code' => '00390050839',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2067,7 +2244,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            89 =>
+            89 => 
             array (
                 'id' => 90,
                 'company_id' => 1,
@@ -2083,6 +2260,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00311260095',
                 'vat_code' => '00311260095',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2090,7 +2269,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            90 =>
+            90 => 
             array (
                 'id' => 91,
                 'company_id' => 1,
@@ -2106,6 +2285,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '92539460151',
                 'vat_code' => '03485390961',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2113,7 +2294,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            91 =>
+            91 => 
             array (
                 'id' => 92,
                 'company_id' => 1,
@@ -2129,6 +2310,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00290280494',
                 'vat_code' => '00290280494',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2136,7 +2319,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            92 =>
+            92 => 
             array (
                 'id' => 93,
                 'company_id' => 1,
@@ -2152,6 +2335,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83011520109',
                 'vat_code' => '00300940103',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2159,7 +2344,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            93 =>
+            93 => 
             array (
                 'id' => 94,
                 'company_id' => 1,
@@ -2175,6 +2360,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00088020086',
                 'vat_code' => '00088020086',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2182,7 +2369,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            94 =>
+            94 => 
             array (
                 'id' => 95,
                 'company_id' => 1,
@@ -2198,6 +2385,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '00361130099',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2205,7 +2394,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            95 =>
+            95 => 
             array (
                 'id' => 96,
                 'company_id' => 1,
@@ -2221,6 +2410,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '90068070102',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2228,7 +2419,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            96 =>
+            96 => 
             array (
                 'id' => 97,
                 'company_id' => 1,
@@ -2244,6 +2435,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '85001810184',
                 'vat_code' => '00465640183',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2251,7 +2444,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            97 =>
+            97 => 
             array (
                 'id' => 98,
                 'company_id' => 1,
@@ -2267,6 +2460,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00436140347',
                 'vat_code' => '00436140347 ',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2274,7 +2469,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            98 =>
+            98 => 
             array (
                 'id' => 99,
                 'company_id' => 1,
@@ -2290,6 +2485,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '82000970770',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2297,7 +2494,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            99 =>
+            99 => 
             array (
                 'id' => 100,
                 'company_id' => 1,
@@ -2313,6 +2510,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '07249491007',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2320,7 +2519,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            100 =>
+            100 => 
             array (
                 'id' => 101,
                 'company_id' => 1,
@@ -2336,6 +2535,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00296990096',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2343,7 +2544,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            101 =>
+            101 => 
             array (
                 'id' => 102,
                 'company_id' => 1,
@@ -2359,6 +2560,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '00707040168',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2366,7 +2569,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            102 =>
+            102 => 
             array (
                 'id' => 103,
                 'company_id' => 1,
@@ -2382,6 +2585,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00681530168',
                 'vat_code' => '00681530168',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2389,7 +2594,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            103 =>
+            103 => 
             array (
                 'id' => 104,
                 'company_id' => 1,
@@ -2405,6 +2610,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00330380163',
                 'vat_code' => '00330380163',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2412,7 +2619,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            104 =>
+            104 => 
             array (
                 'id' => 105,
                 'company_id' => 1,
@@ -2428,6 +2635,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '01566130157',
                 'vat_code' => '00717740963',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2435,7 +2644,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            105 =>
+            105 => 
             array (
                 'id' => 106,
                 'company_id' => 1,
@@ -2451,6 +2660,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00561660127',
                 'vat_code' => '00561660127',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2458,7 +2669,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            106 =>
+            106 => 
             array (
                 'id' => 107,
                 'company_id' => 1,
@@ -2474,6 +2685,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83001820162',
                 'vat_code' => '02733610162',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2481,7 +2694,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            107 =>
+            107 => 
             array (
                 'id' => 108,
                 'company_id' => 1,
@@ -2497,6 +2710,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00240600163',
                 'vat_code' => '00240600163',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2504,7 +2719,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            108 =>
+            108 => 
             array (
                 'id' => 109,
                 'company_id' => 1,
@@ -2520,6 +2735,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00420010480',
                 'vat_code' => '00420010480',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'b.scotti@comune.sesto-fiorentino.fi.it',
                 'pec' => NULL,
@@ -2527,7 +2744,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            109 =>
+            109 => 
             array (
                 'id' => 110,
                 'company_id' => 1,
@@ -2543,6 +2760,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00663500239',
                 'vat_code' => '00663500239',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2550,7 +2769,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            110 =>
+            110 => 
             array (
                 'id' => 111,
                 'company_id' => 1,
@@ -2566,6 +2785,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83000470183',
                 'vat_code' => '00470790189',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2573,7 +2794,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            111 =>
+            111 => 
             array (
                 'id' => 112,
                 'company_id' => 1,
@@ -2589,6 +2810,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '88000230784',
                 'vat_code' => '00529360786',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2596,7 +2819,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            112 =>
+            112 => 
             array (
                 'id' => 113,
                 'company_id' => 1,
@@ -2612,6 +2835,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00431430784',
                 'vat_code' => '00431430784',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2619,7 +2844,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            113 =>
+            113 => 
             array (
                 'id' => 114,
                 'company_id' => 1,
@@ -2635,6 +2860,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00297750093',
                 'vat_code' => '00297750093',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2642,7 +2869,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            114 =>
+            114 => 
             array (
                 'id' => 115,
                 'company_id' => 1,
@@ -2658,6 +2885,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '82006930125',
                 'vat_code' => '00308200120',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2665,7 +2894,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            115 =>
+            115 => 
             array (
                 'id' => 116,
                 'company_id' => 1,
@@ -2681,6 +2910,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00666340161',
                 'vat_code' => '00666340161',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2688,7 +2919,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            116 =>
+            116 => 
             array (
                 'id' => 117,
                 'company_id' => 1,
@@ -2704,6 +2935,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00228700332',
                 'vat_code' => '00228700332',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2711,7 +2944,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            117 =>
+            117 => 
             array (
                 'id' => 118,
                 'company_id' => 1,
@@ -2727,6 +2960,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00232420331',
                 'vat_code' => '00232420331',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2734,7 +2969,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            118 =>
+            118 => 
             array (
                 'id' => 119,
                 'company_id' => 1,
@@ -2750,6 +2985,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00853850105',
                 'vat_code' => '00853850105',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2757,7 +2994,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            119 =>
+            119 => 
             array (
                 'id' => 120,
                 'company_id' => 1,
@@ -2773,6 +3010,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00467340188',
                 'vat_code' => '00467340188',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2780,7 +3019,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            120 =>
+            120 => 
             array (
                 'id' => 121,
                 'company_id' => 1,
@@ -2796,6 +3035,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00640710166',
                 'vat_code' => '00640710166',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2803,7 +3044,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            121 =>
+            121 => 
             array (
                 'id' => 122,
                 'company_id' => 1,
@@ -2819,6 +3060,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00663280162',
                 'vat_code' => '00663280162',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2826,7 +3069,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            122 =>
+            122 => 
             array (
                 'id' => 123,
                 'company_id' => 1,
@@ -2842,6 +3085,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00378820781',
                 'vat_code' => '00378820781',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2849,7 +3094,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            123 =>
+            123 => 
             array (
                 'id' => 124,
                 'company_id' => 1,
@@ -2865,6 +3110,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00722280161',
                 'vat_code' => '01657210165',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'segreteria@comune.gandellino.bg.it',
                 'pec' => NULL,
@@ -2872,7 +3119,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            124 =>
+            124 => 
             array (
                 'id' => 125,
                 'company_id' => 1,
@@ -2888,6 +3135,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '81001640168',
                 'vat_code' => '01657200166',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2895,7 +3144,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            125 =>
+            125 => 
             array (
                 'id' => 126,
                 'company_id' => 1,
@@ -2911,6 +3160,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00335130167',
                 'vat_code' => '00335130167',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2918,7 +3169,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            126 =>
+            126 => 
             array (
                 'id' => 127,
                 'company_id' => 1,
@@ -2934,6 +3185,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00318100096',
                 'vat_code' => '00318100096',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2941,7 +3194,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            127 =>
+            127 => 
             array (
                 'id' => 128,
                 'company_id' => 1,
@@ -2957,6 +3210,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80005610243',
                 'vat_code' => '00605690247',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2964,7 +3219,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            128 =>
+            128 => 
             array (
                 'id' => 129,
                 'company_id' => 1,
@@ -2980,6 +3235,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00314770066',
                 'vat_code' => '00314770066',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -2987,7 +3244,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            129 =>
+            129 => 
             array (
                 'id' => 130,
                 'company_id' => 1,
@@ -3003,6 +3260,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00482750189',
                 'vat_code' => '00482750189',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3010,7 +3269,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            130 =>
+            130 => 
             array (
                 'id' => 131,
                 'company_id' => 1,
@@ -3026,6 +3285,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '92142960282',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3033,7 +3294,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            131 =>
+            131 => 
             array (
                 'id' => 132,
                 'company_id' => 1,
@@ -3049,6 +3310,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '85001770180',
                 'vat_code' => '00463070185',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3056,7 +3319,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            132 =>
+            132 => 
             array (
                 'id' => 133,
                 'company_id' => 1,
@@ -3072,6 +3335,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83503550150',
                 'vat_code' => '09179860151',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3079,7 +3344,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            133 =>
+            133 => 
             array (
                 'id' => 134,
                 'company_id' => 1,
@@ -3095,6 +3360,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '06396970482',
                 'vat_code' => '06396970482',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3102,7 +3369,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            134 =>
+            134 => 
             array (
                 'id' => 135,
                 'company_id' => 1,
@@ -3118,6 +3385,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '81000430280',
                 'vat_code' => '01545800284',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'protocollo@comune.fontaniva.pd.it',
                 'pec' => NULL,
@@ -3125,7 +3394,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            135 =>
+            135 => 
             array (
                 'id' => 136,
                 'company_id' => 1,
@@ -3141,6 +3410,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '81000410282',
                 'vat_code' => '01573490289',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3148,7 +3419,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            136 =>
+            136 => 
             array (
                 'id' => 137,
                 'company_id' => 1,
@@ -3164,6 +3435,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00246280085',
                 'vat_code' => '00246280085',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3171,7 +3444,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            137 =>
+            137 => 
             array (
                 'id' => 138,
                 'company_id' => 1,
@@ -3187,6 +3460,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00253750087',
                 'vat_code' => '00253750087',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'p.m.sanremo@comunedisanremo.it',
                 'pec' => NULL,
@@ -3194,7 +3469,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            138 =>
+            138 => 
             array (
                 'id' => 139,
                 'company_id' => 1,
@@ -3210,6 +3485,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00341340099',
                 'vat_code' => '00341340099',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'ragioneria@comune.roccavignale.sv.it',
                 'pec' => NULL,
@@ -3217,7 +3494,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            139 =>
+            139 => 
             array (
                 'id' => 140,
                 'company_id' => 1,
@@ -3233,6 +3510,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80004690113',
                 'vat_code' => '00213620115',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3240,7 +3519,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            140 =>
+            140 => 
             array (
                 'id' => 141,
                 'company_id' => 1,
@@ -3256,6 +3535,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83000990164',
                 'vat_code' => '00714450160',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3263,7 +3544,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            141 =>
+            141 => 
             array (
                 'id' => 142,
                 'company_id' => 1,
@@ -3279,6 +3560,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00866400179',
                 'vat_code' => '00583980982',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3286,7 +3569,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            142 =>
+            142 => 
             array (
                 'id' => 143,
                 'company_id' => 1,
@@ -3302,6 +3585,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00246270169',
                 'vat_code' => '00246270169',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3309,7 +3594,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            143 =>
+            143 => 
             array (
                 'id' => 144,
                 'company_id' => 1,
@@ -3325,6 +3610,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '82002190021',
                 'vat_code' => '00210440020',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3332,7 +3619,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            144 =>
+            144 => 
             array (
                 'id' => 145,
                 'company_id' => 1,
@@ -3348,6 +3635,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80006370169',
                 'vat_code' => '00239780166',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3355,7 +3644,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            145 =>
+            145 => 
             array (
                 'id' => 146,
                 'company_id' => 1,
@@ -3371,6 +3660,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '91000280189',
                 'vat_code' => '01394200180',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3378,7 +3669,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            146 =>
+            146 => 
             array (
                 'id' => 147,
                 'company_id' => 1,
@@ -3394,6 +3685,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00309270122',
                 'vat_code' => '00309270122',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3401,7 +3694,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            147 =>
+            147 => 
             array (
                 'id' => 148,
                 'company_id' => 1,
@@ -3417,6 +3710,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '84000830186',
                 'vat_code' => '00475500187',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'ragioneria@comune.portalbera.pv.it',
                 'pec' => NULL,
@@ -3424,7 +3719,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            148 =>
+            148 => 
             array (
                 'id' => 149,
                 'company_id' => 1,
@@ -3440,6 +3735,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00376030177',
                 'vat_code' => '00376030177',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3447,7 +3744,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            149 =>
+            149 => 
             array (
                 'id' => 150,
                 'company_id' => 1,
@@ -3463,6 +3760,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00207470253',
                 'vat_code' => '00207470253',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3470,7 +3769,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            150 =>
+            150 => 
             array (
                 'id' => 151,
                 'company_id' => 1,
@@ -3486,6 +3785,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80011430487',
                 'vat_code' => '00628510489',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3493,7 +3794,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            151 =>
+            151 => 
             array (
                 'id' => 152,
                 'company_id' => 1,
@@ -3509,6 +3810,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '81000090787',
                 'vat_code' => '01468070782',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3516,7 +3819,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            152 =>
+            152 => 
             array (
                 'id' => 153,
                 'company_id' => 1,
@@ -3532,6 +3835,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00722510161',
                 'vat_code' => '00722510161',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3539,7 +3844,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            153 =>
+            153 => 
             array (
                 'id' => 154,
                 'company_id' => 1,
@@ -3555,6 +3860,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '81002410165',
                 'vat_code' => '00771900164 ',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'elena.bettoni@comune.colere.bg.it',
                 'pec' => NULL,
@@ -3562,7 +3869,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            154 =>
+            154 => 
             array (
                 'id' => 155,
                 'company_id' => 1,
@@ -3578,6 +3885,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00412270043',
                 'vat_code' => '00412270043',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'protocollo@comune.canale.cn.it',
                 'pec' => NULL,
@@ -3585,7 +3894,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            155 =>
+            155 => 
             array (
                 'id' => 156,
                 'company_id' => 1,
@@ -3601,6 +3910,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83000950184',
                 'vat_code' => '00488410184',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3608,7 +3919,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            156 =>
+            156 => 
             array (
                 'id' => 157,
                 'company_id' => 1,
@@ -3624,6 +3935,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00576500102',
                 'vat_code' => '00576500102',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3631,7 +3944,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            157 =>
+            157 => 
             array (
                 'id' => 158,
                 'company_id' => 1,
@@ -3647,6 +3960,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80008790174',
                 'vat_code' => '00360880173',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3654,7 +3969,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            158 =>
+            158 => 
             array (
                 'id' => 159,
                 'company_id' => 1,
@@ -3670,6 +3985,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '01011320486',
                 'vat_code' => '00492810486',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3677,7 +3994,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            159 =>
+            159 => 
             array (
                 'id' => 160,
                 'company_id' => 1,
@@ -3693,6 +4010,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00603990367',
                 'vat_code' => '00292430360',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3700,7 +4019,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            160 =>
+            160 => 
             array (
                 'id' => 161,
                 'company_id' => 1,
@@ -3716,6 +4035,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00338220098',
                 'vat_code' => '00338220098',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3723,7 +4044,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            161 =>
+            161 => 
             array (
                 'id' => 162,
                 'company_id' => 1,
@@ -3739,6 +4060,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00888570108',
                 'vat_code' => '00888570108',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3746,7 +4069,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            162 =>
+            162 => 
             array (
                 'id' => 163,
                 'company_id' => 1,
@@ -3762,6 +4085,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00759970171',
                 'vat_code' => '00577190986',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'gatti.caterina@pavonemella.it',
                 'pec' => NULL,
@@ -3769,7 +4094,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            163 =>
+            163 => 
             array (
                 'id' => 164,
                 'company_id' => 1,
@@ -3785,6 +4110,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80007490107',
                 'vat_code' => '00867000101',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3792,7 +4119,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            164 =>
+            164 => 
             array (
                 'id' => 165,
                 'company_id' => 1,
@@ -3808,6 +4135,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '87000210788',
                 'vat_code' => '01079800783',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3815,7 +4144,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            165 =>
+            165 => 
             array (
                 'id' => 166,
                 'company_id' => 1,
@@ -3831,6 +4160,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '01021480379',
                 'vat_code' => '00529031205',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3838,7 +4169,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            166 =>
+            166 => 
             array (
                 'id' => 167,
                 'company_id' => 1,
@@ -3854,6 +4185,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00290170174',
                 'vat_code' => '00550530984',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3861,7 +4194,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            167 =>
+            167 => 
             array (
                 'id' => 168,
                 'company_id' => 1,
@@ -3877,6 +4210,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '80001130527',
                 'vat_code' => '00166340521',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3884,7 +4219,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            168 =>
+            168 => 
             array (
                 'id' => 169,
                 'company_id' => 1,
@@ -3900,6 +4235,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '94000290166',
                 'vat_code' => '00276180163',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3907,7 +4244,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            169 =>
+            169 => 
             array (
                 'id' => 170,
                 'company_id' => 1,
@@ -3923,6 +4260,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '02409760069',
                 'vat_code' => '02409760069',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3930,7 +4269,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            170 =>
+            170 => 
             array (
                 'id' => 171,
                 'company_id' => 1,
@@ -3946,6 +4285,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00453990178',
                 'vat_code' => '00564140986',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3953,7 +4294,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            171 =>
+            171 => 
             array (
                 'id' => 172,
                 'company_id' => 1,
@@ -3969,6 +4310,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '82002790267',
                 'vat_code' => '01974550269',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3976,7 +4319,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            172 =>
+            172 => 
             array (
                 'id' => 173,
                 'company_id' => 1,
@@ -3992,6 +4335,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00683770168',
                 'vat_code' => '00683770168',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -3999,7 +4344,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            173 =>
+            173 => 
             array (
                 'id' => 174,
                 'company_id' => 1,
@@ -4015,6 +4360,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00161690664',
                 'vat_code' => '00161690664',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4022,7 +4369,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            174 =>
+            174 => 
             array (
                 'id' => 175,
                 'company_id' => 1,
@@ -4038,6 +4385,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => ' 80013190485',
                 'vat_code' => '03149360483 ',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4045,7 +4394,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            175 =>
+            175 => 
             array (
                 'id' => 176,
                 'company_id' => 1,
@@ -4061,6 +4410,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00239980691',
                 'vat_code' => '00239980691',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4068,7 +4419,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            176 =>
+            176 => 
             array (
                 'id' => 177,
                 'company_id' => 1,
@@ -4084,6 +4435,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00842990178',
                 'vat_code' => '00581430980',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4091,7 +4444,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            177 =>
+            177 => 
             array (
                 'id' => 178,
                 'company_id' => 1,
@@ -4107,6 +4460,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '83001630165',
                 'vat_code' => '01580610168',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4114,7 +4469,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            178 =>
+            178 => 
             array (
                 'id' => 179,
                 'company_id' => 1,
@@ -4130,6 +4485,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00321950164',
                 'vat_code' => '00321950164',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4137,7 +4494,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            179 =>
+            179 => 
             array (
                 'id' => 180,
                 'company_id' => 1,
@@ -4153,6 +4510,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00727670168',
                 'vat_code' => '00727670168',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4160,7 +4519,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            180 =>
+            180 => 
             array (
                 'id' => 181,
                 'company_id' => 1,
@@ -4176,6 +4535,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4183,7 +4544,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            181 =>
+            181 => 
             array (
                 'id' => 182,
                 'company_id' => 2,
@@ -4199,6 +4560,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '01338160995',
                 'vat_code' => '01338160995',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4206,7 +4569,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            182 =>
+            182 => 
             array (
                 'id' => 183,
                 'company_id' => 1,
@@ -4222,6 +4585,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '02077390991',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4229,7 +4594,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            183 =>
+            183 => 
             array (
                 'id' => 184,
                 'company_id' => 1,
@@ -4245,6 +4610,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00988530101',
                 'vat_code' => '00988530101',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'info@bontempiscuolaguida.it',
                 'pec' => NULL,
@@ -4252,7 +4619,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            184 =>
+            184 => 
             array (
                 'id' => 185,
                 'company_id' => 1,
@@ -4268,6 +4635,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'GRBRCR56R08D969M',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'riccardo.garbarino@gmail.com',
                 'pec' => NULL,
@@ -4275,7 +4644,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            185 =>
+            185 => 
             array (
                 'id' => 186,
                 'company_id' => 1,
@@ -4291,6 +4660,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'FBBMGR54E53D969R',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'fu.marino@libero.it',
                 'pec' => NULL,
@@ -4298,7 +4669,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            186 =>
+            186 => 
             array (
                 'id' => 187,
                 'company_id' => 1,
@@ -4314,6 +4685,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'MLELRM48P68D969J',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'norita2658@yahoo.it',
                 'pec' => NULL,
@@ -4321,7 +4694,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            187 =>
+            187 => 
             array (
                 'id' => 188,
                 'company_id' => 1,
@@ -4337,6 +4710,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'BRNRRT55B28D969P',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'marfa2285@gmail.com',
                 'pec' => NULL,
@@ -4344,7 +4719,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            188 =>
+            188 => 
             array (
                 'id' => 189,
                 'company_id' => 1,
@@ -4360,6 +4735,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'TRVGCR46L12D969P',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'gc.traverso@virgilio.it',
                 'pec' => NULL,
@@ -4367,7 +4744,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            189 =>
+            189 => 
             array (
                 'id' => 190,
                 'company_id' => 1,
@@ -4383,6 +4760,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'DRNPRM43E22D969C',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4390,7 +4769,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            190 =>
+            190 => 
             array (
                 'id' => 191,
                 'company_id' => 1,
@@ -4406,6 +4785,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'GCCVTR52A23H581X',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4413,7 +4794,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            191 =>
+            191 => 
             array (
                 'id' => 192,
                 'company_id' => 1,
@@ -4429,6 +4810,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'STRGUO43E19D969N',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'ugostra@hotmail.com',
                 'pec' => NULL,
@@ -4436,7 +4819,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            192 =>
+            192 => 
             array (
                 'id' => 193,
                 'company_id' => 1,
@@ -4452,6 +4835,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CNAMRP34P25G924R',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4459,7 +4844,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            193 =>
+            193 => 
             array (
                 'id' => 194,
                 'company_id' => 1,
@@ -4475,6 +4860,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'TRKLRZ59S14Z224G',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4482,7 +4869,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            194 =>
+            194 => 
             array (
                 'id' => 195,
                 'company_id' => 1,
@@ -4498,6 +4885,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'RBRCRD70C02D969E',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'corsa1400v@libero.it',
                 'pec' => NULL,
@@ -4505,7 +4894,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            195 =>
+            195 => 
             array (
                 'id' => 196,
                 'company_id' => 1,
@@ -4521,6 +4910,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'BNCRLD49C04D969V',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4528,7 +4919,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            196 =>
+            196 => 
             array (
                 'id' => 197,
                 'company_id' => 1,
@@ -4544,6 +4935,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'SPZMRA65M30D969H',
                 'vat_code' => '02814380107',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'spezzanomario@gmail.com',
                 'pec' => NULL,
@@ -4551,7 +4944,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            197 =>
+            197 => 
             array (
                 'id' => 198,
                 'company_id' => 1,
@@ -4567,6 +4960,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '01395770991',
                 'vat_code' => '01395770991',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4574,7 +4969,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            198 =>
+            198 => 
             array (
                 'id' => 199,
                 'company_id' => 1,
@@ -4590,6 +4985,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'TDNLRT71B16D969E',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'alberto.tedone@gmail.com',
                 'pec' => NULL,
@@ -4597,7 +4994,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            199 =>
+            199 => 
             array (
                 'id' => 200,
                 'company_id' => 1,
@@ -4613,6 +5010,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'GNSPLA68P09D969B',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4620,7 +5019,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            200 =>
+            200 => 
             array (
                 'id' => 201,
                 'company_id' => 1,
@@ -4636,6 +5035,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'MNSNNN50A19G273U',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4643,7 +5044,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            201 =>
+            201 => 
             array (
                 'id' => 202,
                 'company_id' => 1,
@@ -4659,6 +5060,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'PRSCST66M63D969M',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'parisic252@gmail.com',
                 'pec' => NULL,
@@ -4666,7 +5069,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            202 =>
+            202 => 
             array (
                 'id' => 203,
                 'company_id' => 1,
@@ -4682,6 +5085,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'FRRMTR59L49D969B',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4689,7 +5094,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            203 =>
+            203 => 
             array (
                 'id' => 204,
                 'company_id' => 1,
@@ -4705,6 +5110,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'SNTGTN52P12E573X',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'santamaria.gaetano@gmail.com',
                 'pec' => NULL,
@@ -4712,7 +5119,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            204 =>
+            204 => 
             array (
                 'id' => 205,
                 'company_id' => 1,
@@ -4728,6 +5135,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'TDNLRT71B16D969E',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4735,7 +5144,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            205 =>
+            205 => 
             array (
                 'id' => 206,
                 'company_id' => 1,
@@ -4751,6 +5160,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'TRVBRN72D12D969Q',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'brunotraverso72@gmail.com',
                 'pec' => NULL,
@@ -4758,7 +5169,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            206 =>
+            206 => 
             array (
                 'id' => 207,
                 'company_id' => 1,
@@ -4774,6 +5185,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'MRBGNI58R14Z603Z',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'ginobad@inwind.it',
                 'pec' => NULL,
@@ -4781,7 +5194,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            207 =>
+            207 => 
             array (
                 'id' => 208,
                 'company_id' => 1,
@@ -4797,6 +5210,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CRSNNL78B67D969V',
                 'vat_code' => '01875650994',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'antoste2008@libero.it',
                 'pec' => NULL,
@@ -4804,7 +5219,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            208 =>
+            208 => 
             array (
                 'id' => 209,
                 'company_id' => 1,
@@ -4820,6 +5235,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'BGGLNZ74H22D969R',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'lo.bgg@libero.it',
                 'pec' => NULL,
@@ -4827,7 +5244,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            209 =>
+            209 => 
             array (
                 'id' => 210,
                 'company_id' => 1,
@@ -4843,6 +5260,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '04027720236',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4850,7 +5269,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            210 =>
+            210 => 
             array (
                 'id' => 211,
                 'company_id' => 1,
@@ -4866,6 +5285,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '01238040180',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4873,7 +5294,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            211 =>
+            211 => 
             array (
                 'id' => 212,
                 'company_id' => 1,
@@ -4889,6 +5310,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'SVLSRA77H69D969A',
                 'vat_code' => '01549660999',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'sara.savo77@gmail.com',
                 'pec' => NULL,
@@ -4896,7 +5319,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            212 =>
+            212 => 
             array (
                 'id' => 213,
                 'company_id' => 1,
@@ -4912,6 +5335,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'SBRDTL61S42D969H',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -4919,7 +5344,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            213 =>
+            213 => 
             array (
                 'id' => 214,
                 'company_id' => 1,
@@ -4935,6 +5360,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CRSCRL83T22D969T',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'carlo.corsiglia@hotmail.it',
                 'pec' => NULL,
@@ -4942,7 +5369,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            214 =>
+            214 => 
             array (
                 'id' => 215,
                 'company_id' => 1,
@@ -4958,6 +5385,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'VRGMRZ56R03D969Q',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'mvaraglioti@gmail.com',
                 'pec' => NULL,
@@ -4965,7 +5394,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            215 =>
+            215 => 
             array (
                 'id' => 216,
                 'company_id' => 1,
@@ -4981,6 +5410,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'LSSRMR62M48D969N',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'rosamaria_alessi@fastwebnet.it',
                 'pec' => NULL,
@@ -4988,7 +5419,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            216 =>
+            216 => 
             array (
                 'id' => 217,
                 'company_id' => 1,
@@ -5004,6 +5435,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '02289020998',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'soluzioniretail2015@gmail.com',
                 'pec' => NULL,
@@ -5011,7 +5444,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            217 =>
+            217 => 
             array (
                 'id' => 218,
                 'company_id' => 1,
@@ -5027,6 +5460,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'VLLNZE64C13D969S',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -5034,7 +5469,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            218 =>
+            218 => 
             array (
                 'id' => 219,
                 'company_id' => 1,
@@ -5050,6 +5485,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'FNRMCL84E02Z602O',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'marcellofinardi@84gmail.com',
                 'pec' => NULL,
@@ -5057,7 +5494,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            219 =>
+            219 => 
             array (
                 'id' => 220,
                 'company_id' => 1,
@@ -5073,6 +5510,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'LLALCA87L52D969T',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'aieali@hotmail.it',
                 'pec' => NULL,
@@ -5080,7 +5519,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            220 =>
+            220 => 
             array (
                 'id' => 221,
                 'company_id' => 1,
@@ -5096,6 +5535,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'SBRPQL58H03F839Q',
                 'vat_code' => '02502000991',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'pasqualesbrescia@libero.it',
                 'pec' => NULL,
@@ -5103,7 +5544,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            221 =>
+            221 => 
             array (
                 'id' => 222,
                 'company_id' => 1,
@@ -5119,6 +5560,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'PCCNRC76B19D969Z',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'enryp07@gmail.com',
                 'pec' => NULL,
@@ -5126,7 +5569,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            222 =>
+            222 => 
             array (
                 'id' => 223,
                 'company_id' => 1,
@@ -5142,6 +5585,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '02475620999',
                 'vat_code' => '02475620999',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'effeci1service@gmail.com',
                 'pec' => NULL,
@@ -5149,7 +5594,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            223 =>
+            223 => 
             array (
                 'id' => 224,
                 'company_id' => 1,
@@ -5165,6 +5610,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'BRTMSM74T28D969S',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'massimo.bertola@amt.genova.it',
                 'pec' => NULL,
@@ -5172,7 +5619,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            224 =>
+            224 => 
             array (
                 'id' => 225,
                 'company_id' => 1,
@@ -5188,6 +5635,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'FRLSFN63T18D969Z',
                 'vat_code' => '02415910997',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'serviceenergygenova@libero.it',
                 'pec' => NULL,
@@ -5195,7 +5644,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            225 =>
+            225 => 
             array (
                 'id' => 226,
                 'company_id' => 1,
@@ -5211,6 +5660,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'PTLMRC53L12B025N',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'ila83@libero.it',
                 'pec' => NULL,
@@ -5218,7 +5669,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            226 =>
+            226 => 
             array (
                 'id' => 227,
                 'company_id' => 1,
@@ -5234,6 +5685,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'PLTNTN50E21D969N',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'pilocl1950@hotmail.it',
                 'pec' => NULL,
@@ -5241,7 +5694,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            227 =>
+            227 => 
             array (
                 'id' => 228,
                 'company_id' => 1,
@@ -5257,6 +5710,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '01038370993',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'immobiliaregandolfo@gmail.com',
                 'pec' => NULL,
@@ -5264,7 +5719,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            228 =>
+            228 => 
             array (
                 'id' => 229,
                 'company_id' => 1,
@@ -5280,6 +5735,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'PLMMRC65P26D969P',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'marchino366@gmail.com',
                 'pec' => NULL,
@@ -5287,7 +5744,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            229 =>
+            229 => 
             array (
                 'id' => 230,
                 'company_id' => 1,
@@ -5303,6 +5760,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'SNTGPP67H30D969B',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'sangiusedan@libero.it',
                 'pec' => NULL,
@@ -5310,7 +5769,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            230 =>
+            230 => 
             array (
                 'id' => 231,
                 'company_id' => 1,
@@ -5326,6 +5785,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'NSNNNA64L68D969I',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'annanosengo@gmail.com',
                 'pec' => NULL,
@@ -5333,7 +5794,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            231 =>
+            231 => 
             array (
                 'id' => 232,
                 'company_id' => 1,
@@ -5349,6 +5810,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'NBLSND94L31A479F',
                 'vat_code' => '01562830057',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -5356,7 +5819,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            232 =>
+            232 => 
             array (
                 'id' => 233,
                 'company_id' => 1,
@@ -5372,6 +5835,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00873440051',
                 'vat_code' => '00873440051',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'irtel.srl@virgilio.it',
                 'pec' => NULL,
@@ -5379,7 +5844,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            233 =>
+            233 => 
             array (
                 'id' => 234,
                 'company_id' => 1,
@@ -5395,6 +5860,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'PRSMRA60R07D969N',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'marietto60@gmail.com',
                 'pec' => NULL,
@@ -5402,7 +5869,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            234 =>
+            234 => 
             array (
                 'id' => 235,
                 'company_id' => 1,
@@ -5418,6 +5885,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'NZLLSS82E30D969T',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'alessioanzalone82@gmail.com',
                 'pec' => NULL,
@@ -5425,7 +5894,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            235 =>
+            235 => 
             array (
                 'id' => 236,
                 'company_id' => 1,
@@ -5441,6 +5910,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'FRRCLD63C31D969U',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'rotvit@tiscalinet.it',
                 'pec' => NULL,
@@ -5448,7 +5919,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            236 =>
+            236 => 
             array (
                 'id' => 237,
                 'company_id' => 1,
@@ -5464,6 +5935,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'MSADDG70A13D969A',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'davidemasi1970@gmail.com',
                 'pec' => NULL,
@@ -5471,7 +5944,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            237 =>
+            237 => 
             array (
                 'id' => 238,
                 'company_id' => 1,
@@ -5487,6 +5960,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CRDLGU55C10D969V',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'luigicrd@gmail.com',
                 'pec' => NULL,
@@ -5494,7 +5969,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            238 =>
+            238 => 
             array (
                 'id' => 239,
                 'company_id' => 1,
@@ -5510,6 +5985,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '01704070992',
                 'vat_code' => '01704070992',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -5517,7 +5994,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            239 =>
+            239 => 
             array (
                 'id' => 240,
                 'company_id' => 1,
@@ -5533,6 +6010,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'LMBPMR71D67D969J',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'machiapa@alice.it',
                 'pec' => NULL,
@@ -5540,7 +6019,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            240 =>
+            240 => 
             array (
                 'id' => 241,
                 'company_id' => 1,
@@ -5556,6 +6035,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'LMBMSM50D04D969C',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'maximodue@alice.it',
                 'pec' => NULL,
@@ -5563,7 +6044,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            241 =>
+            241 => 
             array (
                 'id' => 242,
                 'company_id' => 1,
@@ -5579,6 +6060,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'BLSMRC54E02A182L',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'markstar58@libero.it',
                 'pec' => NULL,
@@ -5586,7 +6069,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            242 =>
+            242 => 
             array (
                 'id' => 243,
                 'company_id' => 1,
@@ -5602,6 +6085,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'TRSFNC62E05D969E',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'mrosascardigno@gmail.com',
                 'pec' => NULL,
@@ -5609,7 +6094,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            243 =>
+            243 => 
             array (
                 'id' => 244,
                 'company_id' => 1,
@@ -5625,6 +6110,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CRBNNA59C64D969S',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'carboneanna959@gmail.com',
                 'pec' => NULL,
@@ -5632,7 +6119,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            244 =>
+            244 => 
             array (
                 'id' => 245,
                 'company_id' => 1,
@@ -5648,6 +6135,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'SNTLCU69M31D969P',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'l.santini69@gmail.com',
                 'pec' => NULL,
@@ -5655,7 +6144,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            245 =>
+            245 => 
             array (
                 'id' => 246,
                 'company_id' => 1,
@@ -5671,6 +6160,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '03928170988',
                 'vat_code' => '03928170988',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -5678,7 +6169,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            246 =>
+            246 => 
             array (
                 'id' => 247,
                 'company_id' => 1,
@@ -5694,6 +6185,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'MNTNDR71S17D969Z',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'andreaminetti@alice.it',
                 'pec' => NULL,
@@ -5701,7 +6194,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            247 =>
+            247 => 
             array (
                 'id' => 248,
                 'company_id' => 1,
@@ -5717,6 +6210,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'SLVLDA52R15D969J',
                 'vat_code' => '01551170994',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'aldo.salvade@gmail.com',
                 'pec' => NULL,
@@ -5724,7 +6219,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            248 =>
+            248 => 
             array (
                 'id' => 249,
                 'company_id' => 1,
@@ -5740,6 +6235,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CLMGNN41L13B142B',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'gianniclemente@hotmail.it',
                 'pec' => NULL,
@@ -5747,7 +6244,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            249 =>
+            249 => 
             array (
                 'id' => 250,
                 'company_id' => 1,
@@ -5763,6 +6260,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'TVRFRZ74S12D969P',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'ft3004@icloud.com',
                 'pec' => NULL,
@@ -5770,7 +6269,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            250 =>
+            250 => 
             array (
                 'id' => 251,
                 'company_id' => 1,
@@ -5786,6 +6285,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'MBRMRC67M07D969B',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'marcoimbergamo@yahoo.it',
                 'pec' => NULL,
@@ -5793,7 +6294,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            251 =>
+            251 => 
             array (
                 'id' => 252,
                 'company_id' => 1,
@@ -5809,6 +6310,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'GRFFNC86S04D969N',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'graffigna@tiscali.it',
                 'pec' => NULL,
@@ -5816,7 +6319,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            252 =>
+            252 => 
             array (
                 'id' => 253,
                 'company_id' => 1,
@@ -5832,6 +6335,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'GMBLSN95S28D969R',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'Alex.Gambino95@hotmail.it',
                 'pec' => NULL,
@@ -5839,7 +6344,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            253 =>
+            253 => 
             array (
                 'id' => 254,
                 'company_id' => 1,
@@ -5855,6 +6360,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'FRRLRD96C31D969Q',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'ferrarileonardo96@gmail.com',
                 'pec' => NULL,
@@ -5862,7 +6369,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            254 =>
+            254 => 
             array (
                 'id' => 255,
                 'company_id' => 1,
@@ -5878,6 +6385,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'BNZDRA56C02E785O',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'Dario.Benzi2005@libero.it',
                 'pec' => NULL,
@@ -5885,7 +6394,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            255 =>
+            255 => 
             array (
                 'id' => 256,
                 'company_id' => 1,
@@ -5901,6 +6410,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'QRZLGU83B17E560A',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'querzolaluigi@gmail.com',
                 'pec' => NULL,
@@ -5908,7 +6419,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            256 =>
+            256 => 
             array (
                 'id' => 257,
                 'company_id' => 1,
@@ -5924,6 +6435,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'FFTLCU76T27D969T',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'luca.affatigato@libero.it',
                 'pec' => NULL,
@@ -5931,7 +6444,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            257 =>
+            257 => 
             array (
                 'id' => 258,
                 'company_id' => 1,
@@ -5947,6 +6460,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'DNLCNZ68M51D969M',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'cinziadaniele68@gmail.com',
                 'pec' => NULL,
@@ -5954,7 +6469,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            258 =>
+            258 => 
             array (
                 'id' => 259,
                 'company_id' => 1,
@@ -5970,6 +6485,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'PRNFBA84P14D969C',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'pernyf84@gmail.com',
                 'pec' => NULL,
@@ -5977,7 +6494,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            259 =>
+            259 => 
             array (
                 'id' => 260,
                 'company_id' => 1,
@@ -5993,6 +6510,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '00507860096',
                 'vat_code' => '00507860096',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'amministrazione@gestopark.it',
                 'pec' => NULL,
@@ -6000,7 +6519,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            260 =>
+            260 => 
             array (
                 'id' => 261,
                 'company_id' => 1,
@@ -6016,6 +6535,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'BRTMSM57H21D969B',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'massimo.maria.bartoli@gmail.com',
                 'pec' => NULL,
@@ -6023,7 +6544,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            261 =>
+            261 => 
             array (
                 'id' => 262,
                 'company_id' => 1,
@@ -6039,6 +6560,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'TRMRCC82S27D969U',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'ro.trimb@gmail.com',
                 'pec' => NULL,
@@ -6046,7 +6569,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            262 =>
+            262 => 
             array (
                 'id' => 263,
                 'company_id' => 1,
@@ -6062,6 +6585,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'BRDGCR57S09F524E',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'giancarlo.bordoni2@tin.it',
                 'pec' => NULL,
@@ -6069,7 +6594,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            263 =>
+            263 => 
             array (
                 'id' => 264,
                 'company_id' => 1,
@@ -6085,6 +6610,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'PPLGPP51P56C356I',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'giusy.ippolito@yahoo.it',
                 'pec' => NULL,
@@ -6092,7 +6619,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            264 =>
+            264 => 
             array (
                 'id' => 265,
                 'company_id' => 1,
@@ -6108,6 +6635,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '06188330150',
                 'vat_code' => '02066400405',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => ' fornitori-maggioli@legalmail.it',
                 'pec' => NULL,
@@ -6115,7 +6644,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            265 =>
+            265 => 
             array (
                 'id' => 266,
                 'company_id' => 1,
@@ -6131,6 +6660,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CLLMHL62M57D969M',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'michela.celli@gmail.com',
                 'pec' => NULL,
@@ -6138,7 +6669,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            266 =>
+            266 => 
             array (
                 'id' => 267,
                 'company_id' => 1,
@@ -6154,6 +6685,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'DMNFNC64B45D969X',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'FRADOMENICHELLI@LIBERO.IT',
                 'pec' => NULL,
@@ -6161,7 +6694,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            267 =>
+            267 => 
             array (
                 'id' => 268,
                 'company_id' => 1,
@@ -6177,6 +6710,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'BRTFNC46L12D920G',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'TOFRAISE@LIBERO.IT',
                 'pec' => NULL,
@@ -6184,7 +6719,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            268 =>
+            268 => 
             array (
                 'id' => 269,
                 'company_id' => 1,
@@ -6200,6 +6735,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'BBBMRC84S19D969B',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'BUBBIMARCO@GMAIL.COM',
                 'pec' => NULL,
@@ -6207,7 +6744,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            269 =>
+            269 => 
             array (
                 'id' => 270,
                 'company_id' => 1,
@@ -6223,6 +6760,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CPLGZM58R71E573C',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'GRACIPO58@GMAIL.COM',
                 'pec' => NULL,
@@ -6230,7 +6769,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            270 =>
+            270 => 
             array (
                 'id' => 271,
                 'company_id' => 1,
@@ -6246,6 +6785,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CMPMRZ62D10D969M',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'MAURIZIOCAMPODONICO@GMAIL.COM',
                 'pec' => NULL,
@@ -6253,7 +6794,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            271 =>
+            271 => 
             array (
                 'id' => 272,
                 'company_id' => 1,
@@ -6269,6 +6810,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '01805510987',
                 'vat_code' => '01805510987',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'stefano.dorazio@cascinaclarabella.it',
                 'pec' => NULL,
@@ -6276,7 +6819,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            272 =>
+            272 => 
             array (
                 'id' => 273,
                 'company_id' => 1,
@@ -6292,6 +6835,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'PRDPLA64D23D969C',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'PARODI.P2011@LIBERO.IT',
                 'pec' => NULL,
@@ -6299,7 +6844,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            273 =>
+            273 => 
             array (
                 'id' => 274,
                 'company_id' => 1,
@@ -6315,6 +6860,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => '03033940788',
                 'vat_code' => '03033940788',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'info@pec.labconsulenze.it',
                 'pec' => NULL,
@@ -6322,7 +6869,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            274 =>
+            274 => 
             array (
                 'id' => 275,
                 'company_id' => 1,
@@ -6338,6 +6885,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CRSGNN76R14D969J',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'CRESCENTE76@LIBERO.IT',
                 'pec' => NULL,
@@ -6345,7 +6894,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            275 =>
+            275 => 
             array (
                 'id' => 276,
                 'company_id' => 1,
@@ -6361,6 +6910,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'FZZNNZ57S60E873N',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'VFAZZARI54@GMAIL.COM',
                 'pec' => NULL,
@@ -6368,7 +6919,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            276 =>
+            276 => 
             array (
                 'id' => 277,
                 'company_id' => 1,
@@ -6384,6 +6935,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CRLSLV77D47D969Q',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'SILVIA.CARLARINO@GMAIL.COM',
                 'pec' => NULL,
@@ -6391,7 +6944,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            277 =>
+            277 => 
             array (
                 'id' => 278,
                 'company_id' => 1,
@@ -6407,6 +6960,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'PSCCHR87R42B519L',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'CHIARAPASCALUCCI@GMAIL.COM',
                 'pec' => NULL,
@@ -6414,7 +6969,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            278 =>
+            278 => 
             array (
                 'id' => 279,
                 'company_id' => 1,
@@ -6430,6 +6985,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'VTIGPP53E22D514A',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -6437,7 +6994,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            279 =>
+            279 => 
             array (
                 'id' => 280,
                 'company_id' => 1,
@@ -6453,6 +7010,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CLSCRD55E16F839C',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'corrado.celestino@gmail.com',
                 'pec' => NULL,
@@ -6460,7 +7019,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            280 =>
+            280 => 
             array (
                 'id' => 281,
                 'company_id' => 1,
@@ -6476,6 +7035,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'GTRKNN96L04Z605W',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'roll3134@gmail.com',
                 'pec' => NULL,
@@ -6483,7 +7044,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            281 =>
+            281 => 
             array (
                 'id' => 282,
                 'company_id' => 1,
@@ -6499,6 +7060,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'KTVRNI79H58Z154A',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'MARKPERM@LIVE.IT',
                 'pec' => NULL,
@@ -6506,7 +7069,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            282 =>
+            282 => 
             array (
                 'id' => 283,
                 'company_id' => 1,
@@ -6522,6 +7085,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'SCDPLA75L68D969M',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => '30SOFIA05.PS@GMAIL.COM',
                 'pec' => NULL,
@@ -6529,7 +7094,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            283 =>
+            283 => 
             array (
                 'id' => 284,
                 'company_id' => 1,
@@ -6545,6 +7110,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'FLRMNL75E07D969S',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'FLORISMANUEL@GMAIL.COM',
                 'pec' => NULL,
@@ -6552,7 +7119,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            284 =>
+            284 => 
             array (
                 'id' => 285,
                 'company_id' => 1,
@@ -6568,6 +7135,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'KTVRNI79H58Z154A',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'MARKPERM@LIVE.IT',
                 'pec' => NULL,
@@ -6575,7 +7144,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            285 =>
+            285 => 
             array (
                 'id' => 286,
                 'company_id' => 1,
@@ -6591,6 +7160,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'FLRMNL75E07D969S',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'FLORISMANUEL@GMAIL.COM',
                 'pec' => NULL,
@@ -6598,7 +7169,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            286 =>
+            286 => 
             array (
                 'id' => 287,
                 'company_id' => 1,
@@ -6614,6 +7185,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'SCDPLA75L68D969M',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => '30SOFIA05.PS@GMAIL.COM',
                 'pec' => NULL,
@@ -6621,7 +7194,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            287 =>
+            287 => 
             array (
                 'id' => 288,
                 'company_id' => 1,
@@ -6637,6 +7210,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'MNNSMN84S66H224X',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'SIMISM@LIBERO.IT',
                 'pec' => NULL,
@@ -6644,7 +7219,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            288 =>
+            288 => 
             array (
                 'id' => 289,
                 'company_id' => 1,
@@ -6660,6 +7235,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'MNNSMN84S66H224X',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'SIMISM@LIBERO.IT',
                 'pec' => NULL,
@@ -6667,7 +7244,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            289 =>
+            289 => 
             array (
                 'id' => 290,
                 'company_id' => 1,
@@ -6683,6 +7260,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'GDCMHL83S04D969B',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'M.GUIDUCCI@HOTMAIL.COM',
                 'pec' => NULL,
@@ -6690,7 +7269,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            290 =>
+            290 => 
             array (
                 'id' => 291,
                 'company_id' => 1,
@@ -6706,6 +7285,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'GDCMHL83S04D969B',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'M.GUIDUCCI@HOTMAIL.COM',
                 'pec' => NULL,
@@ -6713,7 +7294,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            291 =>
+            291 => 
             array (
                 'id' => 292,
                 'company_id' => 1,
@@ -6729,6 +7310,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CLVTLI50D22D969F',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -6736,7 +7319,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            292 =>
+            292 => 
             array (
                 'id' => 293,
                 'company_id' => 1,
@@ -6752,6 +7335,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'CLVTLI50D22D969F',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'CHIARA1305@LIBERO.IT',
                 'pec' => NULL,
@@ -6759,7 +7344,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            293 =>
+            293 => 
             array (
                 'id' => 294,
                 'company_id' => 1,
@@ -6775,6 +7360,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'MZZNDR88A14D969K',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'ANDREA.MAZZU.1988@GMAIL.COM',
                 'pec' => NULL,
@@ -6782,7 +7369,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            294 =>
+            294 => 
             array (
                 'id' => 295,
                 'company_id' => 1,
@@ -6798,6 +7385,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '01477940678',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -6805,7 +7394,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            295 =>
+            295 => 
             array (
                 'id' => 296,
                 'company_id' => 1,
@@ -6821,6 +7410,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '09043181008',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -6828,7 +7419,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            296 =>
+            296 => 
             array (
                 'id' => 297,
                 'company_id' => 1,
@@ -6844,6 +7435,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '01704070992',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -6851,7 +7444,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            297 =>
+            297 => 
             array (
                 'id' => 298,
                 'company_id' => 1,
@@ -6867,6 +7460,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => NULL,
                 'vat_code' => '01704070992',
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => NULL,
                 'pec' => NULL,
@@ -6874,7 +7469,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            298 =>
+            298 => 
             array (
                 'id' => 299,
                 'company_id' => 1,
@@ -6890,6 +7485,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'DGRFNC75C10L331U',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'FRENKGREGORITP@GMAIL.COM',
                 'pec' => NULL,
@@ -6897,7 +7494,7 @@ class ClientsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            299 =>
+            299 => 
             array (
                 'id' => 300,
                 'company_id' => 1,
@@ -6913,6 +7510,8 @@ class ClientsTableSeeder extends Seeder
                 'birth_place' => NULL,
                 'tax_code' => 'LBRLSN81H22D969O',
                 'vat_code' => NULL,
+                'is_historical' => 1,
+                'residue' => '0.00',
                 'phone' => NULL,
                 'email' => 'Alessandrino1981@gmail.com',
                 'pec' => NULL,
@@ -6921,7 +7520,7 @@ class ClientsTableSeeder extends Seeder
                 'updated_at' => NULL,
             ),
         ));
-
-
+        
+        
     }
 }
