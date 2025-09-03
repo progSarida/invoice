@@ -140,8 +140,8 @@ class ListClients extends ListRecords
                         $param[$index]['num_doc'] = $invoice->invoiceNumber();
                         $param[$index]['data_doc'] = \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y');
                         $param[$index]['desc'] = $invoice->description;
-                        $amount = $invoice->client?->type?->value == 'public' ? $invoice->no_vat_total : $invoice->total
-;                       switch($invoice->docType->name) {
+                        $amount = $invoice->client?->type?->value == 'public' ? $invoice->no_vat_total : $invoice->total;
+                        switch($invoice->docType->name) {
                             case 'TD02':                                                                                // acconti/anticipi su fattura
                                 // $saldo -= $amount;
                                 $param[$index]['desc'] = 'Acconto<br>Doc. orig. ' . $invoice->invoiceNumber();
@@ -184,7 +184,9 @@ class ListClients extends ListRecords
                                 $index++;
                                 $param[$index]['order'] = \Carbon\Carbon::parse($payment->updated_at)->valueOf();
                                 $param[$index]['reg'] = \Carbon\Carbon::parse($payment->updated_at)->format('d/m/Y');
-                                $param[$index]['cliente'] = $payment->invoice->client->denomination;
+                                $param[$index]['cliente']['nome'] = $payment->invoice->client->denomination;
+                                $param[$index]['cliente']['pi'] = $payment->invoice->client->vat_code;
+                                $param[$index]['cliente']['cf'] = $payment->invoice->client->tax_code;
                                 $param[$index]['num_doc'] = '';
                                 $param[$index]['data_doc'] = '';
                                 $param[$index]['desc'] = 'S/DO FATTURA ' . $payment->invoice->client->denomination . '<br>Doc. orig. ' . $payment->invoice->invoiceNumber();
@@ -220,6 +222,9 @@ class ListClients extends ListRecords
                         $saldo -= $item['avere'];
                         $item['saldo'] = $saldo;
                     }
+
+                    $temp = $param;
+                    $param = $this->closeOpen($data, $temp);                                                            // inserimento 'chiusura/apertura'
 
                     // dd($param);
 
@@ -297,8 +302,40 @@ class ListClients extends ListRecords
         return $residue;
     }
 
-    private function closeOpen($index, $param, $invoice)												        // controllo se devo inserire la chiusura del bilancio
+    private function closeOpen($data, $temp)									                                // controllo se devo inserire la chiusura del bilancio
     {
-        // se updated_at di index-1 e upfated_at di $index sono di due anni diversi
+        // param = array();
+        // ciclio su temp
+            // se ['reg'] dell'elemento precedente e ['reg'] dell'elemento attuale sono di due anni diversi
+                // creo una prima riga nuova (per chiusura 31/12)
+                    // ['auto'] = true;
+                    // ['order'] = con data 31/12/{anno_data_invoice}
+                    // ['reg'] = 31/12/{anno_data_invoice}
+                    // ['cliente']['nome'] = ''
+                    // ['cliente']['pi'] = ''
+                    // ['cliente']['cf'] = ''
+                    // ['num_doc'] = ''
+                    // ['data_doc'] = ''
+                    // ['desc'] = SALDO CHIUSURA AL 31/12/{anno_data_invoice}
+                    // ['dare'] = 0
+                    // ['avere'] = $annual
+                // index++
+                // creo una seconda riga nuova (er apertura 01/01)
+                    // ['auto'] = true;
+                    // ['order'] = con data 31/12/{anno_data_invoice}
+                    // ['reg'] = 01/01/{anno_data_invoice}+1
+                    // ['cliente']['nome'] = ''
+                    // ['cliente']['pi'] = ''
+                    // ['cliente']['cf'] = ''
+                    // ['num_doc'] = ''
+                    // ['data_doc'] = ''
+                    // ['desc'] = SALDO APERTURA AL 01/01/{anno_data_invoice}+1
+                    // ['dare'] = $annual
+                    // ['avere'] = 0
+                // annual = 0
+                // index++
+            // altrimenti prosegui nelll'inserimento in param degli elementi di temp
+
+            // return param
     }
 }
