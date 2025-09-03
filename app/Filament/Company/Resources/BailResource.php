@@ -32,6 +32,8 @@ class BailResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione attiva';
 
+    protected static ?int $navigationSort = 5;
+
     protected static ?string $recordTitleAttribute = 'insurance';
 
     public static function form(Form $form): Form
@@ -83,12 +85,44 @@ class BailResource extends Resource
                 Forms\Components\TextInput::make('cig_code')->label('CIG')
                     ->maxLength(255)
                     ->columnSpan(2),
-                Forms\Components\TextInput::make('insurance')->label('Assicurazione')
-                    ->maxLength(255)
+                Forms\Components\Select::make('insurance_id')
+                    ->label('Assicurazione')
+                    ->options(function () {
+                        return \App\Models\Insurance::query()
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $set('agency_id', null);
+                    })
                     ->columnSpan(4),
-                Forms\Components\TextInput::make('agency')->label('Agenzia')
-                    ->maxLength(255)
-                    ->columnSpan(3),
+                Forms\Components\Select::make('agency_id')
+                    ->label('Agenzia')
+                    ->options(function () {
+                        return \App\Models\Agency::query()
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->live()
+                    ->options(function (callable $get) {
+                        $insuranceId = $get('insurance_id');
+                        return \App\Models\Agency::query()
+                            ->when($insuranceId, fn ($query) => $query->where('insurance_id', $insuranceId))
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state) {
+                            $agency = \App\Models\Agency::find($state);
+                            if ($agency && $agency->insurance_id) {
+                                $set('insurance_id', $agency->insurance_id);
+                            }
+                        }
+                    })
+                    ->columnSpan(4),
                 Forms\Components\TextInput::make('bill_number')->label('Numero Polizza')
                     ->maxLength(255)
                     ->columnSpan(2),
@@ -188,10 +222,10 @@ class BailResource extends Resource
                 Tables\Columns\TextColumn::make('tax_type')
                     ->label('Tipo Entrata')
                     ->formatStateUsing(fn ($state) => $state?->getLabel() ?? 'N/A'),
-                Tables\Columns\TextColumn::make('insurance')
+                Tables\Columns\TextColumn::make('insurance.name')
                     ->label('Assicurazione')
                     ->searchable()
-                    ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('bill_number')
                     ->label('Numero Polizza')
                     ->searchable()
@@ -226,14 +260,16 @@ class BailResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('insurance')
                     ->options(function () {
-                        return \App\Models\Bail::distinct()
-                            ->pluck('insurance')
-                            ->filter()
-                            ->mapWithKeys(function ($insurance) {
-                                return [$insurance => $insurance];
-                            });
+                        return \App\Models\Insurance::all()
+                            ->pluck('name', 'id')
+                            ->toArray();
                     })
-                    ->label('Assicurazione'),
+                    ->label('Assicurazione')
+                    ->query(function ($query, $data) {
+                        if ($data['value']) {
+                            $query->where('insurance_id', $data['value']);
+                        }
+                    }),
                 Tables\Filters\SelectFilter::make('tax_type')
                     ->options(\App\Enums\TaxType::class)
                     ->label('Entrata'),

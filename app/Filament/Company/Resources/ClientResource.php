@@ -35,6 +35,8 @@ class ClientResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione attiva';
 
+    protected static ?int $navigationSort = 6;
+
     protected static ?string $recordTitleAttribute = 'denomination';
 
     public static function getGlobalSearchResultDetails(Model $record): array

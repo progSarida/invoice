@@ -26,6 +26,8 @@ class BankAccountResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione attiva';
 
+    protected static ?int $navigationSort = 7;
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function getGlobalSearchResultDetails(Model $record): array

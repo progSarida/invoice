@@ -32,6 +32,8 @@ class SupplierResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione passiva';
 
+    protected static ?int $navigationSort = 4;
+
     public static function getNavigationSort(): ?int
     {
         return 1;

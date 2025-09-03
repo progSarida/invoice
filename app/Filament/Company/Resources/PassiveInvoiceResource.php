@@ -39,6 +39,8 @@ class PassiveInvoiceResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione passiva';
 
+    protected static ?int $navigationSort = 3;
+
     public static function getNavigationSort(): ?int
     {
         return 2;

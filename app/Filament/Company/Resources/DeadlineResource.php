@@ -31,6 +31,8 @@ class DeadlineResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione passiva';
 
+    protected static ?int $navigationSort = 2;
+
     public static function getNavigationSort(): ?int
     {
         return 4;

@@ -13,8 +13,8 @@ class Bail extends Model
         'contract_id',                                          // id contratto
         'cig_code',                                             // codice identificativo gara
         'tax_type',                                             // tipo entrata (Enum)
-        'insurance',                                            // assicurazione
-        'agency',                                               // agenzia
+        'insurance_id',                                            // assicurazione
+        'agency_id',                                               // agenzia
         'bill_number',                                          // numero polizza
         'bill_date',                                            // data polizza
         'bill_attachment_path',                                 // percorso file polizza
@@ -48,5 +48,13 @@ class Bail extends Model
 
     public function contract(){
         return $this->belongsTo(NewContract::class,'contract_id');
+    }
+
+    public function insurance(){
+        return $this->belongsTo(Insurance::class);
+    }
+
+    public function agency(){
+        return $this->belongsTo(Agency::class);
     }
 }

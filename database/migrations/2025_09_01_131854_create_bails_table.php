@@ -11,6 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('insurances', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('company_id')->constrained('companies')->onUpdate('cascade');     // tenant
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('agencies', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('company_id')->constrained('companies')->onUpdate('cascade');     // tenant
+            $table->foreignId('insurance_id')->constrained('insurances')->onUpdate('cascade');  // assicurazione
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('bails', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onUpdate('cascade');     // tenant
@@ -25,8 +42,8 @@ return new class extends Migration
 
             $table->string('cig_code')->nullable();                                             // codice identificativo gara
             $table->string('tax_type')->nullable();                                             // tipo entrata (Enum)
-            $table->string('insurance')->nullable();                                            // assicurazione
-            $table->string('agency')->nullable();                                               // agenzia
+            $table->foreignId('insurance_id')->constrained('insurances')->onUpdate('cascade');  // assicurazione
+            $table->foreignId('agency_id')->constrained('agencies')->onUpdate('cascade');       // agenzia
             $table->string('bill_number')->nullable();                                          // numero polizza
             $table->date('bill_date')->nullable();                                              // data polizza
             $table->string('bill_attachment_path')->nullable();                                 // percorso file polizza
@@ -52,6 +69,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('bails');
+        Schema::dropIfExists('agencies');
+        Schema::dropIfExists('insurances');
+        Schema::enableForeignKeyConstraints();
     }
 };

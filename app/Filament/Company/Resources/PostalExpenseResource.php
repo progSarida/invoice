@@ -48,6 +48,8 @@ class PostalExpenseResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione attiva';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $recordTitleAttribute = 'denomination';
 
     public static function form(Form $form): Form

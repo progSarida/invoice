@@ -153,4 +153,14 @@ class Company extends Model
     {
         return $this->hasMany(Bail::class);
     }
+
+    public function insurances()
+    {
+        return $this->hasMany(Insurance::class);
+    }
+
+    public function agencies()
+    {
+        return $this->hasMany(Agency::class);
+    }
 }
