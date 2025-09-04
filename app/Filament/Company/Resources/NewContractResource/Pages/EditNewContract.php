@@ -10,6 +10,7 @@ use App\Filament\Company\Resources\NewContractResource;
 use App\Models\NewContract;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Radio;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use setasign\Fpdi\Fpdi;
 
@@ -111,7 +112,8 @@ class EditNewContract extends EditRecord
                         echo $fpdi->Output('S');
                     }, $fileName);
                 }),
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
         ];
     }
 

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\PassivePaymentResource\Pages;
 use App\Filament\Company\Resources\PassivePaymentResource\RelationManagers;
+use Illuminate\Support\Facades\Auth;
 
 class PassivePaymentResource extends Resource
 {
@@ -38,6 +39,7 @@ class PassivePaymentResource extends Resource
     {
         return $form
             ->columns(12)
+            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
             ->schema([
                 Forms\Components\Select::make('passive_invoice_id')
                     ->label('Fattura')
@@ -53,8 +55,8 @@ class PassivePaymentResource extends Resource
                     ->live()
                     ->preload()
                     // ->optionsLimit(20)
-                    ->columnSpan(5)
-                    ->autofocus(),
+                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+                    ->columnSpan(5),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()
@@ -165,7 +167,8 @@ class PassivePaymentResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
                 ]),
             ]);
     }

@@ -31,6 +31,7 @@ use App\Filament\Company\Resources\NewContractResource\Pages;
 use App\Filament\Company\Resources\NewContractResource\RelationManagers;
 use App\Filament\Company\Resources\ContractDetailsResource\RelationManagers\ContractDetailsRelationManager;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class NewContractResource extends Resource
@@ -51,6 +52,7 @@ class NewContractResource extends Resource
     {
         return $form
             ->columns(12)
+            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
             ->schema([
                 Forms\Components\Select::make('client_id')->label('Cliente')
                     ->hintAction(
@@ -71,8 +73,8 @@ class NewContractResource extends Resource
                     ->live()
                     ->preload()
                     ->optionsLimit(5)
-                    ->columnSpan(5)
-                    ->autofocus(),
+                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+                    ->columnSpan(5),
                 Forms\Components\Select::make('tax_type')
                     ->label('Entrata')
                     ->options(TaxType::class)
@@ -240,12 +242,14 @@ class NewContractResource extends Resource
                     ->multiple()->preload(),
             ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
             ->actions([
-                // Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
                 ]),
             ])
             ->defaultSort('start_validity_date', 'asc');

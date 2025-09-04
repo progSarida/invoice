@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\ClientResource\Pages;
 use App\Filament\Company\Resources\ClientResource\RelationManagers;
 use App\Filament\Company\Resources\ClientResource\RelationManagers\PostalExpensesRelationManager;
+use Illuminate\Support\Facades\Auth;
 
 class ClientResource extends Resource
 {
@@ -55,6 +56,7 @@ class ClientResource extends Resource
 
         return $form
             ->columns(12)
+            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
             ->schema([
                 Forms\Components\Select::make('type')->label('Tipo')
                     ->options(ClientType::class)
@@ -65,8 +67,8 @@ class ClientResource extends Resource
                     ->afterStateUpdated(function (callable $set, $state) {
                         $set('subtype', null);
                     })
-                    ->columnspan(3)
-                    ->autofocus(),
+                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+                    ->columnspan(3),
                 Forms\Components\Select::make('subtype')->label('Sottotipo')
                     ->options(function (callable $get) {
                         $type = $get('type');
@@ -275,7 +277,8 @@ class ClientResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
                 ]),
             ]);
     }

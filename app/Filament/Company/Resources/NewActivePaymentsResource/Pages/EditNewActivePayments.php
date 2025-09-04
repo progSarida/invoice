@@ -41,10 +41,13 @@ class EditNewActivePayments extends EditRecord
     {
         return [
             Actions\DeleteAction::make()
+                ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()))
                 ->disabled(fn () => $this->record->validated),
             Actions\ForceDeleteAction::make()
+                ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()))
                 ->disabled(fn () => $this->record->validated),
             Actions\RestoreAction::make()
+                ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()))
                 ->disabled(fn () => $this->record->validated),
         ];
     }
