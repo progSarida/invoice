@@ -35,6 +35,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class NewActivePaymentsResource extends Resource
 {
@@ -200,7 +201,7 @@ class NewActivePaymentsResource extends Resource
                     ->afterStateUpdated(function (\App\Models\ActivePayments $record, bool $state) {
                         if ($state) {
                             $record->validation_date = now();
-                            $record->validation_user_id = auth()->id();
+                            $record->validation_user_id = Auth::user()->id;
                         } else {
                             $record->validation_date = null;
                             $record->validation_user_id = null;

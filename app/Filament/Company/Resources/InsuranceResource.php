@@ -23,9 +23,9 @@ class InsuranceResource extends Resource
 
     protected static ?string $navigationIcon = 'ri-contract-line';
 
-    protected static ?string $navigationGroup = 'Fatturazione attiva';
+    protected static ?string $navigationGroup = 'Cauzioni';
 
-    protected static ?int $navigationSort = 9;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {

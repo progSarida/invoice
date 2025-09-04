@@ -69,33 +69,95 @@ class NewInvoiceResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione attiva';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Grid::make('GRID')->columnSpan(2)->schema([
+                // Grid::make('GRID')->columnSpan(2)->schema([
+
+                    Section::make('Opzioni')
+                    // ->collapsible()
+                    ->columns(12)
+                    ->collapsed(false)
+                    ->label('')
+                    ->schema([
+                        Toggle::make('art_73')
+                            ->label('Art. 73')
+                            ->dehydrated()
+                            ->columnSpan(2)
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                if ($state) {
+                                    $set('sectional_id', null);
+                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                    $set('number', $number);
+                                    NewInvoiceResource::invoiceNumber($get, $set);
+                                }
+                                else{
+                                    $clientId = $get('client_id');
+                                    if ($clientId) {
+                                        $client = \App\Models\Client::find($clientId);
+                                        if ($client && $client->type) {
+                                            $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
+                                                ->where('client_type', $client->type->value)
+                                                ->first();
+                                            if ($sectional) {
+                                                $set('sectional_id', $sectional->id);
+                                                $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                                $set('number', $number);
+                                                NewInvoiceResource::invoiceNumber($get, $set);
+                                            } else {
+                                                $set('sectional_id', null);
+                                                $set('number', null);
+                                                NewInvoiceResource::invoiceNumber($get, $set);
+                                                Notification::make()
+                                                    ->title('Nessun sezionario trovato per il tipo di cliente selezionato.')
+                                                    ->warning()
+                                                    ->send();
+                                            }
+                                        }
+                                    }
+                                }
+                            }),
+
+                        Forms\Components\Select::make('social_contributions')
+                            ->label('')
+                            // ->columnSpan(4)
+                            ->columnSpan(6)
+                            ->placeholder('Cassa previdenziale')
+                            ->multiple()
+                            ->options(function () {
+                                return SocialContribution::where('company_id', Filament::getTenant()->id)
+                                    ->get()
+                                    ->mapWithKeys(fn ($item) => [$item->id => $item->fund->getLabel()])
+                                    ->toArray();
+                            })
+                            // ->dehydrated(fn ($state) => is_array($state) && count($state)),
+                            ->dehydrated(),
+
+                        Forms\Components\Select::make('withholdings')
+                            ->label('')
+                            // ->columnSpan(3)
+                            ->columnSpan(4)
+                            ->placeholder('Ritenute')
+                            ->multiple()
+                            ->options(function () {
+                                return Withholding::where('company_id', Filament::getTenant()->id)
+                                    ->get()
+                                    ->mapWithKeys(fn ($item) => [$item->id => $item->withholding_type->getLabel()])
+                                    ->toArray();
+                            })
+                            // ->dehydrated(fn ($state) => is_array($state) && count($state)),
+                            ->dehydrated(),
+
+                        ]),
 
                     Section::make('Destinatario')
                         ->collapsible()
+                        ->columns(6)
                         ->schema([
-                            // Placeholder::make('')
-                            // ->hidden(function ($record) {
-                            //     if ($record && $record->parent_id) {
-                            //         Notification::make('refused_status')
-                            //             ->title('Dopo aver selezionato le voci da stornare salvare la nota di credito')
-                            //             ->color('warning')
-                            //             ->icon('gmdi-block')
-                            //             ->persistent()
-                            //             ->send();
-                            //         return true;
-                            //     }
-
-                            //     return true;
-                            // })
-                            // ->content('')
-                            // ->columnSpan(1),
                             Forms\Components\Select::make('client_id')->label('Cliente')
                                 ->hintAction(
                                     Action::make('Nuovo')
@@ -143,11 +205,12 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 ->preload()
                                 ->optionsLimit(5)
-                                ->columns(1)
+                                ->columnSpan(4)
                                 ->autofocus(),
 
                             Forms\Components\Select::make('tax_type')->label('Entrata')
                                 ->required()
+                                ->columnSpan(2)
                                 ->options(TaxType::class)
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     if(empty($get('client_id')) || empty($get('tax_type')))
@@ -176,7 +239,7 @@ class NewInvoiceResource extends Resource
                                     modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$get('client_id'))->where('tax_type',$get('tax_type'))
                                 )
                                 ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
+                                    fn (Model $record) => "{$record->office_name} ({$record->office_code}) TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
                                 )
                                 ->disabled(fn(Get $get): bool => ! filled($get('client_id')) || ! filled($get('tax_type')))
                                 ->afterStateUpdated(function (Set $set, $state) {
@@ -205,6 +268,7 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 ->preload()
                                 ->optionsLimit(5)
+                                ->columnSpan(3)
                                 ->visible(
                                     function(Get $get){
                                         if(filled ( $get('client_id') )){
@@ -340,129 +404,19 @@ class NewInvoiceResource extends Resource
                                     function (Model $record) {
                                         $return = "Fattura n. {$record->getNewInvoiceNumber()}";
                                         if($record->client->type->isPublic())
-                                            $return.= " - {$record->tax_type->getLabel()}\n{$record->contract->office_name} ({$record->contract->office_code}) - CIG: {$record->contract->cig_code}";
+                                            $return.= " - {$record->tax_type->getLabel()} {$record->contract->office_name} ({$record->contract->office_code}) - CIG: {$record->contract->cig_code}";
                                         $return.= "\nDestinatario: {$record->client->denomination}";
                                         return $return;
                                     }
                                 )
                                 ->preload()
+                                ->columnSpan(3)
                                 // ->optionsLimit(10)
                                 ->searchable()
-                        ]),
+                        ]),                        
 
-                        // Section::make('Status SDI')->columns(2)
-                        // ->collapsed()
-                        // ->schema([
-                        //     Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
-                        //         ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))
-                        //         ->columnSpanFull(),
-                        //     Forms\Components\TextInput::make('sdi_code')->label('Codice')->readOnly()->columnSpan(1)->disabled(),
-                        //     Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(1)->disabled()
-                        //         ->native(false)
-                        //         ->displayFormat('d F Y'),
-                        // ]),
-
-                        Section::make('Dati per il pagamento')->columns(4)
-                        ->collapsed(false)
-                        ->schema([
-                            Forms\Components\Select::make('bank_account_id')->label('IBAN')
-                                ->relationship(
-                                    name: 'bankAccount',
-                                    modifyQueryUsing: fn (Builder $query) =>
-                                    $query->where('company_id',Filament::getTenant()->id)
-                                )
-                                ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => "{$record->name}\n$record->iban"
-                                )
-                                ->searchable()
-                                ->required()
-                                ->columnSpanFull()->preload(),
-                            Forms\Components\Select::make('payment_mode')->label('Modalità')
-                                // ->options(PaymentType::class)
-                                ->afterStateUpdated( function(Set $set, $state){
-                                    if($state == PaymentMode::TP02->value){
-                                        $set('rate_number', 1);
-                                    }
-                                    else{
-                                        $set('rate_number', null);
-                                    }
-                                })
-                                ->reactive()
-                                ->options(
-                                    collect(PaymentMode::cases())
-                                        ->sortBy(fn (PaymentMode $type) => $type->getOrder())
-                                        ->mapWithKeys(fn (PaymentMode $type) => [
-                                            $type->value => $type->getLabel()
-                                        ])
-                                        ->toArray()
-                                )
-                                ->required()
-                                ->default(PaymentMode::TP02->value)
-                                ->columnSpan(2),
-                            Forms\Components\TextInput::make('rate_number')
-                                ->label('Numero rate')
-                                ->columnSpan(2)
-                                ->default(1)
-                                ->required(fn(Get $get): bool => $get('payment_mode') != PaymentMode::TP02->value)
-                                ->disabled(fn(Get $get): bool => $get('payment_mode') == PaymentMode::TP02->value)
-                                ->dehydrated(),
-                            Forms\Components\Select::make('payment_type')->label('Tipo')
-                                // ->options(PaymentType::class)
-                                ->options(
-                                    collect(PaymentType::cases())
-                                        ->sortBy(fn (PaymentType $type) => $type->getOrder())
-                                        ->mapWithKeys(fn (PaymentType $type) => [
-                                            $type->value => $type->getLabel()
-                                        ])
-                                        ->toArray()
-                                )
-                                ->required()
-                                ->default('mp05')
-                                ->columnSpan(2),
-                            Forms\Components\Select::make('payment_days')
-                                ->label('Giorni')
-                                ->required()
-                                ->options([
-                                    30 => '30',
-                                    60 => '60',
-                                    90 => '90',
-                                    120 => '120',
-                                ])
-                                ->default(30)
-                                ->columnSpan(2),
-                                ]),
-
-                        Section::make('Status SDI')->columns(2)
-                        ->collapsed()
-                        ->schema([
-                            Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
-                                ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))
-                                ->columnSpanFull(),
-                            Forms\Components\TextInput::make('sdi_code')->label('Codice SdI')->readOnly()->columnSpan(1)->disabled(),
-                            Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(1)->disabled()
-                                ->native(false)
-                                ->displayFormat('d F Y'),
-                        ]),
-
-                        Section::make('Status del pagamento')->columns(2)
-                            ->collapsed()
-                            ->schema([
-                                Forms\Components\Select::make('payment_status')->label('Status')
-                                    ->required()
-                                    ->default('waiting')
-                                    ->options(PaymentStatus::class)->columnSpan(2),
-
-                                Forms\Components\DatePicker::make('last_payment_date')->label('Data ultimo pagamento')
-                                ->native(false)
-                                ->displayFormat('d F Y')->columnSpan(1)->disabled(),
-                                Forms\Components\TextInput::make('total_payment')->label('Totale pagamenti')
-                                    ->extraInputAttributes(['style' => 'text-align: right;'])
-                                    ->numeric()->suffix('€')->columnSpan(1)->disabled(),
-
-                            ])
-
-                ]),
-                Grid::make('GRID')->columnSpan(3)->schema([
+                // ]),
+                // Grid::make('GRID')->columnSpan(3)->schema([
 
                     Section::make('')
                         ->columns(6)
@@ -732,158 +686,116 @@ class NewInvoiceResource extends Resource
                                 ->columnSpanFull(),
                         ]),
 
-
-
-                ]),//FIRST GRID
-
-                Section::make('Opzioni')
-                    // ->collapsible()
-                    ->columns(12)
-                    ->collapsed()
-                    ->label('')
-                    ->schema([
-                        Toggle::make('art_73')
-                            ->label('Art. 73')
-                            ->dehydrated()
-                            ->columnSpan(2)
-                            ->reactive()
-                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
-                                if ($state) {
-                                    $set('sectional_id', null);
-                                    $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
-                                    $set('number', $number);
-                                    NewInvoiceResource::invoiceNumber($get, $set);
-                                }
-                                else{
-                                    $clientId = $get('client_id');
-                                    if ($clientId) {
-                                        $client = \App\Models\Client::find($clientId);
-                                        if ($client && $client->type) {
-                                            $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
-                                                ->where('client_type', $client->type->value)
-                                                ->first();
-                                            if ($sectional) {
-                                                $set('sectional_id', $sectional->id);
-                                                $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
-                                                $set('number', $number);
-                                                NewInvoiceResource::invoiceNumber($get, $set);
-                                            } else {
-                                                $set('sectional_id', null);
-                                                $set('number', null);
-                                                NewInvoiceResource::invoiceNumber($get, $set);
-                                                Notification::make()
-                                                    ->title('Nessun sezionario trovato per il tipo di cliente selezionato.')
-                                                    ->warning()
-                                                    ->send();
-                                            }
-                                        }
+                    Section::make('Dati per il pagamento')->columns(4)
+                        ->collapsed(false)
+                        ->columns(12)
+                        ->schema([
+                            Forms\Components\Select::make('bank_account_id')->label('IBAN')
+                                ->relationship(
+                                    name: 'bankAccount',
+                                    modifyQueryUsing: fn (Builder $query) =>
+                                    $query->where('company_id',Filament::getTenant()->id)
+                                )
+                                ->getOptionLabelFromRecordUsing(
+                                    fn (Model $record) => "{$record->name} $record->iban"
+                                )
+                                ->searchable()
+                                ->required()
+                                ->columnSpan(5)
+                                ->preload(),
+                            Forms\Components\Select::make('payment_mode')->label('Modalità')
+                                // ->options(PaymentType::class)
+                                ->afterStateUpdated( function(Set $set, $state){
+                                    if($state == PaymentMode::TP02->value){
+                                        $set('rate_number', 1);
                                     }
-                                }
-                            }),
+                                    else{
+                                        $set('rate_number', null);
+                                    }
+                                })
+                                ->reactive()
+                                ->options(
+                                    collect(PaymentMode::cases())
+                                        ->sortBy(fn (PaymentMode $type) => $type->getOrder())
+                                        ->mapWithKeys(fn (PaymentMode $type) => [
+                                            $type->value => $type->getLabel()
+                                        ])
+                                        ->toArray()
+                                )
+                                ->required()
+                                ->default(PaymentMode::TP02->value)
+                                ->columnSpan(2),
+                            Forms\Components\TextInput::make('rate_number')
+                                ->label('Rate')
+                                ->columnSpan(1)
+                                ->default(1)
+                                ->required(fn(Get $get): bool => $get('payment_mode') != PaymentMode::TP02->value)
+                                ->disabled(fn(Get $get): bool => $get('payment_mode') == PaymentMode::TP02->value)
+                                ->dehydrated(),
+                            Forms\Components\Select::make('payment_type')->label('Tipo')
+                                // ->options(PaymentType::class)
+                                ->options(
+                                    collect(PaymentType::cases())
+                                        ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                                        ->mapWithKeys(fn (PaymentType $type) => [
+                                            $type->value => $type->getLabel()
+                                        ])
+                                        ->toArray()
+                                )
+                                ->required()
+                                ->default('mp05')
+                                ->columnSpan(3),
+                            Forms\Components\Select::make('payment_days')
+                                ->label('Giorni')
+                                ->required()
+                                ->options([
+                                    30 => '30',
+                                    60 => '60',
+                                    90 => '90',
+                                    120 => '120',
+                                ])
+                                ->default(30)
+                                ->columnSpan(1),
+                                ]),
 
-                        // Forms\Components\Select::make('social_contributions')   // se ci sono casse previdenziali per l'emittente della fattura => mostra select casse?
-                        //     ->columnSpan(2)
-                        //     // ->label('Cassa previdenziale')
-                        //     ->label('')
-                        //     ->placeholder('Cassa previdenziale')
-                        //     ->reactive()
-                        //     ->multiple()
-                        //     ->dehydrated()
-                        //     ->columns(2)
-                        //     ->options(
-                        //         function(){
-                        //                 return SocialContribution::where('company_id', Filament::getTenant()->id)
-                        //                             ->get()
-                        //                             ->mapWithKeys(function ($item) {
-                        //                                 return [$item->id => $item->fund?->getLabel()];
-                        //                             })
-                        //                             ->toArray();
-                        //             }
-                        //     )
-                        //     ->afterStateUpdated(function ($state, Get $get, Set $set) {
-                        //         //
-                        //     })
-                        //     ->visible(
-                        //             function(){
-                        //                 $count = SocialContribution::where('company_id', Filament::getTenant()->id)->count();
-                        //                 return $count > 0;
-                        //             }
-                        //         ),
+                        Section::make('Status SDI')->columns(2)
+                            ->collapsed()
+                            ->columns(6)
+                            ->schema([
+                                Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
+                                    ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))
+                                    ->columnSpan(2),
+                                Forms\Components\TextInput::make('sdi_code')->label('Codice SdI')->readOnly()->columnSpan(2)->disabled(),
+                                Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(2)->disabled()
+                                    ->native(false)
+                                    ->displayFormat('d F Y'),
+                            ]),
 
-                        Forms\Components\Select::make('social_contributions')
-                            ->label('')
-                            // ->columnSpan(4)
-                            ->columnSpan(6)
-                            ->placeholder('Cassa previdenziale')
-                            ->multiple()
-                            ->options(function () {
-                                return SocialContribution::where('company_id', Filament::getTenant()->id)
-                                    ->get()
-                                    ->mapWithKeys(fn ($item) => [$item->id => $item->fund->getLabel()])
-                                    ->toArray();
-                            })
-                            // ->dehydrated(fn ($state) => is_array($state) && count($state)),
-                            ->dehydrated(),
+                        Section::make('Status del pagamento')->columns(2)
+                            ->collapsed()
+                            ->columns(6)
+                            ->schema([
+                                Forms\Components\Select::make('payment_status')->label('Status')
+                                    ->required()
+                                    ->default('waiting')
+                                    ->options(PaymentStatus::class)->columnSpan(2),
 
-                        // Forms\Components\Select::make('withholdings')           // se c'è la ritenuta d'acconto la inserisce nella stampa
-                        //     ->columnSpan(2)
-                        //     // ->label('Ritenuta d\'acconto')
-                        //     ->label('')
-                        //     ->placeholder('Ritenute')
-                        //     ->reactive()
-                        //     ->multiple()
-                        //     ->dehydrated()
-                        //     ->columns(2)
-                        //     ->options(
-                        //         function(){
-                        //                 return Withholding::where('company_id', Filament::getTenant()->id)
-                        //                             ->get()
-                        //                             ->mapWithKeys(function ($item) {
-                        //                                 return [$item->id => $item->withholding_type?->getLabel()];
-                        //                             })
-                        //                             ->toArray();
-                        //             }
-                        //     )
-                        //     ->afterStateUpdated(function ($state, Get $get, Set $set) {
-                        //         //
-                        //     })
-                        //     ->visible(
-                        //             function(){
-                        //                 $count = Withholding::where('company_id', Filament::getTenant()->id)->count();
-                        //                 return $count > 0;
-                        //             }
-                        //         ),
-                        //     ]),
+                                Forms\Components\DatePicker::make('last_payment_date')->label('Data ultimo pagamento')
+                                ->native(false)
+                                ->displayFormat('d F Y')->columnSpan(2)->disabled(),
+                                Forms\Components\TextInput::make('total_payment')->label('Totale pagamenti')
+                                    ->extraInputAttributes(['style' => 'text-align: right;'])
+                                    ->columnSpan(2)
+                                    ->numeric()->suffix('€')->columnSpan(1)->disabled(),
 
-                        Forms\Components\Select::make('withholdings')
-                            ->label('')
-                            // ->columnSpan(3)
-                            ->columnSpan(4)
-                            ->placeholder('Ritenute')
-                            ->multiple()
-                            ->options(function () {
-                                return Withholding::where('company_id', Filament::getTenant()->id)
-                                    ->get()
-                                    ->mapWithKeys(fn ($item) => [$item->id => $item->withholding_type->getLabel()])
-                                    ->toArray();
-                            })
-                            // ->dehydrated(fn ($state) => is_array($state) && count($state)),
-                            ->dehydrated(),
+                            ]),
 
-                        // Forms\Components\Select::make('vat_enforce_type')
-                        //     ->label('')
-                        //     ->columnSpan(3)
-                        //     ->placeholder('Esigibilità IVA')
-                        //     ->options(
-                        //         collect(VatEnforceType::cases())
-                        //         ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                        //     )
-                        //     ->dehydrated()
+                // ]),//FIRST GRID
 
+                
 
-                        ]),
-
-            ])->columns(5);
+            // ])->columns(5);
+            ]);
 
     }
 

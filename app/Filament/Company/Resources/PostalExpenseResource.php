@@ -46,9 +46,9 @@ class PostalExpenseResource extends Resource
 
     protected static ?string $navigationIcon = 'tabler-mail-dollar';
 
-    protected static ?string $navigationGroup = 'Fatturazione attiva';
+    protected static ?string $navigationGroup = 'Costi di notifica';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'denomination';
 

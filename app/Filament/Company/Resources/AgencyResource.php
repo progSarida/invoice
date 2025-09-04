@@ -23,9 +23,9 @@ class AgencyResource extends Resource
 
     protected static ?string $navigationIcon = 'phosphor-house-light';
 
-    protected static ?string $navigationGroup = 'Fatturazione attiva';
+    protected static ?string $navigationGroup = 'Cauzioni';
 
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
