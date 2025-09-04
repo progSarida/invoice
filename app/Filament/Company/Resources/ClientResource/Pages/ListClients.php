@@ -132,8 +132,8 @@ class ListClients extends ListRecords
                     $saldo = $precResidue ? $residue : 0;                                                               // saldo iniziale
                     $index = 0;
                     foreach($invoices as $key => $invoice) {
-                        $param[$index]['order'] = \Carbon\Carbon::parse($invoice->updated_at)->valueOf();
-                        $param[$index]['reg'] = \Carbon\Carbon::parse($invoice->updated_at)->format('d/m/Y');
+                        $param[$index]['order'] = \Carbon\Carbon::parse($invoice->created_at)->valueOf();
+                        $param[$index]['reg'] = \Carbon\Carbon::parse($invoice->created_at)->format('d/m/Y');
                         $param[$index]['cliente']['nome'] = $invoice->client->denomination;
                         $param[$index]['cliente']['pi'] = $invoice->client->vat_code;
                         $param[$index]['cliente']['cf'] = $invoice->client->tax_code;
@@ -182,14 +182,14 @@ class ListClients extends ListRecords
                         if($invoice->activePayments) {
                             foreach($invoice->activePayments as $payment){
                                 $index++;
-                                $param[$index]['order'] = \Carbon\Carbon::parse($payment->updated_at)->valueOf();
-                                $param[$index]['reg'] = \Carbon\Carbon::parse($payment->updated_at)->format('d/m/Y');
+                                $param[$index]['order'] = \Carbon\Carbon::parse($payment->created_at)->valueOf();
+                                $param[$index]['reg'] = \Carbon\Carbon::parse($payment->created_at)->format('d/m/Y');
                                 $param[$index]['cliente']['nome'] = $payment->invoice->client->denomination;
                                 $param[$index]['cliente']['pi'] = $payment->invoice->client->vat_code;
                                 $param[$index]['cliente']['cf'] = $payment->invoice->client->tax_code;
-                                $param[$index]['num_doc'] = '';
-                                $param[$index]['data_doc'] = '';
-                                $param[$index]['desc'] = 'S/DO FATTURA ' . $payment->invoice->client->denomination . '<br>Doc. orig. ' . $payment->invoice->invoiceNumber();
+                                $param[$index]['num_doc'] = $payment->invoice->invoiceNumber();
+                                $param[$index]['data_doc'] = $payment->invoice->invoice_date->format('d/m/Y');
+                                $param[$index]['desc'] = 'S/DO FATTURA ' . strtoupper($payment->invoice->client->denomination) . '<br>Doc. orig. ' . $payment->invoice->invoiceNumber();
                                 // $saldo -= $payment->amount;
                                 $param[$index]['dare'] = 0;
                                 $param[$index]['avere'] = $payment->amount;
@@ -262,7 +262,7 @@ class ListClients extends ListRecords
             $client = Client::find($data['client_id']);
             $historicResidue = $client ? $client->residue : 0;													// residuo storico del cliente
         } else {																								// nessun cliente selezionato
-            $historicResidue = Client::sum('residue');															// residuo storico totale									
+            $historicResidue = Client::sum('residue');															// residuo storico totale
         }
 
         $invoices = \Filament\Facades\Filament::getTenant()													    // fatture su cui fare il calcolo
@@ -281,10 +281,10 @@ class ListClients extends ListRecords
         // dd($residue);
 
         $totals = $invoices->selectRaw('
-                SUM(CASE 
-                    WHEN clients.type = \'public\' 
-                    THEN invoices.no_vat_total 
-                    ELSE invoices.total 
+                SUM(CASE
+                    WHEN clients.type = \'public\'
+                    THEN invoices.no_vat_total
+                    ELSE invoices.total
                 END) as total_sum,
                 SUM(total_notes) as notes_sum,
                 SUM(total_payment) as payment_sum
@@ -302,40 +302,105 @@ class ListClients extends ListRecords
         return $residue;
     }
 
-    private function closeOpen($data, $temp)									                                // controllo se devo inserire la chiusura del bilancio
+    private function closeOpen($data, $temp)
     {
-        // param = array();
-        // ciclio su temp
-            // se ['reg'] dell'elemento precedente e ['reg'] dell'elemento attuale sono di due anni diversi
-                // creo una prima riga nuova (per chiusura 31/12)
-                    // ['auto'] = true;
-                    // ['order'] = con data 31/12/{anno_data_invoice}
-                    // ['reg'] = 31/12/{anno_data_invoice}
-                    // ['cliente']['nome'] = ''
-                    // ['cliente']['pi'] = ''
-                    // ['cliente']['cf'] = ''
-                    // ['num_doc'] = ''
-                    // ['data_doc'] = ''
-                    // ['desc'] = SALDO CHIUSURA AL 31/12/{anno_data_invoice}
-                    // ['dare'] = 0
-                    // ['avere'] = $annual
-                // index++
-                // creo una seconda riga nuova (er apertura 01/01)
-                    // ['auto'] = true;
-                    // ['order'] = con data 31/12/{anno_data_invoice}
-                    // ['reg'] = 01/01/{anno_data_invoice}+1
-                    // ['cliente']['nome'] = ''
-                    // ['cliente']['pi'] = ''
-                    // ['cliente']['cf'] = ''
-                    // ['num_doc'] = ''
-                    // ['data_doc'] = ''
-                    // ['desc'] = SALDO APERTURA AL 01/01/{anno_data_invoice}+1
-                    // ['dare'] = $annual
-                    // ['avere'] = 0
-                // annual = 0
-                // index++
-            // altrimenti prosegui nelll'inserimento in param degli elementi di temp
+        // if (empty($temp) || empty($data['from_date']) || empty($data['to_date'])) {                             // non ci sono voci o intervallo di date, restituisci inalterato
+        //     return $temp;
+        // }
 
-            // return param
+        $param = [];                                                                                            // output
+        $index = 0;                                                                                             // indice param
+        $first = true;                                                                                          // flag primo storno (residuo precedente)
+        $annual = 0;                                                                                            // saldo da stornare per gli anni successivi
+        $residue = $this->getPrecResidue($data);                                                                // residuo precedente
+        $currentSaldo = $residue;                                                                               // inizializzo il saldo con il residuo
+
+        for ($i = 0; $i < count($temp); $i++) {                                                                 // ciclo sugli elementi di $temp
+            $param[$index] = $temp[$i];                                                                         // aggiungo l'elemento corrente di $temp
+            $currentSaldo = $temp[$i]['saldo'];                                                                 // aggiorno il saldo corrente
+
+            $currentDate = \Carbon\Carbon::createFromFormat('d/m/Y', $temp[$i]['reg']);
+            $currentYear = $currentDate->year;
+
+            if ($i < count($temp) - 1) {                                                                        // controllo se l'elemento successivo esiste
+                $nextDate = \Carbon\Carbon::createFromFormat('d/m/Y', $temp[$i + 1]['reg']);
+                $nextYear = $nextDate->year;
+
+                if ($currentYear !== $nextYear) {                                                               // controllo se l'elemento successivo appartiene a un anno diverso
+                    // $amountToClose = $first ? $residue : $annual;                                               // imposto il valore da stornare
+                    $amountToClose = $first ? ($data['prec_residue'] ? $residue : 0) : $annual;                 // imposto il valore da stornare
+                    $annual = $currentSaldo;                                                                    // salvo il saldo per l'apertura successiva
+
+                    $param[++$index] = [                                                                        // aggiungo la riga di chiusura (31/12)
+                        'auto' => true,
+                        'order' => \Carbon\Carbon::create($currentYear, 12, 31, 23, 59, 59)->valueOf(),
+                        'reg' => \Carbon\Carbon::create($currentYear, 12, 31)->format('d/m/Y'),
+                        'cliente' => ['nome' => '', 'pi' => '', 'cf' => ''],
+                        'num_doc' => '',
+                        'data_doc' => '',
+                        'desc' => 'SALDO CHIUSURA AL 31/12/' . $currentYear,
+                        'dare' => 0,
+                        'avere' => $amountToClose,
+                        'saldo' => 0,
+                    ];
+
+                    $param[++$index] = [                                                                        // aggiungo la riga di apertura (01/01 dell'anno successivo)
+                        'auto' => true,
+                        'order' => \Carbon\Carbon::create($nextYear, 1, 1)->startOfDay()->valueOf(),
+                        'reg' => \Carbon\Carbon::create($nextYear, 1, 1)->format('d/m/Y'),
+                        'cliente' => ['nome' => '', 'pi' => '', 'cf' => ''],
+                        'num_doc' => '',
+                        'data_doc' => '',
+                        'desc' => 'SALDO APERTURA AL 01/01/' . $nextYear,
+                        'dare' => $amountToClose,
+                        'avere' => 0,
+                        'saldo' => 0,
+                    ];
+
+                    $first = false;                                                                             // dopo il primo storno disabilito il flag
+                }
+            }
+
+            $index++;
+        }
+
+        // Aggiungo chiusura per l'ultimo anno se necessario
+        // $lastDate = \Carbon\Carbon::createFromFormat('d/m/Y', $temp[count($temp) - 1]['reg']);
+        // if ($lastDate === false) {
+        //     $lastYear = \Carbon\Carbon::parse($data['to_date'])->year;
+        // } else {
+        //     $lastYear = $lastDate->year;
+        // }
+        // $toDateYear = \Carbon\Carbon::parse($data['to_date'])->year;
+
+        // if ($lastYear <= $toDateYear && ($currentSaldo != 0 || ($first && $residue != 0))) {
+        //     $amountToClose = $first ? $residue : $currentSaldo;
+
+        //     // Aggiungi la riga di chiusura per l'ultimo anno
+        //     $param[$index] = [
+        //         'auto' => true,
+        //         'order' => \Carbon\Carbon::create($lastYear, 12, 31, 23, 59, 59)->valueOf(),
+        //         'reg' => \Carbon\Carbon::create($lastYear, 12, 31)->format('d/m/Y'),
+        //         'cliente' => ['nome' => '', 'pi' => '', 'cf' => ''],
+        //         'num_doc' => '',
+        //         'data_doc' => '',
+        //         'desc' => 'SALDO CHIUSURA AL 31/12/' . $lastYear,
+        //         'dare' => $amountToClose < 0 ? abs($amountToClose) : 0,
+        //         'avere' => $amountToClose > 0 ? abs($amountToClose) : 0,
+        //         'saldo' => 0,
+        //     ];
+        // }
+
+        usort($param, function ($a, $b) {                                                                       // ordino gli elementi per 'order'
+            return $a['order'] <=> $b['order'];
+        });
+
+        $currentSaldo = $data['prec_residue'] ? $residue : 0;                                                   // ricalcolo il saldo per tutte le voci
+        foreach ($param as &$entry) {
+            $currentSaldo += $entry['dare'] - $entry['avere'];
+            $entry['saldo'] = $currentSaldo;
+        }
+
+        return $param;
     }
 }
