@@ -20,6 +20,7 @@ use App\Models\Client;
 use App\Models\ManageType;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
@@ -98,7 +99,18 @@ class ListClients extends ListRecords
                             Checkbox::make('prec_residue')
                                 ->label('Con residuo precedente')
                                 ->columnSpan(3)
-                                ->default(false)
+                                ->default(false),
+                            Placeholder::make('')
+                                ->content('')
+                                ->columnSpan(9),
+                            Select::make('output_format')
+                                ->label('Formato di output')
+                                ->options([
+                                    'pdf' => 'PDF',
+                                    'excel' => 'Excel',
+                                ])
+                                ->default('pdf')
+                                ->columnSpan(3),
                         ]),
                 ])
                 ->action(function ($data) {
@@ -107,6 +119,7 @@ class ListClients extends ListRecords
                     $fromDate = $data['from_date'] ?? null;
                     $toDate = $data['to_date'] ?? null;
                     $precResidue = $data['prec_residue'];
+                    $outputFormat = $data['output_format'] ?? 'pdf';
 
                     $invoices = \Filament\Facades\Filament::getTenant()
                         ->invoices()
@@ -229,6 +242,12 @@ class ListClients extends ListRecords
                     // dd($param);
 
                     $tenant = \Filament\Facades\Filament::getTenant();
+
+                    if ($outputFormat === 'excel') {
+                        return $this->generateExcelOutput($data, $residue, $param, $tenant);
+                    } else {
+                        return $this->generatePdfOutput($data, $residue, $param, $tenant);
+                    }
 
                     return response()->streamDownload(function () use ($data, $residue, $param, $tenant) {
                         echo Pdf::loadHTML(
@@ -402,5 +421,119 @@ class ListClients extends ListRecords
         }
 
         return $param;
+    }
+
+    private function generatePdfOutput($data, $residue, $param, $tenant)
+    {
+        return response()->streamDownload(function () use ($data, $residue, $param, $tenant) {
+            echo Pdf::loadHTML(
+                Blade::render('pdf.ledger', [
+                    'company' => $tenant,
+                    'filters' => $data,
+                    'residue' => $residue,
+                    'data' => $param,
+                ])
+            )
+                ->setPaper('A4', 'portrait')
+                ->stream();
+        }, 'Partitario.pdf');
+    }
+
+    // Metodo per generare output Excel
+    protected function generateExcelOutput($data, $residue, $param, $tenant)
+    {
+        // Prepara i dati per Excel
+        $excelData = [];
+
+        // Header
+        $excelData[] = [
+            'Data Reg.',
+            'Cliente',
+            'P.IVA',
+            'Cod.Fiscale',
+            'Num. Doc.',
+            'Data Doc.',
+            'Descrizione',
+            'Dare',
+            'Avere',
+            'Saldo'
+        ];
+
+        // Se c'è un residuo precedente, aggiungilo come prima riga
+        if ($data['prec_residue']) {
+            $excelData[] = [
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                'Residuo precedente',
+                '',
+                $residue < 0 ? abs($residue) : 0,
+                $residue
+            ];
+        }
+
+        // Dati del partitario
+        foreach ($param as $row) {
+            $excelData[] = [
+                $row['reg'],
+                $row['cliente']['nome'] ?? '',
+                $row['cliente']['pi'] ?? '',
+                $row['cliente']['cf'] ?? '',
+                $row['num_doc'] ?? '',
+                $row['data_doc'] ?? '',
+                strip_tags(str_replace('<br>', ' - ', $row['desc'] ?? '')), // Rimuove HTML e sostituisce <br>
+                $row['dare'] ?? 0,
+                $row['avere'] ?? 0,
+                $row['saldo'] ?? 0
+            ];
+        }
+
+        return response()->streamDownload(function () use ($excelData) {
+            // Crea un nuovo spreadsheet
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Imposta il titolo del foglio
+            $sheet->setTitle('Partitario');
+
+            // Scrive i dati
+            $sheet->fromArray($excelData, null, 'A1');
+
+            // Formattazione header
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'E0E0E0']
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                    ]
+                ]
+            ];
+            $sheet->getStyle('A1:J1')->applyFromArray($headerStyle);
+
+            // Formattazione colonne numeriche (Dare, Avere, Saldo)
+            $numberStyle = [
+                'numberFormat' => ['formatCode' => '#,##0.00']
+            ];
+            $sheet->getStyle('H:J')->applyFromArray($numberStyle);
+
+            // Auto-dimensiona le colonne
+            foreach (range('A', 'J') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            // Crea il writer e salva
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, 'Partitario.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="Partitario.xlsx"'
+        ]);
     }
 }
