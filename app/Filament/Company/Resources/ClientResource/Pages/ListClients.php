@@ -470,7 +470,7 @@ class ListClients extends ListRecords
                 '',
                 'Residuo precedente',
                 '',
-                $residue < 0 ? abs($residue) : 0,
+                '',
                 $residue
             ];
         }
