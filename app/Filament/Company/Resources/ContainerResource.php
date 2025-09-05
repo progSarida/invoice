@@ -34,6 +34,8 @@ class ContainerResource extends Resource
 
     protected static ?string $navigationGroup = 'Archivio';
 
+    public static function shouldRegisterNavigation(): bool{ return true; }                             // se messo a false nasconde 'Archivio'
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function getGloballySearchableAttributes(): array
