@@ -64,6 +64,8 @@ class NewActivePaymentsResource extends Resource
                         name: 'invoice',
                         titleAttribute: 'id',
                         modifyQueryUsing: fn ($query) => $query->whereNotNull('flow')
+                                                               ->where('sdi_status', '!=', 'da_inviare')    // non includo fattura da inviare
+                                                               ->where('parent_id', null)                   // non includo note di credito
                     )
                     ->getOptionLabelFromRecordUsing(function (Model $record) {
                         $cliente = $record->client?->denomination ?? 'Cliente sconosciuto';
@@ -81,7 +83,21 @@ class NewActivePaymentsResource extends Resource
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()
+                    ->live()
                     ->disabled(fn ($get) => $get('validated'))
+                    ->afterStateUpdated(function ($state, Get $get) {
+                        $invoice = Invoice::find($get('invoice_id'));
+                        $newTotalPayment = $state + $invoice->total_payment;
+                        $compare = $invoice->client?->type?->value == 'public' ? $invoice->no_vat_total : $invoice->total;
+
+                        if($newTotalPayment > ($compare - $invoice->total_notes)){
+                            Notification::make()
+                                ->title('Attenzione! Con questo inserimento il totale dei pagamenti della fattura ' . $invoice->getNewInvoiceNumber() . ' eccederebbe il dovuto.')
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        }
+                    })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     // ->rules(['numeric', 'min:0'])
@@ -99,7 +115,15 @@ class NewActivePaymentsResource extends Resource
                             Notification::make()
                                 ->title('Attenzione! La data del pagamento è inferiore alla data della fattura.')
                                 ->danger()
-                                ->duration(6000)
+                                ->persistent()
+                                ->send();
+                        }
+
+                        if ($paymentDate && $paymentDate > today()) {
+                            Notification::make()
+                                ->title('Attenzione! La data del pagamento è successiva alla data di oggi.')
+                                ->warning()
+                                ->persistent()
                                 ->send();
                         }
                     })

@@ -29,7 +29,6 @@ class ActTypeResource extends Resource
 
     /**
      * Controlla se mostrare questa risorsa nella navigazione
-     * Visibile solo per admin globali e manager del tenant corrente
      */
     public static function shouldRegisterNavigation(): bool
     {
