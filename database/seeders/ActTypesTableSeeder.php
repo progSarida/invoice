@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class ActTypesTableSeeder extends Seeder
 {
@@ -14,12 +15,12 @@ class ActTypesTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
-        \DB::table('act_types')->delete();
-        
-        \DB::table('act_types')->insert(array (
-            0 => 
+
+        DB::table('act_types')->delete();
+
+        DB::table('act_types')->insert(array (
+            0 =>
             array (
                 'id' => 1,
                 'company_id' => 1,
@@ -29,7 +30,7 @@ class ActTypesTableSeeder extends Seeder
                 'created_at' => '2025-08-18 10:30:43',
                 'updated_at' => '2025-08-18 10:30:43',
             ),
-            1 => 
+            1 =>
             array (
                 'id' => 2,
                 'company_id' => 1,
@@ -39,7 +40,7 @@ class ActTypesTableSeeder extends Seeder
                 'created_at' => '2025-08-18 10:30:43',
                 'updated_at' => '2025-08-18 10:30:43',
             ),
-            2 => 
+            2 =>
             array (
                 'id' => 3,
                 'company_id' => 1,
@@ -49,7 +50,7 @@ class ActTypesTableSeeder extends Seeder
                 'created_at' => '2025-08-18 10:30:43',
                 'updated_at' => '2025-08-18 10:30:43',
             ),
-            3 => 
+            3 =>
             array (
                 'id' => 4,
                 'company_id' => 1,
@@ -59,7 +60,7 @@ class ActTypesTableSeeder extends Seeder
                 'created_at' => '2025-08-18 10:30:43',
                 'updated_at' => '2025-08-18 10:30:43',
             ),
-            4 => 
+            4 =>
             array (
                 'id' => 5,
                 'company_id' => 1,
@@ -69,7 +70,7 @@ class ActTypesTableSeeder extends Seeder
                 'created_at' => '2025-08-18 10:30:43',
                 'updated_at' => '2025-08-18 10:30:43',
             ),
-            5 => 
+            5 =>
             array (
                 'id' => 6,
                 'company_id' => 1,
@@ -79,7 +80,7 @@ class ActTypesTableSeeder extends Seeder
                 'created_at' => '2025-08-18 10:30:43',
                 'updated_at' => '2025-08-18 10:30:43',
             ),
-            6 => 
+            6 =>
             array (
                 'id' => 7,
                 'company_id' => 1,
@@ -89,7 +90,7 @@ class ActTypesTableSeeder extends Seeder
                 'created_at' => '2025-08-18 10:30:43',
                 'updated_at' => '2025-08-18 10:30:43',
             ),
-            7 => 
+            7 =>
             array (
                 'id' => 8,
                 'company_id' => 1,
@@ -100,7 +101,7 @@ class ActTypesTableSeeder extends Seeder
                 'updated_at' => '2025-08-18 10:30:43',
             ),
         ));
-        
-        
+
+
     }
 }
