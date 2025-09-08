@@ -52,7 +52,7 @@ class PassivePayment extends Model
         static::created(function ($payment) {
             if ($payment->passiveInvoice) {
                 $payment->passiveInvoice->total_payment += $payment->amount;
-                $payment->passiveInvoice->last_payment_date = $payment->payment_date;
+                // $payment->passiveInvoice->last_payment_date = $payment->payment_date;
                 if ( is_null($payment->passiveInvoice->last_payment_date) || $payment->passiveInvoice->last_payment_date < $payment->payment_date ) {
                     $payment->passiveInvoice->last_payment_date = $payment->payment_date;
                 }

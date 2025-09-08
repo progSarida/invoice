@@ -78,7 +78,7 @@ class ActivePayments extends Model
         static::created(function ($payment) {
             if ($payment->invoice) {
                 $payment->invoice->total_payment += $payment->amount;
-                $payment->invoice->last_payment_date = $payment->payment_date;
+                // $payment->invoice->last_payment_date = $payment->payment_date;
                 if ( is_null($payment->invoice->last_payment_date) || $payment->invoice->last_payment_date < $payment->payment_date ) {
                     $payment->invoice->last_payment_date = $payment->payment_date;
                 }
