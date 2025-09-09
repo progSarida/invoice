@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use App\Enums\InvoicingCicle;
@@ -13,10 +12,10 @@ class NewContract extends Model
 {
     protected $fillable = [
         'client_id',
-        'tax_type',
+        'tax_types',
         'start_validity_date',
         'end_validity_date',
-        'accrual_type_id',
+        'accrual_types',
         'payment_type',
         'cig_code',
         'cup_code',
@@ -30,7 +29,7 @@ class NewContract extends Model
     ];
 
     protected $casts = [
-        'tax_type' => TaxType::class,
+        'tax_types' => 'array',
         'payment_type' => TenderPaymentType::class,
         'start_validity_date' => 'date',
         'end_validity_date' => 'date',
@@ -38,8 +37,36 @@ class NewContract extends Model
         'invoicing_cycle' => InvoicingCicle::class,
         'new_contract_copy_date' => 'date',
         'reinvoice' => 'boolean',
-        // 'accrual_types' => 'array'
+        'accrual_types' => 'array',
     ];
+
+    public function getTaxTypesAttribute($value)
+    {
+        $values = is_string($value) ? json_decode($value, true) : $value;
+        return array_map(function ($val) {
+            return TaxType::from($val)->getLabel();
+        }, $values ?? []);
+    }
+
+    public function setTaxTypesAttribute($values)
+    {
+        $this->attributes['tax_types'] = json_encode(array_map('strtolower', $values));
+    }
+
+    public function getAccrualTypesAttribute($value)
+    {
+        $values = is_string($value) ? json_decode($value, true) : $value;
+        if (!$values) return [];
+        $accrualTypes = AccrualType::whereIn('id', $values)->pluck('name', 'id')->toArray();
+        return array_map(function ($id) use ($accrualTypes) {
+            return $accrualTypes[$id] ?? 'Sconosciuto';
+        }, $values);
+    }
+
+    public function setAccrualTypesAttribute($values)
+    {
+        $this->attributes['accrual_types'] = json_encode($values);
+    }
 
     public function company()
     {
@@ -49,11 +76,6 @@ class NewContract extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
-    }
-
-    public function accrualType(): BelongsTo
-    {
-        return $this->belongsTo(AccrualType::class);
     }
 
     public function contractDetails(): HasMany
@@ -71,3 +93,4 @@ class NewContract extends Model
         return $this->hasMany(Invoice::class, 'contract_id');
     }
 }
+

@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Filament\Exports;
-
 use App\Models\NewContract;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
@@ -20,9 +18,11 @@ class NewContractExporter extends Exporter
                 ->label('Azienda'),
             ExportColumn::make('client.denomination')
                 ->label('Cliente'),
-            ExportColumn::make('tax_type')
-                ->label('Entrata')
-                ->formatStateUsing(fn ($state) => $state?->getLabel() ?? null),
+            ExportColumn::make('tax_types') // MODIFICA: Rinominato da 'tax_type' a 'tax_types'
+                ->label('Entrate')
+                ->formatStateUsing(function ($state) {
+                    return !empty($state) ? implode(', ', $state) : 'N/A'; // MODIFICA: Unisce le etichette con virgola
+                }),
             ExportColumn::make('start_validity_date')
                 ->label('Inizio contratto')
                 ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : null),
@@ -77,11 +77,9 @@ class NewContractExporter extends Exporter
     public static function getCompletedNotificationBody(Export $export): string
     {
         $body = 'Your new contract export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
-
         if ($failedRowsCount = $export->getFailedRowsCount()) {
             $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to export.';
         }
-
         return $body;
     }
 }

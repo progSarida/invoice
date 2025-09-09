@@ -70,7 +70,6 @@
                     'invoice_tax_type' => 'Entrata',
                     'validated' => 'Pagamenti validati',
                     'contract_accrual_type_id' => 'Competenza',
-                    'invoice_tax_type' => 'Entrata',
                     'invoice_year' => 'Anno fattura',
                     'invoice_budget_year' => 'Anno bilancio',
                     'invoice_accrual_year' => 'Anno competenza',

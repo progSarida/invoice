@@ -10,36 +10,30 @@
             margin: 0;
             padding: 20mm;
         }
-
         .header {
             text-align: center;
             margin-bottom: 30px;
             border-bottom: 2px solid #000;
             padding-bottom: 15px;
         }
-
         .header h1 {
             font-size: 5mm;
             margin: 0 0 10px 0;
             font-weight: bold;
         }
-
         .client {
             font-size: 5mm;
             margin: 0 0 10px 0;
             font-weight: bold;
         }
-
         .contract-info {
             display: flex;
             justify-content: space-between;
             margin-bottom: 30px;
         }
-
         .section {
             margin-bottom: 25px;
         }
-
         .section-title {
             font-size: 4mm;
             font-weight: bold;
@@ -48,55 +42,45 @@
             border-left: 4px solid #333;
             margin-bottom: 15px;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             border: 0.5px solid #333;
             margin-bottom: 20px;
         }
-
         th, td {
             border: 0.3px solid #666;
             padding: 8px 12px;
             text-align: left;
             vertical-align: top;
         }
-
         th {
             background-color: #f8f9fa;
             font-weight: bold;
             font-size: 3mm;
         }
-
         td {
             font-size: 2.75mm;
         }
-
         .label-col {
             width: 33%;
             font-weight: bold;
             background-color: #fafafa;
         }
-
         .value-col {
             width: 67%;
         }
-
         .amount {
             /* font-weight: bold; */
             /* font-size: 3.5mm; */
             /* color: #d63384; */
         }
-
         .dates {
             /* background-color: #e7f3ff; */
         }
-
         .codes {
             /* background-color: #fff3cd; */
         }
-
         .footer {
             position: fixed;
             bottom: 20mm;
@@ -112,10 +96,9 @@
 <body>
     <!-- Header -->
     <div class="header">
-        <h1>CONTRATTO {{ strtoupper($contract->tax_type->getLabel()) }}</h1>
+        <h1>CONTRATTO {{ strtoupper(!empty($contract->tax_types) ? implode(', ', $contract->tax_types) : 'N/A') }}</h1>
         <p class='client'>{{ $contract->client->denomination ?? 'Cliente N/A' }}</p>
     </div>
-
     <!-- Informazioni Generali -->
     <div class="section">
         <div class="section-title">Informazioni Generali</div>
@@ -146,9 +129,9 @@
             </tr>
             <tr>
                 <td class="label-col">Entrata</td>
-                <td class="value-col">{{ strtoupper($contract->tax_type->getLabel()) }}</td>
+                <td class="value-col">{{ strtoupper(!empty($contract->tax_types) ? implode(', ', $contract->tax_types) : 'N/A') }}</td>
             </tr>
-                        <tr class="dates">
+            <tr class="dates">
                 <td class="label-col">Data inizio</td>
                 <td class="value-col">{{ \Carbon\Carbon::parse($contract->start_validity_date)->format('d/m/Y') }}</td>
             </tr>
@@ -178,7 +161,6 @@
             </tr>
         </table>
     </div>
-
     <!-- Informazioni Documento -->
     <div class="section">
         <div class="section-title">Affidamento</div>
@@ -201,7 +183,6 @@
             </tr>
         </table>
     </div>
-
     <!-- Footer -->
     <div class="footer">
         <p>Documento generato il {{ now()->format('d/m/Y H:i:s') }} | Operatore: {{ Auth::user()->name }}</p>

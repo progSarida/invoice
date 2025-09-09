@@ -43,7 +43,7 @@ class ListNewInvoices extends ListRecords
                     foreach ($contracts['to_invoice'] as $contract) {
                         $user->notify(
                             Notification::make()
-                                ->title('Il contratto con ' . $contract->client->denomination . ' (' . $contract->tax_type->getLabel() . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
+                                ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
                                 // ->body('TESTBODY')
                                 ->icon('heroicon-o-exclamation-triangle')
                                 ->warning()
@@ -53,7 +53,7 @@ class ListNewInvoices extends ListRecords
                     foreach ($contracts['partial'] as $contract) {
                         $user->notify(
                             Notification::make()
-                                ->title('Il contratto con ' . $contract->client->denomination . ' (' . $contract->tax_type->getLabel() . ' - ' . $contract->cig_code . ') ' . 'ha una fattura parzialmente stornata')
+                                ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'ha una fattura parzialmente stornata')
                                 // ->body('TESTBODY')
                                 ->icon('heroicon-o-exclamation-triangle')
                                 ->warning()
@@ -237,7 +237,7 @@ class ListNewInvoices extends ListRecords
                         ->with([
                             'invoices' => function ($query) use ($docTypeId, $manageTypeId, $fromBudgetYear, $toBudgetYear, $fromInvoiceDate, $toInvoiceDate) {
                                 $query->with([
-                                    'client.city', // Aggiungi questa relazione
+                                    'client.city',
                                     'docType',
                                     'contract'
                                 ])
@@ -249,10 +249,10 @@ class ListNewInvoices extends ListRecords
                                     ->when($fromInvoiceDate, fn($q) => $q->where('invoice_date', '>=', $fromInvoiceDate))
                                     ->when($toInvoiceDate, fn($q) => $q->where('invoice_date', '<=', $toInvoiceDate));
                             },
-                            'client.city' // Aggiungi anche qui per sicurezza
+                            'client.city'
                         ])
                         ->when($clientId, fn($q) => $q->where('client_id', $clientId))
-                        ->when($taxType, fn($q) => $q->whereHas('invoices', fn($q) => $q->where('tax_type', $taxType)))
+                        ->when($taxType, fn($q) => $q->whereJsonContains('tax_types', $taxType))
                         ->when($contractType, fn($q) => $q->whereHas('lastDetail', fn($q) => $q->where('contract_type', $contractType)))
                         ->get();
 

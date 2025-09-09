@@ -96,7 +96,7 @@ class PostalExpenseResource extends Resource
                             ->afterStateUpdated(function (Set $set, $state) {
                                 $contract = NewContract::find($state);
                                 if ($contract) {
-                                    $set('tax_type', $contract->tax_type);
+                                    // $set('tax_type', $contract->tax_type);
                                     $set('reinvoice', $contract->reinvoice);
                                 }
                             })

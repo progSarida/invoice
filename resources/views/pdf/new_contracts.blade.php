@@ -98,15 +98,14 @@
                 <li> Ricerca: {{ $search }} </li>
             @endif
             @php
-                // dd($filters);
                 $fieldTranslations = [
                     'client_id' => 'Cliente',
-                    'tax_type' => 'Entrata',
+                    'tax_types' => 'Entrate', // MODIFICA: Cambiato da 'tax_type' a 'tax_types'
                     'accrual_type_id' => 'Competenza',
                     'payment_type' => 'Tipo pagamento'
                 ];
                 $fieldValues = [
-                    'tax_type' => [
+                    'tax_types' => [ // MODIFICA: Cambiato da 'tax_type' a 'tax_types'
                         'cds' => 'Codice della Strada',
                         'ici' => 'Imposta Comunale sugli Immobili',
                         'imu' => 'Imposta Municipale Unica',
@@ -138,7 +137,15 @@
                             @php
                                 $type = !empty($data['value']) ? \App\Models\AccrualType::find($data['value']) : null;
                             @endphp
-                            {{$type->name }}
+                            {{ $type->name }}
+                        @elseif($field == 'tax_types') <!-- MODIFICA: Cambiato da 'tax_type' a 'tax_types' -->
+                            @php
+                                $val = [];
+                                foreach($data['values'] as $el) {
+                                    $val[] = $fieldValues['tax_types'][$el] ?? \App\Enums\TaxType::from($el)->getLabel();
+                                }
+                            @endphp
+                            {{ implode(', ', $val) }}
                         @else
                             @php
                                 $val = [];
@@ -178,7 +185,7 @@
             @foreach($contracts as $contract)
                 <tr class="record-row-first">
                     <td>{{ $contract->client->denomination }}</td>
-                    <td>{{ $contract->tax_type->getLabel() }}</td>
+                    <td>{{ !empty($contract->tax_types) ? implode(', ', $contract->tax_types) : 'N/A' }}</td> <!-- MODIFICA: Gestione di tax_types -->
                     <td>{{ \App\Models\AccrualType::find($contract->accrual_type_id)->name }}</td>
                     <td>{{ $contract->payment_type->getLabel() }}</td>
                     <td>{{ \Carbon\Carbon::parse($contract->start_validity_date)->format('d/m/Y') }}</td>

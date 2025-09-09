@@ -105,7 +105,8 @@ class EditNewContract extends EditRecord
                     Storage::delete('temp/contract_temp.pdf');
 
                     // Genera il nome del file finale
-                    $fileName = 'contratto-' . $record->client->denomination . '-' . $record->tax_type->getLabel() . '-' . $record->lastDetail->number . '-' . $record->lastDetail->date->format('d-m-Y') . '.pdf';
+                    // $fileName = 'contratto-' . $record->client->denomination . '-' . $record->tax_type->getLabel() . '-' . $record->lastDetail->number . '-' . $record->lastDetail->date->format('d-m-Y') . '.pdf';
+                    $fileName = 'contratto-' . $record->client->denomination . '-' . implode('-', $record->tax_types) . '-' . $record->lastDetail->number . '-' . $record->lastDetail->date->format('d-m-Y') . '.pdf';
 
                     // Stream del PDF unito
                     return response()->streamDownload(function () use ($fpdi) {

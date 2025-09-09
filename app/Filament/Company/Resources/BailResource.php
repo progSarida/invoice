@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Filament\Company\Resources;
 
 use App\Filament\Company\Resources\BailResource\Pages;
@@ -23,17 +22,11 @@ use Illuminate\Support\Facades\Storage;
 class BailResource extends Resource
 {
     protected static ?string $model = Bail::class;
-
     public static ?string $pluralModelLabel = 'Cauzioni';
-
     public static ?string $modelLabel = 'Cauzione';
-
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
-
     protected static ?string $navigationGroup = 'Cauzioni';
-
     protected static ?int $navigationSort = 1;
-
     protected static ?string $recordTitleAttribute = 'insurance';
 
     public static function form(Form $form): Form
@@ -52,10 +45,14 @@ class BailResource extends Resource
                     ->preload()
                     ->optionsLimit(5)
                     ->columnSpan(5),
-                Forms\Components\Select::make('tax_type')->label('Tipo Entrata')
-                    ->options(\App\Enums\TaxType::class)->afterStateUpdated(function (Get $get, Set $set) {
-                        if(empty($get('client_id')) || empty($get('tax_type')))
-                        $set('contract_id', null);
+                Forms\Components\Select::make('tax_types') // MODIFICA: Rinominato da 'tax_type' a 'tax_types'
+                    ->label('Tipo Entrata')
+                    ->options(\App\Enums\TaxType::class)
+                    ->multiple() // MODIFICA: Aggiunto per consentire selezione multipla
+                    ->afterStateUpdated(function (Get $get, Set $set) { // MODIFICA: Aggiornato per gestire array
+                        if (empty($get('client_id')) || empty($get('tax_types'))) {
+                            $set('contract_id', null);
+                        }
                     })
                     ->placeholder('')
                     ->searchable()
@@ -65,19 +62,25 @@ class BailResource extends Resource
                 Forms\Components\Select::make('contract_id')->label('Contratto')
                     ->relationship(
                         name: 'contract',
-                        modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$get('client_id'))->where('tax_type',$get('tax_type'))
+                        modifyQueryUsing: fn (Builder $query, Get $get) => $query
+                            ->where('client_id', $get('client_id'))
+                            ->when($get('tax_types'), function ($q, $taxTypes) {
+                                foreach ($taxTypes as $taxType) {
+                                    $q->whereJsonContains('tax_types', $taxType);
+                                }
+                            })
                     )
                     ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => "{$record->office_name} ({$record->office_code})"
+                        fn (Model $record) => "{$record->office_name} ({$record->office_code})\nCIG: ({$record->cig_code})"
                     )
                     ->afterStateUpdated(function (Set $set, $state) {
-                        if($state) {
+                        if ($state) {
                             $contract = NewContract::find($state);
                             $set('cig_code', $contract->cig_code);
                         }
                     })
-                    ->disabled(fn(Get $get): bool => ! filled($get('client_id')) || ! filled($get('tax_type')))
-                    ->searchable('denomination')
+                    ->disabled(fn (Get $get): bool => !filled($get('client_id')) || !filled($get('tax_types')))
+                    ->searchable('cig_code')
                     ->live()
                     ->preload()
                     ->optionsLimit(5)
@@ -87,6 +90,7 @@ class BailResource extends Resource
                     ->columnSpan(2),
                 Forms\Components\Select::make('insurance_id')
                     ->label('Assicurazione')
+                    ->required()
                     ->options(function () {
                         return \App\Models\Insurance::query()
                             ->pluck('name', 'id')
@@ -100,6 +104,7 @@ class BailResource extends Resource
                     ->columnSpan(4),
                 Forms\Components\Select::make('agency_id')
                     ->label('Agenzia')
+                    ->required()
                     ->options(function () {
                         return \App\Models\Agency::query()
                             ->pluck('name', 'id')
@@ -219,9 +224,25 @@ class BailResource extends Resource
                     ->label('CIG')
                     ->searchable()
                     ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
-                Tables\Columns\TextColumn::make('tax_type')
+                Tables\Columns\TextColumn::make('tax_types') // MODIFICA: Rinominato da 'tax_type' a 'tax_types'
                     ->label('Tipo Entrata')
-                    ->formatStateUsing(fn ($state) => $state?->getLabel() ?? 'N/A'),
+                    ->badge() // MODIFICA: Aggiunto per visualizzare come badge
+                    ->color(fn (string $state): string => match ($state) { // MODIFICA: Aggiunto colori personalizzati
+                        'CDS' => 'info',
+                        'ICI' => 'warning',
+                        'IMU' => 'success',
+                        'LIBERO' => 'danger',
+                        'PARK' => 'info',
+                        'PUB' => 'info',
+                        'TARI' => 'primary',
+                        'TEP' => 'primary',
+                        'TOSAP' => 'warning',
+                        default => 'gray'
+                    })
+                    ->separator(', ') // MODIFICA: Aggiunto per separare valori multipli
+                    ->searchable(query: function (Builder $query, string $search) { // MODIFICA: Aggiunto whereJsonContains per ricerca
+                        $query->whereJsonContains('tax_types', $search);
+                    }),
                 Tables\Columns\TextColumn::make('insurance.name')
                     ->label('Assicurazione')
                     ->searchable()
@@ -241,12 +262,10 @@ class BailResource extends Resource
                         if (!$record->bill_deadline) {
                             return 'N/A';
                         }
-
                         try {
                             $deadline = \Carbon\Carbon::parse($record->bill_deadline);
                             $today = \Carbon\Carbon::today();
                             $daysRemaining = $today->diffInDays($deadline, false);
-
                             return $daysRemaining;
                         } catch (\Exception $e) {
                             \Illuminate\Support\Facades\Log::error('Errore nel calcolo dei giorni rimanenti: ' . $e->getMessage());
@@ -260,22 +279,33 @@ class BailResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('insurance')
                     ->options(function () {
-                        return \App\Models\Insurance::all()
-                            ->pluck('name', 'id')
-                            ->toArray();
+                        return \App\Models\Insurance::all()->pluck('name', 'id')->toArray();
                     })
                     ->label('Assicurazione')
                     ->query(function ($query, $data) {
-                        if ($data['value']) {
-                            $query->where('insurance_id', $data['value']);
+                        if (!empty($data['value'])) {
+                            $query->where('insurance_id', $data);
                         }
                     }),
-                Tables\Filters\SelectFilter::make('tax_type')
+                Tables\Filters\SelectFilter::make('tax_types')
                     ->options(\App\Enums\TaxType::class)
-                    ->label('Entrata'),
+                    ->multiple()
+                    ->label('Entrata')
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['values'])) {
+                            foreach ($data as $taxType) {
+                                $query->whereJsonContains('tax_types', $taxType);
+                            }
+                        }
+                    }),
                 Tables\Filters\SelectFilter::make('bail_status')
                     ->options(\App\Enums\BailStatus::class)
-                    ->label('Stato'),
+                    ->label('Stato')
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['value'])) {
+                            $query->where('bail_status', $data['value']);
+                        }
+                    }),
                 Tables\Filters\SelectFilter::make('expiration_status')
                     ->label('Stato Scadenza')
                     ->options([
@@ -298,9 +328,7 @@ class BailResource extends Resource
                             ->label('Senza data di pagamento'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return $data['not_paid']
-                            ? $query->whereNull('original_pay_date')
-                            : $query->whereNotNull('original_pay_date');
+                        return $data['not_paid'] ? $query->whereNull('original_pay_date') : $query;
                     }),
                 Tables\Filters\Filter::make('not_receipt')
                     ->form([
@@ -308,11 +336,9 @@ class BailResource extends Resource
                             ->label('Senza allegato pagamento'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return $data['not_receipt']
-                            ? $query->whereNull('receipt_attachment_path')
-                            : $query->whereNotNull('receipt_attachment_path');
+                        return $data['not_receipt'] ? $query->whereNull('receipt_attachment_path') : $query;
                     }),
-            ],layout: FiltersLayout::Modal)->filtersFormColumns(3)
+            ], layout: FiltersLayout::Modal)->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

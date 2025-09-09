@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Filament\Company\Resources;
 
 use App\Enums\InvoicingCicle;
@@ -37,15 +36,10 @@ use Illuminate\Support\Facades\Storage;
 class NewContractResource extends Resource
 {
     protected static ?string $model = NewContract::class;
-
     public static ?string $pluralModelLabel = 'Contratti';
-
     public static ?string $modelLabel = 'Contratto';
-
     protected static ?string $navigationIcon = 'govicon-file-contract-o';
-
     protected static ?string $navigationGroup = 'Fatturazione attiva';
-
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
@@ -58,7 +52,7 @@ class NewContractResource extends Resource
                     ->hintAction(
                         Action::make('Nuovo')
                             ->icon('govicon-user-suit')
-                            ->form( fn(Form $form) => ClientResource::modalForm($form) )
+                            ->form(fn(Form $form) => ClientResource::modalForm($form))
                             ->modalWidth('7xl')
                             ->modalHeading('')
                             ->action(fn (array $data, Client $client, Set $set) => NewContractResource::saveClient($data, $client, $set))
@@ -75,12 +69,14 @@ class NewContractResource extends Resource
                     ->optionsLimit(5)
                     ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
                     ->columnSpan(5),
-                Forms\Components\Select::make('tax_type')
-                    ->label('Entrata')
+                Forms\Components\Select::make('tax_types')
+                    ->label('Entrate')
                     ->options(TaxType::class)
+                    ->multiple()
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->rules(['array', 'in:'.implode(',', collect(TaxType::cases())->pluck('value')->toArray())])
                     ->columnSpan(3),
                 DatePicker::make('start_validity_date')
                     ->label('Inizio Validità')
@@ -91,12 +87,14 @@ class NewContractResource extends Resource
                     ->label('Fine Validità')
                     ->date()
                     ->columnSpan(2),
-                Forms\Components\Select::make('accrual_type_id')
-                    ->label('Competenza')
-                    ->relationship('accrualType', 'name')
+                Forms\Components\Select::make('accrual_types')
+                    ->label('Competenze')
+                    ->options(AccrualType::pluck('name', 'id')->toArray())
+                    ->multiple()
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->rules(['array', 'exists:accrual_types,id'])
                     ->columnSpan(3),
                 Forms\Components\Select::make('payment_type')
                     ->label('Tipo pagamento')
@@ -112,7 +110,6 @@ class NewContractResource extends Resource
                     ->inputMode('decimal')
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    // ->rules(['numeric', 'min:0'])
                     ->suffix('€'),
                 Forms\Components\Toggle::make('reinvoice')
                     ->label('Rifatturazione spese postali')
@@ -140,14 +137,9 @@ class NewContractResource extends Resource
                     ->label('Periodicità fatturazione')
                     ->options(InvoicingCicle::class)
                     ->required()
-                    // ->searchable()
                     ->preload()
                     ->columnSpan(3),
-                // Placeholder::make('')
-                //     ->content('')
-                //     ->columnSpan(2),
                 Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
-                    // ->required()
                     ->live()
                     ->disk('public')
                     ->directory('new_contracts')
@@ -160,14 +152,12 @@ class NewContractResource extends Resource
                             $set('new_contract_copy_date', null);
                         }
                     })
-                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
-                        // Genera un nome personalizzato per il file
-                        $client = Client::find($get('client_id'))->denomination;                            // cliente
-                        $taxType = TaxType::from($get('tax_type'))->getLabel();                             // entrata
-                        $cig = $get('cig_code');                                                            // cig
-                        $extension = $file->getClientOriginalExtension();                                   // estensione
-
-                        return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxType, $cig, $extension);
+                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get, $record) {
+                        $client = Client::find($get('client_id'))->denomination;
+                        $taxTypes = implode('_', array_map(fn($val) => TaxType::from($val)->getLabel(), $get('tax_types')));
+                        $cig = $get('cig_code');
+                        $extension = $file->getClientOriginalExtension();
+                        return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxTypes, $cig, $extension);
                     })
                     ->columnSpan(5),
                 Forms\Components\Actions::make([
@@ -187,7 +177,6 @@ class NewContractResource extends Resource
                     ->date()
                     ->visible(fn(Get $get, $record): bool => $record && $record->new_contract_copy_path || $get('new_contract_copy_path'))
                     ->columnSpan(2),
-
             ]);
     }
 
@@ -199,19 +188,39 @@ class NewContractResource extends Resource
                     ->label('Cliente')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tax_type')
-                    ->label('Entrata')
-                    ->searchable()
-                    // ->badge()
+                Tables\Columns\TextColumn::make('tax_types')
+                    ->label('Entrate')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'CDS' => 'info',
+                        'ICI' => 'warning',
+                        'IMU' => 'success',
+                        'LIBERO' => 'danger',
+                        'PARK' => 'info',
+                        'PUB' => 'info',
+                        'TARI' => 'primary',
+                        'TEP' => 'primary',
+                        'TOSAP' => 'warning',
+                        default => 'gray'
+                    })
+                    ->separator(', ')
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $query->whereJsonContains('tax_types', $search);
+                    })
                     ->sortable(),
-                Tables\Columns\TextColumn::make('accrualType.name')
-                    ->label('Competenza')
-                    ->sortable()
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('accrual_types')
+                    ->label('Competenze')
+                    ->badge()
+                    ->color('primary')
+                    ->separator(', ')
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $accrualTypeIds = AccrualType::where('name', 'like', "%{$search}%")->pluck('id')->toArray();
+                        $query->whereJsonContains('accrual_types', $accrualTypeIds);
+                    })
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('payment_type')
                     ->label('Tipo pagamento')
                     ->searchable()
-                    // ->badge()
                     ->color('black')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_validity_date')
@@ -235,12 +244,19 @@ class NewContractResource extends Resource
                     )
                     ->searchable()->preload()
                     ->optionsLimit(5),
-                SelectFilter::make('tax_type')->label('Entrata')->options(TaxType::class)
-                    ->multiple()->preload(),
-                SelectFilter::make('accrual_type_id')->label('Competenza')->relationship('accrualType', 'name'),
+                SelectFilter::make('tax_types')
+                    ->label('Entrate')
+                    ->options(TaxType::class)
+                    ->multiple()
+                    ->preload(),
+                SelectFilter::make('accrual_types')
+                    ->label('Competenze')
+                    ->options(AccrualType::pluck('name', 'id')->toArray())
+                    ->multiple()
+                    ->preload(),
                 SelectFilter::make('payment_type')->label('Tipo pagamento')->options(TenderPaymentType::class)
                     ->multiple()->preload(),
-            ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
+            ], layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
@@ -258,7 +274,7 @@ class NewContractResource extends Resource
     public static function getRelations(): array
     {
         return [
-             ContractDetailsRelationManager::class,
+            ContractDetailsRelationManager::class,
         ];
     }
 
@@ -292,12 +308,14 @@ class NewContractResource extends Resource
                     ->preload()
                     ->optionsLimit(5)
                     ->columnSpan(5),
-                Forms\Components\Select::make('tax_type')
-                    ->label('Entrata')
+                Forms\Components\Select::make('tax_types')
+                    ->label('Entrate')
                     ->options(TaxType::class)
+                    ->multiple()
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->rules(['array', 'in:'.implode(',', collect(TaxType::cases())->pluck('value')->toArray())])
                     ->columnSpan(3),
                 DatePicker::make('start_validity_date')
                     ->label('Inizio Validità')
@@ -308,12 +326,14 @@ class NewContractResource extends Resource
                     ->label('Fine Validità')
                     ->date()
                     ->columnSpan(2),
-                Forms\Components\Select::make('accrual_type_id')
-                    ->label('Competenza')
-                    ->relationship('accrualType', 'name')
+                Forms\Components\Select::make('accrual_types')
+                    ->label('Competenze')
+                    ->options(AccrualType::pluck('name', 'id')->toArray())
+                    ->multiple()
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->rules(['array', 'exists:accrual_types,id'])
                     ->columnSpan(3),
                 Forms\Components\Select::make('payment_type')
                     ->label('Tipo pagamento')
@@ -329,7 +349,6 @@ class NewContractResource extends Resource
                     ->inputMode('decimal')
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    // ->rules(['numeric', 'min:0'])
                     ->suffix('€'),
                 Placeholder::make('')
                     ->content('')
@@ -356,14 +375,9 @@ class NewContractResource extends Resource
                     ->label('Periodicità fatturazione')
                     ->options(InvoicingCicle::class)
                     ->required()
-                    // ->searchable()
                     ->preload()
                     ->columnSpan(3),
-                // Placeholder::make('')
-                //     ->content('')
-                //     ->columnSpan(2),
                 Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
-                    // ->required()
                     ->live()
                     ->disk('public')
                     ->directory('new_contracts')
@@ -376,14 +390,12 @@ class NewContractResource extends Resource
                             $set('new_contract_copy_date', null);
                         }
                     })
-                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
-                        // Genera un nome personalizzato per il file
-                        $client = Client::find($get('client_id'))->denomination;                            // cliente
-                        $taxType = TaxType::from($get('tax_type'))->getLabel();                             // entrata
-                        $cig = $get('cig_code');                                                            // cig
-                        $extension = $file->getClientOriginalExtension();                                   // estensione
-
-                        return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxType, $cig, $extension);
+                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get, $record) {
+                        $client = Client::find($get('client_id'))->denomination;
+                        $taxTypes = implode('_', array_map(fn($val) => TaxType::from($val)->getLabel(), $get('tax_types')));
+                        $cig = $get('cig_code');
+                        $extension = $file->getClientOriginalExtension();
+                        return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxTypes, $cig, $extension);
                     })
                     ->columnSpan(5),
                 Forms\Components\Actions::make([
@@ -404,7 +416,6 @@ class NewContractResource extends Resource
                     ->visible(fn(Get $get, $record): bool => $record && $record->new_contract_copy_path || $get('new_contract_copy_path'))
                     ->columnSpan(2),
             ]);
-
     }
 
     public static function saveClient(array $data, Client $client, Set $set): void
@@ -419,10 +430,7 @@ class NewContractResource extends Resource
         $client->vat_code = $data['vat_code'];
         $client->email = $data['email'];
         $client->save();
-
-        // Set the newly created client_id in the form
         $set('client_id', $client->id);
-
         Notification::make()
             ->title('Cliente salvato con successo')
             ->success()
@@ -433,10 +441,10 @@ class NewContractResource extends Resource
     {
         $contract->company_id = Filament::getTenant()->id;
         $contract->client_id = $data['client_id'];
-        $contract->tax_type = $data['tax_type'];
+        $contract->tax_types = $data['tax_types'];
         $contract->start_validity_date = $data['start_validity_date'];
         $contract->end_validity_date = $data['end_validity_date'];
-        $contract->accrual_type_id = $data['accrual_type_id'];
+        $contract->accrual_types = $data['accrual_types'];
         $contract->payment_type = $data['payment_type'];
         $contract->cig_code = $data['cig_code'];
         $contract->cup_code = $data['cup_code'];
@@ -447,11 +455,8 @@ class NewContractResource extends Resource
         $contract->new_contract_copy_path = $data['new_contract_copy_path'] ?? null;
         $contract->new_contract_copy_date = $data['new_contract_copy_date'] ?? null;
         $contract->reinvoice = $data['reinvoice'] ?? false;
-
         $contract->save();
-
         $set('contract_id', $contract->id);
-
         Notification::make()
             ->title('Contratto salvato con successo')
             ->success()

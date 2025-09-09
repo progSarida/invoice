@@ -38,7 +38,7 @@ class CheckInvoicingContracts implements ShouldQueue
             foreach ($users as $user) {
                 $user->notify(
                     Notification::make()
-                        ->title('Il contratto con ' . $contract->client->denomination . ' (' . $contract->tax_type->getLabel() . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
+                        ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
                         // ->body('TESTBODY')
                         ->icon('heroicon-o-exclamation-triangle')
                         ->warning()
@@ -52,7 +52,7 @@ class CheckInvoicingContracts implements ShouldQueue
             foreach ($users as $user) {
                 $user->notify(
                     Notification::make()
-                        ->title('Il contratto con ' . $contract->client->denomination . ' (' . $contract->tax_type->getLabel() . ' - ' . $contract->cig_code . ') ' . 'ha una fattura parzialmente stornata')
+                        ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'ha una fattura parzialmente stornata')
                         // ->body('TESTBODY')
                         ->icon('heroicon-o-exclamation-triangle')
                         ->warning()

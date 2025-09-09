@@ -236,7 +236,7 @@ class NewInvoiceResource extends Resource
                             Forms\Components\Select::make('contract_id')->label('Contratto')
                                 ->relationship(
                                     name: 'contract',
-                                    modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$get('client_id'))->where('tax_type',$get('tax_type'))
+                                    modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$get('client_id'))->whereJsonContains('tax_types',$get('tax_type'))
                                 )
                                 ->getOptionLabelFromRecordUsing(
                                     fn (Model $record) => "{$record->office_name} ({$record->office_code}) TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
