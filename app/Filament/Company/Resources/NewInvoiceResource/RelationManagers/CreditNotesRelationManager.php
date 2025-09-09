@@ -187,7 +187,7 @@ class CreditNotesRelationManager extends RelationManager
                                 ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                     if ($state) {
                                         $contract = \App\Models\NewContract::find($state);
-                                        $set('accrual_type_id', $contract ? $contract->accrual_type_id : null);
+                                        // $set('accrual_type_id', $contract ? $contract->accrual_type_id : null);
                                     } else {
                                         $set('accrual_type_id', null);
                                     }

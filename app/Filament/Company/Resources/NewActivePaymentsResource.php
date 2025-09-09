@@ -310,8 +310,8 @@ class NewActivePaymentsResource extends Resource
                         }
                         return $query;
                     }),
-                SelectFilter::make('contract_accrual_type_id')
-                    ->label('Competenza')
+                SelectFilter::make('contract_accrual_types')
+                    ->label('Competenze')
                     ->options(function () {
                         return AccrualType::query()
                             ->pluck('name', 'id')
@@ -322,13 +322,13 @@ class NewActivePaymentsResource extends Resource
                     ->multiple()
                     ->query(function (Builder $query, array $data) {
                         $values = $data['values'] ?? [];
-
                         if (!empty($values)) {
                             return $query->whereHas('invoice.contract', function ($q) use ($values) {
-                                $q->whereIn('accrual_type_id', $values);
+                                foreach ($values as $value) {
+                                    $q->whereJsonContains('accrual_types', $value);
+                                }
                             });
                         }
-
                         return $query;
                     })
                     ->searchable()

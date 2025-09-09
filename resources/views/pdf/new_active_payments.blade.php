@@ -6,39 +6,33 @@
             font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
         }
-
         table {
             border-collapse: collapse;
             width: 100%;
-            border: 2px solid black;                          /* bordi esterni */
+            border: 2px solid black;
         }
-
         th, td {
-            border-top: 1px dashed black;                     /* tratteggio tra le righe */
-            border-bottom: 1px dashed black;                  /* tratteggio tra le righe */
-            border-left: none;                                  /* nessun bordo verticale */
-            border-right: none;                                 /* nessun bordo verticale */
+            border-top: 1px dashed black;
+            border-bottom: 1px dashed black;
+            border-left: none;
+            border-right: none;
             padding: 4px;
             text-align: left;
         }
-
         thead th {
-            border-top: 2px solid black;                      /* bordi intestazione sopra */
-            border-bottom: 2px solid black;                   /* bordi intestazione sotto */
+            border-top: 2px solid black;
+            border-bottom: 2px solid black;
         }
-
         tbody tr:last-child td {
-            border-bottom: 2px solid black;                   /* bordi esterni sotto */
+            border-bottom: 2px solid black;
         }
-
         tr td:first-child,
         tr th:first-child {
-            border-left: 2px solid black;                     /* bordi esterni sinistra */
+            border-left: 2px solid black;
         }
-
         tr td:last-child,
         tr th:last-child {
-            border-right: 2px solid black;                    /* bordi esterni destra */
+            border-right: 2px solid black;
         }
     </style>
 </head>
@@ -46,7 +40,6 @@
     @php
         $client = '';
         $clientId = $filters['invoice_client_id']['value'] ?? null;
-
         if ($clientId) {
             $client = \App\Models\Client::find($clientId)?->denomination;
         }
@@ -64,17 +57,15 @@
                 <li>Ricerca: {{ $search }}</li>
             @endif
             @php
-                // dd($filters);
                 $fieldTranslations = [
                     'invoice_number' => 'Numero fattura',
                     'invoice_tax_type' => 'Entrata',
                     'validated' => 'Pagamenti validati',
-                    'contract_accrual_type_id' => 'Competenza',
+                    'contract_accrual_types' => 'Competenze', // MODIFICA: Cambiato da 'contract_accrual_type_id' a 'contract_accrual_types'
                     'invoice_year' => 'Anno fattura',
                     'invoice_budget_year' => 'Anno bilancio',
                     'invoice_accrual_year' => 'Anno competenza',
                     'invoice_client_type' => 'Tipo cliente',
-                    // 'invoice_client_id' => 'Cliente',
                 ];
                 $fieldValues = [
                     'invoice_client_type' => [
@@ -82,7 +73,7 @@
                         'public' => 'Pubblica Amministrazione',
                     ],
                     'validated' => [
-                        'si' => 'Si',
+                        'si' => 'Sì',
                         'no' => 'No'
                     ],
                     'invoice_tax_type' => [
@@ -96,8 +87,7 @@
                         'tep' => 'TEP',
                         'tosap' => 'Tassa per l\'Occupazione del Suolo Pubblico',
                     ],
-                    'contract_accrual_type_id' => \App\Models\AccrualType::pluck('name', 'id')->toArray(),
-                    // 'invoice_client_id' => \App\Models\Client::pluck('denomination', 'id')->toArray(),
+                    'contract_accrual_types' => \App\Models\AccrualType::pluck('name', 'id')->toArray(), // MODIFICA: Cambiato da 'contract_accrual_type_id' a 'contract_accrual_types'
                 ];
             @endphp
             @foreach($filters as $field => $data)
@@ -105,10 +95,16 @@
                 @php
                     $label = $fieldTranslations[$field] ?? ucfirst($field);
                     $displayValues = [];
-
                     if (isset($data['number'])) {
-                        // Campo "numero fattura"
                         $displayValues[] = sprintf('%03d', $data['number']);
+                    } elseif ($field === 'contract_accrual_types') { // MODIFICA: Gestione specifica per contract_accrual_types
+                        if (isset($data['values'])) {
+                            foreach ($data['values'] as $val) {
+                                $displayValues[] = $fieldValues['contract_accrual_types'][$val] ?? \App\Models\AccrualType::find($val)?->name ?? $val;
+                            }
+                        } elseif (isset($data['value'])) {
+                            $displayValues[] = $fieldValues['contract_accrual_types'][$data['value']] ?? \App\Models\AccrualType::find($data['value'])?->name ?? $data['value'];
+                        }
                     } elseif (isset($data['value'])) {
                         $value = $data['value'];
                         if ($value === '') {
@@ -130,7 +126,6 @@
                         }
                     }
                 @endphp
-
                 @if (!empty($displayValues))
                     <li>{{ $label }}: {{ implode(', ', $displayValues) }}</li>
                 @endif

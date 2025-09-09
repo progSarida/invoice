@@ -285,7 +285,7 @@ class NewInvoiceResource extends Resource
                                 ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                     if ($state) {
                                         $contract = \App\Models\NewContract::find($state);
-                                        $set('accrual_type_id', $contract ? $contract->accrual_type_id : null);
+                                        // $set('accrual_type_id', $contract ? $contract->accrual_type_id : null);
                                     } else {
                                         $set('accrual_type_id', null);
                                     }
@@ -1228,7 +1228,8 @@ class NewInvoiceResource extends Resource
         $contract->tax_type = $data['tax_type'];
         $contract->start_validity_date = $data['start_validity_date'];
         $contract->end_validity_date = $data['end_validity_date'];
-        $contract->accrual_type_id = $data['accrual_type_id'];
+        // $contract->accrual_type_id = $data['accrual_type_id'];
+        $contract->accrual_types = $data['accrual_types'];
         $contract->payment_type = $data['payment_type'];
         $contract->cig_code = $data['cig_code'];
         $contract->cup_code = $data['cup_code'];
