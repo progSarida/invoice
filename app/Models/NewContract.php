@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class NewContract extends Model
 {
     protected $fillable = [
+        'company_id',
         'client_id',
         'tax_types',
         'start_validity_date',
@@ -44,13 +45,15 @@ class NewContract extends Model
     {
         $values = is_string($value) ? json_decode($value, true) : $value;
         return array_map(function ($val) {
-            return TaxType::from($val)->getLabel();
+            return TaxType::from(trim(strtolower($val)))->getLabel();
         }, $values ?? []);
     }
 
     public function setTaxTypesAttribute($values)
     {
-        $this->attributes['tax_types'] = json_encode(array_map('strtolower', $values));
+        $this->attributes['tax_types'] = json_encode(array_map(function($value) {
+            return strtolower(trim($value));
+        }, $values));
     }
 
     public function getAccrualTypesAttribute($value)
