@@ -517,6 +517,8 @@ class ListNewInvoices extends ListRecords
         foreach($activeContracts as $contract) {
             $invoicingCycle = $contract->invoicing_cycle;
 
+            if ($invoicingCycle === null) { continue; }                                         // se il ciclo di fatturazione è null salto il contratto
+
             if ($invoicingCycle instanceof InvoicingCicle) { $cycle = $invoicingCycle; }
             else { $cycle = InvoicingCicle::from($invoicingCycle); }
 
