@@ -243,8 +243,9 @@ class Invoice extends Model
     public function scopeNewInvoices($query)
     {
         $tenant = Filament::getTenant();
-        return $query->where('flow', 'out')
-                     ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+        return $query->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                    //  ->where('flow', 'out')
+                     ->whereNotNull('contract_id')
                      ->orderByRaw("FIELD(sdi_status, 'rifiutata', 'scartata') DESC")
                      ->orderBy('invoice_date', 'desc')
                      ->orderBy('year', 'desc')
@@ -381,7 +382,7 @@ class Invoice extends Model
             : $this->invoiceItems()->where('auto', false)->get();
         foreach ($items as $item) {
             $vatCodeType = $item->vat_code_type;
-            $vatRate = floatval($item->vat_code_type->getRate());
+            $vatRate = floatval($item->vat_code_type?->getRate() ?? 0);
 
             // Regime ordinario/semplificato: considera solo righe con IVA > 0
             if ($taxRegime !== 'rf19' && $vatRate > 0) {

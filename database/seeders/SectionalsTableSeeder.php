@@ -24,7 +24,7 @@ class SectionalsTableSeeder extends Seeder
             array (
                 'id' => 1,
                 'company_id' => 1,
-                'description' => '01',
+                'description' => '00',
                 'client_type' => 'private',
                 'doc_type' => '',
                 'numeration_type' => 'annual',
