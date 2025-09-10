@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\PassivePaymentResource\Pages;
 use App\Filament\Company\Resources\PassivePaymentResource\RelationManagers;
+use App\Models\PassiveInvoice;
+use Filament\Forms\Set;
 use Illuminate\Support\Facades\Auth;
 
 class PassivePaymentResource extends Resource
@@ -49,6 +51,11 @@ class PassivePaymentResource extends Resource
                         $fornitore = $record->supplier?->denomination ?? 'Fornitore sconosciuto';
                         return "{$fornitore} - {$record->number}/{$record->invoice_date->format('d-m-Y')}";
                     })
+                    ->afterStateUpdated(function ($state, Set $set) {
+                        $passiveInvoice = PassiveInvoice::find($state);
+                        $set('bank', $passiveInvoice->bank);
+                        $set('iban', $passiveInvoice->iban);
+                    })
                     ->required()
                     ->disabled(fn ($get) => $get('validated'))
                     ->searchable(['number', 'section', 'year'])
@@ -79,6 +86,16 @@ class PassivePaymentResource extends Resource
                     ->live()
                     ->default(false)
                     ->columnSpan(2),
+                //
+                Forms\Components\TextInput::make('bank')
+                    ->label('Banca')
+                    ->columnSpan(4),
+                Forms\Components\TextInput::make('iban')
+                    ->label('IBAN')
+                    ->columnSpan(4),
+                Forms\Components\Placeholder::make('')
+                    ->columnSpan(4),
+                //
                 Forms\Components\DatePicker::make('registration_date')
                     ->label('Data registrazione')
                     ->disabled()
@@ -112,11 +129,11 @@ class PassivePaymentResource extends Resource
                 Tables\Columns\TextColumn::make('invoice_formatted')
                     ->label('Fattura')
                     ->getStateUsing(function ($record) {
-                        $invoice = $record->invoice;
+                        $invoice = $record->passiveInvoice;
                         if (!$invoice) {
                             return 'Nessuna fattura';
                         }
-                        return "{$record->number}/{$invoice->invoice_date->format('d-m-Y')}";
+                        return "{$invoice->number}/{$invoice->invoice_date->format('d-m-Y')}";
                     })
                     ->sortable()
                     ->searchable(),

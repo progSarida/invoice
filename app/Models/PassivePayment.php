@@ -13,6 +13,8 @@ class PassivePayment extends Model
         'passive_invoice_id',
         'amount',
         'payment_date',
+        'bank',
+        'iban',
         'registration_date',
         'registration_user_id',
         'validated',
