@@ -180,7 +180,7 @@ class PassivePaymentResource extends Resource
                     ->afterStateUpdated(function (\App\Models\ActivePayments $record, bool $state) {
                         if ($state) {
                             $record->validation_date = now();
-                            $record->validation_user_id = auth()->id();
+                            $record->validation_user_id = Auth::id();
                         } else {
                             // Se vuoi "annullare" la validazione quando il toggle viene disattivato
                             $record->validation_date = null;
