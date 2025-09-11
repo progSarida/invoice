@@ -12,6 +12,7 @@ class ActivePayments extends Model
         'invoice_id',
         'amount',
         'payment_date',
+        'bank_account_id',
         'registration_date',
         'registration_user_id',
         'validated',
@@ -33,6 +34,10 @@ class ActivePayments extends Model
 
     public function company(){
         return $this->belongsTo(Company::class);
+    }
+
+    public function bankAccount(){
+        return $this->belongsTo(BankAccount::class);
     }
 
     public function registrationUser(){

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\PassivePaymentResource\Pages;
 use App\Filament\Company\Resources\PassivePaymentResource\RelationManagers;
 use App\Models\PassiveInvoice;
+use Filament\Facades\Filament;
 use Filament\Forms\Set;
 use Illuminate\Support\Facades\Auth;
 
@@ -89,12 +90,25 @@ class PassivePaymentResource extends Resource
                 //
                 Forms\Components\TextInput::make('bank')
                     ->label('Banca')
-                    ->columnSpan(4),
+                    ->columnSpan(3),
                 Forms\Components\TextInput::make('iban')
                     ->label('IBAN')
-                    ->columnSpan(4),
+                    ->columnSpan(3),
+                Forms\Components\Select::make('bank_account_id')->label('Conto')
+                    ->relationship(
+                        name: 'bankAccount',
+                        modifyQueryUsing: fn (Builder $query) =>
+                        $query->where('company_id',Filament::getTenant()->id)
+                    )
+                    ->getOptionLabelFromRecordUsing(
+                        fn (Model $record) => "{$record->name} - $record->iban"
+                    )
+                    ->searchable()
+                    ->required()
+                    ->columnSpan(5)
+                    ->preload(),
                 Forms\Components\Placeholder::make('')
-                    ->columnSpan(4),
+                    ->columnSpan(1),
                 //
                 Forms\Components\DatePicker::make('registration_date')
                     ->label('Data registrazione')
