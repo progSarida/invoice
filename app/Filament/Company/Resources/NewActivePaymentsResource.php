@@ -137,6 +137,21 @@ class NewActivePaymentsResource extends Resource
                     ->live()
                     ->default(false)
                     ->columnSpan(2),
+                Forms\Components\Select::make('bank_account_id')->label('Conto')
+                    ->relationship(
+                        name: 'bankAccount',
+                        modifyQueryUsing: fn (Builder $query) =>
+                        $query->where('company_id',Filament::getTenant()->id)
+                    )
+                    ->getOptionLabelFromRecordUsing(
+                        fn (Model $record) => "{$record->name} - $record->iban"
+                    )
+                    ->searchable()
+                    ->required()
+                    ->columnSpan(5)
+                    ->preload(),
+                Forms\Components\Placeholder::make('')
+                    ->columnSpan(7),
                 Section::make('Dati registrazione/validazione')
                         // ->collapsible()
                         ->columns(12)

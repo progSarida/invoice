@@ -15,6 +15,7 @@ class PassivePayment extends Model
         'payment_date',
         'bank',
         'iban',
+        'bank_account_id',
         'registration_date',
         'registration_user_id',
         'validated',
@@ -33,6 +34,10 @@ class PassivePayment extends Model
 
     public function passiveInvoice(){
         return $this->belongsTo(PassiveInvoice::class, 'passive_invoice_id');
+    }
+
+    public function bankAccount(){
+        return $this->belongsTo(BankAccount::class);
     }
 
     public function registrationUser(){
