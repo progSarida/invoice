@@ -29,6 +29,7 @@ class Bail extends Model
         'renew_premium',                                            // importo
         'renew_date',                                               // scadenza polizza
         'receipt_attachment_path',                                  // percorso file ricevuta di quietanza
+        'receipt_date',                                             // data ricevuta di quietanza
         'note',                                                     // note
     ];
 
@@ -92,11 +93,64 @@ class Bail extends Model
         });
 
         static::saved(function ($bail) {
-            //
+
+            $existB = Attachment::where('attachment_type', 'bail_bill')->where('element_id', $bail->id)->first();       // controllo se esiste l'allegato della polizza
+            $existR = Attachment::where('attachment_type', 'bail_receipt')->where('element_id', $bail->id)->first();    // controllo se esiste l'allegato della ricevuta
+
+            if($bail->bill_attachment_path){
+                $filenameB = basename($bail->bill_attachment_path) ?: 'unknown';
+
+                $dataB = [
+                    'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                    'client_id' => $bail->contract->client_id,
+                    'contract_id' => $bail->contract->id,
+                    // 'element_table' => 'bails',
+                    'element_id' => $bail->id,
+                    'attachment_type' => 'bail_bill',
+                    'attachment_filename' => $filenameB,
+                    'attachment_date' => $bail->date,
+                    'attachment_upload_date' => now()->toDateString(),
+                    'attachment_path' => $bail->bill_attachment_path,
+                ];
+
+                if (!$existB) { $billAttachment = Attachment::create($dataB); }
+                else { $existB->update($dataB); }
+            }
+            else { $existB->delete(); }
+
+            if($bail->receipt_attachment_path){
+                $filenameR = basename($bail->receipt_attachment_path) ?: 'unknown';
+
+                $dataR = [
+                    'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                    'client_id' => $bail->contract->client_id,
+                    'contract_id' => $bail->contract->id,
+                    // 'element_table' => 'bails',
+                    'element_id' => $bail->id,
+                    'attachment_type' => 'bail_receipt',
+                    'attachment_filename' => $filenameR,
+                    'attachment_date' => $bail->receipt_date,
+                    'attachment_upload_date' => now()->toDateString(),
+                    'attachment_path' => $bail->receipt_attachment_path,
+                ];
+
+                if (!$existR) { $billAttachment = Attachment::create($dataR); }
+                else { $existR->update($dataR); }
+            }
+            else { $existR->delete(); }
+            
         });
 
         static::deleting(function ($bail) {
             //
+        });
+
+        static::deleted(function ($bail) {
+            $existB = Attachment::where('attachment_type', 'bail_bill')->where('element_id', $bail->id)->first();       // controllo se esiste l'allegato della polizza
+            $existR = Attachment::where('attachment_type', 'bail_receipt')->where('element_id', $bail->id)->first();    // controllo se esiste l'allegato della ricevuta
+
+            if($existB) { $existB->delete(); }
+            if($existR) { $existR->delete(); }
         });
 
     }

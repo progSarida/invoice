@@ -189,6 +189,8 @@ class PostalExpenseResource extends Resource
                             ->default(now()->year)
                             ->visible(false),
 
+                        Forms\Components\DatePicker::make('act_date')->label('Data atto'),
+
                         Forms\Components\FileUpload::make('act_attachment_path')->label('Allegato atto')
                             ->required()
                             ->disk('public')
@@ -218,7 +220,7 @@ class PostalExpenseResource extends Resource
                             })
                             ->maxSize(10240),
 
-                        Forms\Components\DatePicker::make('act_attachment_date')->label('Data allegato atto')
+                        Forms\Components\DatePicker::make('act_attachment_date')->label('Data caricamento atto')
                             // ->required()
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value),
                             // ->visible(function (Get $get, $record): bool {
@@ -294,6 +296,8 @@ class PostalExpenseResource extends Resource
                         Forms\Components\DatePicker::make('amount_registration_date')->label('Data registrazione importo')
                             ->required(),
 
+                        Forms\Components\DatePicker::make('notify_date')->label('Data notifica'),
+
                         Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
                             ->required()
                             ->autofocus(fn($record): bool => $record && $record->shipmentInserted())
@@ -323,7 +327,7 @@ class PostalExpenseResource extends Resource
                             })
                             ->maxSize(10240),
 
-                        Forms\Components\DatePicker::make('notify_attachment_date')->label('Data allegato notifica')
+                        Forms\Components\DatePicker::make('notify_attachment_date')->label('Data caricamento notifica')
                             // ->required()
                             // ->visible(function (Get $get, $record): bool {
                             //     $hasUploadedFile = !empty($get('notify_attachment_path'));
@@ -549,6 +553,11 @@ class PostalExpenseResource extends Resource
                         Forms\Components\DatePicker::make('notify_date_registration_date')->label('Data registrazione data di notifica')
                             ->required(),
 
+                        Forms\Components\DatePicker::make('reinvoive_date')->label('Data fattura emessa')
+                            ->default(function ($record) {
+                                return $record?->reInvoice?->invoice_date;
+                            }),
+
                         Forms\Components\FileUpload::make('reinvoice_attachment_path')->label('Allegato fattura emessa')
                             ->required()
                             ->disk('public')
@@ -575,7 +584,7 @@ class PostalExpenseResource extends Resource
                             })
                             ->autofocus(fn($record): bool => $record && $record->reinvoiceInserted()),
 
-                        Forms\Components\DatePicker::make('reinvoice_attachment_date')->label('Data file fattura emessa caricato')
+                        Forms\Components\DatePicker::make('reinvoice_attachment_date')->label('Data caricamnto fattura emessa')
                             // ->required()
                             ,
 

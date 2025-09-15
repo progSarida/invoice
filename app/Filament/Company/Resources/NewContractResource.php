@@ -139,30 +139,33 @@ class NewContractResource extends Resource
                     ->required()
                     ->preload()
                     ->columnSpan(3),
-                Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
-                    ->live()
-                    ->disk('public')
-                    ->directory('new_contracts')
-                    ->visibility('public')
-                    ->acceptedFileTypes(['application/pdf', 'image/*'])
-                    ->afterStateUpdated(function (Set $set, $state) {
-                        if (!empty($state)) {
-                            $set('new_contract_copy_date', now()->toDateString());
-                        } else {
-                            $set('new_contract_copy_date', null);
-                        }
-                    })
-                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get, $record) {
-                        $client = Client::find($get('client_id'))->denomination;
-                        $taxTypes = implode('_', array_map(fn($val) => TaxType::from($val)->getLabel(), $get('tax_types')));
-                        $cig = $get('cig_code');
-                        $extension = $file->getClientOriginalExtension();
-                        return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxTypes, $cig, $extension);
-                    })
+                // Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
+                //     ->live()
+                //     ->disk('public')
+                //     ->directory('new_contracts')
+                //     ->visibility('public')
+                //     ->acceptedFileTypes(['application/pdf', 'image/*'])
+                //     ->afterStateUpdated(function (Set $set, $state) {
+                //         if (!empty($state)) {
+                //             $set('new_contract_copy_date', now()->toDateString());
+                //         } else {
+                //             $set('new_contract_copy_date', null);
+                //         }
+                //     })
+                //     ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get, $record) {
+                //         $client = Client::find($get('client_id'))->denomination;
+                //         $taxTypes = implode('_', array_map(fn($val) => TaxType::from($val)->getLabel(), $get('tax_types')));
+                //         $cig = $get('cig_code');
+                //         $extension = $file->getClientOriginalExtension();
+                //         return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxTypes, $cig, $extension);
+                //     })
+                //     ->columnSpan(5),
+                Placeholder::make('')
+                    ->content('')
                     ->columnSpan(5),
                 Forms\Components\Actions::make([
                     Forms\Components\Actions\Action::make('view_new_contract_copy')
-                        ->label('Visualizza')
+                        ->label('Contratto in vigore')
                         ->icon('heroicon-o-eye')
                         ->url(fn($record): ?string => $record && $record->new_contract_copy_path ? Storage::url($record->new_contract_copy_path) : null)
                         ->openUrlInNewTab()
@@ -170,13 +173,13 @@ class NewContractResource extends Resource
                         ->color('primary'),
                 ])
                 ->columnSpan(2),
-                DatePicker::make('new_contract_copy_date')
-                    ->readonly()
-                    ->dehydrated()
-                    ->label('Data caricamento')
-                    ->date()
-                    ->visible(fn(Get $get, $record): bool => $record && $record->new_contract_copy_path || $get('new_contract_copy_path'))
-                    ->columnSpan(2),
+                // DatePicker::make('new_contract_copy_date')
+                //     ->readonly()
+                //     ->dehydrated()
+                //     ->label('Data caricamento')
+                //     ->date()
+                //     ->visible(fn(Get $get, $record): bool => $record && $record->new_contract_copy_path || $get('new_contract_copy_path'))
+                //     ->columnSpan(2),
             ]);
     }
 
@@ -377,30 +380,33 @@ class NewContractResource extends Resource
                     ->required()
                     ->preload()
                     ->columnSpan(3),
-                Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
-                    ->live()
-                    ->disk('public')
-                    ->directory('new_contracts')
-                    ->visibility('public')
-                    ->acceptedFileTypes(['application/pdf', 'image/*'])
-                    ->afterStateUpdated(function (Set $set, $state) {
-                        if (!empty($state)) {
-                            $set('new_contract_copy_date', now()->toDateString());
-                        } else {
-                            $set('new_contract_copy_date', null);
-                        }
-                    })
-                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get, $record) {
-                        $client = Client::find($get('client_id'))->denomination;
-                        $taxTypes = implode('_', array_map(fn($val) => TaxType::from($val)->getLabel(), $get('tax_types')));
-                        $cig = $get('cig_code');
-                        $extension = $file->getClientOriginalExtension();
-                        return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxTypes, $cig, $extension);
-                    })
+                // Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
+                //     ->live()
+                //     ->disk('public')
+                //     ->directory('new_contracts')
+                //     ->visibility('public')
+                //     ->acceptedFileTypes(['application/pdf', 'image/*'])
+                //     ->afterStateUpdated(function (Set $set, $state) {
+                //         if (!empty($state)) {
+                //             $set('new_contract_copy_date', now()->toDateString());
+                //         } else {
+                //             $set('new_contract_copy_date', null);
+                //         }
+                //     })
+                //     ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get, $record) {
+                //         $client = Client::find($get('client_id'))->denomination;
+                //         $taxTypes = implode('_', array_map(fn($val) => TaxType::from($val)->getLabel(), $get('tax_types')));
+                //         $cig = $get('cig_code');
+                //         $extension = $file->getClientOriginalExtension();
+                //         return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxTypes, $cig, $extension);
+                //     })
+                //     ->columnSpan(5),
+                Placeholder::make('')
+                    ->content('')
                     ->columnSpan(5),
                 Forms\Components\Actions::make([
                     Forms\Components\Actions\Action::make('view_new_contract_copy')
-                        ->label('Visualizza')
+                        ->label('Contratto in vigore')
                         ->icon('heroicon-o-eye')
                         ->url(fn($record): ?string => $record && $record->new_contract_copy_path ? Storage::url($record->new_contract_copy_path) : null)
                         ->openUrlInNewTab()
@@ -408,13 +414,13 @@ class NewContractResource extends Resource
                         ->color('primary'),
                 ])
                 ->columnSpan(2),
-                DatePicker::make('new_contract_copy_date')
-                    ->readonly()
-                    ->dehydrated()
-                    ->label('Data caricamento')
-                    ->date()
-                    ->visible(fn(Get $get, $record): bool => $record && $record->new_contract_copy_path || $get('new_contract_copy_path'))
-                    ->columnSpan(2),
+                // DatePicker::make('new_contract_copy_date')
+                //     ->readonly()
+                //     ->dehydrated()
+                //     ->label('Data caricamento')
+                //     ->date()
+                //     ->visible(fn(Get $get, $record): bool => $record && $record->new_contract_copy_path || $get('new_contract_copy_path'))
+                //     ->columnSpan(2),
             ]);
     }
 

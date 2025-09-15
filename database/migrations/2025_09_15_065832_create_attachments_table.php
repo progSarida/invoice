@@ -20,8 +20,8 @@ return new class extends Migration
             $table->unsignedBigInteger('contract_id')->nullable();                              // contratto
             $table->foreign('contract_id')->references('id')->on('new_contracts')
                 ->onUpdate('cascade')->onDelete('cascade');
-            $table->string('element_table');                                                    // tabella originale allegato
-            $table->unsignedBigInteger('element_id');                                           // id dell'elemento nella tabella specificata
+            // $table->string('element_table');                                                    // tabella originale allegato
+            $table->unsignedBigInteger('element_id');                                           // id dell'elemento che ha caricato il file
             $table->string('attachment_type')->nullable();                                      // tipo di allegato
             $table->string('attachment_filename')->nullable();                                  // nome file
             $table->date('attachment_date')->nullable();                                        // data allegato
@@ -35,7 +35,8 @@ return new class extends Migration
         });
 
         Schema::table('contract_details', function (Blueprint $table) {
-            $table->string('contract_attachment_path')->nullable();                             // percorso file contratto
+            $table->string('contract_attachment_path')->nullable();                                     // percorso file contratto
+            $table->date('contract_attachment_date')->after('contract_attachment_path')->nullable();    // data caricamento file contratto
         });
 
         Schema::table('postal_expenses', function (Blueprint $table) {

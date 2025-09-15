@@ -181,12 +181,15 @@ class BailResource extends Resource
                     ->columnSpan(3)
                     ->nullable(),
                 Forms\Components\TextInput::make('renew_premium')->label('Importo Rinnovo')
-                    ->columnSpan(3)
+                    ->columnSpan(2)
                     ->numeric()
                     ->prefix('€')
                     ->nullable(),
                 Forms\Components\DatePicker::make('renew_date')->label('Data Rinnovo')
-                    ->columnSpan(3)
+                    ->columnSpan(2)
+                    ->nullable(),
+                Forms\Components\DatePicker::make('receipt_date')->label('Data Ricevuta')
+                    ->columnSpan(2)
                     ->nullable(),
                 Forms\Components\FileUpload::make('receipt_attachment_path')->label('Allegato Ricevuta Pagamento')
                     ->live()

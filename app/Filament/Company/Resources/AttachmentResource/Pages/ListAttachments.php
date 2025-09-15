@@ -5,6 +5,7 @@ namespace App\Filament\Company\Resources\AttachmentResource\Pages;
 use App\Filament\Company\Resources\AttachmentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\MaxWidth;
 
 class ListAttachments extends ListRecords
 {
@@ -15,5 +16,10 @@ class ListAttachments extends ListRecords
         return [
             // Actions\CreateAction::make(),
         ];
+    }
+
+    public function getMaxContentWidth(): MaxWidth|string|null                                  // allarga la tabella a tutta pagina
+    {
+        return MaxWidth::Full;
     }
 }

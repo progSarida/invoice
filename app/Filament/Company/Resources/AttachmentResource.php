@@ -113,8 +113,8 @@ class AttachmentResource extends Resource
     {
         return [
             'index' => Pages\ListAttachments::route('/'),
-            'create' => Pages\CreateAttachment::route('/create'),
-            'edit' => Pages\EditAttachment::route('/{record}/edit'),
+            // 'create' => Pages\CreateAttachment::route('/create'),
+            // 'edit' => Pages\EditAttachment::route('/{record}/edit'),
         ];
     }
 }

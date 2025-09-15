@@ -39,6 +39,7 @@ class PostalExpense extends Model
         'act_type_id',
         'act_id',
         'act_year',
+        'act_date',
         'act_attachment_path',
         'act_attachment_date',
 
@@ -47,6 +48,7 @@ class PostalExpense extends Model
         'shipment_insert_date',
 
         // lavorazione e notifica
+        'notify_date',
         'notify_attachment_path',
         'notify_attachment_date',
         'order_rif',
@@ -117,8 +119,10 @@ class PostalExpense extends Model
 
         // date
         'send_protocol_date' => 'date',
+        'act_date',
         'act_attachment_date' => 'date',
         'shipment_insert_date' => 'date',
+        'notify_date',
         'notify_attachment_date' => 'date',
         'receive_protocol_date' => 'date',
         'amount_registration_date' => 'date',
@@ -366,11 +370,74 @@ class PostalExpense extends Model
         });
 
         static::saved(function ($expense) {
-            //
+            $existA = Attachment::where('attachment_type', 'postal_act')->where('element_id', $expense->id)->first();
+            if ($expense->act_attachment_path) {
+                $filenameAct = basename($expense->act_attachment_path) ?: 'unknown';
+                $dataA = [
+                    'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                    'client_id' => $expense->client_id,
+                    'contract_id' => $expense->new_contract_id,
+                    'element_id' => $expense->id,
+                    'attachment_type' => 'postal_act',
+                    'attachment_filename' => $filenameAct,
+                    'attachment_date' => $expense->act_date,
+                    'attachment_upload_date' => now()->toDateString(),
+                    'attachment_path' => $expense->act_attachment_path,
+                ];
+                if (!$existA) { $actAttachment = Attachment::create($dataA); }
+                else { $existA->update($dataA); }
+            } elseif ($existA) { $existA->delete(); }
+
+            $existN = Attachment::where('attachment_type', 'postal_notify')->where('element_id', $expense->id)->first();
+            if ($expense->act_attachment_path) {
+                $filenameAct = basename($expense->act_attachment_path) ?: 'unknown';
+                $dataN = [
+                    'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                    'client_id' => $expense->client_id,
+                    'contract_id' => $expense->new_contract_id,
+                    'element_id' => $expense->id,
+                    'attachment_type' => 'postal_notify',
+                    'attachment_filename' => $filenameAct,
+                    'attachment_date' => $expense->notify_date,
+                    'attachment_upload_date' => now()->toDateString(),
+                    'attachment_path' => $expense->act_attachment_path,
+                ];
+                if (!$existN) { $actAttachment = Attachment::create($dataN); }
+                else { $existN->update($dataN); }
+            } elseif ($existN) { $existN->delete(); }
+
+            $existR = Attachment::where('attachment_type', 'postal_reinvoice')->where('element_id', $expense->id)->first();
+            if ($expense->act_attachment_path) {
+                $filenameAct = basename($expense->act_attachment_path) ?: 'unknown';
+                $dataR = [
+                    'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                    'client_id' => $expense->client_id,
+                    'contract_id' => $expense->new_contract_id,
+                    'element_id' => $expense->id,
+                    'attachment_type' => 'postal_reinvoice',
+                    'attachment_filename' => $filenameAct,
+                    'attachment_date' => $expense->reinvoice_date,
+                    'attachment_upload_date' => now()->toDateString(),
+                    'attachment_path' => $expense->act_attachment_path,
+                ];
+                if (!$existR) { $actAttachment = Attachment::create($dataR); }
+                else { $existR->update($dataN); }
+            } elseif ($existR) { $existR->delete(); }
         });
 
         static::deleting(function ($expense) {
             //
+        });
+
+        static::deleted(function ($expense) {
+            $existAct = Attachment::where('attachment_type', 'postal_act')->where('element_id', $expense->id)->first();                // elimino l'allegato dell'atto notificato
+            if ($existAct) { $existAct->delete(); }
+
+            $existNotify = Attachment::where('attachment_type', 'postal_notify')->where('element_id', $expense->id)->first();          // elimino l'allegato della notifica
+            if ($existNotify) { $existNotify->delete(); }
+
+            $existReinvoice = Attachment::where('attachment_type', 'postal_reinvoice')->where('element_id', $expense->id)->first();    // elemino l'allegato della fattura emessa
+            if ($existReinvoice) { $existReinvoice->delete(); }
         });
 
     }
