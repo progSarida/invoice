@@ -34,7 +34,7 @@ return new class extends Migration
             $table->date('receipt_date')->after('receipt_attachment_path')->nullable();
         });
 
-        Schema::table('contract_deatils', function (Blueprint $table) {
+        Schema::table('contract_details', function (Blueprint $table) {
             $table->string('contract_attachment_path')->nullable();                             // percorso file contratto
         });
 
