@@ -31,7 +31,7 @@ return new class extends Migration
         });
 
         Schema::table('bails', function (Blueprint $table) {
-            $table->date('receipt_date')->after('receipt_attachment_path ')->nullable();
+            $table->date('receipt_date')->after('receipt_attachment_path')->nullable();
         });
 
         Schema::table('contract_deatils', function (Blueprint $table) {
