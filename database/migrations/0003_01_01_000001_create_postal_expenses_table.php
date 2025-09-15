@@ -102,7 +102,7 @@ return new class extends Migration
             $table->string('expense_type')->nullable();                                                 // enum tipologoa spesa: ExpenseType
 
             $table->unsignedBigInteger('passive_invoice_id')->nullable();              				    //
-            $table->foreign('passive_invoice_id')->references('id')->on('passive_invoices');      		// notifica inserita da utente (mostrare se spedizione)
+            $table->foreign('passive_invoice_id')->references('id')->on('passive_invoices');      		// fattura passiva (mostrare se spedizione)
 
             $table->decimal('notify_expense_amount',10,2)->nullable();                          		// importo spese notifica (da passive_invoice_id, se spedizione)
 
