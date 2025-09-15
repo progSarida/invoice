@@ -365,6 +365,10 @@ class PostalExpense extends Model
             }
         });
 
+        static::saved(function ($expense) {
+            //
+        });
+
         static::deleting(function ($expense) {
             //
         });

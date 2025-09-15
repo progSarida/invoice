@@ -187,7 +187,7 @@ class PassiveInvoiceResource extends Resource
                                     ,
                             ]),
                 // ]),
-            
+
             // ])->columns(5);
             ]);
     }
@@ -236,6 +236,7 @@ class PassiveInvoiceResource extends Resource
                     ->label('')
                     ->tooltip('Scarica PDF')
                     ->icon('hugeicons-pdf-01')
+                    ->iconSize('lg')
                     ->action(function ($record) {
                         $pdfPath = $record->pdf_path;
                         if ($pdfPath && Storage::disk('public')->exists($pdfPath)) {
@@ -254,6 +255,7 @@ class PassiveInvoiceResource extends Resource
                     ->label('')
                     ->tooltip('Scarica XML')
                     ->icon('hugeicons-xml-01')
+                    ->iconSize('lg')
                     ->action(function ($record) {
                         $xmlPath = $record->xml_path;
                         if ($xmlPath && Storage::disk('public')->exists($xmlPath)) {

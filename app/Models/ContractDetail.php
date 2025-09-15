@@ -25,4 +25,28 @@ class ContractDetail extends Model
     {
         return $this->belongsTo(NewContract::class, 'contract_id');
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($detail) {
+            //
+        });
+
+        static::created(function ($detail) {
+            //
+        });
+
+        static::updating(function ($detail) {
+            //
+        });
+
+        static::saved(function ($detail) {
+            //
+        });
+
+        static::deleting(function ($detail) {
+            //
+        });
+
+    }
 }

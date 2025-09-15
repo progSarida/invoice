@@ -95,5 +95,29 @@ class NewContract extends Model
     {
         return $this->hasMany(Invoice::class, 'contract_id');
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($contract) {
+            //
+        });
+
+        static::created(function ($contract) {
+            //
+        });
+
+        static::updating(function ($contract) {
+            //
+        });
+
+        static::saved(function ($contract) {
+            //
+        });
+
+        static::deleting(function ($contract) {
+            //
+        });
+
+    }
 }
 

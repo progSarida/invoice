@@ -76,4 +76,28 @@ class Bail extends Model
     {
         return $this->belongsTo(Agency::class);
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($bail) {
+            //
+        });
+
+        static::created(function ($bail) {
+            //
+        });
+
+        static::updating(function ($bail) {
+            //
+        });
+
+        static::saved(function ($bail) {
+            //
+        });
+
+        static::deleting(function ($bail) {
+            //
+        });
+
+    }
 }
