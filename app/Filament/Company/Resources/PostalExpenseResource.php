@@ -212,7 +212,7 @@ class PostalExpenseResource extends Resource
                                 $date = $get('send_protocol_date') ?? '******';                                     // data protocollo invio
                                 $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';   // modalità invio
                                 $client = Client::find($get('client_id'))->denomination;                            // cliente
-                                $taxType = $get('tax_type')->getLabel();                                            // entrata
+                                $taxType = TaxType::from($get('tax_type'))->getLabel();                             // entrata
                                 $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                      // tipo atto
                                 $extension = $file->getClientOriginalExtension();                                   // estensione
 
@@ -421,8 +421,7 @@ class PostalExpenseResource extends Resource
                             ->required(),
 
                         Forms\Components\TextInput::make('iban')->label('IBAN')
-                            ->maxLength(255)
-                            ->rules(['iban']),
+                            ->maxLength(255),
 
                         Forms\Components\Select::make('expense_insert_user_id')->label('Utente inserimento spese')
                             ->disabled()
@@ -999,7 +998,6 @@ class PostalExpenseResource extends Resource
                                 Forms\Components\TextInput::make('iban')
                                     ->label('IBAN')
                                     ->maxLength(255)
-                                    ->rules(['iban'])
                                     ->columnSpan(3),
                                 Forms\Components\Select::make('expense_insert_user_id')
                                     ->label('Utente inserimento spese')

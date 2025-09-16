@@ -389,8 +389,8 @@ class PostalExpense extends Model
             } elseif ($existA) { $existA->delete(); }
 
             $existN = Attachment::where('attachment_type', 'postal_notify')->where('element_id', $expense->id)->first();
-            if ($expense->act_attachment_path) {
-                $filenameAct = basename($expense->act_attachment_path) ?: 'unknown';
+            if ($expense->notify_attachment_path) {
+                $filenameAct = basename($expense->notify_attachment_path) ?: 'unknown';
                 $dataN = [
                     'company_id' => \Filament\Facades\Filament::getTenant()->id,
                     'client_id' => $expense->client_id,
@@ -400,15 +400,15 @@ class PostalExpense extends Model
                     'attachment_filename' => $filenameAct,
                     'attachment_date' => $expense->notify_date,
                     'attachment_upload_date' => now()->toDateString(),
-                    'attachment_path' => $expense->act_attachment_path,
+                    'attachment_path' => $expense->notify_attachment_path,
                 ];
                 if (!$existN) { $actAttachment = Attachment::create($dataN); }
                 else { $existN->update($dataN); }
             } elseif ($existN) { $existN->delete(); }
 
             $existR = Attachment::where('attachment_type', 'postal_reinvoice')->where('element_id', $expense->id)->first();
-            if ($expense->act_attachment_path) {
-                $filenameAct = basename($expense->act_attachment_path) ?: 'unknown';
+            if ($expense->reinvoice_attachment_path) {
+                $filenameAct = basename($expense->reinvoice_attachment_path) ?: 'unknown';
                 $dataR = [
                     'company_id' => \Filament\Facades\Filament::getTenant()->id,
                     'client_id' => $expense->client_id,
@@ -418,7 +418,7 @@ class PostalExpense extends Model
                     'attachment_filename' => $filenameAct,
                     'attachment_date' => $expense->reinvoice_date,
                     'attachment_upload_date' => now()->toDateString(),
-                    'attachment_path' => $expense->act_attachment_path,
+                    'attachment_path' => $expense->reinvoice_attachment_path,
                 ];
                 if (!$existR) { $actAttachment = Attachment::create($dataR); }
                 else { $existR->update($dataN); }
