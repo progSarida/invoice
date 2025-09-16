@@ -9,6 +9,7 @@ use App\Filament\Company\Resources\ContainerResource\RelationManagers;
 use App\Filament\Company\Resources\ContainerResource\RelationManagers\ContractsRelationManager;
 use App\Filament\Company\Resources\ContainerResource\RelationManagers\TendersRelationManager;
 use App\Models\Container;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Section;
@@ -34,7 +35,10 @@ class ContainerResource extends Resource
 
     protected static ?string $navigationGroup = 'Archivio';
 
-    public static function shouldRegisterNavigation(): bool{ return true; }                             // se messo a false nasconde 'Archivio'
+    public static function shouldRegisterNavigation(): bool{                                            // mostra 'Archivio' solo per Sarida e STC
+        if(Filament::getTenant()->id === 1 || Filament::getTenant() === 2) return true;
+        else return false;
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
 
