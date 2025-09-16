@@ -30,6 +30,7 @@ class CompanyPanelProvider extends PanelProvider
         return $panel
             ->id('company')
             ->path('company')
+            // ->topNavigation()
             ->login() // Abilita la pagina di login
             // ->registration() // Opzionale: abilita la registrazione
             ->passwordReset() // Opzionale: abilita il reset della password
