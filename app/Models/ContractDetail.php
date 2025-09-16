@@ -15,7 +15,7 @@ class ContractDetail extends Model
         'date',
         'description',
         'contract_attachment_path',
-        'contract_attachment_date'
+        'contract_attachment_date',
     ];
 
     protected $casts = [
@@ -87,7 +87,7 @@ class ContractDetail extends Model
         });
 
         static::deleted(function ($detail) {
-            
+
             if (!$detail->contract) { return; }                                                             // controllo che il contratto associato esista
 
             $mostRecentDetail = $detail->contract->contractDetails()                                        // trovo il ContractDetail più recente rimasto
@@ -97,14 +97,14 @@ class ContractDetail extends Model
 
             $updateData = [];
             if ($mostRecentDetail) {                                                                        // se esiste un ContractDetail più recente, uso i suoi valori
-                if (!is_null($mostRecentDetail->contract_attachment_path)) {                                
+                if (!is_null($mostRecentDetail->contract_attachment_path)) {
                     $updateData['new_contract_copy_path'] = $mostRecentDetail->contract_attachment_path;
                 }
                 if (!is_null($mostRecentDetail->contract_attachment_date)) {
                     $updateData['new_contract_copy_date'] = $mostRecentDetail->contract_attachment_date;
                 }
             } else {                                                                                        // non esiste un ContractDetail più recente
-                
+
                 $updateData['new_contract_copy_path'] = null;
                 $updateData['new_contract_copy_date'] = null;
             }
