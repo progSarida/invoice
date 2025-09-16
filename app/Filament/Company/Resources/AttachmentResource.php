@@ -25,6 +25,8 @@ class AttachmentResource extends Resource
 
     public static ?string $pluralModelLabel = 'Allegati';
 
+    public static ?string $modelLabel = 'Allegato';
+
     protected static ?string $navigationIcon = 'tni-attachment-o';
 
     public static function form(Form $form): Form
@@ -41,7 +43,7 @@ class AttachmentResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('attachment_type')
                     ->label('Tipo allegato'),
-                Tables\Columns\TextColumn::make('attachment_date')
+                Tables\Columns\TextColumn::make('attachment_upload_date')
                     ->label('Data caricamento')
                     ->date('d/m/Y')
                     ->sortable(),
@@ -59,6 +61,10 @@ class AttachmentResource extends Resource
                             return "{$contract?->office_name} ({$contract?->office_code}) - TIPO: {$contract?->payment_type->getLabel()} - CIG: {$contract?->cig_code}";
                         else return '';
                     }),
+                Tables\Columns\TextColumn::make('attachment_date')
+                    ->label('Data allegato')
+                    ->date('d/m/Y')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('attachment_filename')
                     ->label('Allegato'),
             ])

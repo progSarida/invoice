@@ -14,7 +14,8 @@ class Attachment extends Model
         'element_id',                                               // id elemento che ha caricato il file
         'attachment_type',                                          // tipo di allegato
         'attachment_filename',                                      // nome file allegato
-        'attachment_date',                                          // dati caricamento allegato
+        'attachment_date',                                          // dati allegato
+        'attachment_upload_date',                                   // dati caricamento allegato
         'attachment_path',                                          // percorso file allegato
     ];
 

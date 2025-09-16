@@ -27,7 +27,7 @@ class BailResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
     protected static ?string $navigationGroup = 'Cauzioni';
     protected static ?int $navigationSort = 1;
-    protected static ?string $recordTitleAttribute = 'insurance';
+    protected static ?string $recordTitleAttribute = 'bill_number';
 
     public static function form(Form $form): Form
     {

@@ -108,8 +108,8 @@ class Bail extends Model
                     'element_id' => $bail->id,
                     'attachment_type' => 'bail_bill',
                     'attachment_filename' => $filenameB,
-                    'attachment_date' => $bail->date,
-                    'attachment_upload_date' => now()->toDateString(),
+                    'attachment_date' => $bail->bill_date,
+                    'attachment_upload_date' => today()->toDateString(),
                     'attachment_path' => $bail->bill_attachment_path,
                 ];
 
@@ -130,7 +130,7 @@ class Bail extends Model
                     'attachment_type' => 'bail_receipt',
                     'attachment_filename' => $filenameR,
                     'attachment_date' => $bail->receipt_date,
-                    'attachment_upload_date' => now()->toDateString(),
+                    'attachment_upload_date' => today()->toDateString(),
                     'attachment_path' => $bail->receipt_attachment_path,
                 ];
 
@@ -138,7 +138,7 @@ class Bail extends Model
                 else { $existR->update($dataR); }
             }
             else { $existR->delete(); }
-            
+
         });
 
         static::deleting(function ($bail) {
