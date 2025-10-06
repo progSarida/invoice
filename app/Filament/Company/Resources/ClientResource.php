@@ -118,12 +118,6 @@ class ClientResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->columnspan(6),
-                Forms\Components\TextInput::make('zip_code')->label('Cap')
-                    ->required()
-                    ->maxLength(5)
-                    ->disabled()
-                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
-                    ->columnspan(1),
                 Forms\Components\Select::make('city_id')->label('Città')
                     ->relationship(name: 'city', titleAttribute: 'name')
                     ->required()
@@ -142,6 +136,13 @@ class ClientResource extends Resource
                             $set('province_id', null);
                         }
                     }),
+                Forms\Components\TextInput::make('zip_code')->label('Cap')
+                    ->required()
+                    ->maxLength(5)
+                    ->disabled()
+                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
+                    ->columnspan(1),
+
                 Forms\Components\Select::make('province_id')->label('Provincia')
                     ->options(Province::pluck('code', 'id')->toArray())
                     ->searchable()

@@ -40,10 +40,10 @@ class ProvinceResource extends Resource
                 //       ->required()
                 //       ->searchable()
                 //       ->preload(),
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('name')->label('Nome')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('code')
+                Forms\Components\TextInput::make('code')->label('Sigla')
                     ->required()
                     ->maxLength(255),
             ]);
