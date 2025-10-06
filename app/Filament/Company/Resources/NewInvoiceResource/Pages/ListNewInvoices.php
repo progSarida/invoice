@@ -33,34 +33,6 @@ class ListNewInvoices extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('checkInvoicing')
-                // ->hidden()
-                ->label('Controllo contratti da fatturare')
-                ->action(function () {
-                    $activeContracts = $this->getActiveContractsData();
-                    $contracts = $this->getInvoicingContracts($activeContracts);
-                    $user = Auth::user();
-                    foreach ($contracts['to_invoice'] as $contract) {
-                        $user->notify(
-                            Notification::make()
-                                ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
-                                // ->body('TESTBODY')
-                                ->icon('heroicon-o-exclamation-triangle')
-                                ->warning()
-                                ->toDatabase(),
-                        );
-                    }
-                    foreach ($contracts['partial'] as $contract) {
-                        $user->notify(
-                            Notification::make()
-                                ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'ha una fattura parzialmente stornata')
-                                // ->body('TESTBODY')
-                                ->icon('heroicon-o-exclamation-triangle')
-                                ->warning()
-                                ->toDatabase(),
-                        );
-                    }
-                }),
             Actions\CreateAction::make()
                 // ->keyBindings(['alt+n'])
                 ->hidden(function () {
@@ -308,6 +280,34 @@ class ListNewInvoices extends ListRecords
                         ->title('Stampa avviata')
                         ->success()
                         ->send();
+                }),
+                Actions\Action::make('checkInvoicing')
+                    // ->hidden()
+                    ->label('Controllo contratti da fatturare')
+                    ->action(function () {
+                        $activeContracts = $this->getActiveContractsData();
+                        $contracts = $this->getInvoicingContracts($activeContracts);
+                        $user = Auth::user();
+                        foreach ($contracts['to_invoice'] as $contract) {
+                            $user->notify(
+                                Notification::make()
+                                    ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
+                                    // ->body('TESTBODY')
+                                    ->icon('heroicon-o-exclamation-triangle')
+                                    ->warning()
+                                    ->toDatabase(),
+                            );
+                        }
+                        foreach ($contracts['partial'] as $contract) {
+                            $user->notify(
+                                Notification::make()
+                                    ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'ha una fattura parzialmente stornata')
+                                    // ->body('TESTBODY')
+                                    ->icon('heroicon-o-exclamation-triangle')
+                                    ->warning()
+                                    ->toDatabase(),
+                            );
+                        }
                 }),
         ];
     }

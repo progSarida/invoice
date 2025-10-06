@@ -668,7 +668,7 @@ class NewInvoiceResource extends Resource
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
                                 ->columnSpan(1),
-                            Forms\Components\TextInput::make('reference_number_to')->label('Totali')
+                            Forms\Components\TextInput::make('total_number')->label('Totali')
                                 // ->required()
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
