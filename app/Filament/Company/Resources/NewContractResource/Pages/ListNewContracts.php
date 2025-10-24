@@ -31,7 +31,7 @@ class ListNewContracts extends ListRecords
         return [
 
             Actions\Action::make('convert')
-                ->label('Converti vecchi*')
+                ->label('Converti vecchi**')
                 ->visible(fn (): bool => Auth::user()->is_admin)
                 ->tooltip('Converti vecchi contratti')
                 ->color('primary')
