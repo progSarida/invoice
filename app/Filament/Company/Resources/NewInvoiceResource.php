@@ -763,7 +763,7 @@ class NewInvoiceResource extends Resource
                             ->columns(6)
                             ->schema([
                                 Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
-                                    ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))
+                                    // ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))  decommentare dopo che Daniele ha corretto gli stati necessari
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('sdi_code')->label('Codice SdI')->readOnly()->columnSpan(2)->disabled(),
                                 Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(2)->disabled()

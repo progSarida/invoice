@@ -35,9 +35,14 @@ class ContainerResource extends Resource
 
     protected static ?string $navigationGroup = 'Archivio';
 
-    public static function shouldRegisterNavigation(): bool{                                            // mostra 'Archivio' solo per Sarida e STC
-        if(Filament::getTenant()->id === 1 || Filament::getTenant() === 2) return true;
-        else return false;
+    // public static function shouldRegisterNavigation(): bool{                                            // mostra 'Archivio' solo per Sarida e STC
+    //     if(Filament::getTenant()->id === 1 || Filament::getTenant() === 2) return true;
+    //     else return false;
+    // }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;                                                                                   // nascondo la risorsa dal menu di navigazione
     }
 
     protected static ?string $recordTitleAttribute = 'name';
