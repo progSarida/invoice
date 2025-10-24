@@ -31,7 +31,7 @@ class ListNewContracts extends ListRecords
         return [
 
             Actions\Action::make('convert')
-                ->label('Converti vecchi')
+                ->label('Converti vecchi*')
                 ->visible(fn (): bool => Auth::user()->is_admin)
                 ->tooltip('Converti vecchi contratti')
                 ->color('primary')
@@ -107,7 +107,7 @@ class ListNewContracts extends ListRecords
 
                             foreach($details as $detail){
                                 $dataD = [
-                                    'company_id'        => $tenant->id,
+                                    // 'company_id'        => $tenant->id,
                                     'contract_id'       => $newContract->id,
                                     'number'            => $detail->number,
                                     'contract_type'     => $detail->contract_type,
