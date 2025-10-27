@@ -53,12 +53,17 @@ class AttachmentResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('client.denomination')
                     ->label('Cliente')
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('contract')
                     ->label('Contratto')
                     ->sortable()
-                    ->searchable()
+                    ->searchable(
+                        query: function ($query, $search) {
+                            return $query->whereHas('contract', function ($query) use ($search) {
+                                $query->where('cig_code', 'like', "%{$search}%");
+                            });
+                        }
+                    )
                     ->getStateUsing(function ($record) {
                         $contract = NewContract::find($record->contract_id);
                         if($contract)
@@ -82,7 +87,7 @@ class AttachmentResource extends Resource
                     ->preload()
                     ->optionsLimit(5),
                 SelectFilter::make('notify_type')
-                    ->label('Tipo notifica')
+                    ->label('Tipo allegato')
                     ->options(AttachmentType::class)
                     ->searchable()
                     ->preload(),
