@@ -152,6 +152,34 @@ class AttachmentResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('download_all')
+                        ->label('Scarica selezionati')
+                        ->icon('tabler-download')
+                        ->action(function ($records) {
+                            $zip = new \ZipArchive();
+                            $zipFileName = 'allegati_' . now()->format('Y-m-d_His') . '.zip';
+                            $zipFilePath = storage_path('app/public/' . $zipFileName);
+
+                            if ($zip->open($zipFilePath, \ZipArchive::CREATE) === TRUE) {
+                                foreach ($records as $record) {
+                                    $filePath = $record->attachment_path;
+                                    if ($filePath && Storage::disk('public')->exists($filePath)) {
+                                        $fullPath = Storage::disk('public')->path($filePath);
+                                        $fileName = basename($filePath);
+                                        
+                                        // aggiung prefisso per evitare duplicati
+                                        $uniqueFileName = $record->id . '_' . $fileName;
+                                        $zip->addFile($fullPath, $uniqueFileName);
+                                    }
+                                }
+                                $zip->close();
+
+                                return response()->download($zipFilePath)->deleteFileAfterSend(true);
+                            }
+
+                            return redirect()->back()->with('error', 'Errore nella creazione del file ZIP.');
+                        })
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }
