@@ -619,12 +619,27 @@ class NewInvoiceResource extends Resource
                                 ->rules(['digits:4'])
                                 ->columnSpan(2),
 
-                            Forms\Components\Select::make('accrual_type_id')->label('Tipo di competenza')
+                            Forms\Components\Select::make('accrual_type_id')
+                                ->label('Tipo di competenza')
                                 ->required()
-                                ->options(function () {
-                                    return AccrualType::orderBy('order')->pluck('name', 'id');
+                                ->options(function (callable $get) {
+                                    $contractId = $get('contract_id');
+                                    if (!$contractId) {
+                                        return [];
+                                    }
+
+                                    $contract = NewContract::find($contractId);
+                                    if (!$contract || empty($contract->accrual_types)) {
+                                        return [];
+                                    }
+
+                                    return AccrualType::whereIn('name', $contract->accrual_types)
+                                        ->orderBy('order')
+                                        ->pluck('name', 'id')
+                                        ->toArray();
                                 })
                                 ->columnSpan(3),
+
                             Forms\Components\Select::make('manage_type_id')->label('Tipo di gestione')
                                 ->options(function () {
                                     return ManageType::orderBy('order')->pluck('name', 'id');
