@@ -85,19 +85,24 @@ class PostalExpenseResource extends Resource
                             ->preload()
                             ->columnSpan(3),
 
-                        Forms\Components\Select::make('new_contract_id')->label('Contratto')
+                        Forms\Components\Select::make('new_contract_id')
+                            ->label('Contratto')
                             ->relationship(
                                 name: 'contract',
-                                modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$get('client_id'))
+                                modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id', $get('client_id'))
                             )
                             ->getOptionLabelFromRecordUsing(
                                 fn (Model $record) => "{$record->office_name} ({$record->office_code}) - TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
                             )
-                            ->afterStateUpdated(function (Set $set, $state) {
+                            ->afterStateUpdated(function (Set $set, $state, Get $get) {
                                 $contract = NewContract::find($state);
                                 if ($contract) {
-                                    // $set('tax_type', $contract->tax_type);
                                     $set('reinvoice', $contract->reinvoice);
+                                    // Resettiamo tax_type per evitare valori non validi
+                                    $set('tax_type', null);
+                                } else {
+                                    $set('reinvoice', false);
+                                    $set('tax_type', null);
                                 }
                             })
                             ->required()
@@ -107,9 +112,29 @@ class PostalExpenseResource extends Resource
                             ->optionsLimit(5)
                             ->columnSpan(6),
 
-                        Forms\Components\Select::make('tax_type')->label('Tipo entrata')
+                        Forms\Components\Select::make('tax_type')
+                            ->label('Tipo entrata')
                             ->required()
-                            ->options(TaxType::class)
+                            ->options(function (Get $get) {
+                                $contractId = $get('new_contract_id');
+                                if (!$contractId) {
+                                    return [];
+                                }
+
+                                $contract = NewContract::find($contractId);
+                                if (!$contract || empty($contract->getAttribute('tax_types'))) {
+                                    return [];
+                                }
+
+                                // Otteniamo i valori grezzi di tax_types (es. ["park"])
+                                $taxTypes = $contract->getAttribute('tax_types');
+                                
+                                // Filtra le opzioni di TaxType in base a tax_types
+                                return collect(TaxType::cases())
+                                    ->filter(fn ($case) => in_array($case->getLabel(), $taxTypes))
+                                    ->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])
+                                    ->toArray();
+                            })
                             ->searchable()
                             ->live()
                             ->placeholder('Seleziona')
