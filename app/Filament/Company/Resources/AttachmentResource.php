@@ -96,12 +96,13 @@ class AttachmentResource extends Resource
                     ->iconSize('lg')
                     ->action(function ($record) {
                         $filePath = $record->attachment_path;
-                        dd();
+                        // dd($filePath);
                         if ($filePath && Storage::disk('public')->exists($filePath)) {
+                            $filename = explode("/", $filePath)[1];
                             return response()->download(
                                 Storage::disk('public')->path($filePath),
                                 // 'document_' . $record->number . '.pdf'
-                                $filePath
+                                $filename
                             );
                         }
                         return redirect()->back()->with('error', 'File PDF non trovato.');
