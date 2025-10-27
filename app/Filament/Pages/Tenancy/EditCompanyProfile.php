@@ -28,6 +28,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Pages\Tenancy\EditTenantProfile;
 
 class EditCompanyProfile extends EditTenantProfile
@@ -609,6 +611,11 @@ class EditCompanyProfile extends EditTenantProfile
                                             )
                                             ->columnSpan(4),
                                         TextInput::make('quantity')->label('Quantità')
+                                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                                if($get('unit_price'))
+                                                    $set('amount', $state * $get('unit_price'));
+                                            })
+                                            ->live()
                                             ->columnSpan(2)
                                             ->numeric(),
                                         TextInput::make('measure_unit')->label('Unità di misura')
@@ -618,6 +625,11 @@ class EditCompanyProfile extends EditTenantProfile
                                         //     ->columnSpan(3),
                                         TextInput::make('unit_price')
                                             ->label('Prezzo unitario')
+                                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                                if($get('quantity'))
+                                                    $set('amount', $state * $get('quantity'));
+                                            })
+                                            ->live()
                                             ->columnSpan(3),
                                             // ->default(0.00),
                                         TextInput::make('amount')

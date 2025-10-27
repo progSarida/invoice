@@ -12,6 +12,7 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Services\AndxorSoapService;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\TextInput;
 
 class EditNewInvoice extends EditRecord
@@ -37,8 +38,12 @@ class EditNewInvoice extends EditRecord
                 ->requiresConfirmation()
                 ->modalHeading('Duplica Fattura')
                 ->modalDescription('Vuoi creare una copia di questa fattura? La nuova fattura avrà un nuovo numero, una nuova data e gli importi delle voci a zero.')
-                ->modalSubmitActionLabel('Duplica')
-                ->action(function (Invoice $record) {
+                ->modalSubmitActionLabel('Duplica')->form([
+                    Checkbox::make('duplicate_items')
+                        ->label('Duplica anche le voci della fattura')
+                        ->default(true),
+                ])
+                ->action(function (Invoice $record, array $data) {
                     try {
                         $newInvoice = $record->replicate();                                 // creo una nuova istanza della fattura
 
@@ -54,24 +59,30 @@ class EditNewInvoice extends EditRecord
 
                         $newInvoice->save();                                                // salvo la nuova fattura (il boot method genererà automaticamente invoice_uid)
 
-                        $items = $record->invoiceItems->all();
-                        $lastKey = array_key_last($items);
+                        if ($data['duplicate_items']) {
+                            $items = $record->invoiceItems->all();
+                            $lastKey = array_key_last($items);
 
-                        foreach ($items as $key => $item) {                                 // duplico gli InvoiceItem collegati
-                            $newItem = $item->replicate();
-                            $newItem->invoice_id = $newInvoice->id;
-                            $newItem->quantity = 0.00;
-                            $newItem->amount = 0.00;
-                            $newItem->taxable = 0.00;
-                            $newItem->total = 0.00;
-                            $newItem->save();
+                            foreach ($items as $key => $item) {                                 // duplico gli InvoiceItem collegati
+                                $newItem = $item->replicate();
+                                $newItem->invoice_id = $newInvoice->id;
+                                $newItem->quantity = 0.00;
+                                $newItem->amount = 0.00;
+                                $newItem->taxable = 0.00;
+                                $newItem->total = 0.00;
+                                $newItem->save();
 
-                            if ($key === $lastKey) {
-                                // $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
-                                $newInvoice->checkStampDuty();                              // verifico e inserisco eventuale imposta di bollo (non fa nulla)
-                                $newItem->autoInsert();                                     // crea voci fattura di ritenute, riepiloghi e casse previdenziali
-                                $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
+                                if ($key === $lastKey) {
+                                    // $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
+                                    $newInvoice->checkStampDuty();                              // verifico e inserisco eventuale imposta di bollo (non fa nulla)
+                                    $newItem->autoInsert();                                     // crea voci fattura di ritenute, riepiloghi e casse previdenziali
+                                    $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
+                                }
                             }
+                        } else {
+                            // Se non si duplicano le voci, aggiorno comunque i totali e verifico l'imposta di bollo
+                            $newInvoice->checkStampDuty();
+                            $newInvoice->updateTotal();
                         }
 
                         Notification::make()
