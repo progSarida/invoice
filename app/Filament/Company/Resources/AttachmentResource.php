@@ -12,6 +12,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -91,6 +92,41 @@ class AttachmentResource extends Resource
                     ->options(AttachmentType::class)
                     ->searchable()
                     ->preload(),
+                Filter::make('interval_date')
+                    ->label('Intervallo di date')
+                    ->form([
+                        Forms\Components\DatePicker::make('start_date')
+                            ->label('Data inizio')
+                            ->placeholder('Seleziona data inizio')
+                            ->displayFormat('d/m/Y'),
+                        Forms\Components\DatePicker::make('end_date')
+                            ->label('Data fine')
+                            ->placeholder('Seleziona data fine')
+                            ->displayFormat('d/m/Y')
+                            ->afterOrEqual('start_date'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        if (!empty($data['start_date'])) {
+                            $query->where('attachment_upload_date', '>=', $data['start_date']);
+                        }
+                        if (!empty($data['end_date'])) {
+                            $query->where('attachment_upload_date', '<=', \Carbon\Carbon::parse($data['end_date'])->endOfDay());
+                        }
+                        return $query;
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicator = null;
+
+                        if (!empty($data['start_date']) && !empty($data['end_date'])) {
+                            $indicator = 'Dal ' . \Carbon\Carbon::parse($data['start_date'])->format('d/m/Y') . ' al ' . \Carbon\Carbon::parse($data['end_date'])->format('d/m/Y');
+                        } elseif (!empty($data['start_date'])) {
+                            $indicator = 'Dal ' . \Carbon\Carbon::parse($data['start_date'])->format('d/m/Y');
+                        } elseif (!empty($data['end_date'])) {
+                            $indicator = 'Al ' . \Carbon\Carbon::parse($data['end_date'])->format('d/m/Y');
+                        }
+
+                        return $indicator ? [$indicator] : [];
+                    }),
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
