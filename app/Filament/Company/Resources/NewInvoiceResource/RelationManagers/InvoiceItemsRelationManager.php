@@ -9,6 +9,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
 use App\Enums\VatCodeType;
+use App\Filament\Company\Resources\PostalExpenseResource;
 use Filament\Tables\Table;
 use App\Models\InvoiceItem;
 use App\Models\InvoiceElement;
@@ -407,7 +408,21 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->modalHeading('Seleziona spese di notifica')
                     ->modalDescription('Seleziona le spese postali da aggiungere alla fattura')
                     ->modalSubmitActionLabel('Aggiungi alla fattura')
-                    ->modalCancelActionLabel('Annulla')
+                    ->modalCancelActionLabel('Annulla'),
+
+                Tables\Actions\Action::make('create_postal_expense')
+                    ->label('Crea spesa di notifica')
+                    ->hidden(function () {
+                        $contractId = $this->getOwnerRecord()->contract_id;
+                        return PostalExpense::where('new_contract_id', $contractId)
+                            ->where('reinvoice_id', null)
+                            ->exists();
+                    })
+                    ->url(function () {
+                        $contractId = $this->getOwnerRecord()->contract_id;
+                        return PostalExpenseResource::getUrl('create', ['new_contract_id' => $contractId]);
+                    })
+                    ->openUrlInNewTab(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
