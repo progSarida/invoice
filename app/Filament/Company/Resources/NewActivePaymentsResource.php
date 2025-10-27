@@ -63,7 +63,7 @@ class NewActivePaymentsResource extends Resource
                     ->relationship(
                         name: 'invoice',
                         titleAttribute: 'id',
-                        modifyQueryUsing: fn ($query) => $query->whereNotNull('flow')
+                        modifyQueryUsing: fn ($query) => $query->whereNotNull('contract_id')
                                                                ->where('sdi_status', '!=', 'da_inviare')    // non includo fattura da inviare
                                                                ->where('parent_id', null)                   // non includo note di credito
                     )
@@ -73,6 +73,10 @@ class NewActivePaymentsResource extends Resource
                         $number = str_pad($record->number ?? 0, 3, '0', STR_PAD_LEFT);
                         $year = $record->year ?? '????';
                         return "{$cliente} - {$number}/{$sectional}/{$year}";
+                    })
+                    ->afterStateUpdated(function(Set $set, $state) {
+                        $invoice = Invoice::find($state);
+                        $set('bank_account_id', $invoice->bank_account_id);
                     })
                     ->required()
                     ->disabled(fn ($get) => $get('validated'))
@@ -89,6 +93,8 @@ class NewActivePaymentsResource extends Resource
                         $invoice = Invoice::find($get('invoice_id'));
                         $newTotalPayment = $state + $invoice->total_payment;
                         $compare = $invoice->client?->type?->value == 'public' ? $invoice->no_vat_total : $invoice->total;
+
+                        dd($newTotalPayment . " > (" . $compare . " - " . $invoice->total_notes . ")");
 
                         if($newTotalPayment > ($compare - $invoice->total_notes)){
                             Notification::make()

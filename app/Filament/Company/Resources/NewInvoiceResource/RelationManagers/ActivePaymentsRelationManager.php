@@ -2,8 +2,10 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\RelationManagers;
 
+use App\Models\BankAccount;
 use App\Models\Invoice;
 use Carbon\Carbon;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
@@ -56,6 +58,9 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->searchable()
                     ->live()
                     ->preload()
+                    ->default(function ($livewire) {
+                        return $livewire->getOwnerRecord()->id;
+                    })
                     ->columnSpan(5),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
@@ -82,6 +87,23 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->live()
                     ->default(false)
                     ->columnSpan(2),
+                Select::make('bank_account_id')
+                    ->label('Conto')
+                    ->options(function () {
+                        return BankAccount::where('company_id', Filament::getTenant()->id)
+                            ->get()
+                            ->mapWithKeys(function ($record) {
+                                return [$record->id => "{$record->name} - {$record->iban}"];
+                            })
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->required()
+                    ->default(function ($livewire) {
+                        return $livewire->getOwnerRecord()->bank_account_id;
+                    })
+                    ->columnSpan(5)
+                    ->preload(),
                 Section::make('Dati registrazione/validazione')
                         // ->collapsible()
                         ->columns(12)
