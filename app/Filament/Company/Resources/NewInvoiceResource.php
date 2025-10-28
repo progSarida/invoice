@@ -234,13 +234,29 @@ class NewInvoiceResource extends Resource
                                 ),
 
                             Forms\Components\Select::make('contract_id')->label('Contratto')
+                                // ->relationship(
+                                //     name: 'contract',
+                                //     modifyQueryUsing: fn (Builder $query, Get $get) => $query
+                                //         ->where('client_id', $get('client_id'))
+                                //         ->whereJsonContains('tax_types', $get('tax_type'))
+                                //         ->where('end_validity_date', '>=', today())
+                                //         ->where('start_validity_date', '<=', today())
+                                // )
                                 ->relationship(
                                     name: 'contract',
-                                    modifyQueryUsing: fn (Builder $query, Get $get) => $query
-                                        ->where('client_id', $get('client_id'))
-                                        ->whereJsonContains('tax_types', $get('tax_type'))
-                                        ->where('end_validity_date', '>=', today()) // ← ATTIVO
-                                        ->where('start_validity_date', '<=', today()) // ← opzionale: già iniziato
+                                    modifyQueryUsing: function (Builder $query, Get $get, $livewire) {
+                                        $query->where('client_id', $get('client_id'))
+                                                ->whereJsonContains('tax_types', $get('tax_type'));
+
+                                        // applico i filtri di validità solo in fase di creazione
+                                        if ($livewire instanceof \Filament\Resources\Pages\CreateRecord) {
+                                            $query
+                                                ->where('end_validity_date', '>=', today())
+                                                ->where('start_validity_date', '<=', today());
+                                        }
+
+                                        return $query;
+                                    },
                                 )
                                 ->getOptionLabelFromRecordUsing(
                                     fn (Model $record) => "{$record->office_name} ({$record->office_code}) TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
