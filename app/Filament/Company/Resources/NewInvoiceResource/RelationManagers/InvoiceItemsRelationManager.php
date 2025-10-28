@@ -362,7 +362,7 @@ class InvoiceItemsRelationManager extends RelationManager
                                 // Crea l'invoice item
                                 $invoiceItem = InvoiceItem::create([
                                     'invoice_id' => $invoice->id,
-                                    'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier_name),
+                                    'description' => 'Rimborso spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier_name),
                                     'amount' => $amount,
                                     'total' => $amount,
                                     'vat_code_type' => VatCodeType::VC06,

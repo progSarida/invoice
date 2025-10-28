@@ -15,6 +15,7 @@ class BankAccount extends Model
         'iban',
         'bic',
         'swift',
+        'agency',
     ];
 
     public function company(){

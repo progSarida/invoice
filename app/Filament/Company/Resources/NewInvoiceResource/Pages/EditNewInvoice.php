@@ -13,6 +13,7 @@ use Filament\Notifications\Notification;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Services\AndxorSoapService;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 
 class EditNewInvoice extends EditRecord
@@ -107,7 +108,19 @@ class EditNewInvoice extends EditRecord
                 ->label('Stampa')
                 ->icon('heroicon-o-printer')
                 ->color('primary')
-                ->action(function (Invoice $record) {
+                ->requiresConfirmation()
+                ->modalHeading('Selezione stampa')
+                ->modalDescription('Seleziona il tipo di stampa per la fattura')
+                ->modalSubmitActionLabel('Selezione')
+                ->form([
+                    Select::make('selection')->label('Tipo stampa')
+                        ->options([
+                                "soft" => "Semplice",
+                                "hard" => "Strutturata"
+                            ]
+                        ),
+                ])
+                ->action(function (Invoice $record, $data) {
                     $vats = $record->vatResume();                                           // Creazione array con dati riepiloghi IVA
                     // dd($vats);
                     $funds = $record->getFundBreakdown();                                   // Creazione array con dati casse previdenziali
@@ -118,7 +131,7 @@ class EditNewInvoice extends EditRecord
                     $grouped = collect($vats)                                               // Raggruppamento dati riepilochi IVA in base a aliquota
                         ->groupBy('%')
                         ->where('auto', false)
-                        ->map(function ($items, $percent) {
+                        ->map(function ($items, $percent){
                             return [
                                 '%' => $percent,
                                 'taxable' => $items->sum('taxable'),
@@ -131,11 +144,20 @@ class EditNewInvoice extends EditRecord
                         ->values()
                         ->toArray();
 
-                    $pdf = Pdf::loadView('pdf.invoice', [
-                        'invoice' => $record,
-                        'vats' => $grouped,
-                        'funds' => $funds,
-                    ]);
+                    if($data['selection'] == "hard"){
+                        $pdf = Pdf::loadView('pdf.invoice', [
+                            'invoice' => $record,
+                            'vats' => $grouped,
+                            'funds' => $funds,
+                        ]);                        
+                    }
+                    else{
+                        $pdf = Pdf::loadView('pdf.invoice_alt', [
+                            'invoice' => $record,
+                            'vats' => $grouped,
+                            'funds' => $funds,
+                        ]);                        
+                    }
 
                     $pdf->setPaper('A4', 'portrait');
 

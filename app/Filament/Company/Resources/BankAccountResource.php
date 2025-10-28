@@ -57,27 +57,31 @@ class BankAccountResource extends Resource
                     ->maxLength(255)
                     ->default(fn () => filament()->getTenant()?->name)
                     ->columnspan(4),
+                Forms\Components\TextInput::make('agency')
+                    ->label('Agenzia')
+                    ->maxLength(255)
+                    ->columnspan(4),
                 Forms\Components\TextInput::make('number')
                     ->label('Conto corrente')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(4),
+                    ->columnspan(3),
                 Forms\Components\TextInput::make('iban')
                     ->label('IBAN')
                     ->required()
                     ->maxLength(27)
                     ->hintIcon('heroicon-o-information-circle', tooltip: 'Codice internazionale per identificare il conto bancario')
-                    ->columnSpan(4),
+                    ->columnSpan(3),
                 Forms\Components\TextInput::make('bic')
                     ->label('BIC')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(4),
+                    ->columnspan(3),
                 Forms\Components\TextInput::make('swift')
                     ->label('SWIFT')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(4),
+                    ->columnspan(3),
             ]);
     }
 
