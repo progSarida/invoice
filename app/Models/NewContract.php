@@ -38,7 +38,7 @@ class NewContract extends Model
         'invoicing_cycle' => InvoicingCicle::class,
         'new_contract_copy_date' => 'date',
         'reinvoice' => 'boolean',
-        'accrual_types' => 'array',
+        'accrual_types' => 'json',
     ];
 
     public function getTaxTypesAttribute($value)

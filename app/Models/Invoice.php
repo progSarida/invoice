@@ -15,6 +15,7 @@ use App\Models\AccrualType;
 use App\Enums\PaymentStatus;
 use App\Enums\VatEnforceType;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -318,6 +319,11 @@ class Invoice extends Model
             }
         });
 
+        static::saved(function ($invoice) {
+            static::checkContractValidity($invoice);
+            static::checkBudgetExceeded($invoice);
+        });
+
         static::deleted(function ($invoice) {
             if ($invoice->invoice) {
                 $postalExpenseItems = $invoice->invoiceItems()->whereNotNull('postal_expense_id')->get() ?? [];
@@ -578,5 +584,51 @@ class Invoice extends Model
             return $number."/".$sectional."/".$this->year;
         }
 
+    }
+
+    private static function checkContractValidity($invoice)
+    {
+        if (!$invoice->contract_id) return;
+
+        $contract = $invoice->contract;
+        if (!$contract) return;
+        else if($contract->end_validity_date < today())
+                Notification::make()
+                    ->title('La voce è stata inserita in una fattura che fa riferimento ad un contratto scaduto')
+                    ->danger()
+                    ->send();
+    }
+
+    private static function checkBudgetExceeded($invoice)
+    {
+        if (!$invoice->contract_id) return;
+
+        $contract = $invoice->contract;
+        if (!$contract) return;
+
+        $totalInvoiced = Invoice::where('contract_id', $contract->id)->sum('total');        // totale di tutte le fatture per questo contratto
+
+        $limit = $contract->amount;
+
+        $cacheKey = "budget_exceeded_{$contract->id}";                                      // recupero lo stato precedente (uso cache per evitare notifiche duplicate)
+
+        $wasAlreadyNotified = cache()->has($cacheKey);
+
+        if ($totalInvoiced > $limit && !$wasAlreadyNotified) {                              // supera il budget e non è stato ancora notificato
+            Notification::make()
+                ->title('Budget contratto superato')
+                ->body("
+                    <strong>Contratto:</strong> {$contract->office_name} ({$contract->office_code})<br>
+                    <strong>Budget:</strong> " . number_format($limit, 2) . " €<br>
+                    <strong>Totale fatturato:</strong> " . number_format($totalInvoiced, 2) . " €
+                ")
+                ->danger()
+                ->persistent()
+                ->send();
+
+            // cache()->put($cacheKey, true, now()->addDay());
+            cache()->put($cacheKey, true, now()->addSeconds(5));                            // memorizzo in cache per bloccare duplicazione dovuta a update concatenati
+        }
+        // cache()->forget("budget_exceeded_{$contract->id}");
     }
 }

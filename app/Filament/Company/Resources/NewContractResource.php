@@ -32,6 +32,7 @@ use App\Filament\Company\Resources\ContractDetailsResource\RelationManagers\Cont
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class NewContractResource extends Resource
 {
@@ -76,7 +77,7 @@ class NewContractResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->rules(['array', 'in:'.implode(',', collect(TaxType::cases())->pluck('value')->toArray())])
+                    // ->rules(['array', 'in:'.implode(',', collect(TaxType::cases())->pluck('value')->toArray())])
                     ->columnSpan(3),
                 DatePicker::make('start_validity_date')
                     ->label('Inizio Validità')
@@ -89,12 +90,30 @@ class NewContractResource extends Resource
                     ->columnSpan(2),
                 Forms\Components\Select::make('accrual_types')
                     ->label('Competenze')
-                    ->options(AccrualType::pluck('name', 'id')->toArray())
                     ->multiple()
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->rules(['array', 'exists:accrual_types,id'])
+                    ->options(\App\Models\AccrualType::pluck('name', 'id'))
+                    ->formatStateUsing(function ($record) {
+                        if (!$record) return [];
+
+                        $raw = $record->getRawOriginal('accrual_types');                                        // bypasso il getter
+
+                        if (is_string($raw)) {
+                            $raw = json_decode($raw, true) ?: [];
+                        }
+
+                        return is_array($raw) ? array_map('intval', $raw) : [];
+                    })
+                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_map('intval', $state) : [])
+                    ->rules([
+                        'required',
+                        'array',
+                        'array.*' => Rule::in(
+                            \App\Models\AccrualType::pluck('id')->map('strval')->toArray()
+                        ),
+                    ])
                     ->columnSpan(3),
                 Forms\Components\Select::make('payment_type')
                     ->label('Tipo pagamento')
