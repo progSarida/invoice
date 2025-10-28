@@ -87,9 +87,10 @@ class AttachmentResource extends Resource
                     ->searchable()
                     ->preload()
                     ->optionsLimit(5),
-                SelectFilter::make('notify_type')
+                SelectFilter::make('attachment_type')
                     ->label('Tipo allegato')
                     ->options(AttachmentType::class)
+                    ->multiple()
                     ->searchable()
                     ->preload(),
                 Filter::make('interval_date')
@@ -166,7 +167,7 @@ class AttachmentResource extends Resource
                                     if ($filePath && Storage::disk('public')->exists($filePath)) {
                                         $fullPath = Storage::disk('public')->path($filePath);
                                         $fileName = basename($filePath);
-                                        
+
                                         // aggiung prefisso per evitare duplicati
                                         $uniqueFileName = $record->id . '_' . $fileName;
                                         $zip->addFile($fullPath, $uniqueFileName);
