@@ -25,6 +25,8 @@
 
         .description { padding-bottom: 10mm;}
 
+        .note { font-style: italic; padding-top: 3mm;}
+
         .dashed_bottom { border-bottom: 0.5px dashed #000;}
 
         .dati_sdi { margin-bottom: 10px; }
@@ -48,7 +50,7 @@
     $number = $invoice->company->vat_number ?? $invoice->company->tax_number;
     $logoPath = storage_path('app/public/logos/logo_'. $number . '.png');
     $logoSrc = null;
-
+// dd($vats);
     if (file_exists($logoPath)) {
         $logoBase64 = base64_encode(file_get_contents($logoPath));
         $logoSrc = 'data:image/png;base64,' . $logoBase64;
@@ -173,13 +175,16 @@
         {{-- Riepiloghi IVA --}}
         @foreach($vats as $vat)
             @php
-                // Verifica se $vat['%'] è numerico prima di formattarlo
+                // dd($vats);
                 $labelImponibile = (is_numeric($vat['%']) && $vat['%'])
                     ? 'I.V.A. ' . number_format($vat['%'], 2, ',', '.') . '%'
                     : ($vat['%'] ? 'I.V.A. ' . $vat['%'] : '');
                 $labelIVA = (is_numeric($vat['%']) && $vat['%'])
                     ? 'I.V.A. ' . number_format($vat['%'], 2, ',', '.') . '%'
                     : ($vat['%'] ? 'I.V.A. ' . $vat['%'] : '');
+                $vatAmount = (is_numeric($vat['%']) && $vat['%'])
+                    ? $vat['taxable'] * ($vat['%'] / 100)
+                    : $vat['vat'];
             @endphp
             <tr>
                 <td style="width: 5%; {{ $loop->first ? 'padding-top: 5mm;' : '' }}"></td>
@@ -192,7 +197,7 @@
                 <td style="width: 5%"></td>
                 <td style="width: 60%">{{ $labelIVA }}</td>
                 <td style="width: 15%">{{ $invoice->currency ?? 'Euro' }}</td>
-                <td style="width: 15%" class="right">{{ number_format($vat['vat'], 2, ',', '.') }}</td>
+                <td style="width: 15%" class="right">{{ number_format($vatAmount, 2, ',', '.') }}</td>
                 <td style="width: 5%"></td>
             </tr>
         @endforeach
@@ -283,8 +288,16 @@
             <td colspan="2" style="width: 30%;" class="dashed_bottom">&nbsp;</td>
             <td style="width: 5%"></td>
         </tr>
+        @php
+        // dd($invoice->company->stampDuty->virtual_stamp && $stamp);
+            use App\Enums\ClientType;
+            $split = $invoice->client->type == ClientType::PUBLIC;
+        @endphp
         <tr>
-            <td colspan="5" class="">{{ ($invoice->company->stampDuty->virtual_stamp && $stamp) ? 'Imposta di bollo assolta in modo virtuale' : ''}}</td>
+            <td colspan="5" class="note">{{ $split ? 'Iva da versare a cura del concessionario o committente ai sensi dell\'art. 17 - ter del D.P.N.R. Nr 633/1972' : ''}}</td>
+        </tr>
+        <tr>
+            <td colspan="5" class="note">{{ ($invoice->company->stampDuty->virtual_stamp && $stamp) ? 'Imposta di bollo assolta in modo virtuale' : ''}}</td>
         </tr>
         <tr>
             <td style="padding-top: 2mm; padding-bottom: 2mm;" colspan="5" class="dashed_bottom"></td>

@@ -591,12 +591,19 @@ class Invoice extends Model
         if (!$invoice->contract_id) return;
 
         $contract = $invoice->contract;
+
+        $cacheKey = "contract_expired_{$contract->id}";                                      // recupero lo stato precedente (uso cache per evitare notifiche duplicate)
+        $contractExpiredNotified = cache()->has($cacheKey);
+
         if (!$contract) return;
-        else if($contract->end_validity_date < today())
-                Notification::make()
-                    ->title('La voce è stata inserita in una fattura che fa riferimento ad un contratto scaduto')
-                    ->danger()
-                    ->send();
+        else if($contract->end_validity_date < today() && !$contractExpiredNotified) {
+            Notification::make()
+                ->title('La voce è stata inserita in una fattura che fa riferimento ad un contratto scaduto')
+                ->danger()
+                ->send();
+
+            cache()->put($cacheKey, true, now()->addSeconds(5));                            // memorizzo in cache per bloccare duplicazione dovuta a update concatenati
+        }
     }
 
     private static function checkBudgetExceeded($invoice)
@@ -611,10 +618,9 @@ class Invoice extends Model
         $limit = $contract->amount;
 
         $cacheKey = "budget_exceeded_{$contract->id}";                                      // recupero lo stato precedente (uso cache per evitare notifiche duplicate)
+        $budgetExceededNotified = cache()->has($cacheKey);
 
-        $wasAlreadyNotified = cache()->has($cacheKey);
-
-        if ($totalInvoiced > $limit && !$wasAlreadyNotified) {                              // supera il budget e non è stato ancora notificato
+        if ($totalInvoiced > $limit && !$budgetExceededNotified) {                          // supera il budget e non è stato ancora notificato
             Notification::make()
                 ->title('Budget contratto superato')
                 ->body("
