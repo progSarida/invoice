@@ -28,7 +28,8 @@ class Company extends Model
         'rea_number',
         'nominal_capital',
         'shareholders',
-        'liquidation'
+        'liquidation',
+        'logo_path'
     ];
 
     public function users()

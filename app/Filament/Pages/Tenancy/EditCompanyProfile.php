@@ -28,9 +28,11 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Pages\Tenancy\EditTenantProfile;
+use Illuminate\Http\UploadedFile;
 
 class EditCompanyProfile extends EditTenantProfile
 {
@@ -124,6 +126,21 @@ class EditCompanyProfile extends EditTenantProfile
                                 TextInput::make('fax')->label('Fax')
                                     ->maxLength(255)
                                     ->columnSpan(3),
+                                Placeholder::make('')
+                                    ->columnSpan(8),
+                                FileUpload::make('logo_path')
+                                    ->label('Logo')
+                                    ->live()
+                                    ->disk('public')
+                                    ->directory('logos')
+                                    ->visibility('public')
+                                    ->acceptedFileTypes(['image/*'])
+                                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get) {
+                                        $vatTax = $get('vat_number') ? $get('vat_number') : $get('tx_number');
+                                        $extension = $file->getClientOriginalExtension();
+                                        return sprintf('logo_%s.%s', $vatTax, $extension);
+                                    })
+                                    ->columnSpan(4),
                             ])
                             ->columns(12),
                         Tabs\Tab::make('Albo professionale')

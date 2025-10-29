@@ -8,7 +8,7 @@
         body { font-family: Helvetica, Arial, sans-serif; font-size: 3.25mm; }
         table { width: 100%; border-collapse: collapse; }
 
-        td { border: 0.2px solid #000; }
+        /* td { border: 0.2px solid #000; } */
 
         .border { border: 0.2px solid #000; }
         .border_left   { border-left:   0.2px solid #000; }
@@ -38,15 +38,16 @@
     </style>
 </head>
 @php
-    $doc = strtoupper($invoice->docType->description) 
-             . ' N. ' 
-             . $invoice->getNewInvoiceNumber() 
-             . ' del ' 
+    $doc = strtoupper($invoice->docType->description)
+             . ' N. '
+             . $invoice->getNewInvoiceNumber()
+             . ' del '
              . $invoice->invoice_date->format('d-m-Y');
 
-    $logoPath = storage_path('app/public/img/logo.png');
+    $number = $invoice->company->vat_number ?? $invoice->company->tax_number;
+    $logoPath = storage_path('app/public/logos/logo_'. $number . '.png');
     $logoSrc = null;
-    
+
     if (file_exists($logoPath)) {
         $logoBase64 = base64_encode(file_get_contents($logoPath));
         $logoSrc = 'data:image/png;base64,' . $logoBase64;
@@ -67,8 +68,8 @@
         <tr>
             <td rowspan="5" style="width: 20%; vertical-align: top; text-align: center;">
                 @if($logoSrc)
-                    <img src="{{ $logoSrc }}" 
-                        style="max-width: 100%; height: auto;" 
+                    <img src="{{ $logoSrc }}"
+                        style="max-width: 100%; height: auto;"
                         alt="Logo">
                 @else
                     <div>Logo non disponibile</div>
@@ -117,7 +118,7 @@
         <tr>
             <td class="right" style="padding-right: 2mm; width: 55%;">Spett.le</td>
             <td style="width: 45%">{{ $cliente }}</td>
-        </tr>  
+        </tr>
         <tr>
             <td class="right" style="width: 55%;"></td>
             <td style="width: 45%">{{ $invoice->client->address }}</td>
@@ -125,7 +126,7 @@
         <tr>
             <td class="right" style="width: 55%;"></td>
             <td style="width: 45%">{{ $indirizzoCliente }}</td>
-        </tr>  
+        </tr>
         <tr>
             <td class="right" style="width: 55%;"></td>
             <td style="width: 45%">P.I. {{ $invoice->client->vat_code }}</td>
@@ -138,7 +139,7 @@
             <td style="padding-top: 5mm; padding-bottom: 5mm;" colspan="5"></td>
         </tr>
     </table>
-    <table> 
+    <table>
         {{-- Dati fattura --}}
         <tr>
             <td colspan="5" class='bold'>{{ $doc }}</td>
@@ -147,7 +148,7 @@
             <td colspan="5" class='description'>{{ $invoice->description }}</td>
         </tr>
         {{-- Voci fattura inserite dall'operatore --}}
-        @foreach($invoice->invoiceItems as $item)                                       
+        @foreach($invoice->invoiceItems as $item)
             @php
                 // dd($invoice->invoiceItems);
             @endphp
@@ -172,11 +173,11 @@
         @foreach($vats as $vat)
             @php
                 // Verifica se $vat['%'] è numerico prima di formattarlo
-                $labelImponibile = (is_numeric($vat['%']) && $vat['%']) 
-                    ? 'I.V.A. ' . number_format($vat['%'], 2, ',', '.') . '%' 
+                $labelImponibile = (is_numeric($vat['%']) && $vat['%'])
+                    ? 'I.V.A. ' . number_format($vat['%'], 2, ',', '.') . '%'
                     : ($vat['%'] ? 'I.V.A. ' . $vat['%'] : '');
-                $labelIVA = (is_numeric($vat['%']) && $vat['%']) 
-                    ? 'I.V.A. ' . number_format($vat['%'], 2, ',', '.') . '%' 
+                $labelIVA = (is_numeric($vat['%']) && $vat['%'])
+                    ? 'I.V.A. ' . number_format($vat['%'], 2, ',', '.') . '%'
                     : ($vat['%'] ? 'I.V.A. ' . $vat['%'] : '');
             @endphp
             <tr>
@@ -239,8 +240,14 @@
             <td style="width: 5%"></td>
         </tr>
         {{-- Imposta di bollo --}}
+        @php
+            $stamp = false;
+        @endphp
         @foreach($invoice->invoiceItems as $item)
             @if(!$item->invoice_element_id && (! (int) $item->auto))
+            @php
+                $stamp = true;
+            @endphp
                 <tr>
                     <td style="width: 5%; padding-top: 5mm;"></td>
                     <td style="width: 60%; padding-top: 5mm;">{{ $item->description }}</td>
@@ -250,16 +257,16 @@
                     </td>
                     <td style="width: 5%; padding-top: 5mm;"></td>
                 </tr>
+                <tr>
+                    <td style="width: 5%"></td>
+                    <td style="width: 60%;"></td>
+                    <td colspan="2" style="width: 30%;" class="dashed_bottom">
+                        &nbsp;
+                    </td>
+                </tr>
             @endif
         @endforeach
         {-- Totale --}
-        <tr>
-            <td style="width: 5%"></td>
-            <td style="width: 60%;"></td>
-            <td colspan="2" style="width: 30%;" class="dashed_bottom">
-                &nbsp;
-            </td>
-        </tr>
         <tr>
             <td style="width: 5%; padding-top: 5mm;"></td>
             <td style="width: 60%; padding-top: 5mm;">TOTALE</td>
@@ -276,7 +283,7 @@
             <td style="width: 5%"></td>
         </tr>
         <tr>
-            <td colspan="5" class="">{{ $invoice->company->stampDuty->virtual_stamp ? 'Imposta di bollo assolta in modo virtuale' : ''}}</td>
+            <td colspan="5" class="">{{ ($invoice->company->stampDuty->virtual_stamp && $stamp) ? 'Imposta di bollo assolta in modo virtuale' : ''}}</td>
         </tr>
         <tr>
             <td style="padding-top: 2mm; padding-bottom: 2mm;" colspan="5" class="dashed_bottom"></td>
