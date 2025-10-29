@@ -21,6 +21,7 @@
         .center { text-align: center; }
         .right { text-align: right; }
         .padding { padding-top: 1mm; padding-bottom: 1mm;}
+        .padding_company { padding-left: 5mm;}
 
         .description { padding-bottom: 10mm;}
 
@@ -75,14 +76,14 @@
                     <div>Logo non disponibile</div>
                 @endif
             </td>
-            <td colspan="4" class='bold center'>{{ $invoice->company->name }}</td>
+            <td colspan="4" class='bold left padding_company'>{{ $invoice->company->name }}</td>
         </tr>
         <tr>
-            <td colspan="4" class='center'>Sede Legale: {{ $sedeLegale }}</td>
+            <td colspan="4" class='left padding_company'>Sede Legale: {{ $sedeLegale }}</td>
         </tr>
-        <tr><td colspan="4" class='center'>{{ $contatti }}</td></tr>
-        <tr><td colspan="4" class='center'>{{ $cf }}</td></tr>
-        <tr><td colspan="4" class='center'>{{ $rea }}</td></tr>
+        <tr><td colspan="4" class='left padding_company'>{{ $contatti }}</td></tr>
+        <tr><td colspan="4" class='left padding_company'>{{ $cf }}</td></tr>
+        <tr><td colspan="4" class='left padding_company'>{{ $rea }}</td></tr>
         <tr>
             <td style="padding-top: 5mm; padding-bottom: 5mm;" colspan="5"></td>
         </tr>
