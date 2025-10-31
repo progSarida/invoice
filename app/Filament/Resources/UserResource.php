@@ -9,6 +9,7 @@ use App\Models\Company;
 use Filament\Forms;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -52,6 +53,11 @@ class UserResource extends Resource
                     ->label('Amministratore')
                     ->dehydrated(fn ($state) => filled($state))
                     ->helperText(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord ? '' : ''),
+
+                Select::make('roles')->label('Ruolo')
+                        ->relationship('roles', 'name')
+                        ->preload()
+                        ->searchable(),    
 
                 Forms\Components\Section::make('Aziende e Permessi')
                     ->collapsed()
