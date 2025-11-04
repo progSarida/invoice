@@ -2,12 +2,14 @@
 
 namespace App\Policies;
 
-use App\Models\Client;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use App\Models\Client;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ClientPolicy
 {
+    use HandlesAuthorization;
+
     /**
      * Determine whether the user can view any models.
      */
@@ -19,7 +21,7 @@ class ClientPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user): bool
+    public function view(User $user, Client $client): bool
     {
         return $user->can('view_client');
     }
@@ -35,7 +37,7 @@ class ClientPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user): bool
+    public function update(User $user, Client $client): bool
     {
         return $user->can('update_client');
     }
@@ -43,7 +45,7 @@ class ClientPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user): bool
+    public function delete(User $user, Client $client): bool
     {
         return $user->can('delete_client');
     }
@@ -59,9 +61,9 @@ class ClientPolicy
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user): bool
+    public function forceDelete(User $user, Client $client): bool
     {
-        return $user->can('{{ ForceDelete }}');
+        return $user->can('force_delete_client');
     }
 
     /**
@@ -69,15 +71,15 @@ class ClientPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('{{ ForceDeleteAny }}');
+        return $user->can('force_delete_any_client');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user): bool
+    public function restore(User $user, Client $client): bool
     {
-        return $user->can('{{ Restore }}');
+        return $user->can('restore_client');
     }
 
     /**
@@ -85,15 +87,15 @@ class ClientPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('{{ RestoreAny }}');
+        return $user->can('restore_any_client');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user): bool
+    public function replicate(User $user, Client $client): bool
     {
-        return $user->can('{{ Replicate }}');
+        return $user->can('replicate_client');
     }
 
     /**
@@ -101,6 +103,6 @@ class ClientPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('{{ Reorder }}');
+        return $user->can('reorder_client');
     }
 }

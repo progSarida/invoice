@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Supplier;
+use App\Models\City;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class SupplierPolicy
+class CityPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class SupplierPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_supplier');
+        return $user->can('view_any_city');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Supplier $supplier): bool
+    public function view(User $user, City $city): bool
     {
-        return $user->can('view_supplier');
+        return $user->can('view_city');
     }
 
     /**
@@ -31,23 +31,23 @@ class SupplierPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_supplier');
+        return $user->can('create_city');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Supplier $supplier): bool
+    public function update(User $user, City $city): bool
     {
-        return $user->can('update_supplier');
+        return $user->can('update_city');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Supplier $supplier): bool
+    public function delete(User $user, City $city): bool
     {
-        return $user->can('delete_supplier');
+        return $user->can('delete_city');
     }
 
     /**
@@ -55,15 +55,15 @@ class SupplierPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_supplier');
+        return $user->can('delete_any_city');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Supplier $supplier): bool
+    public function forceDelete(User $user, City $city): bool
     {
-        return $user->can('force_delete_supplier');
+        return $user->can('force_delete_city');
     }
 
     /**
@@ -71,15 +71,15 @@ class SupplierPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_supplier');
+        return $user->can('force_delete_any_city');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Supplier $supplier): bool
+    public function restore(User $user, City $city): bool
     {
-        return $user->can('restore_supplier');
+        return $user->can('restore_city');
     }
 
     /**
@@ -87,15 +87,15 @@ class SupplierPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_supplier');
+        return $user->can('restore_any_city');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Supplier $supplier): bool
+    public function replicate(User $user, City $city): bool
     {
-        return $user->can('replicate_supplier');
+        return $user->can('replicate_city');
     }
 
     /**
@@ -103,6 +103,6 @@ class SupplierPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_supplier');
+        return $user->can('reorder_city');
     }
 }
