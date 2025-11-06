@@ -70,7 +70,8 @@ class CompanyPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                 ->label('Passa ad amministratore')
-                ->visible(fn (): bool => Auth::user()->is_admin)
+                // ->visible(fn (): bool => Auth::user()->is_admin)
+                ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                 ->url('/admin')
                 ->icon('clarity-administrator-line')
             ])

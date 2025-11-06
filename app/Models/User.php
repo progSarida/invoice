@@ -55,7 +55,8 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
-        if ($panel->getId() === 'admin') { return $this->is_admin; }                        // solo chi è admin può accedere al relativo panel
+        // if ($panel->getId() === 'admin') { return $this->is_admin; }                        // solo chi è admin può accedere al relativo panel
+        if ($panel->getId() === 'admin') { return $this->hasRole('super_admin'); }          // solo chi è admin può accedere al relativo panel
         if ($panel->getId() === 'company') { return true; }                                 // tutti gli utenti possono accedere al panel 'company'
         return false;
     }

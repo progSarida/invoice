@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Company;
 use Filament\Forms;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
@@ -49,15 +50,16 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('password_confirmation')
                     ->password()
                     ->label('Conferma password'),
-                Forms\Components\Toggle::make('is_admin')
-                    ->label('Amministratore')
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->helperText(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord ? '' : ''),
+                // Forms\Components\Toggle::make('is_admin')
+                //     ->label('Amministratore')
+                //     ->dehydrated(fn ($state) => filled($state))
+                //     ->helperText(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord ? '' : ''),
 
+                Placeholder::make('')->label(''),
                 Select::make('roles')->label('Ruolo')
                         ->relationship('roles', 'name')
                         ->preload()
-                        ->searchable(),    
+                        ->searchable(),
 
                 Forms\Components\Section::make('Aziende e Permessi')
                     ->collapsed()
@@ -125,12 +127,16 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')->label('Email')
                     ->searchable(),
-                Tables\Columns\ToggleColumn::make('is_admin')
-                    ->label('Admin')
-                    ->onIcon('heroicon-s-shield-check')
-                    ->offIcon('heroicon-s-shield-exclamation')
-                    ->onColor('success')
-                    ->offColor('danger'),
+                // Tables\Columns\ToggleColumn::make('is_admin')
+                //     ->label('Admin')
+                //     ->onIcon('heroicon-s-shield-check')
+                //     ->offIcon('heroicon-s-shield-exclamation')
+                //     ->onColor('success')
+                //     ->offColor('danger'),
+            Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Ruolo')
+                    ->badge()
+                    ->separator(', '),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

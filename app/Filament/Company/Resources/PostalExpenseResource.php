@@ -128,7 +128,7 @@ class PostalExpenseResource extends Resource
 
                                 // Otteniamo i valori grezzi di tax_types (es. ["park"])
                                 $taxTypes = $contract->getAttribute('tax_types');
-                                
+
                                 // Filtra le opzioni di TaxType in base a tax_types
                                 return collect(TaxType::cases())
                                     ->filter(fn ($case) => in_array($case->getLabel(), $taxTypes))
@@ -840,17 +840,20 @@ class PostalExpenseResource extends Resource
                                     ->label('Utente inserimento dati')
                                     ->relationship('shipmentInsertUser', 'name')
                                     ->searchable()
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->preload()
                                     ->optionsLimit(5)
                                     ->columnSpan(4),
                                 Forms\Components\DatePicker::make('shipment_insert_date_from')
                                     ->label('Data inserimento dati')
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('shipment_insert_date_to')
                                     ->label('Data inserimento dati')
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                             ]),
                     ])
@@ -934,15 +937,18 @@ class PostalExpenseResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->optionsLimit(5)
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(4),
                                 Forms\Components\DatePicker::make('notify_insert_date')
                                     ->label('Data inserimento notifica')
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('notify_insert_date')
                                     ->label('Data inserimento notifica')
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                             ]),
                     ])
@@ -1030,15 +1036,18 @@ class PostalExpenseResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->optionsLimit(5)
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('expense_insert_date_from')
                                     ->label('Data inserimento spese da')
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('expense_insert_date_to')
                                     ->label('Data inserimento spese a')
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                             ]),
                     ])
@@ -1087,15 +1096,18 @@ class PostalExpenseResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->optionsLimit(5)
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(4),
                                 Forms\Components\DatePicker::make('payment_insert_date_from')
                                     ->label('Data inserimento pagamento da')
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('payment_insert_date_to')
                                     ->label('Data inserimento pagamento a')
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                             ]),
                     ])
@@ -1151,15 +1163,18 @@ class PostalExpenseResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->optionsLimit(5)
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('reinvoice_insert_date_from')
                                     ->label('Data inserimento rifatturazione da')
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('reinvoice_insert_date_to')
                                     ->label('Data inserimento rifatturazione a')
-                                    ->visible(fn (): bool => Auth::user()->is_admin)
+                                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
                                     ->columnSpan(3),
                             ]),
                     ])
