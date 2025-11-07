@@ -32,6 +32,7 @@ use Filament\Forms\Components\Placeholder;
 use App\Filament\Resources\CompanyResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CompanyResource\RelationManagers;
+use Illuminate\Support\Facades\Auth;
 
 class CompanyResource extends Resource
 {

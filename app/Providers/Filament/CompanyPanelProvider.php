@@ -3,6 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Tenancy\EditCompanyProfile;
+use App\Http\Middleware\SetSpatieTenant;
+use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Models\Company;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
@@ -62,6 +65,12 @@ class CompanyPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            // ->plugins([
+            //     FilamentShieldPlugin::make(),
+            // ])
+            ->tenantMiddleware([
+                SyncShieldTenant::class,
+            ])
             ->databaseNotifications()
             ->databaseNotificationsPolling(5)
             ->authMiddleware([
@@ -71,7 +80,7 @@ class CompanyPanelProvider extends PanelProvider
                 MenuItem::make()
                 ->label('Passa ad amministratore')
                 // ->visible(fn (): bool => Auth::user()->is_admin)
-                ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                ->visible(fn (): bool => Auth::user()->hasAdminAccess())
                 ->url('/admin')
                 ->icon('clarity-administrator-line')
             ])

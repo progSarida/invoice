@@ -4,22 +4,12 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Supplier;
+use Filament\Facades\Filament;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class SupplierPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Determine whether the user is 'super_admin' and if he is bypass controls.
-     */
-    public function before(User $user, string $ability): bool|null
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-        return null;
-    }
 
     /**
      * Determine whether the user can view any models.

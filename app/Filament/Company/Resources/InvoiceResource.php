@@ -49,7 +49,7 @@ class InvoiceResource extends Resource
 
     public static ?string $pluralModelLabel = 'Fatture archiviate';
 
-    public static ?string $modelLabel = 'Fattura';
+    public static ?string $modelLabel = 'Fattura archiviata';
 
     protected static ?string $navigationIcon = 'phosphor-invoice-duotone';
 

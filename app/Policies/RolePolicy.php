@@ -10,16 +10,13 @@ class RolePolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user is 'super_admin' and if he is bypass controls.
-     */
-    public function before(User $user, string $ability): bool|null
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-        return null;
-    }
+    // public function before(User $user, string $ability): bool
+    // {
+    //     if($user->isSuperAdmin())
+    //         return true;
+    //     else
+    //         return false;
+    // }
 
     /**
      * Determine whether the user can view any models.

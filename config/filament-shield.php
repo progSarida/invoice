@@ -14,7 +14,7 @@ return [
         'cluster' => null,
     ],
 
-    'tenant_model' => null,
+    'tenant_model' => 'App\Models\Company',
 
     'auth_provider_model' => [
         'fqcn' => 'App\\Models\\User',
@@ -28,7 +28,7 @@ return [
     ],
 
     'panel_user' => [
-        'enabled' => true,
+        'enabled' => false,
         'name' => 'panel_user',
     ],
 
