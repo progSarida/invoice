@@ -77,17 +77,17 @@ class AuthServiceProvider extends ServiceProvider
             $panelId = Filament::getId();
             if ($panelId==="admin" && $user->hasPanelAccessRole()) {
                 $tenantRoles = $user->hasPanelAccessRole();
-                if($this->checkTenantPermission($user, $permission, $arguments, $tenantRoles))
+                if($this->checkTenantPermission($user, $permission, $tenantRoles, $arguments))
                     return true;
             }
             else{
                 $tenantRoles = $user->getTenantRoles();
-                if($this->checkTenantPermission($user, $permission, $arguments, $tenantRoles))
+                if($this->checkTenantPermission($user, $permission, $tenantRoles, $arguments))
                     return true;
                 else
                 {
                     $tenantRoles = $user->hasFullCompaniesAccessRole();
-                    if($this->checkTenantPermission($user, $permission, $arguments, $tenantRoles))
+                    if($this->checkTenantPermission($user, $permission, $tenantRoles, $arguments))
                         return true;
                 }
             }
@@ -96,7 +96,7 @@ class AuthServiceProvider extends ServiceProvider
         });
     }
 
-    public function checkTenantPermission(User $user, string $permission, array $arguments = [], $tenantRoles){
+    public function checkTenantPermission(User $user, string $permission, $tenantRoles, array $arguments = []){
         //BISOGNA SISTEMARE LA FORMATTAZIONE DEL PERMESSO
             $actionPrefix = $this->mapActionToPrefix($permission);
             $resourceName = $this->getResourceNameFromArguments($arguments);
