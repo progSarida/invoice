@@ -274,7 +274,7 @@ class PassiveInvoiceResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
+                        ->visible(fn (): bool => Auth::user()->isManager()),
                 ]),
             ]);
     }

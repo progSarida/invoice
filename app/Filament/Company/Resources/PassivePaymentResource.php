@@ -42,7 +42,7 @@ class PassivePaymentResource extends Resource
     {
         return $form
             ->columns(12)
-            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('passive_invoice_id')
                     ->label('Fattura')
@@ -63,7 +63,7 @@ class PassivePaymentResource extends Resource
                     ->live()
                     ->preload()
                     // ->optionsLimit(20)
-                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
                     ->columnSpan(5),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
@@ -199,7 +199,7 @@ class PassivePaymentResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
+                        ->visible(fn (): bool => Auth::user()->isManager()),
                 ]),
             ]);
     }

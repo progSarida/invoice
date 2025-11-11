@@ -21,7 +21,7 @@ class EditClient extends EditRecord
         return [
             Actions\DeleteAction::make()
                 ->keyBindings(['f4'])
-                ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
+                ->visible(fn (): bool => Auth::user()->isManager()),
         ];
     }
 

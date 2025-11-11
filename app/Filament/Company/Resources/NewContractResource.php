@@ -47,7 +47,7 @@ class NewContractResource extends Resource
     {
         return $form
             ->columns(12)
-            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('client_id')->label('Cliente')
                     ->hintAction(
@@ -68,7 +68,7 @@ class NewContractResource extends Resource
                     ->live()
                     ->preload()
                     ->optionsLimit(5)
-                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
                     ->columnSpan(5),
                 Forms\Components\Select::make('tax_types')
                     ->label('Entrate')
@@ -282,12 +282,12 @@ class NewContractResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
+                    ->visible(fn (): bool => Auth::user()->isManager()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
+                        ->visible(fn (): bool => Auth::user()->isManager()),
                 ]),
             ])
             ->defaultSort('start_validity_date', 'asc');

@@ -44,7 +44,7 @@ class SupplierResource extends Resource
     {
         return $form
             ->columns(6)
-            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 TextInput::make('denomination')
                     ->label('Denominazione')
@@ -215,7 +215,7 @@ class SupplierResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
+                        ->visible(fn (): bool => Auth::user()->isManager()),
                 ]),
             ]);
     }

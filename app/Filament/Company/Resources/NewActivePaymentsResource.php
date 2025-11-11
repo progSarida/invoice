@@ -55,7 +55,7 @@ class NewActivePaymentsResource extends Resource
     {
         return $form
             ->columns(12)
-            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('invoice_id')
                     ->label('Fattura')
@@ -445,7 +445,7 @@ class NewActivePaymentsResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
+                        ->visible(fn (): bool => Auth::user()->isManager()),
                 ]),
             ]);
     }

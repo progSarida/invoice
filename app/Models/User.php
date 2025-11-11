@@ -93,10 +93,6 @@ class User extends Authenticatable implements FilamentUser, HasTenants
                     ->exists();
     }
 
-    public function isSuperAdmin(){
-        return $this->hasRole('super_admin');
-    }
-
     /**
      * Ottiene l'OGGETTO Role di Spatie specifico dell'utente per il tenant corrente,
      * leggendo la colonna 'company_id' nella tabella model_has_roles.
@@ -129,14 +125,13 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 
     public function canAccessPanel(Panel $panel): bool
     {
-        $panelId = $panel->getId(); 
+        $panelId = $panel->getId();
         
         if($this->isSuperAdmin())
             return true;
 
-        if ($panelId === 'admin') { 
+        if ($panelId === 'admin')
             return $this->hasAdminAccess();
-        }
         
         // Per il pannello multi-tenant, deve avere un'associazione con un tenant valido.
         return $this->hasCompanyAccess() || $this->companies()->exists();
@@ -168,9 +163,25 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     }
 
     // Metodo helper per verificare se l'utente è manager di una specifica company
-    public function isManagerOf(Company $company): bool
+    public function isManager(): bool
     {
-        return true; //$this->companies()->where('company_id', $company->id)->wherePivot('is_manager', true)->exists();
+        return $this->hasRole('manager', Filament::getTenant()->id);
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->hasRole('super_admin', GlobalAccessType::AllPanels->value);
+    }
+
+    public function hasRole($roleName, array|int $company_ids){
+        if(is_array($company_ids))
+            return $this->roles()->where('name', $roleName)
+                ->wherePivotIn( 'company_id', $company_ids )
+                ->exists();
+        else
+            return $this->roles()->where('name', $roleName)
+                ->wherePivot( 'company_id', $company_ids )
+                ->exists();
     }
 
     public function roles(): BelongsToMany

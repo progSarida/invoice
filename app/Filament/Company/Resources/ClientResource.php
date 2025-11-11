@@ -56,7 +56,7 @@ class ClientResource extends Resource
 
         return $form
             ->columns(12)
-            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('type')->label('Tipo')
                     ->options(ClientType::class)
@@ -67,7 +67,7 @@ class ClientResource extends Resource
                     ->afterStateUpdated(function (callable $set, $state) {
                         $set('subtype', null);
                     })
-                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant()); })
+                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
                     ->columnspan(3),
                 Forms\Components\Select::make('subtype')->label('Sottotipo')
                     ->options(function (callable $get) {
@@ -279,7 +279,7 @@ class ClientResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
+                        ->visible(fn (): bool => Auth::user()->isManager()),
                 ]),
             ]);
     }

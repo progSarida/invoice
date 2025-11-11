@@ -44,13 +44,11 @@ class EditCompanyProfile extends EditTenantProfile
     public function form(Form $form): Form
     {
         $company = filament()->getTenant();
-        $user = Auth::user();
-        $isManager = $user && $company ? $user->isManagerOf($company) : false;
         $italyId = State::where('name', 'Italy')->first()->id;
         return $form
             ->columns(12)
             ->extraAttributes(['class' => 'w-full'])
-            ->disabled(!$isManager)
+            ->disabled(!Auth::user()->isManager())
             ->schema([
                 Placeholder::make('')
                     ->content('')

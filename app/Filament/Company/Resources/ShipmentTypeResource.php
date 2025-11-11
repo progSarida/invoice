@@ -35,19 +35,19 @@ class ShipmentTypeResource extends Resource
      * Controlla se mostrare questa risorsa nella navigazione
      * Visibile solo per admin globali e manager del tenant corrente
      */
-    public static function shouldRegisterNavigation(): bool
-    {
-        $user = Auth::user();
-        $tenant = Filament::getTenant();
+    // public static function shouldRegisterNavigation(): bool
+    // {
+    //     $user = Auth::user();
+    //     $tenant = Filament::getTenant();
 
-        if (!$user) { return false;   }                                         // nessun utente autenticato
+    //     if (!$user) { return false;   }                                         // nessun utente autenticato
 
-        // if ($user->is_admin) { return true; }                                // admin vedono sempre
+    //     // if ($user->is_admin) { return true; }                                // admin vedono sempre
 
-        if ($tenant && $user->isManagerOf($tenant)) { return true; }            // manager del tenant corrente possono vedere
+    //     if ($tenant && $user->isManager()) { return true; }            // manager del tenant corrente possono vedere
 
-        return false;                                                           // utenti normali non vedono
-    }
+    //     return false;                                                           // utenti normali non vedono
+    // }
 
     public static function form(Form $form): Form
     {

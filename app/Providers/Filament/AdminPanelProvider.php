@@ -60,21 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            // ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->resources([
-                StateResource::class,
-                RegionResource::class,
-                ProvinceResource::class,
-                CityResource::class,
-                UserResource::class,
-                CompanyResource::class,
-                // SectionalResource::class,
-                AccrualTypeResource::class,
-                ManageTypeResource::class,
-                DocGroupResource::class,
-                DocTypeResource::class,
-                LimitMotivationTypeResource::class,
-            ])
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,

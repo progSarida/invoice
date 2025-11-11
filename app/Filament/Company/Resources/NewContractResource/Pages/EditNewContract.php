@@ -114,7 +114,7 @@ class EditNewContract extends EditRecord
                     }, $fileName);
                 }),
             Actions\DeleteAction::make()
-                ->visible(fn (): bool => Auth::user()->isManagerOf(\Filament\Facades\Filament::getTenant())),
+                ->visible(fn (): bool => Auth::user()->isManager()),
         ];
     }
 
