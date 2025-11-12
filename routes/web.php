@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/auth/callback', [SsoController::class, 'callback'])->name('sso.callback');
-Route::get('/sso-login', [SsoController::class, 'redirect'])->name('sso.login');
+Route::get('/sso-login', [SsoController::class, 'login'])->name('sso.login');
 
 Route::get('/admin/login', fn() => redirect()->route('sso.login'))->name('filament.admin.auth.login');
 

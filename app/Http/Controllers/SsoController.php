@@ -15,6 +15,21 @@ use Illuminate\Support\Facades\Session; // Aggiunto per fix sessione
 
 class SsoController extends Controller
 {
+    public function login(){
+        Session::put('state', $state = Str::random(40));
+        Session::save();
+        $query = http_build_query([
+            'client_id'     => env('SSO_CLIENT_ID'),
+            'redirect_uri'  => env('SSO_REDIRECT_URI'),
+            'response_type' => 'code',
+            'scope'         => 'access-traffic',
+            'state'         => $state,
+        ]);
+
+        return redirect(env('SSO_AUTH_URL') . '?' . $query);
+    }
+
+
     /**
      * Avvia il flusso SSO: genera lo stato CSRF e reindirizza a Passport.
      */
@@ -126,7 +141,7 @@ class SsoController extends Controller
         $ssoScope = env('SSO_SCOPE');
         $ssoRoleName = $ssoUserData['application_roles'][$ssoScope] ?? null; 
         
-        if ($ssoRoleName && class_exists('Spatie\Permission\Models\Role')) {
+        if ($ssoRoleName=="super_admin" && class_exists('Spatie\Permission\Models\Role')) {
             $user->syncRoles([]); 
             
             // Crea il ruolo se non esiste prima di assegnarlo
