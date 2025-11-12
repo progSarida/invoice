@@ -1,13 +1,14 @@
 <?php
 
-use Filament\Facades\Filament;
-use Filament\Pages\Dashboard;
+use App\Http\Controllers\SsoController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->to('/admin');
-});
 
-Route::get('/login', function () {
-    return redirect()->to('/admin/login');
-})->name('login');
+Route::get('/auth/callback', [SsoController::class, 'callback'])->name('sso.callback');
+Route::get('/sso-login', [SsoController::class, 'redirect'])->name('sso.login');
+
+Route::get('/admin/login', fn() => redirect()->route('sso.login'))->name('filament.admin.auth.login');
+
+Route::get('/', fn() => redirect()->route('sso.login'));
+Route::get('/login', fn() => redirect()->route('sso.login'));
+Route::get('/admin/login', fn() => redirect()->route('sso.login'));
