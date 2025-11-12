@@ -22,7 +22,7 @@ class SsoController extends Controller
             'client_id'     => env('SSO_CLIENT_ID'),
             'redirect_uri'  => env('SSO_REDIRECT_URI'),
             'response_type' => 'code',
-            'scope'         => 'access-traffic',
+            'scope'         => env('SSO_SCOPE'),
             'state'         => $state,
         ]);
 
@@ -53,7 +53,7 @@ class SsoController extends Controller
             'client_id'     => env('SSO_CLIENT_ID'),
             'redirect_uri'  => $redirectUri,
             'response_type' => 'code',
-            'scope'         => env('SSO_SCOPE'), 
+            'scope'         => env('SSO_SCOPE'),
             'state'         => $state, 
         ]);
 
