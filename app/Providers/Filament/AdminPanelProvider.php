@@ -10,26 +10,13 @@ use Filament\PanelProvider;
 use Filament\Facades\Filament;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
-use Filament\View\PanelsRenderHook;
-use App\Filament\Resources\CityResource;
-use App\Filament\Resources\UserResource;
 use Filament\Navigation\NavigationGroup;
-use App\Filament\Resources\RegionResource;
 use Filament\Http\Middleware\Authenticate;
-use App\Filament\Resources\CompanyResource;
-use App\Filament\Resources\DocTypeResource;
-use App\Filament\Resources\DocGroupResource;
-use App\Filament\Resources\ProvinceResource;
-use App\Filament\Resources\SectionalResource;
-use App\Filament\Resources\ManageTypeResource;
-use App\Filament\Resources\AccrualTypeResource;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use App\Filament\Resources\LimitMotivationTypeResource;
-use App\Filament\Resources\StateResource;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -88,10 +75,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 MenuItem::make()
-                    ->label('Passa ad operatore')
+                    ->label('Passa alle aziende')
                     ->url('/company')
                     ->icon('gmdi-business-center-s'),
-                // ...
             ])
             ->NavigationGroups([
                 NavigationGroup::make()

@@ -11,53 +11,55 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role as SpatieRole; 
 use Illuminate\Support\Facades\URL; 
-use Illuminate\Support\Facades\Session; // Aggiunto per fix sessione
+use Illuminate\Support\Facades\Session;
 
 class SsoController extends Controller
 {
-    public function login(){
-        Session::put('state', $state = Str::random(40));
-        Session::save();
-        $query = http_build_query([
-            'client_id'     => env('SSO_CLIENT_ID'),
-            'redirect_uri'  => env('SSO_REDIRECT_URI'),
-            'response_type' => 'code',
-            'scope'         => env('SSO_SCOPE'),
-            'state'         => $state,
-        ]);
-
-        return redirect(env('SSO_AUTH_URL') . '?' . $query);
-    }
-
-
     /**
      * Avvia il flusso SSO: genera lo stato CSRF e reindirizza a Passport.
      */
-    public function redirect(Request $request)
+    public function redirect()
     {
+        // === LOG PER CONFERMARE L'ESECUZIONE DEL METODO ===
+        Log::info("SSO Redirect: Esecuzione del metodo 'redirect' iniziata.");
+        // =======================================================
+        
+        // 1. Recupera la configurazione SSO dall'array config/services.php
+        $config = config('services.sso');
+
+        // Verifica configurazione essenziale
+        if (empty($config['auth_url']) || empty($config['client_id'])) {
+             Log::error("SSO Configuration Error: Missing AUTH_URL or CLIENT_ID in config/services.php");
+             // DEBUG ESTREMO: Se la configurazione non c'è, restituisci un errore visibile.
+             return response("ERRORE FATALE DI CONFIGURAZIONE SSO. Controllare 'config/services.php' e '.env'.", 500);
+        }
+        
         $state = Str::random(40);
         
         // Usa l'helper session() per la massima affidabilità
         session()->put('state', $state); 
         
-        // 💡 TENTATIVO DI FIX: Forza il salvataggio della sessione prima del reindirizzamento
-        // Questo può aiutare se l'ambiente di hosting ha problemi con l'output buffer.
+        // Forza il salvataggio della sessione prima del reindirizzamento (FIX CHIAVE)
         Session::save();
         
         Log::debug("SSO Redirect: State saved in session. Saved State: " . session('state'));
 
-        // Usa l'URI di reindirizzamento configurato nell'App Cliente
-        $redirectUri = env('SSO_REDIRECT_URI') ?? URL::to('/auth/callback'); 
+        // Usa l'URI di reindirizzamento configurato nell'App Cliente (usa fallback locale se non definito)
+        $redirectUri = $config['redirect_uri'] ?? URL::to('/auth/callback'); 
 
         $query = http_build_query([
-            'client_id'     => env('SSO_CLIENT_ID'),
+            'client_id'     => $config['client_id'],
             'redirect_uri'  => $redirectUri,
             'response_type' => 'code',
-            'scope'         => env('SSO_SCOPE'),
+            'scope'         => $config['scope'],
             'state'         => $state, 
         ]);
 
-        return redirect(env('SSO_AUTH_URL') . '?' . $query);
+        $finalUrl = $config['auth_url'] . '?' . $query;
+        Log::info("SSO Redirect: Tentativo di reindirizzamento a: " . $finalUrl);
+        
+        // QUESTA RIGA ESEGUE IL REINDIRIZZAMENTO EFFETTIVO.
+        return redirect($finalUrl);
     }
     
     /**
@@ -65,8 +67,11 @@ class SsoController extends Controller
      */
     public function callback(Request $request)
     {
-        // 1. Verifica Stato di Sicurezza (CSRF Protection) e Errori
-        $sessionState = session()->pull('state'); // Usa l'helper e pull
+        // 1. Recupera la configurazione SSO dall'array config/services.php
+        $config = config('services.sso');
+
+        // 2. Verifica Stato di Sicurezza (CSRF Protection) e Errori
+        $sessionState = session()->pull('state');
         $isError = $request->has('error');
 
         // Logging dello stato per debug
@@ -79,28 +84,27 @@ class SsoController extends Controller
 
 
         if (!$sessionState || $sessionState !== $request->state || $isError) {
-            // L'errore 'invalid_scope' è stato inviato dal Portale SSO nel reindirizzamento!
             $errorMessage = $request->error ?? 'Stato Sessione mancante'; 
             
-            // Se c'è un errore dallo SSO Server (come invalid_scope), loggiamo quello.
             if ($request->error) {
                  Log::error("SSO Security/Error Failure: SSO Server Error Received: " . $request->error);
             }
             
+            // Reindirizza al login di Filament
             return redirect('/admin/login')->withErrors(['sso' => 'Accesso SSO fallito o negato. Errore: ' . $errorMessage]);
         }
         
         // --- SE LA VERIFICA PASSA, PROSEGUIAMO CON LO SCAMBIO TOKEN ---
 
-        // 2. Scambio Codice per Token
-        $redirectUri = env('SSO_REDIRECT_URI') ?? URL::to('/auth/callback');
+        // 3. Scambio Codice per Token
+        $redirectUri = $config['redirect_uri'] ?? URL::to('/auth/callback');
 
         $response = Http::asForm()
                 ->withOptions(['verify' => false]) 
-                ->post(env('SSO_TOKEN_URL'), [
+                ->post($config['token_url'], [
                     'grant_type' => 'authorization_code',
-                    'client_id' => env('SSO_CLIENT_ID'),
-                    'client_secret' => env('SSO_CLIENT_SECRET'),
+                    'client_id' => $config['client_id'],
+                    'client_secret' => $config['client_secret'],
                     'redirect_uri' => $redirectUri,
                     'code' => $request->code,
                 ]);
@@ -108,7 +112,6 @@ class SsoController extends Controller
         $data = $response->json();
 
         if ($response->failed() || !isset($data['access_token'])) {
-             // LOG DETTAGLIATO: Stampa lo stato e il corpo della risposta (errore Passport)
              Log::error('SSO Token Exchange Failed: Status: ' . $response->status());
              Log::error('SSO Token Exchange Failed: Body: ' . $response->body()); 
 
@@ -116,10 +119,10 @@ class SsoController extends Controller
         }
         $accessToken = $data['access_token'];
 
-        // 3. Recupera i Dati Utente dal Server IdP
+        // 4. Recupera i Dati Utente dal Server IdP
         $userResponse = Http::withToken($accessToken)
                 ->withOptions(['verify' => false]) 
-                ->get(env('SSO_USERINFO_URL'));
+                ->get($config['userinfo_url']);
         
         $ssoUserData = $userResponse->json();
 
@@ -128,7 +131,7 @@ class SsoController extends Controller
              return redirect('/admin/login')->withErrors(['sso' => 'Impossibile recuperare i dati utente validi.']);
         }
 
-        // 4. Provisioning/Shadow User Locale
+        // 5. Provisioning/Shadow User Locale
         $user = User::firstOrCreate(
             ['email' => $ssoUserData['email']],
             [
@@ -137,10 +140,11 @@ class SsoController extends Controller
             ]
         );
 
-        // 5. Acquisizione e Sincronizzazione del Ruolo tramite Spatie
-        $ssoScope = env('SSO_SCOPE');
+        // 6. Acquisizione e Sincronizzazione del Ruolo tramite Spatie
+        $ssoScope = $config['scope'];
         $ssoRoleName = $ssoUserData['application_roles'][$ssoScope] ?? null; 
         
+        // Verifica l'esistenza della classe SpatieRole prima di tentare l'assegnazione
         if ($ssoRoleName=="super_admin" && class_exists('Spatie\Permission\Models\Role')) {
             $user->syncRoles([]); 
             
@@ -153,7 +157,7 @@ class SsoController extends Controller
             Log::info("SSO Login: User {$user->email} assigned role: {$role->name} (Created if non-existent).");
         }
 
-        // 6. Logga e Reindirizza a Filament
+        // 7. Logga e Reindirizza a Filament
         Auth::login($user, true); 
         return redirect('/admin'); 
     }
