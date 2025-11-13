@@ -194,7 +194,8 @@ class PassivePaymentResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -217,6 +218,7 @@ class PassivePaymentResource extends Resource
             'index' => Pages\ListPassivePayments::route('/'),
             'create' => Pages\CreatePassivePayment::route('/create'),
             'edit' => Pages\EditPassivePayment::route('/{record}/edit'),
+            'view' => Pages\ViewPassivePayment::route('/{record}'),
         ];
     }
 }

@@ -62,7 +62,8 @@ class InsuranceResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -84,6 +85,7 @@ class InsuranceResource extends Resource
             'index' => Pages\ListInsurances::route('/'),
             'create' => Pages\CreateInsurance::route('/create'),
             'edit' => Pages\EditInsurance::route('/{record}/edit'),
+            'view' => Pages\ViewInsurance::route('/{record}'),
         ];
     }
 }

@@ -440,7 +440,8 @@ class NewActivePaymentsResource extends Resource
                     }),
             ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(8)
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -463,6 +464,7 @@ class NewActivePaymentsResource extends Resource
             'index' => Pages\ListNewActivePayments::route('/'),
             'create' => Pages\CreateNewActivePayments::route('/create'),
             'edit' => Pages\EditNewActivePayments::route('/{record}/edit'),
+            'view' => Pages\ViewNewActivePayments::route('/{record}'),
         ];
     }
 }

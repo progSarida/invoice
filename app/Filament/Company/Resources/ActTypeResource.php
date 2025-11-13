@@ -89,7 +89,8 @@ class ActTypeResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -112,6 +113,7 @@ class ActTypeResource extends Resource
             'index' => Pages\ListActTypes::route('/'),
             'create' => Pages\CreateActType::route('/create'),
             'edit' => Pages\EditActType::route('/{record}/edit'),
+            'view' => Pages\ViewActType::route('/{record}'),
         ];
     }
 }

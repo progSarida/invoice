@@ -130,6 +130,7 @@ class AttachmentResource extends Resource
                     }),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),
                 Action::make('download_pdf')
                     ->label('')
@@ -196,8 +197,9 @@ class AttachmentResource extends Resource
     {
         return [
             'index' => Pages\ListAttachments::route('/'),
-            // 'create' => Pages\CreateAttachment::route('/create'),
-            // 'edit' => Pages\EditAttachment::route('/{record}/edit'),
+            'create' => Pages\CreateAttachment::route('/create'),
+            'edit' => Pages\EditAttachment::route('/{record}/edit'),
+            'view' => Pages\ViewAttachment::route('/{record}'),
         ];
     }
 }

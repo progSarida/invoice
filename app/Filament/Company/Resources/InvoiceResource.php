@@ -501,7 +501,7 @@ class InvoiceResource extends Resource
             ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
             ->persistFiltersInSession()
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

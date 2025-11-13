@@ -280,7 +280,8 @@ class NewContractResource extends Resource
                     ->multiple()->preload(),
             ], layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
                     ->visible(fn (): bool => Auth::user()->isManager()),
             ])
@@ -306,6 +307,7 @@ class NewContractResource extends Resource
             'index' => Pages\ListNewContracts::route('/'),
             'create' => Pages\CreateNewContract::route('/create'),
             'edit' => Pages\EditNewContract::route('/{record}/edit'),
+            'view' => Pages\ViewNewContract::route('/{record}'),
         ];
     }
 
