@@ -32,6 +32,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Pages\Tenancy\EditTenantProfile;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Http\UploadedFile;
 
 class EditCompanyProfile extends EditTenantProfile
@@ -39,6 +40,12 @@ class EditCompanyProfile extends EditTenantProfile
     public static function getLabel(): string
     {
         return 'Dati azienda';
+    }
+
+
+    public function getMaxContentWidth(): MaxWidth|string|null                                  // allarga la tabella a tutta pagina
+    {
+        return MaxWidth::Full;
     }
 
     public function form(Form $form): Form
@@ -675,6 +682,44 @@ class EditCompanyProfile extends EditTenantProfile
                                             : 'Senza aliquota';
                                         $name = $state['name'] ?? 'Nuova voce';
                                         return "$name ($vatLabel)";
+                                    })
+                                    ->columnSpan(12),
+                            ])
+                            ->columns(12),
+
+                        Tabs\Tab::make('Conti Prima nota')
+                            ->schema([
+                                Repeater::make('instruments')
+                                    ->label('')
+                                    ->relationship('instruments')
+                                    ->schema([
+                                        TextInput::make('name')
+                                            ->label('Conto')
+                                            ->maxLength(255)
+                                            ->required()
+                                            ->columnSpan(4),
+                                        TextInput::make('description')
+                                            ->label('Descrizione')
+                                            ->maxLength(255)
+                                            ->columnSpan(7),
+                                        TextInput::make('order')
+                                            ->label('Posizione')
+                                            ->maxLength(255)
+                                            ->required()
+                                            ->columnSpan(1),
+                                    ])
+                                    ->columns(12)
+                                    ->maxItems(10)
+                                    ->defaultItems(0)
+                                    ->addActionLabel('Aggiungi conto')
+                                    ->deleteAction(
+                                        fn ($action) => $action->label('Rimuovi conto')
+                                    )
+                                    ->collapsible()
+                                    ->collapsed()
+                                    ->itemLabel(function (array $state): ?string {
+                                        $name = $state['name'] ?? 'Nuovo conto';
+                                        return "$name";
                                     })
                                     ->columnSpan(12),
                             ])

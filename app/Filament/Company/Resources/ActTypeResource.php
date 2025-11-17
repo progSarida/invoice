@@ -27,7 +27,7 @@ class ActTypeResource extends Resource
 
     // protected static ?string $navigationGroup = 'Gestione';
 
-    // protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
 

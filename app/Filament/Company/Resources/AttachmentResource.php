@@ -30,6 +30,8 @@ class AttachmentResource extends Resource
 
     protected static ?string $navigationIcon = 'tni-attachment-o';
 
+    protected static ?int $navigationSort = 3;
+
     // protected static ?string $navigationGroup = 'Gestione';
 
     // protected static ?int $navigationSort = 3;
