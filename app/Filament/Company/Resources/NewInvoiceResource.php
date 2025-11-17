@@ -205,8 +205,7 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 ->preload()
                                 ->optionsLimit(5)
-                                ->columnSpan(4)
-                                ->autofocus(),
+                                ->columnSpan(4),
 
                             Forms\Components\Select::make('tax_type')->label('Entrata')
                                 ->required()
