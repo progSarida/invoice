@@ -16,6 +16,7 @@ use App\Models\Deadline;
 use App\Models\PassiveDownload;
 use App\Models\PassiveInvoice;
 use App\Models\PassiveItem;
+use App\Models\SdiNotification;
 use App\Models\Supplier;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
@@ -509,6 +510,14 @@ class AndxorSoapService
                 'sdi_date' => $date[0]
             ]);
 
+            SdiNotification::create([
+                'invoice_id' => $invoice->id,
+                'code' => $response_s->IdSdI ?? null,
+                'status' => $this->translateStatus($response_s->Stato),
+                'date' => $date[0],
+                'description' => ''
+            ]);
+
             // Log della richiesta e risposta per debug
             // Log::debug('Richiesta SOAP: ' . $this->client->getLastRequest());
             // Log::debug('Risposta SOAP: ' . $this->client->getLastResponse());
@@ -540,11 +549,23 @@ class AndxorSoapService
         $date = explode("T", $response->DataOraCreazione);                                              // la data deve essere in base allo stato?
         // $date = explode("T", $this->getDate($response));
 
-        // Aggiorna stato e data modifica stato della fattura
-        $invoice->update([
-            'sdi_status' => $this->translateStatus($response->Stato),
-            'sdi_date' => $date[0]
-        ]);
+        $newStatus = $this->translateStatus($response->Stato);
+
+        if($invoice->sdi_status != $newStatus){
+            // Aggiorna stato e data modifica stato della fattura
+            $invoice->update([
+                'sdi_status' => $newStatus,
+                'sdi_date' => $date[0]
+            ]);
+
+            SdiNotification::create([
+                    'invoice_id' => $invoice->id,
+                    'code' => $invoice->sdi_code ?? null,
+                    'status' => $newStatus,
+                    'date' => $date[0],
+                    'description' => ''
+                ]);
+        }
 
         return $response;
     }
