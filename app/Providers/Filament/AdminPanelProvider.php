@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middlewares\CheckDbSession;
 use App\Responses\SsoLogoutResponse;
 use Filament\Pages;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -57,6 +58,7 @@ class AdminPanelProvider extends PanelProvider
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
+                CheckDbSession::class,
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,

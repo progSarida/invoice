@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Tenancy\EditCompanyProfile;
 use App\Http\Middleware\SetSpatieTenant;
+use App\Http\Middlewares\CheckDbSession;
 use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Models\Company;
@@ -52,6 +53,7 @@ class CompanyPanelProvider extends PanelProvider
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
+                CheckDbSession::class,
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
