@@ -148,20 +148,18 @@ class SsoController extends Controller
 
         // Verifica l'esistenza della classe SpatieRole prima di tentare l'assegnazione
         if ($ssoRole['name'] == "super_admin" && class_exists('Spatie\Permission\Models\Role')) {
-            $user->syncRoles([]); 
             
             // Crea il ruolo se non esiste prima di assegnarlo
             $role = SpatieRole::firstOrCreate(
                 ['name' => $ssoRole['name'], 'guard_name' => 'web']
             );
             
-
             $userId = $user->id; // L'ID dell'utente autenticato
             $roleId = $role->id; // L'ID del ruolo creato/trovato
             $companyId = 10000; // Il valore che vuoi inserire per 'company_id'
 
             // 🛑 INSERIMENTO DIRETTO NELLA TABELLA PIVOT
-            DB::table('model_has_roles')->insert([
+            DB::table('model_has_roles')->updateOrInsert([
                 'role_id'      => $roleId,
                 'model_type'   => 'App\Models\User', // O il namespace corretto del tuo modello
                 'model_id'     => $userId,
