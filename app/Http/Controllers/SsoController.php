@@ -87,16 +87,16 @@ class SsoController extends Controller
         ]);
 
 
-        if (!$sessionState || $sessionState !== $request->state || $isError) {
-            $errorMessage = $request->error ?? 'Stato Sessione mancante'; 
+        // if (!$sessionState || $sessionState !== $request->state || $isError) {
+        //     $errorMessage = $request->error ?? 'Stato Sessione mancante'; 
             
-            if ($request->error) {
-                 Log::error("SSO Security/Error Failure: SSO Server Error Received: " . $request->error);
-            }
+        //     if ($request->error) {
+        //          Log::error("SSO Security/Error Failure: SSO Server Error Received: " . $request->error);
+        //     }
             
-            // Reindirizza al login di Filament
-            return redirect('/admin/login')->withErrors(['sso' => 'Accesso SSO fallito o negato. Errore: ' . $errorMessage]);
-        }
+        //     // Reindirizza al login di Filament
+        //     return redirect('/admin/login')->withErrors(['sso' => 'Accesso SSO fallito o negato. Errore: ' . $errorMessage]);
+        // }
         
         // --- SE LA VERIFICA PASSA, PROSEGUIAMO CON LO SCAMBIO TOKEN ---
 
