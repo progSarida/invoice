@@ -185,7 +185,6 @@ class SsoController extends Controller
         $rememberGuardName = config('auth.defaults.guard'); // Es. 'web'
         $sessionCookieName = config('session.cookie'); 
         $cookiePath = config('session.path');
-        $cookieDomain = config('session.domain');
         
         // Inizializza con il nome base come fallback.
         $rememberCookieName = 'remember_' . $rememberGuardName; 
@@ -200,6 +199,16 @@ class SsoController extends Controller
         } catch (\Exception $e) {
             Log::error("SLO: Impossibile ottenere il nome del cookie tramite Auth Guard. Usato nome base.", ['error' => $e->getMessage()]);
         }
+
+        // ==============================================================
+        // 💡 LOG RICHIESTO: Stampa il nome esatto utilizzato per l'eliminazione
+        // ==============================================================
+        Log::info('SLO DEBUG: Cookies', [
+            'session_cookie' => $sessionCookieName,
+            'remember_cookie' => $rememberCookieName, // <-- Nome esatto con Hash
+            'cookie_path' => $cookiePath
+        ]);
+        // ==============================================================
         
         if (empty($incomingKey) || $incomingKey !== $sloKey) {
             Log::warning('SLO Callback: Tentativo di accesso non autorizzato.', ['remote_ip' => $request->ip()]);
@@ -212,24 +221,9 @@ class SsoController extends Controller
 
 
         try {
-            // Revoca del remember_token
-            $updated = DB::table((new User)->getTable())->where('id', $userId)->update(['remember_token' => null]);
-            Log::info("SLO: Remember token revocato per l'utente {$userId} (risultato: {$updated}).");
-
             // Eliminazione delle sessioni attive nel DB (necessario per Filament)
             $deletedCount = DB::table('sessions')->where('user_id', $userId)->delete();
             Log::info("SLO: Terminate {$deletedCount} session(s) per l'utente {$userId}.");
-
-            // ==============================================================
-            // 💡 LOG RICHIESTO: Stampa il nome esatto utilizzato per l'eliminazione
-            // ==============================================================
-            Log::info('SLO DEBUG: Tentativo di eliminazione cookie client-side.', [
-                'session_cookie' => $sessionCookieName,
-                'remember_cookie' => $rememberCookieName, // <-- Nome esatto con Hash
-                'cookie_domain' => $cookieDomain ?? 'null',
-                'cookie_path' => $cookiePath
-            ]);
-            // ==============================================================
             
             // 5. ELIMINAZIONE DEI COOKIE (CLIENT-SIDE)
             // L'eliminazione avviene forzando la scadenza con SymfonyCookie.
