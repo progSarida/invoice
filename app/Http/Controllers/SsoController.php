@@ -156,9 +156,17 @@ class SsoController extends Controller
             );
             
 
-            $user->assignRole($role);
-            $user->is_admin = true;
-            $user->save();
+            $userId = $user->id; // L'ID dell'utente autenticato
+            $roleId = $role->id; // L'ID del ruolo creato/trovato
+            $companyId = 10000; // Il valore che vuoi inserire per 'company_id'
+
+            // 🛑 INSERIMENTO DIRETTO NELLA TABELLA PIVOT
+            DB::table('model_has_roles')->insert([
+                'role_id'      => $roleId,
+                'model_type'   => 'App\Models\User', // O il namespace corretto del tuo modello
+                'model_id'     => $userId,
+                'company_id'   => $companyId, // ✅ Inserisci qui il valore richiesto
+            ]);
 
             Log::info("SSO Login: User {$user->email} assigned role: {$ssoRole['name']} (Created if non-existent).");
         }
