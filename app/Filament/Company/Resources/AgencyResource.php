@@ -72,7 +72,8 @@ class AgencyResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -94,6 +95,7 @@ class AgencyResource extends Resource
             'index' => Pages\ListAgencies::route('/'),
             'create' => Pages\CreateAgency::route('/create'),
             'edit' => Pages\EditAgency::route('/{record}/edit'),
+            'view' => Pages\ViewAgency::route('/{record}'),
         ];
     }
 }

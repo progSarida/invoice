@@ -210,7 +210,8 @@ class SupplierResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -233,6 +234,7 @@ class SupplierResource extends Resource
             'index' => Pages\ListSuppliers::route('/'),
             'create' => Pages\CreateSupplier::route('/create'),
             'edit' => Pages\EditSupplier::route('/{record}/edit'),
+            'view' => Pages\ViewSupplier::route('/{record}'),
         ];
     }
 }

@@ -164,4 +164,14 @@ class Company extends Model
     {
         return $this->hasMany(Agency::class);
     }
+
+    public function instruments()
+    {
+        return $this->hasMany(Instrument::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

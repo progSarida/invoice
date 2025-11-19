@@ -205,8 +205,7 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 ->preload()
                                 ->optionsLimit(5)
-                                ->columnSpan(4)
-                                ->autofocus(),
+                                ->columnSpan(4),
 
                             Forms\Components\Select::make('tax_type')->label('Entrata')
                                 ->required()
@@ -1162,8 +1161,8 @@ class NewInvoiceResource extends Resource
             // ])->filtersFormColumns(2)
             ->persistFiltersInSession()
             ->actions([
-                Tables\Actions\EditAction::make()
-                ->label(''),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -1199,6 +1198,7 @@ class NewInvoiceResource extends Resource
             'index' => Pages\ListNewInvoices::route('/'),
             'create' => Pages\CreateNewInvoice::route('/create'),
             'edit' => Pages\EditNewInvoice::route('/{record}/edit'),
+            'view' => Pages\ViewNewInvoice::route('/{record}'),
         ];
     }
 

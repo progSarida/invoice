@@ -841,19 +841,19 @@ class PostalExpenseResource extends Resource
                                     ->relationship('shipmentInsertUser', 'name')
                                     ->searchable()
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->preload()
                                     ->optionsLimit(5)
                                     ->columnSpan(4),
                                 Forms\Components\DatePicker::make('shipment_insert_date_from')
                                     ->label('Data inserimento dati')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('shipment_insert_date_to')
                                     ->label('Data inserimento dati')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                             ]),
                     ])
@@ -938,17 +938,17 @@ class PostalExpenseResource extends Resource
                                     ->preload()
                                     ->optionsLimit(5)
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(4),
                                 Forms\Components\DatePicker::make('notify_insert_date')
                                     ->label('Data inserimento notifica')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('notify_insert_date')
                                     ->label('Data inserimento notifica')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                             ]),
                     ])
@@ -1037,17 +1037,17 @@ class PostalExpenseResource extends Resource
                                     ->preload()
                                     ->optionsLimit(5)
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('expense_insert_date_from')
                                     ->label('Data inserimento spese da')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('expense_insert_date_to')
                                     ->label('Data inserimento spese a')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                             ]),
                     ])
@@ -1097,17 +1097,17 @@ class PostalExpenseResource extends Resource
                                     ->preload()
                                     ->optionsLimit(5)
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(4),
                                 Forms\Components\DatePicker::make('payment_insert_date_from')
                                     ->label('Data inserimento pagamento da')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('payment_insert_date_to')
                                     ->label('Data inserimento pagamento a')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                             ]),
                     ])
@@ -1164,17 +1164,17 @@ class PostalExpenseResource extends Resource
                                     ->preload()
                                     ->optionsLimit(5)
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('reinvoice_insert_date_from')
                                     ->label('Data inserimento rifatturazione da')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                                 Forms\Components\DatePicker::make('reinvoice_insert_date_to')
                                     ->label('Data inserimento rifatturazione a')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
-                                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin'))
+                                    ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->columnSpan(3),
                             ]),
                     ])
@@ -1242,11 +1242,12 @@ class PostalExpenseResource extends Resource
             ->persistFiltersInSession()
             ->filtersFormWidth(MaxWidth::SevenExtraLarge)
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->modalWidth(MaxWidth::SevenExtraLarge)
-                    ->extraAttributes([
-                        'style' => 'max-width: min(95vw, 1600px) !important;'
-                    ]),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make()
+                //     ->modalWidth(MaxWidth::SevenExtraLarge)
+                //     ->extraAttributes([
+                //         'style' => 'max-width: min(95vw, 1600px) !important;'
+                //     ]),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('view_act_attachment')
                         ->label('Allegato Atto')
@@ -1293,6 +1294,7 @@ class PostalExpenseResource extends Resource
             'index' => Pages\ListPostalExpenses::route('/'),
             'create' => Pages\CreatePostalExpense::route('/create'),
             'edit' => Pages\EditPostalExpense::route('/{record}/edit'),
+            'view' => Pages\ViewPostalExpense::route('/{record}'),
         ];
     }
 

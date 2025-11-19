@@ -231,7 +231,8 @@ class PassiveInvoiceResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
                 Action::make('download_pdf')
                     ->label('')
                     ->tooltip('Scarica PDF')
@@ -293,6 +294,7 @@ class PassiveInvoiceResource extends Resource
             'index' => Pages\ListPassiveInvoices::route('/'),
             'create' => Pages\CreatePassiveInvoice::route('/create'),
             'edit' => Pages\EditPassiveInvoice::route('/{record}/edit'),
+            'view' => Pages\ViewPassiveInvoice::route('/{record}'),
         ];
     }
 

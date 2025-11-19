@@ -134,7 +134,8 @@ class TenderResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -156,6 +157,7 @@ class TenderResource extends Resource
             'index' => Pages\ListTenders::route('/'),
             'create' => Pages\CreateTender::route('/create'),
             'edit' => Pages\EditTender::route('/{record}/edit'),
+            'view' => Pages\ViewTender::route('/{record}'),
         ];
     }
 

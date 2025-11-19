@@ -120,7 +120,8 @@ class BankAccountResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -142,6 +143,7 @@ class BankAccountResource extends Resource
             'index' => Pages\ListBankAccounts::route('/'),
             'create' => Pages\CreateBankAccount::route('/create'),
             'edit' => Pages\EditBankAccount::route('/{record}/edit'),
+            'view' => Pages\ViewBankAccount::route('/{record}'),
         ];
     }
 }

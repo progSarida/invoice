@@ -27,7 +27,7 @@ class ShipmentTypeResource extends Resource
 
     // protected static ?string $navigationGroup = 'Gestione';
 
-    // protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -90,7 +90,8 @@ class ShipmentTypeResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -113,6 +114,7 @@ class ShipmentTypeResource extends Resource
             'index' => Pages\ListShipmentTypes::route('/'),
             'create' => Pages\CreateShipmentType::route('/create'),
             'edit' => Pages\EditShipmentType::route('/{record}/edit'),
+            'view' => Pages\ViewShipmentType::route('/{record}'),
         ];
     }
 }
