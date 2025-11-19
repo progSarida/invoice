@@ -2,11 +2,10 @@
 
 namespace App\Providers;
 
-use App\Models\Permission;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
+use App\Models\User;
 use Filament\Facades\Filament;
-use App\Models\User; // Assicurati di importare il tuo modello User
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate; // Assicurati di importare il tuo modello User
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -33,7 +32,8 @@ class AuthServiceProvider extends ServiceProvider
 
     /**
      * Ricava il nome della risorsa e applica la logica del separatore '::' per i nomi composti.
-     * @param array $arguments L'array degli argomenti passati al Gate.
+     *
+     * @param  array  $arguments  L'array degli argomenti passati al Gate.
      * @return string|null Il nome della risorsa (es. 'supplier' o 'blog::post').
      */
     protected function getResourceNameFromArguments(array $arguments): ?string
@@ -41,7 +41,7 @@ class AuthServiceProvider extends ServiceProvider
         if (empty($arguments)) {
             return null;
         }
-        
+
         $model = $arguments[0];
         $className = null;
 
@@ -59,11 +59,10 @@ class AuthServiceProvider extends ServiceProvider
         if (str_contains($snakeCaseName, '_')) {
             return str_replace('_', '::', $snakeCaseName);
         }
-        
+
         // Altrimenti, restituisce il nome in minuscolo (es. Supplier -> supplier)
         return $snakeCaseName;
     }
-
 
     /**
      * Register any authentication / authorization services.
@@ -73,52 +72,55 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
         Gate::before(function (User $user, string $permission, array $arguments = []) {
 
-            
             $panelId = Filament::getId();
-            if ($panelId==="admin" && $user->hasPanelAccessRole()) {
+            if ($panelId === 'admin' && $user->hasPanelAccessRole()) {
                 $tenantRoles = $user->hasPanelAccessRole();
-                if($this->checkTenantPermission($user, $permission, $tenantRoles, $arguments))
+                if ($this->checkTenantPermission($user, $permission, $tenantRoles, $arguments)) {
                     return true;
-            }
-            else{
+                }
+            } else {
                 $tenantRoles = $user->getTenantRoles();
-                if($this->checkTenantPermission($user, $permission, $tenantRoles, $arguments))
+                if ($this->checkTenantPermission($user, $permission, $tenantRoles, $arguments)) {
                     return true;
-                else
-                {
+                } else {
                     $tenantRoles = $user->hasFullCompaniesAccessRole();
-                    if($this->checkTenantPermission($user, $permission, $tenantRoles, $arguments))
+                    if ($this->checkTenantPermission($user, $permission, $tenantRoles, $arguments)) {
                         return true;
+                    }
                 }
             }
-            
+
             return false;
         });
     }
 
-    public function checkTenantPermission(User $user, string $permission, $tenantRoles, array $arguments = []){
-        //BISOGNA SISTEMARE LA FORMATTAZIONE DEL PERMESSO
-            $actionPrefix = $this->mapActionToPrefix($permission);
-            $resourceName = $this->getResourceNameFromArguments($arguments);
+    public function checkTenantPermission(User $user, string $permission, $tenantRoles, array $arguments = [])
+    {
+        // BISOGNA SISTEMARE LA FORMATTAZIONE DEL PERMESSO
+        $actionPrefix = $this->mapActionToPrefix($permission);
+        $resourceName = $this->getResourceNameFromArguments($arguments);
 
-            if($resourceName=="role"){
-                if($user->isSuperAdmin())
-                    return $permission;
-                else
-                    return false;
-            } 
-            
-            $fullPermission = $actionPrefix;
-
-            if ($resourceName)
-                $fullPermission = $actionPrefix . '_' . $resourceName;
-            
-            foreach($tenantRoles as $tenantRole){
-                if($tenantRole->hasPermissionTo($fullPermission))
-                    return true;
+        if ($resourceName == 'role') {
+            if ($user->isSuperAdmin()) {
+                return $permission;
+            } else {
+                return false;
             }
+        }
 
-            return false;
+        $fullPermission = $actionPrefix;
+
+        if ($resourceName) {
+            $fullPermission = $actionPrefix.'_'.$resourceName;
+        }
+
+        foreach ($tenantRoles as $tenantRole) {
+            if ($tenantRole->hasPermissionTo($fullPermission)) {
+                return true;
+            }
+        }
+
+        return false;
 
     }
 }

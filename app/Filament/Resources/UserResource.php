@@ -75,17 +75,17 @@ class UserResource extends Resource
                 //     ->offIcon('heroicon-s-shield-exclamation')
                 //     ->onColor('success')
                 //     ->offColor('danger'),
-            Tables\Columns\TextColumn::make('roles.name')
+            Tables\Columns\TextColumn::make('companyRoles.name')
                     ->label('Ruolo')
                     ->badge()
                     ->separator(', '),
-                Tables\Columns\TextColumn::make('created_at')
+Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
+                          ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
-                    ->sortable()
+                        ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([

@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\DB;
 
 class RolesRelationManager extends RelationManager
 {
-    protected static string $relationship = 'roles';
+    protected static string $relationship = 'companyRoles';
 
     protected static ?string $title = 'Ruoli';
 
@@ -188,7 +188,7 @@ class RolesRelationManager extends RelationManager
 
                         // 4. Esegui il distacco forzato con wherePivot
                         // CHIAVE: Filtra il costruttore della relazione per includere SOLO la riga con quel team_id
-                        $user->roles()
+                        $user->companyRoles()
                             ->wherePivot('company_id', $teamIdToDetach) // Filtra per team_id specifico (anche se NULL)
                             ->detach($record->id); // Distacca solo questo ruolo
 

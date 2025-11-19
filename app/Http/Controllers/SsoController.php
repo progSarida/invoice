@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -110,7 +112,7 @@ class SsoController extends Controller
                 ]);
 
         $data = $response->json();
-
+ 
         if ($response->failed() || !isset($data['access_token'])) {
              Log::error('SSO Token Exchange Failed: Status: ' . $response->status());
              Log::error('SSO Token Exchange Failed: Body: ' . $response->body()); 
@@ -142,23 +144,83 @@ class SsoController extends Controller
 
         // 6. Acquisizione e Sincronizzazione del Ruolo tramite Spatie
         $ssoScope = $config['scope'];
-        $ssoRoleName = $ssoUserData['application_roles'][$ssoScope] ?? null; 
-        
+        $ssoRole = $ssoUserData['application_roles'][$ssoScope] ?? null;
+
         // Verifica l'esistenza della classe SpatieRole prima di tentare l'assegnazione
-        if ($ssoRoleName=="super_admin" && class_exists('Spatie\Permission\Models\Role')) {
+        if ($ssoRole['name'] == "super_admin" && class_exists('Spatie\Permission\Models\Role')) {
             $user->syncRoles([]); 
             
             // Crea il ruolo se non esiste prima di assegnarlo
             $role = SpatieRole::firstOrCreate(
-                ['name' => $ssoRoleName, 'guard_name' => 'web']
+                ['name' => $ssoRole['name'], 'guard_name' => 'web']
             );
             
-            $user->assignRole($role->name);
-            Log::info("SSO Login: User {$user->email} assigned role: {$role->name} (Created if non-existent).");
+
+            $user->assignRole($role);
+            $user->is_admin = true;
+            $user->save();
+
+            Log::info("SSO Login: User {$user->email} assigned role: {$ssoRole['name']} (Created if non-existent).");
         }
 
         // 7. Logga e Reindirizza a Filament
-        Auth::login($user, true); 
-        return redirect('/admin'); 
+        Auth::login($user, true);
+        return $user->loginRedirect();
+    }
+
+    public function handleSloCallback(Request $request)
+    {
+        // 1. Configurazione e Recupero dei Dati
+        $sloKey = config('services.sso.slo_key');
+        $incomingKey = $request->header('X-SLO-AUTH-KEY');
+        // Si usa filter_var per garantire che l'input sia un intero valido, prevenendo iniezioni SQL implicite
+        $userId = filter_var($request->input('user_id'), FILTER_VALIDATE_INT);
+
+        // 2. AUTENTICAZIONE DELLA RICHIESTA (Chiave Segreta)
+        if (empty($incomingKey) || $incomingKey !== $sloKey) {
+            Log::warning('SLO Callback: Tentativo di accesso non autorizzato o chiave segreta mancante.', [
+                'remote_ip' => $request->ip()
+            ]);
+            return response()->json(['message' => 'Unauthorized SLO request or invalid key.'], 401);
+        }
+
+        // 3. VERIFICA DEI DATI (ID Utente)
+        if (!$userId) {
+            return response()->json(['message' => 'Missing or invalid User ID.'], 400);
+        }
+
+        // 4. TERMINAZIONE DELLE SESSIONI LOCALI
+        try {
+            $updated = DB::table((new User)->getTable())
+                     ->where('id', $userId)
+                     ->update(['remember_token' => null]);
+        
+            Log::info("SLO: Remember token revocato per l'utente {$userId} (risultato: {$updated}).");
+
+            // 2. TERMINAZIONE FORZATA DELLE SESSIONI WEB (RISOLVE FILAMENT)
+            $deletedCount = DB::table('sessions')
+                                ->where('user_id', $userId)
+                                ->delete();
+            
+            Log::info("SLO: Terminate {$deletedCount} session(s) per l'utente {$userId}.");
+
+            // 3. ELIMINAZIONE DEI COOKIE LOCALI
+            $sessionCookieName = config('session.cookie'); 
+            
+            // Costruzione manuale del nome del cookie 'remember'
+            // Rimuove spazi, rende minuscolo e prefissa. (Es: 'My App' -> 'remember_web_myapp')
+            $appName = strtolower(str_replace(' ', '', config('app.name')));
+            $rememberCookieName = 'remember_web_' . $appName; 
+            
+            return response()->json(['message' => "User ID {$userId} logged out completely."], 200)
+                ->withCookie(Cookie::forget($sessionCookieName))
+                ->withCookie(Cookie::forget($rememberCookieName));
+
+
+        } catch (\Exception $e) {
+            // Cattura qualsiasi errore che impedisca l'operazione di logout (es. problemi di connessione DB)
+            Log::error("SLO Callback Fatal Error: " . $e->getMessage(), ['user_id' => $userId, 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Internal server error during session termination.'], 500);
+        }
     }
 }

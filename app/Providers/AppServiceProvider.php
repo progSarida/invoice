@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
+use App\Responses\SsoLogoutResponse;
 use Illuminate\Support\ServiceProvider;
-use App\Models\Permission;
-use Spatie\Permission\Models\Role;
+use Filament\Http\Responses\Auth\LogoutResponse;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(LogoutResponse::class, SsoLogoutResponse::class);
     }
 
     /**
@@ -22,10 +23,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
 
-        // app(\Spatie\Permission\PermissionRegistrar::class)
-        //     ->setPermissionClass(Permission::class)
-        //     ->setRoleClass(Role::class);
-
-        //
     }
 }

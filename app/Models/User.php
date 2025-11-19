@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Spatie\Permission\Traits\HasRoles;
@@ -64,7 +65,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
      */
     public function hasFullCompaniesAccessRole(): Collection
     {
-        return $this->roles()
+        return $this->companyRoles()
                     ->wherePivotIn('company_id', GlobalAccessType::getCompanyAccessIds())
                     ->get();
     }
@@ -74,23 +75,27 @@ class User extends Authenticatable implements FilamentUser, HasTenants
      */
     public function hasPanelAccessRole(): Collection
     {
-        return $this->roles()
+        return $this->companyRoles()
                     ->wherePivotIn('company_id', GlobalAccessType::getPanelAccessIds())
                     ->get();
     }
 
     public function hasAdminAccess(): bool
     {
-        return $this->roles()
+        return $this->companyRoles()
                     ->wherePivotIn('company_id', GlobalAccessType::getPanelAccessIds())
                     ->exists();
     }
 
     public function hasCompanyAccess(): bool
     {
-        return $this->roles()
-                    ->wherePivotIn('company_id', GlobalAccessType::getCompanyAccessIds())
-                    ->exists();
+        if($this->companyRoles()->wherePivotIn('company_id', GlobalAccessType::getCompanyAccessIds())->exists())
+            return true;
+
+        if($this->companies()->exists())
+            return true;
+
+        return false;
     }
 
     /**
@@ -104,7 +109,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         if (!$currentTenant)
             return null;
 
-        return $this->roles()
+        return $this->companyRoles()
                     ->wherePivot('company_id', $currentTenant->getKey())
                     ->get();
     }
@@ -116,7 +121,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         if (!$currentTenant)
             return null;
 
-        return $this->roles()
+        return $this->companyRoles()
                     ->wherePivot('company_id', $currentTenant->getKey())
                     ->first();
     }
@@ -132,9 +137,24 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 
         if ($panelId === 'admin')
             return $this->hasAdminAccess();
+        else if($panelId === 'company')
+            return $this->hasCompanyAccess();
+
+        return false;
+    }
+
+    public function loginRedirect(): ?Response 
+    {
+        $destinationPanelId = null;
+        if ($this->isSuperAdmin() || $this->hasAdminAccess())
+            $destinationPanelId = 'admin';
+        else if ($this->hasCompanyAccess())
+            $destinationPanelId = 'company';
         
-        // Per il pannello multi-tenant, deve avere un'associazione con un tenant valido.
-        return $this->hasCompanyAccess() || $this->companies()->exists();
+        if (!$destinationPanelId)
+            return abort(403, 'Accesso non autorizzato a nessun pannello.');
+        
+        return redirect()->to(Filament::getPanel($destinationPanelId)->getUrl());
     }
 
     public function companies(): BelongsToMany
@@ -175,16 +195,16 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 
     public function hasRole($roleName, array|int $company_ids){
         if(is_array($company_ids))
-            return $this->roles()->where('name', $roleName)
+            return $this->companyRoles()->where('name', $roleName)
                 ->wherePivotIn( 'company_id', $company_ids )
                 ->exists();
         else
-            return $this->roles()->where('name', $roleName)
+            return $this->companyRoles()->where('name', $roleName)
                 ->wherePivot( 'company_id', $company_ids )
                 ->exists();
     }
 
-    public function roles(): BelongsToMany
+    public function companyRoles(): BelongsToMany
     {
         return $this->belongsToMany(
             config('permission.models.role'),
@@ -196,7 +216,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     }
 
     public function getGlobalRoleAttribute(){
-        return $this->roles()
+        return $this->companyRoles()
                    ->wherePivot('company_id', 1000)
                    ->first();
     }

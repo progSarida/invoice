@@ -33,11 +33,6 @@ class CompanyPanelProvider extends PanelProvider
         return $panel
             ->id('company')
             ->path('company')
-            // ->topNavigation()
-            ->login() // Abilita la pagina di login
-            // ->registration() // Opzionale: abilita la registrazione
-            ->passwordReset() // Opzionale: abilita il reset della password
-            ->emailVerification() // Opzionale: abilita la verifica dell'email
             ->profile() // Opzionale: abilita la pagina del profilo
             ->tenant(Company::class)
             ->tenantProfile(EditCompanyProfile::class)
@@ -82,7 +77,10 @@ class CompanyPanelProvider extends PanelProvider
                 // ->visible(fn (): bool => Auth::user()->is_admin)
                 ->visible(fn (): bool => Auth::user()->hasAdminAccess())
                 ->url('/admin')
-                ->icon('clarity-administrator-line')
+                ->icon('clarity-administrator-line'),
+                'logout'=>MenuItem::make()
+                    ->label('Vai al Portale')
+                    ->icon('heroicon-o-arrow-left-start-on-rectangle'),
             ])
             ->globalSearchKeyBindings(['f9']);
     }

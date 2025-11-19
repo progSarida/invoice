@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Responses\SsoLogoutResponse;
 use Filament\Pages;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Panel;
@@ -40,9 +41,6 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->databaseNotificationsPolling(null)
             ->login() // Abilita la pagina di login
-            // ->registration() // Opzionale: abilita la registrazione
-            ->passwordReset() // Opzionale: abilita il reset della password
-            ->emailVerification() // Opzionale: abilita la verifica dell'email
             ->profile() // Opzionale: abilita la pagina del profilo
             ->colors([
                 'primary' => Color::Amber,
@@ -78,6 +76,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Passa alle aziende')
                     ->url('/company')
                     ->icon('gmdi-business-center-s'),
+                'logout'=>MenuItem::make()
+                    ->label('Vai al Portale')
+                    ->icon('heroicon-o-arrow-left-start-on-rectangle'),
+                    
             ])
             ->NavigationGroups([
                 NavigationGroup::make()
