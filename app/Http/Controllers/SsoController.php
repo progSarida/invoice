@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\SessionGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
@@ -176,55 +177,69 @@ class SsoController extends Controller
 
     public function handleSloCallback(Request $request)
     {
-        // 1. Configurazione e Recupero dei Dati
+        // 1. CONFIGURAZIONE E RECUPERO DATI
         $sloKey = config('services.sso.slo_key');
         $incomingKey = $request->header('X-SLO-AUTH-KEY');
-        // Si usa filter_var per garantire che l'input sia un intero valido, prevenendo iniezioni SQL implicite
         $userId = filter_var($request->input('user_id'), FILTER_VALIDATE_INT);
-
-        // 2. AUTENTICAZIONE DELLA RICHIESTA (Chiave Segreta)
+        
+        $rememberGuardName = config('auth.defaults.guard'); // Es. 'web'
+        $sessionCookieName = config('session.cookie'); 
+        $cookiePath = config('session.path');
+        $cookieDomain = config('session.domain');
+        
+        // Inizializza con il nome base come fallback.
+        $rememberCookieName = 'remember_' . $rememberGuardName; 
+        
+        try {
+            // Tenta di ottenere il nome esatto del cookie con hash generato da Laravel
+            $guard = Auth::guard($rememberGuardName);
+            if ($guard instanceof SessionGuard) {
+                // Recupera il nome completo (es. 'remember_web_hash...')
+                $rememberCookieName = $guard->getRecallerName(); 
+            }
+        } catch (\Exception $e) {
+            Log::error("SLO: Impossibile ottenere il nome del cookie tramite Auth Guard. Usato nome base.", ['error' => $e->getMessage()]);
+        }
+        
         if (empty($incomingKey) || $incomingKey !== $sloKey) {
-            Log::warning('SLO Callback: Tentativo di accesso non autorizzato o chiave segreta mancante.', [
-                'remote_ip' => $request->ip()
-            ]);
+            Log::warning('SLO Callback: Tentativo di accesso non autorizzato.', ['remote_ip' => $request->ip()]);
             return response()->json(['message' => 'Unauthorized SLO request or invalid key.'], 401);
         }
 
-        // 3. VERIFICA DEI DATI (ID Utente)
         if (!$userId) {
             return response()->json(['message' => 'Missing or invalid User ID.'], 400);
         }
 
-        // 4. TERMINAZIONE DELLE SESSIONI LOCALI
+
         try {
-            $updated = DB::table((new User)->getTable())
-                     ->where('id', $userId)
-                     ->update(['remember_token' => null]);
-        
+            // Revoca del remember_token
+            $updated = DB::table((new User)->getTable())->where('id', $userId)->update(['remember_token' => null]);
             Log::info("SLO: Remember token revocato per l'utente {$userId} (risultato: {$updated}).");
 
-            // 2. TERMINAZIONE FORZATA DELLE SESSIONI WEB (RISOLVE FILAMENT)
-            $deletedCount = DB::table('sessions')
-                                ->where('user_id', $userId)
-                                ->delete();
-            
+            // Eliminazione delle sessioni attive nel DB (necessario per Filament)
+            $deletedCount = DB::table('sessions')->where('user_id', $userId)->delete();
             Log::info("SLO: Terminate {$deletedCount} session(s) per l'utente {$userId}.");
 
-            // 3. ELIMINAZIONE DEI COOKIE LOCALI
-            $sessionCookieName = config('session.cookie'); 
+            // ==============================================================
+            // 💡 LOG RICHIESTO: Stampa il nome esatto utilizzato per l'eliminazione
+            // ==============================================================
+            Log::info('SLO DEBUG: Tentativo di eliminazione cookie client-side.', [
+                'session_cookie' => $sessionCookieName,
+                'remember_cookie' => $rememberCookieName, // <-- Nome esatto con Hash
+                'cookie_domain' => $cookieDomain ?? 'null',
+                'cookie_path' => $cookiePath
+            ]);
+            // ==============================================================
             
-            // Costruzione manuale del nome del cookie 'remember'
-            // Rimuove spazi, rende minuscolo e prefissa. (Es: 'My App' -> 'remember_web_myapp')
-            $appName = strtolower(str_replace(' ', '', config('app.name')));
-            $rememberCookieName = 'remember_web_' . $appName; 
-            
-            return response()->json(['message' => "User ID {$userId} logged out completely."], 200)
+            // 5. ELIMINAZIONE DEI COOKIE (CLIENT-SIDE)
+            // L'eliminazione avviene forzando la scadenza con SymfonyCookie.
+            $response = response()->json(['message' => "User ID {$userId} logged out completely."], 200)
                 ->withCookie(Cookie::forget($sessionCookieName))
                 ->withCookie(Cookie::forget($rememberCookieName));
 
+            return $response;
 
         } catch (\Exception $e) {
-            // Cattura qualsiasi errore che impedisca l'operazione di logout (es. problemi di connessione DB)
             Log::error("SLO Callback Fatal Error: " . $e->getMessage(), ['user_id' => $userId, 'trace' => $e->getTraceAsString()]);
             return response()->json(['message' => 'Internal server error during session termination.'], 500);
         }
