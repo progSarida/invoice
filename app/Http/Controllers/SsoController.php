@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role as SpatieRole; 
 use Illuminate\Support\Facades\URL; 
 use Illuminate\Support\Facades\Session;
+use Symfony\Component\HttpFoundation\Cookie as HttpFoundationCookie;
 
 class SsoController extends Controller
 {
@@ -177,7 +178,7 @@ class SsoController extends Controller
 
     public function handleSloCallback(Request $request)
     {
-        // 1. CONFIGURAZIONE E RECUPERO DATI
+        // 1. CONFIGURAZIONE E RECUPERO DATI INIZIALI
         $sloKey = config('services.sso.slo_key');
         $incomingKey = $request->header('X-SLO-AUTH-KEY');
         $userId = filter_var($request->input('user_id'), FILTER_VALIDATE_INT);
@@ -185,8 +186,9 @@ class SsoController extends Controller
         $rememberGuardName = config('auth.defaults.guard'); // Es. 'web'
         $sessionCookieName = config('session.cookie'); 
         $cookiePath = config('session.path');
+        $cookieDomain = config('session.domain');
         
-        // Inizializza con il nome base come fallback.
+        // Determina il nome esatto del cookie 'remember' con hash
         $rememberCookieName = 'remember_' . $rememberGuardName; 
         
         try {
@@ -197,39 +199,50 @@ class SsoController extends Controller
                 $rememberCookieName = $guard->getRecallerName(); 
             }
         } catch (\Exception $e) {
+            // Se fallisce, usiamo il nome base ('remember_web') come fallback per l\'eliminazione
             Log::error("SLO: Impossibile ottenere il nome del cookie tramite Auth Guard. Usato nome base.", ['error' => $e->getMessage()]);
         }
-
-        // ==============================================================
-        // 💡 LOG RICHIESTO: Stampa il nome esatto utilizzato per l'eliminazione
-        // ==============================================================
-        Log::info('SLO DEBUG: Cookies', [
-            'session_cookie' => $sessionCookieName,
-            'remember_cookie' => $rememberCookieName, // <-- Nome esatto con Hash
-            'cookie_path' => $cookiePath
-        ]);
-        // ==============================================================
         
+        // 2. AUTENTICAZIONE DELLA RICHIESTA
         if (empty($incomingKey) || $incomingKey !== $sloKey) {
             Log::warning('SLO Callback: Tentativo di accesso non autorizzato.', ['remote_ip' => $request->ip()]);
             return response()->json(['message' => 'Unauthorized SLO request or invalid key.'], 401);
         }
 
+        // 3. VERIFICA DEI DATI
         if (!$userId) {
             return response()->json(['message' => 'Missing or invalid User ID.'], 400);
         }
 
-
+        // 4. TERMINAZIONE SESSIONI (SERVER-SIDE)
         try {
             // Eliminazione delle sessioni attive nel DB (necessario per Filament)
             $deletedCount = DB::table('sessions')->where('user_id', $userId)->delete();
             Log::info("SLO: Terminate {$deletedCount} session(s) per l'utente {$userId}.");
+
+            // 5. LOG DI DEBUG DEI PARAMETRI DI ELIMINAZIONE
+            Log::info('SLO DEBUG: Tentativo di eliminazione cookie client-side.', [
+                'session_cookie' => $sessionCookieName,
+                'remember_cookie' => $rememberCookieName,
+                'cookie_domain' => $cookieDomain ?? 'null',
+                'cookie_path' => $cookiePath,
+                'secure_flag' => config('session.secure') ? 'TRUE' : 'FALSE', // IMPORTANTE
+                'samesite_flag' => config('session.samesite'),
+            ]);
             
-            // 5. ELIMINAZIONE DEI COOKIE (CLIENT-SIDE)
-            // L'eliminazione avviene forzando la scadenza con SymfonyCookie.
-            $response = response()->json(['message' => "User ID {$userId} logged out completely."], 200)
-                ->withCookie(Cookie::forget($sessionCookieName))
-                ->withCookie(Cookie::forget($rememberCookieName));
+            // 6. ELIMINAZIONE DEI COOKIE (CLIENT-SIDE)
+            // L'eliminazione avviene forzando la scadenza con SymfonyCookie per garantire i parametri.
+            $response = response()->json(['message' => "User ID {$userId} logged out completely."], 200);
+
+            // A. Elimina il cookie di Sessione
+            $response = $response->withCookie(
+                new HttpFoundationCookie($sessionCookieName, null, -2628000, $cookiePath, $cookieDomain, config('session.secure'), false, false, config('session.samesite'))
+            );
+
+            // B. Elimina il cookie Remember Me (usa il nome con hash)
+            $response = $response->withCookie(
+                new HttpFoundationCookie($rememberCookieName, null, -2628000, $cookiePath, $cookieDomain, config('session.secure'), false, false, config('session.samesite'))
+            );
 
             return $response;
 
