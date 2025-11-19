@@ -176,14 +176,21 @@ class SsoController extends Controller
         return $user->loginRedirect();
     }
 
+    /**
+     * Gestisce la richiesta di Single Logout (SLO) dal server SSO.
+     */
     public function handleSloCallback(Request $request)
     {
         // 1. CONFIGURAZIONE E RECUPERO DATI INIZIALI
         $sloKey = config('services.sso.slo_key');
         $incomingKey = $request->header('X-SLO-AUTH-KEY');
-        $userId = filter_var($request->input('user_id'), FILTER_VALIDATE_INT);
         
-        $rememberGuardName = config('auth.defaults.guard'); // Es. 'web'
+        // Ricerca utente tramite email
+        $userEmail = $request->input('user_email');
+        $user = User::where('email', $userEmail)->first();
+        $userId = $user ? $user->id : null;
+        
+        $rememberGuardName = config('auth.defaults.guard');
         $sessionCookieName = config('session.cookie'); 
         $cookiePath = config('session.path');
         $cookieDomain = config('session.domain');
@@ -192,14 +199,12 @@ class SsoController extends Controller
         $rememberCookieName = 'remember_' . $rememberGuardName; 
         
         try {
-            // Tenta di ottenere il nome esatto del cookie con hash generato da Laravel
+            // Recupera il nome completo del cookie 'remember' per l'eliminazione
             $guard = Auth::guard($rememberGuardName);
             if ($guard instanceof SessionGuard) {
-                // Recupera il nome completo (es. 'remember_web_hash...')
                 $rememberCookieName = $guard->getRecallerName(); 
             }
         } catch (\Exception $e) {
-            // Se fallisce, usiamo il nome base ('remember_web') come fallback per l\'eliminazione
             Log::error("SLO: Impossibile ottenere il nome del cookie tramite Auth Guard. Usato nome base.", ['error' => $e->getMessage()]);
         }
         
@@ -210,15 +215,19 @@ class SsoController extends Controller
         }
 
         // 3. VERIFICA DEI DATI
-        if (!$userId) {
-            return response()->json(['message' => 'Missing or invalid User ID.'], 400);
+        if (empty($userEmail) || !filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
+            return response()->json(['message' => 'Missing or invalid User Email.'], 400);
         }
 
-        // 4. TERMINAZIONE SESSIONI (SERVER-SIDE)
+        // 4. TERMINAZIONE SESSIONI (SERVER-SIDE - Solo DB Sessioni)
         try {
-            // Eliminazione delle sessioni attive nel DB (necessario per Filament)
-            $deletedCount = DB::table('sessions')->where('user_id', $userId)->delete();
-            Log::info("SLO: Terminate {$deletedCount} session(s) per l'utente {$userId}.");
+            if ($userId) {
+                // Eliminazione delle sessioni attive nel DB (cruciale per terminare la sessione locale)
+                $deletedCount = DB::table('sessions')->where('user_id', $userId)->delete();
+                Log::info("SLO: Terminate {$deletedCount} session(s) per l'utente {$userId} ({$userEmail}).");
+            } else {
+                Log::warning("SLO: Utente non trovato per email, pulizia DB ignorata.", ['user_email' => $userEmail]);
+            }
 
             // 5. LOG DI DEBUG DEI PARAMETRI DI ELIMINAZIONE
             Log::info('SLO DEBUG: Tentativo di eliminazione cookie client-side.', [
@@ -226,20 +235,19 @@ class SsoController extends Controller
                 'remember_cookie' => $rememberCookieName,
                 'cookie_domain' => $cookieDomain ?? 'null',
                 'cookie_path' => $cookiePath,
-                'secure_flag' => config('session.secure') ? 'TRUE' : 'FALSE', // IMPORTANTE
+                'secure_flag' => config('session.secure') ? 'TRUE' : 'FALSE', 
                 'samesite_flag' => config('session.samesite'),
             ]);
             
             // 6. ELIMINAZIONE DEI COOKIE (CLIENT-SIDE)
-            // L'eliminazione avviene forzando la scadenza con SymfonyCookie per garantire i parametri.
-            $response = response()->json(['message' => "User ID {$userId} logged out completely."], 200);
+            $response = response()->json(['message' => "Logout request processed for user {$userEmail}."], 200);
 
-            // A. Elimina il cookie di Sessione
+            // A. Elimina il cookie di Sessione (Usa l'alias corretto: HttpFoundationCookie)
             $response = $response->withCookie(
                 new HttpFoundationCookie($sessionCookieName, null, -2628000, $cookiePath, $cookieDomain, config('session.secure'), false, false, config('session.samesite'))
             );
 
-            // B. Elimina il cookie Remember Me (usa il nome con hash)
+            // B. Elimina il cookie Remember Me (Usa l'alias corretto: HttpFoundationCookie)
             $response = $response->withCookie(
                 new HttpFoundationCookie($rememberCookieName, null, -2628000, $cookiePath, $cookieDomain, config('session.secure'), false, false, config('session.samesite'))
             );
@@ -247,7 +255,7 @@ class SsoController extends Controller
             return $response;
 
         } catch (\Exception $e) {
-            Log::error("SLO Callback Fatal Error: " . $e->getMessage(), ['user_id' => $userId, 'trace' => $e->getTraceAsString()]);
+            Log::error("SLO Callback Fatal Error: " . $e->getMessage(), ['user_email' => $userEmail, 'trace' => $e->getTraceAsString()]);
             return response()->json(['message' => 'Internal server error during session termination.'], 500);
         }
     }
