@@ -3,8 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Tenancy\EditCompanyProfile;
+use App\Http\Middleware\EnsureUserCanAccessPanel;
 use App\Http\Middleware\SetSpatieTenant;
-use App\Http\Middlewares\CheckDbSession;
+use App\Http\Middleware\CheckDbSession;
 use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Models\Company;
@@ -58,6 +59,7 @@ class CompanyPanelProvider extends PanelProvider
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
+                EnsureUserCanAccessPanel::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
