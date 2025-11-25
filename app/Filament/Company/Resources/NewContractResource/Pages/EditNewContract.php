@@ -113,8 +113,8 @@ class EditNewContract extends EditRecord
                         echo $fpdi->Output('S');
                     }, $fileName);
                 }),
-            Actions\DeleteAction::make()
-                ->visible(fn (): bool => Auth::user()->isManager()),
+            // Actions\DeleteAction::make()
+            //     ->visible(fn (): bool => Auth::user()->isManager()),
         ];
     }
 
@@ -133,5 +133,40 @@ class EditNewContract extends EditRecord
 
             $this->halt(); // blocca il salvataggio
         }
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction()->color('success'),
+            $this->getCancelFormAction(),
+            $this->getDeleteFormAction()
+                ->extraAttributes([
+                    'class' => ' md:ml-auto md:w-auto ',
+                ]),
+        ];
+    }
+
+    protected function getDeleteFormAction()
+    {
+        return Actions\DeleteAction::make('delete')
+                ->requiresConfirmation()
+                ->modalHeading('Conferma eliminazione contratto')
+                ->modalDescription('Sei sicuro di voler eliminare questo contratto? Questa azione non può essere annullata.')
+                ->modalSubmitActionLabel('Elimina')
+                ->modalCancelActionLabel('Annulla');
+    }
+
+    protected function getCancelFormAction(): Actions\Action
+    {
+        return Actions\Action::make('cancel')
+            ->label('Indietro')
+            ->color('gray')
+            ->url(function () {
+                if ($this->previousUrl && str($this->previousUrl)->contains('/act-types?')) {
+                    return $this->previousUrl;
+                }
+                return NewContractResource::getUrl('index');
+            });
     }
 }

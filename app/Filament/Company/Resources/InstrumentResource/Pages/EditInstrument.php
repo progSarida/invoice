@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Company\Resources\DeadlineResource\Pages;
+namespace App\Filament\Company\Resources\InstrumentResource\Pages;
 
-use App\Filament\Company\Resources\DeadlineResource;
+use App\Filament\Company\Resources\InstrumentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditDeadline extends EditRecord
+class EditInstrument extends EditRecord
 {
-    protected static string $resource = DeadlineResource::class;
+    protected static string $resource = InstrumentResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -33,8 +33,8 @@ class EditDeadline extends EditRecord
     {
         return Actions\DeleteAction::make('delete')
                 ->requiresConfirmation()
-                ->modalHeading('Conferma eliminazione scadenza')
-                ->modalDescription('Sei sicuro di voler eliminare questa scadenza? Questa azione non può essere annullata.')
+                ->modalHeading('Conferma eliminazione conto')
+                ->modalDescription('Sei sicuro di voler eliminare questo conto? Questa azione non può essere annullata.')
                 ->modalSubmitActionLabel('Elimina')
                 ->modalCancelActionLabel('Annulla');
     }
@@ -45,10 +45,10 @@ class EditDeadline extends EditRecord
             ->label('Indietro')
             ->color('gray')
             ->url(function () {
-                if ($this->previousUrl && str($this->previousUrl)->contains('/deadlines?')) {
+                if ($this->previousUrl && str($this->previousUrl)->contains('/instruments?')) {
                     return $this->previousUrl;
                 }
-                return DeadlineResource::getUrl('index');
+                return InstrumentResource::getUrl('index');
             });
     }
 }

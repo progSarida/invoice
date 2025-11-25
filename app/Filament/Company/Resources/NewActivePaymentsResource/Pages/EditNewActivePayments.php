@@ -68,8 +68,8 @@ class EditNewActivePayments extends EditRecord
     {
         return Actions\DeleteAction::make('delete')
                 ->requiresConfirmation()
-                ->modalHeading('Conferma eliminazione contatto')
-                ->modalDescription('Sei sicuro di voler eliminare questo contatto? Questa azione non può essere annullata.')
+                ->modalHeading('Conferma eliminazione pagamento')
+                ->modalDescription('Sei sicuro di voler eliminare questo pagamento? Questa azione non può essere annullata.')
                 ->modalSubmitActionLabel('Elimina')
                 ->modalCancelActionLabel('Annulla');
     }
@@ -80,7 +80,7 @@ class EditNewActivePayments extends EditRecord
             ->label('Indietro')
             ->color('gray')
             ->url(function () {
-                if ($this->previousUrl && str($this->previousUrl)->contains('/contacts?')) {
+                if ($this->previousUrl && str($this->previousUrl)->contains('/new-active-payments?')) {
                     return $this->previousUrl;
                 }
                 return NewActivePaymentsResource::getUrl('index');
