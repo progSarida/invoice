@@ -54,6 +54,7 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('payment_date')
                     ->label('Data pagamento')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
                     ->date()
                     ->columnSpan(2),
@@ -67,6 +68,7 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('registration_date')
                     ->label('Data registrazione')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled()
                     ->date()
                     ->columnSpan(2),
@@ -77,6 +79,7 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->columnSpan(3),
                 Forms\Components\DatePicker::make('validation_date')
                     ->label('Data validazione')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled()
                     ->visible(fn ($get) => $get('validated'))
                     ->columnSpan(2),

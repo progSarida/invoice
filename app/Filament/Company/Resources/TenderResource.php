@@ -83,7 +83,8 @@ class TenderResource extends Resource
                 Forms\Components\TextInput::make('office_code')->label('Codice ufficio')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\DatePicker::make('date')->label('Data'),
+                Forms\Components\DatePicker::make('date')->label('Data')
+                    ->extraInputAttributes(['class' => 'text-center']),
                 Forms\Components\TextInput::make('cig_code')->label('CIG')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('cup_code')->label('CUP')
@@ -188,7 +189,8 @@ class TenderResource extends Resource
                     Forms\Components\TextInput::make('office_code')->label('Codice ufficio')
                         ->required()
                         ->maxLength(255),
-                    Forms\Components\DatePicker::make('date')->label('Data'),
+                    Forms\Components\DatePicker::make('date')->label('Data')
+                        ->extraInputAttributes(['class' => 'text-center']),
                     Forms\Components\TextInput::make('cig_code')->label('CIG')
                         ->maxLength(255),
                     Forms\Components\TextInput::make('cup_code')->label('CUP')

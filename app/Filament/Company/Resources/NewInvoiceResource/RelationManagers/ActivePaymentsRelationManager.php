@@ -76,6 +76,7 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->columnSpan(2),
                 DatePicker::make('payment_date')
                     ->label('Data pagamento')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
                     ->date()
                     ->columnSpan(2),
@@ -113,6 +114,7 @@ class ActivePaymentsRelationManager extends RelationManager
                         ->schema([
                             DatePicker::make('registration_date')
                                 ->label('Data registrazione')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->disabled()
                                 ->date()
                                 ->columnSpan(2),
@@ -123,6 +125,7 @@ class ActivePaymentsRelationManager extends RelationManager
                                 ->columnSpan(3),
                             DatePicker::make('validation_date')
                                 ->label('Data validazione')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->disabled()
                                 ->visible(fn ($get) => $get('validated'))
                                 ->columnSpan(2),

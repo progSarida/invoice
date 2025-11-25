@@ -200,7 +200,8 @@ class InvoiceResource extends Resource
                         ->schema([
                             Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)->disabled()->columnSpanFull(),
                             Forms\Components\TextInput::make('sdi_code')->label('Codice')->readOnly()->columnSpan(1)->disabled(),
-                            Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(1)->disabled()
+                            Forms\Components\DatePicker::make('sdi_date')->label('Data')
+                                ->extraInputAttributes(['class' => 'text-center'])->readOnly()->columnSpan(1)->disabled()
                                 ->native(false)
                                 ->displayFormat('d F Y'),
                         ]),
@@ -241,8 +242,9 @@ class InvoiceResource extends Resource
                                     ->options(PaymentStatus::class)->disabled()->columnSpan(2),
 
                                 Forms\Components\DatePicker::make('last_payment_date')->label('Data ultimo pagamento')
-                                ->native(false)
-                                ->displayFormat('d F Y')->columnSpan(1)->disabled(),
+                                    ->extraInputAttributes(['class' => 'text-center'])
+                                    ->native(false)
+                                    ->displayFormat('d F Y')->columnSpan(1)->disabled(),
                                 Forms\Components\TextInput::make('total_payment')->label('Totale pagamenti')
                                     ->extraInputAttributes(['style' => 'text-align: right;'])
                                     ->numeric()->suffix('€')->columnSpan(1)->disabled(),
@@ -290,6 +292,7 @@ class InvoiceResource extends Resource
                                 ->numeric(),
 
                             Forms\Components\DatePicker::make('invoice_date')->label('Data')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2)
                                 ->required(),
 

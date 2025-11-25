@@ -27,6 +27,7 @@ class BailResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
     protected static ?string $navigationGroup = 'Cauzioni';
     protected static ?int $navigationSort = 1;
+    protected static ?int $navigationGroupSort = 3;
     protected static ?string $recordTitleAttribute = 'bill_number';
 
     public static function form(Form $form): Form
@@ -132,6 +133,7 @@ class BailResource extends Resource
                     ->maxLength(255)
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('bill_date')->label('Data Polizza')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(2),
                 Forms\Components\FileUpload::make('bill_attachment_path')->label('Allegato Polizza')
                     ->live()
@@ -154,23 +156,40 @@ class BailResource extends Resource
                 ->columnSpan(2),
                 Forms\Components\TextInput::make('year_duration')->label('Anni')
                     ->maxLength(255)
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(1),
                 Forms\Components\TextInput::make('month_duration')->label('Mesi')
                     ->maxLength(255)
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(1),
                 Forms\Components\TextInput::make('day_duration')->label('Giorni')
                     ->maxLength(255)
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(1),
                 Forms\Components\DatePicker::make('bill_start')->label('Inizio Polizza')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('bill_deadline')->label('Scadenza Polizza')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('original_premium')->label('Importo Premio Originario')
                     ->columnSpan(3)
-                    ->numeric()
+                    // ->numeric()
+                    ->live(onBlur: true)
+                    ->extraInputAttributes(['class' => 'text-right'])
+                    ->afterStateUpdated(function ($state, $component) {
+                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->prefix('€')
                     ->nullable(),
                 Forms\Components\DatePicker::make('original_pay_date')->label('Data Pagamento Premio Originario')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(3)
                     ->nullable(),
                 Forms\Components\Select::make('bail_status')->label('Stato Cauzione')
@@ -178,17 +197,31 @@ class BailResource extends Resource
                     ->options(\App\Enums\BailStatus::class)
                     ->nullable(),
                 Forms\Components\DatePicker::make('release_date')->label('Data Rilascio')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(3)
                     ->nullable(),
                 Forms\Components\TextInput::make('renew_premium')->label('Importo Rinnovo')
                     ->columnSpan(2)
-                    ->numeric()
+                    ->live(onBlur: true)
+                    ->extraInputAttributes(['class' => 'text-right'])
+                    ->afterStateUpdated(function ($state, $component) {
+                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    // ->numeric()
                     ->prefix('€')
                     ->nullable(),
                 Forms\Components\DatePicker::make('renew_date')->label('Data Rinnovo')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(2)
                     ->nullable(),
                 Forms\Components\DatePicker::make('receipt_date')->label('Data Ricevuta')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(2)
                     ->nullable(),
                 Forms\Components\FileUpload::make('receipt_attachment_path')->label('Allegato Ricevuta Pagamento')

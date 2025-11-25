@@ -35,11 +35,6 @@ class SupplierResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    public static function getNavigationSort(): ?int
-    {
-        return 1;
-    }
-
     public static function form(Form $form): Form
     {
         return $form

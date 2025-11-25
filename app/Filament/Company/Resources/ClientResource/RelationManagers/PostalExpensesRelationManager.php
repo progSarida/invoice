@@ -107,6 +107,7 @@ class PostalExpensesRelationManager extends RelationManager
                             }),
 
                         Forms\Components\DatePicker::make('send_protocol_date')->label('Data protocollo invio')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->required()
                             ->default(now()->toDateString()),
 
@@ -189,6 +190,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->maxSize(10240),
 
                         Forms\Components\DatePicker::make('act_attachment_date')->label('Data allegato atto')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             // ->required()
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value),
                             // ->visible(function (Get $get, $record): bool {
@@ -206,6 +208,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('shipment_insert_date')->label('Data inserimento dati')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->disabled()
                             ->visible(fn($record): bool => $record && $record->shipment_insert_date),
                     ])
@@ -229,6 +232,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value),
 
                         Forms\Components\DatePicker::make('receive_protocol_date')->label('Data protocollo ricezione')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->required()
                             ->live()
                             ->afterStateUpdated(function (Set $set, $state) {
@@ -262,6 +266,7 @@ class PostalExpensesRelationManager extends RelationManager
                             }),
 
                         Forms\Components\DatePicker::make('amount_registration_date')->label('Data registrazione importo')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->required(),
 
                         Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
@@ -292,6 +297,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->maxSize(10240),
 
                         Forms\Components\DatePicker::make('notify_attachment_date')->label('Data allegato notifica')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             // ->required()
                             // ->visible(function (Get $get, $record): bool {
                             //     $hasUploadedFile = !empty($get('notify_attachment_path'));
@@ -309,6 +315,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('notify_insert_date')->label('Data inserimento notifica')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->disabled()
                             ->visible(fn($record): bool => $record && $record->notify_insert_date),
                     ])
@@ -382,6 +389,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->maxLength(255),
 
                         Forms\Components\DatePicker::make('shipment_doc_date')->label('Data documento')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->required(),
 
                         Forms\Components\TextInput::make('iban')->label('IBAN')
@@ -397,6 +405,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('expense_insert_date')->label('Data inserimento spese')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->disabled()
                             ->visible(fn($record): bool => $record && $record->expense_insert_date),
                     ])
@@ -413,6 +422,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->live(),
 
                         Forms\Components\DatePicker::make('payment_date')->label('Data pagamento')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->required()
                             ->helperText('In caso di più pagamenti, inserire la data dell\'ultimo pagamento'),
 
@@ -431,6 +441,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('payment_insert_date')->label('Data inserimento pagamento')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->disabled()
                             ->visible(fn($record): bool => $record && $record->payment_insert_date),
                     ])
@@ -472,6 +483,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->maxLength(255),
 
                         Forms\Components\DatePicker::make('reinvoice_date')->label('Data fattura emessa')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->required(),
 
                         Forms\Components\TextInput::make('reinvoice_amount')->label('Importo fattura emessa')
@@ -490,6 +502,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('reinvoice_insert_date')->label('Data inserimento rifatturazione')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->disabled()
                             ->visible(fn($record): bool => $record && $record->reinvoice_insert_date),
                     ])
@@ -515,6 +528,7 @@ class PostalExpensesRelationManager extends RelationManager
                     })
                     ->schema([
                         Forms\Components\DatePicker::make('notify_date_registration_date')->label('Data registrazione data di notifica')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->required(),
 
                         Forms\Components\FileUpload::make('reinvoice_attachment_path')->label('Allegato fattura emessa')
@@ -542,6 +556,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->autofocus(fn($record): bool => $record && $record->reinvoiceInserted()),
 
                         Forms\Components\DatePicker::make('reinvoice_attachment_date')->label('Data file fattura emessa caricato')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             // ->required()
                             ,
 
@@ -554,6 +569,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->optionsLimit(5),
 
                         Forms\Components\DatePicker::make('reinvoice_registration_date')->label('Data inserimento registrazione')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->disabled()
                             ->visible(fn($record): bool => $record && $record->reinvoice_registration_date),
                     ])

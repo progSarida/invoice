@@ -42,6 +42,7 @@ class NewContractResource extends Resource
     protected static ?string $navigationIcon = 'govicon-file-contract-o';
     protected static ?string $navigationGroup = 'Fatturazione attiva';
     protected static ?int $navigationSort = 3;
+    protected static ?int $navigationGroupSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -81,11 +82,13 @@ class NewContractResource extends Resource
                     ->columnSpan(3),
                 DatePicker::make('start_validity_date')
                     ->label('Inizio Validità')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->required()
                     ->date()
                     ->columnSpan(2),
                 DatePicker::make('end_validity_date')
                     ->label('Fine Validità')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->date()
                     ->columnSpan(2),
                 Forms\Components\Select::make('accrual_types')
@@ -127,6 +130,15 @@ class NewContractResource extends Resource
                     ->required()
                     ->columnSpan(3)
                     ->inputMode('decimal')
+                    ->live(onBlur: true)
+                    ->extraInputAttributes(['class' => 'text-right'])
+                    ->afterStateUpdated(function ($state, $component) {
+                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->suffix('€'),
@@ -343,11 +355,13 @@ class NewContractResource extends Resource
                     ->columnSpan(3),
                 DatePicker::make('start_validity_date')
                     ->label('Inizio Validità')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->required()
                     ->date()
                     ->columnSpan(2),
                 DatePicker::make('end_validity_date')
                     ->label('Fine Validità')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->date()
                     ->columnSpan(2),
                 Forms\Components\Select::make('accrual_types')

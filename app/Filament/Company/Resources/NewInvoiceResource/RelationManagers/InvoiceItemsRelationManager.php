@@ -78,9 +78,11 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->columnSpan(4),
                 Forms\Components\DatePicker::make('start_date')
                     ->label('Data inizio periodo')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(3),
                 Forms\Components\DatePicker::make('end_date')
                     ->label('Data fine periodo')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('quantity')->label('Quantità')
                     ->columnSpan(4)
@@ -303,6 +305,7 @@ class InvoiceItemsRelationManager extends RelationManager
                                     ->columnSpan(2),
                                 Forms\Components\DatePicker::make('date')
                                     ->label('Data')
+                                    ->extraInputAttributes(['class' => 'text-center'])
                                     ->disabled()
                                     ->columnSpan(2),
                                 Forms\Components\Checkbox::make('selected')

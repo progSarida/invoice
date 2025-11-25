@@ -69,7 +69,9 @@ class NewInvoiceResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione attiva';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
+
+    protected static ?int $navigationGroupSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -450,6 +452,7 @@ class NewInvoiceResource extends Resource
                                 ->required(fn (Get $get) => $get('timing_type') == 'differita')
                                 ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita'),
                             Forms\Components\DatePicker::make('delivery_date')->label('Data documento')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->required(fn (Get $get) => $get('timing_type') == 'differita')
                                 ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita')
                                 ->native(false)
@@ -553,6 +556,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(2)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => NewInvoiceResource::invoiceNumber($get, $set))
                                 ->live()
+                                ->extraInputAttributes(['class' => 'text-right'])
                                 ->disabled(fn (Get $get) => !$get('art_73'))
                                 ->dehydrated()
                                 ->required(),
@@ -590,6 +594,7 @@ class NewInvoiceResource extends Resource
                                     NewInvoiceResource::invoiceNumber($get, $set);
                                 })
                                 ->live()
+                                ->extraInputAttributes(['class' => 'text-right'])
                                 ->disabled(function (Get $get): bool {
                                     $timingType = $get('timing_type');
                                     $today = now();
@@ -616,6 +621,7 @@ class NewInvoiceResource extends Resource
                                 ->default(now()->year),
 
                             Forms\Components\DatePicker::make('invoice_date')->label('Data')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2)
                                 ->required()
                                 ->default(now()->toDateString()),
@@ -623,6 +629,7 @@ class NewInvoiceResource extends Resource
                             Forms\Components\TextInput::make('budget_year')->label('Anno di bilancio')
                                 ->numeric()
                                 ->required()
+                                ->extraInputAttributes(['class' => 'text-right'])
                                 ->minValue(now()->subYears(10)->year)
                                 ->maxValue(now()->year)
                                 ->default(now()->year)
@@ -632,6 +639,7 @@ class NewInvoiceResource extends Resource
                             Forms\Components\TextInput::make('accrual_year')->label('Anno di competenza')
                                 ->numeric()
                                 ->required()
+                                ->extraInputAttributes(['class' => 'text-right'])
                                 ->minValue(now()->subYears(10)->year)
                                 ->maxValue(now()->year)
                                 ->default(now()->year)
@@ -675,6 +683,7 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\DatePicker::make('reference_date_from')
                                 ->label('Da data')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 // ->required()
                                 ->live()
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
@@ -683,6 +692,7 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\DatePicker::make('reference_date_to')
                                 ->label('A data')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 // ->required()
                                 ->live()
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
@@ -761,6 +771,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(2),
                             Forms\Components\TextInput::make('rate_number')
                                 ->label('Rate')
+                                ->extraInputAttributes(['class' => 'text-right'])
                                 ->columnSpan(1)
                                 ->default(1)
                                 ->required(fn(Get $get): bool => $get('payment_mode') != PaymentMode::TP02->value)
@@ -800,7 +811,8 @@ class NewInvoiceResource extends Resource
                                     // ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))  decommentare dopo che Daniele ha corretto gli stati necessari
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('sdi_code')->label('Codice SdI')->readOnly()->columnSpan(2)->disabled(),
-                                Forms\Components\DatePicker::make('sdi_date')->label('Data')->readOnly()->columnSpan(2)->disabled()
+                                Forms\Components\DatePicker::make('sdi_date')->label('Data')
+                                    ->extraInputAttributes(['class' => 'text-center'])->readOnly()->columnSpan(2)->disabled()
                                     ->native(false)
                                     ->displayFormat('d F Y'),
                             ]),
@@ -815,12 +827,15 @@ class NewInvoiceResource extends Resource
                                     ->options(PaymentStatus::class)->columnSpan(2),
 
                                 Forms\Components\DatePicker::make('last_payment_date')->label('Data ultimo pagamento')
-                                ->native(false)
-                                ->displayFormat('d F Y')->columnSpan(2)->disabled(),
+                                    ->extraInputAttributes(['class' => 'text-center'])
+                                    ->native(false)
+                                    ->displayFormat('d F Y')->columnSpan(2)->disabled(),
                                 Forms\Components\TextInput::make('total_payment')->label('Totale pagamenti')
                                     ->extraInputAttributes(['style' => 'text-align: right;'])
                                     ->columnSpan(2)
-                                    ->numeric()->suffix('€')->columnSpan(1)->disabled(),
+                                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                                    // ->numeric()
+                                    ->suffix('€')->columnSpan(1)->disabled(),
 
                             ]),
 

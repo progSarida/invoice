@@ -31,12 +31,7 @@ class PassivePaymentResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione passiva';
 
-    protected static ?int $navigationSort = 1;
-
-    public static function getNavigationSort(): ?int
-    {
-        return 3;
-    }
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -59,7 +54,7 @@ class PassivePaymentResource extends Resource
                     })
                     ->required()
                     ->disabled(fn ($get) => $get('validated'))
-                    ->searchable(['number', 'section', 'year'])
+                    ->searchable(['number'])
                     ->live()
                     ->preload()
                     // ->optionsLimit(20)
@@ -68,7 +63,16 @@ class PassivePaymentResource extends Resource
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()
-                    ->disabled(fn ($get) => $get('validated'))
+                    ->disabled(fn ($get) => !$get('passive_invoice_id') || $get('validated'))
+                    ->live(onBlur: true)
+                    ->extraInputAttributes(['class' => 'text-right'])
+                    ->afterStateUpdated(function ($state, $component) {
+                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->rules(['numeric', 'min:0'])
@@ -76,6 +80,7 @@ class PassivePaymentResource extends Resource
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('payment_date')
                     ->label('Data pagamento')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
                     ->date()
                     ->columnSpan(2),
@@ -112,6 +117,7 @@ class PassivePaymentResource extends Resource
                 //
                 Forms\Components\DatePicker::make('registration_date')
                     ->label('Data registrazione')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled()
                     ->date()
                     ->columnSpan(2),
@@ -122,6 +128,7 @@ class PassivePaymentResource extends Resource
                     ->columnSpan(3),
                 Forms\Components\DatePicker::make('validation_date')
                     ->label('Data validazione')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled()
                     ->visible(fn ($get) => $get('validated'))
                     ->columnSpan(2),

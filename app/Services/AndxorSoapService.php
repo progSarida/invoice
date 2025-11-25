@@ -1200,88 +1200,90 @@ class AndxorSoapService
             // $input['tScaricata'] = false;
             // $input['tStampata'] = false;
 
-            $response = $this->client->PasvElencoFatture($input);                                           // scarico elenco fatture passive
+            $response = $this->client->PasvElencoFatture($input);                                                   // scarico elenco fatture passive
 
-            // dd($response->Fattura);
+            // dd(isset($response), 'STOP');
 
             $supplierNumber = 0;
             $invoiceNumber = 0;
 
-            if (is_array($response->Fattura)) {                                                                 // se ci sono più fatture passive da scaricare
-                foreach($response->Fattura as $item){
+            if(isset($response->Fattura)){
+                if (is_array($response->Fattura)) {                                                                 // se ci sono più fatture passive da scaricare
+                    foreach($response->Fattura as $item){
+                        $param['item'] = $item;
+
+                        $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
+                        $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+                        // $i_input['IdentificativoSdI'] = '15082389451';
+
+                        $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
+
+                        $i_input['Unwrap'] = true;
+                        $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
+
+                        $param['filePath_xml'] = $this->saveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
+                        $param['filePath_pdf'] = $this->savePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
+
+                        $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
+
+                        $newSupplier = $this->checkSupplier($param['content']['FatturaElettronicaHeader']);         // controllo e nel caso inserisco un nuovo fornitore, ritorno il fornitore della fattura
+                        if($newSupplier['new']) $supplierNumber++;                                                  // se ho aggiunto il fornitore incremento il contatore dei fornitori
+                        $param['supplier']  = $newSupplier['supplier'];
+
+                        $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
+                        $param['passive_invoice']  = $passiveInvoice;
+
+                        $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
+
+                        $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
+
+                        $deadline = Deadline::create([
+                            'company_id' => Filament::getTenant()->id,
+                            'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
+                            'note' => null,
+                            'date' => $passiveInvoice->payment_deadline,
+                            'amount'  => $passiveInvoice->total,
+                            'dispatched' => false
+                        ]);
+                    }
+                } else {                                                                                            // se c'è una sola fattura passiva da scaricare
+                    $item = $response->Fattura;
                     $param['item'] = $item;
 
-                    $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
-                    $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
-                    // $i_input['IdentificativoSdI'] = '15082389451';
+                        $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
+                        $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+                        // $i_input['IdentificativoSdI'] = '15082389451';
 
-                    $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
+                        $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
 
-                    $i_input['Unwrap'] = true;
-                    $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
+                        $i_input['Unwrap'] = true;
+                        $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
 
-                    $param['filePath_xml'] = $this->saveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
-                    $param['filePath_pdf'] = $this->savePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
+                        $param['filePath_xml'] = $this->saveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
+                        $param['filePath_pdf'] = $this->savePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
 
-                    $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
+                        $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
 
-                    $newSupplier = $this->checkSupplier($param['content']['FatturaElettronicaHeader']);         // controllo e nel caso inserisco un nuovo fornitore, ritorno il fornitore della fattura
-                    if($newSupplier['new']) $supplierNumber++;                                                  // se ho aggiunto il fornitore incremento il contatore dei fornitori
-                    $param['supplier']  = $newSupplier['supplier'];
+                        $newSupplier = $this->checkSupplier($param['content']['FatturaElettronicaHeader']);         // controllo e nel caso inserisco un nuovo fornitore, ritorno il fornitore della fattura
+                        if($newSupplier['new']) $supplierNumber++;                                                  // se ho aggiunto il fornitore incremento il contatore dei fornitori
+                        $param['supplier']  = $newSupplier['supplier'];
 
-                    $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
-                    $param['passive_invoice']  = $passiveInvoice;
+                        $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
+                        $param['passive_invoice']  = $passiveInvoice;
 
-                    $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
+                        $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
 
-                    $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
+                        $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
 
-                    $deadline = Deadline::create([
-                        'company_id' => Filament::getTenant()->id,
-                        'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
-                        'note' => null,
-                        'date' => $passiveInvoice->payment_deadline,
-                        'amount'  => $passiveInvoice->total,
-                        'dispatched' => false
-                    ]);
+                        $deadline = Deadline::create([
+                            'company_id' => Filament::getTenant()->id,
+                            'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
+                            'note' => null,
+                            'date' => $passiveInvoice->payment_deadline,
+                            'amount'  => $passiveInvoice->total,
+                            'dispatched' => false
+                        ]);
                 }
-            } else {                                                                                            // se c'è una sola fattura passiva da scaricare
-                $item = $response->Fattura;
-                $param['item'] = $item;
-
-                    $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
-                    $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
-                    // $i_input['IdentificativoSdI'] = '15082389451';
-
-                    $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
-
-                    $i_input['Unwrap'] = true;
-                    $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
-
-                    $param['filePath_xml'] = $this->saveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
-                    $param['filePath_pdf'] = $this->savePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
-
-                    $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
-
-                    $newSupplier = $this->checkSupplier($param['content']['FatturaElettronicaHeader']);         // controllo e nel caso inserisco un nuovo fornitore, ritorno il fornitore della fattura
-                    if($newSupplier['new']) $supplierNumber++;                                                  // se ho aggiunto il fornitore incremento il contatore dei fornitori
-                    $param['supplier']  = $newSupplier['supplier'];
-
-                    $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
-                    $param['passive_invoice']  = $passiveInvoice;
-
-                    $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
-
-                    $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
-
-                    $deadline = Deadline::create([
-                        'company_id' => Filament::getTenant()->id,
-                        'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
-                        'note' => null,
-                        'date' => $passiveInvoice->payment_deadline,
-                        'amount'  => $passiveInvoice->total,
-                        'dispatched' => false
-                    ]);
             }
 
             $download = PassiveDownload::create([

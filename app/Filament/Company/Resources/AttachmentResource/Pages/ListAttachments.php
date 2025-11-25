@@ -21,7 +21,7 @@ class ListAttachments extends ListRecords
             Actions\Action::make('print')
                 ->icon('heroicon-o-printer')
                 ->label('Stampa')
-                ->tooltip('Stampa elenco clienti')
+                ->tooltip('Stampa elenco allegati')
                 // ->iconButton()                                                                                       // mostro solo icona
                 ->color('primary')
                 // ->keyBindings(['alt+s'])

@@ -23,7 +23,7 @@ class AgencyResource extends Resource
 
     protected static ?string $navigationIcon = 'phosphor-house-light';
 
-    protected static ?string $navigationGroup = 'Cauzioni';
+    protected static ?string $navigationGroup = 'Parametri Cauzioni';
 
     protected static ?int $navigationSort = 2;
 

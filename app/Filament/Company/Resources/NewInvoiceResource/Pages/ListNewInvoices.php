@@ -174,9 +174,11 @@ class ListNewInvoices extends ListRecords
                                 ->maxValue(date('Y') + 1),
                             DatePicker::make('from_invoice_date')
                                 ->label('Data fatturazione da')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2),
                             DatePicker::make('to_invoice_date')
                                 ->label('Data fatturazione a')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2),
                             Select::make('contract_type')
                                 ->label('Tipo contratto')

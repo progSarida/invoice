@@ -38,6 +38,8 @@ class ClientResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    protected static ?int $navigationGroupSort = 2;
+
     protected static ?string $recordTitleAttribute = 'denomination';
 
     public static function getGlobalSearchResultDetails(Model $record): array
@@ -164,6 +166,7 @@ class ClientResource extends Resource
                     ->columnspan(6),
                 DatePicker::make('birth_date')
                     ->label('Data di nascita')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->date()
                     ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
                     ->columnSpan(3),
@@ -414,6 +417,7 @@ class ClientResource extends Resource
                     ->columnspan(6),
                 DatePicker::make('birth_date')
                     ->label('Data di nascita')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->date()
                     ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
                     ->columnSpan(3),

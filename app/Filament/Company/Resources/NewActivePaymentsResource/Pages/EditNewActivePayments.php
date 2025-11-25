@@ -40,15 +40,50 @@ class EditNewActivePayments extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
-                ->visible(fn (): bool => Auth::user()->isManager())
-                ->disabled(fn () => $this->record->validated),
-            Actions\ForceDeleteAction::make()
-                ->visible(fn (): bool => Auth::user()->isManager())
-                ->disabled(fn () => $this->record->validated),
-            Actions\RestoreAction::make()
-                ->visible(fn (): bool => Auth::user()->isManager())
-                ->disabled(fn () => $this->record->validated),
+            // Actions\DeleteAction::make()
+            //     ->visible(fn (): bool => Auth::user()->isManager())
+            //     ->disabled(fn () => $this->record->validated),
+            // Actions\ForceDeleteAction::make()
+            //     ->visible(fn (): bool => Auth::user()->isManager())
+            //     ->disabled(fn () => $this->record->validated),
+            // Actions\RestoreAction::make()
+            //     ->visible(fn (): bool => Auth::user()->isManager())
+            //     ->disabled(fn () => $this->record->validated),
         ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction()->color('success'),
+            $this->getCancelFormAction(),
+            $this->getDeleteFormAction()
+                ->extraAttributes([
+                    'class' => ' md:ml-auto md:w-auto ',
+                ]),
+        ];
+    }
+
+    protected function getDeleteFormAction()
+    {
+        return Actions\DeleteAction::make('delete')
+                ->requiresConfirmation()
+                ->modalHeading('Conferma eliminazione contatto')
+                ->modalDescription('Sei sicuro di voler eliminare questo contatto? Questa azione non può essere annullata.')
+                ->modalSubmitActionLabel('Elimina')
+                ->modalCancelActionLabel('Annulla');
+    }
+
+    protected function getCancelFormAction(): Actions\Action
+    {
+        return Actions\Action::make('cancel')
+            ->label('Indietro')
+            ->color('gray')
+            ->url(function () {
+                if ($this->previousUrl && str($this->previousUrl)->contains('/contacts?')) {
+                    return $this->previousUrl;
+                }
+                return NewActivePaymentsResource::getUrl('index');
+            });
     }
 }

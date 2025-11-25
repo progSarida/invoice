@@ -28,7 +28,9 @@ class TransactionResource extends Resource
 
     public static ?string $modelLabel = 'Registrazione';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?string $navigationGroup = 'Prima nota';
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -36,6 +38,7 @@ class TransactionResource extends Resource
             ->columns(12)
             ->schema([
                 DatePicker::make('date')->label('Data')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->required()
                     ->columnSpan(2),
                 Select::make('instrument_id')->label('Conto')
@@ -64,40 +67,56 @@ class TransactionResource extends Resource
                     ->columnSpan(6),
                 TextInput::make('in_amount')->label('Entrata')
                     ->columnSpan(4)
-                    ->live()
+                    ->live(onBlur: true)
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->disabled(fn(callable $get) => !$get('client_id'))
                     ->inputMode('decimal')
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->debounce('500ms')
-                    ->afterStateUpdated(function(callable $set, $state){
+                    ->afterStateUpdated(function(callable $set, $state, $component){
                         $lastTransaction =Transaction::where('company_id', Filament::getTenant()->id)->orderBy('date', 'desc')->first();
                         $lastBalance = $lastTransaction ? $lastTransaction->progressive_balance : 0;
                         $newBalance = $lastBalance + $state;
+                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
                         $set('progressive_balance', number_format($newBalance, 2, ',', '.'));
                     })
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    ->suffix('€'),
                 TextInput::make('out_amount')->label('Uscita')
                     ->columnSpan(4)
-                    ->live()
+                    ->live(onBlur: true)
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->disabled(fn(callable $get) => !$get('supplier_id'))
                     ->inputMode('decimal')
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->debounce('500ms')
-                    ->afterStateUpdated(function(callable $set, $state){
+                    ->afterStateUpdated(function(callable $set, $state, $component){
                         $lastTransaction =Transaction::where('company_id', Filament::getTenant()->id)->orderBy('date', 'desc')->first();
                         $lastBalance = $lastTransaction ? $lastTransaction->progressive_balance : 0;
                         $newBalance = $lastBalance - $state;
+                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
                         $set('progressive_balance', number_format($newBalance, 2, ',', '.'));
                     })
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    ->suffix('€'),
                 TextInput::make('progressive_balance')->label('Saldo progressivo')
                     ->required()
                     ->columnSpan(4)
                     ->live()
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->readOnly()
                     ->inputMode('decimal')
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    ->suffix('€'),
             ]);
     }
 

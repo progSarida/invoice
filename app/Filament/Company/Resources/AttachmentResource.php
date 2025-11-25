@@ -30,11 +30,11 @@ class AttachmentResource extends Resource
 
     protected static ?string $navigationIcon = 'tni-attachment-o';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationGroup = 'Generale';
 
-    // protected static ?string $navigationGroup = 'Gestione';
+    protected static ?int $navigationSort = 1;
 
-    // protected static ?int $navigationSort = 3;
+    protected static ?int $navigationGroupSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -100,10 +100,12 @@ class AttachmentResource extends Resource
                     ->form([
                         Forms\Components\DatePicker::make('start_date')
                             ->label('Data inizio')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->placeholder('Seleziona data inizio')
                             ->displayFormat('d/m/Y'),
                         Forms\Components\DatePicker::make('end_date')
                             ->label('Data fine')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->placeholder('Seleziona data fine')
                             ->displayFormat('d/m/Y')
                             ->afterOrEqual('start_date'),
@@ -132,7 +134,7 @@ class AttachmentResource extends Resource
                     }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),
                 Action::make('download_pdf')
                     ->label('')

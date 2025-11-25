@@ -49,7 +49,9 @@ class NewActivePaymentsResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione attiva';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
+
+    protected static ?int $navigationGroupSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -60,41 +62,110 @@ class NewActivePaymentsResource extends Resource
                 Forms\Components\Select::make('invoice_id')
                     ->label('Fattura')
                     ->placeholder('Seleziona una fattura...')
-                    ->relationship(
-                        name: 'invoice',
-                        titleAttribute: 'id',
-                        modifyQueryUsing: fn ($query) => $query->whereNotNull('contract_id')
-                                                               ->where('sdi_status', '!=', 'da_inviare')    // non includo fattura da inviare
-                                                               ->where('parent_id', null)                   // non includo note di credito
-                    )
-                    ->getOptionLabelFromRecordUsing(function (Model $record) {
+                    ->getSearchResultsUsing(function (string $search) {
+                        // Rimuovi spazi multipli e trim
+                        $search = trim(preg_replace('/\s+/', ' ', $search));
+
+                        // Query base con le stesse condizioni del relationship
+                        $query = Invoice::query()
+                            ->whereNotNull('contract_id')
+                            ->where('sdi_status', '!=', 'da_inviare')
+                            ->whereNull('parent_id');
+
+                        // Cerca separatori (spazio, virgola, slash, trattino)
+                        $parts = preg_split('/[\s,\/\-]+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+
+                        if (count($parts) >= 2) {
+                            // Due o più valori: prendi i primi due e convertili a integer
+                            $value1 = is_numeric($parts[0]) ? (int) $parts[0] : null;
+                            $value2 = is_numeric($parts[1]) ? (int) $parts[1] : null;
+
+                            if ($value1 !== null && $value2 !== null) {
+                                // Prova number/year o year/number (match esatto)
+                                $query->where(function ($q) use ($value1, $value2) {
+                                    // Scenario 1: primo = number, secondo = year
+                                    $q->where(function ($subQ) use ($value1, $value2) {
+                                        $subQ->where('number', $value1)
+                                            ->where('year', $value2);
+                                    })
+                                    // Scenario 2: primo = year, secondo = number
+                                    ->orWhere(function ($subQ) use ($value1, $value2) {
+                                        $subQ->where('year', $value1)
+                                            ->where('number', $value2);
+                                    });
+                                });
+                            }
+                        } elseif (count($parts) === 1) {
+                            // Un solo valore: cerca SOLO match esatto in number o year
+                            if (is_numeric($parts[0])) {
+                                $value = (int) $parts[0];
+                                $query->where(function ($q) use ($value) {
+                                    $q->where('number', $value)
+                                    ->orWhere('year', $value);
+                                });
+                            }
+                        }
+
+                        return $query
+                            ->with(['client', 'sectional'])
+                            ->orderBy('invoice_date', 'desc')
+                            ->limit(50)
+                            ->get()
+                            ->mapWithKeys(function ($record) {
+                                $cliente = $record->client?->denomination ?? 'Cliente sconosciuto';
+                                $sectional = $record->sectional?->description ?? 'N/A';
+                                $number = str_pad($record->number ?? 0, 3, '0', STR_PAD_LEFT);
+                                $year = $record->year ?? '????';
+                                $label = "{$cliente} - {$number}/{$sectional}/{$year}";
+
+                                return [$record->id => $label];
+                            })
+                            ->toArray();
+                    })
+                    ->getOptionLabelUsing(function ($value): ?string {
+                        $record = Invoice::find($value);
+
+                        if (!$record) {
+                            return null;
+                        }
+
                         $cliente = $record->client?->denomination ?? 'Cliente sconosciuto';
                         $sectional = $record->sectional?->description ?? 'N/A';
                         $number = str_pad($record->number ?? 0, 3, '0', STR_PAD_LEFT);
                         $year = $record->year ?? '????';
+
                         return "{$cliente} - {$number}/{$sectional}/{$year}";
                     })
                     ->afterStateUpdated(function(Set $set, $state) {
-                        $invoice = Invoice::find($state);
-                        $set('bank_account_id', $invoice->bank_account_id);
+                        if ($state) {
+                            $invoice = Invoice::find($state);
+                            if ($invoice) {
+                                $set('bank_account_id', $invoice->bank_account_id);
+                            }
+                        }
                     })
                     ->required()
                     ->disabled(fn ($get) => $get('validated'))
-                    ->searchable(['number', 'section', 'year'])
+                    ->searchable()
                     ->live()
                     ->preload()
                     ->columnSpan(5),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()
-                    ->live()
-                    ->disabled(fn ($get) => $get('validated'))
-                    ->afterStateUpdated(function ($state, Get $get) {
+                    ->live(onBlur: true)
+                    ->extraInputAttributes(['class' => 'text-right'])
+                    ->disabled(fn ($get) => !$get('invoice_id') || $get('validated'))
+                    ->afterStateUpdated(function ($state, Get $get, $component) {
                         $invoice = Invoice::find($get('invoice_id'));
                         $newTotalPayment = $state + $invoice->total_payment;
                         $compare = $invoice->client?->type?->value == 'public' ? $invoice->no_vat_total : $invoice->total;
 
-                        dd($newTotalPayment . " > (" . $compare . " - " . $invoice->total_notes . ")");
+                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
 
                         if($newTotalPayment > ($compare - $invoice->total_notes)){
                             Notification::make()
@@ -111,6 +182,7 @@ class NewActivePaymentsResource extends Resource
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('payment_date')
                     ->label('Data pagamento')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
                     ->reactive()
                     ->afterStateUpdated(function ($state, Get $get, Set $set) {
@@ -167,6 +239,7 @@ class NewActivePaymentsResource extends Resource
                         ->schema([
                             DatePicker::make('registration_date')
                                 ->label('Data registrazione')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->disabled()
                                 ->date()
                                 ->columnSpan(2),
@@ -177,6 +250,7 @@ class NewActivePaymentsResource extends Resource
                                 ->columnSpan(3),
                             DatePicker::make('validation_date')
                                 ->label('Data validazione')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->disabled()
                                 ->visible(fn ($get) => $get('validated'))
                                 ->columnSpan(2),

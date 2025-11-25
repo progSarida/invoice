@@ -32,6 +32,7 @@ class ContractDetailsRelationManager extends RelationManager
                 TextInput::make('number')
                     ->label('Numero contratto')
                     ->required()
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(2),
                 Forms\Components\Select::make('contract_type')
                     ->label('Tipo contratto')
@@ -42,6 +43,7 @@ class ContractDetailsRelationManager extends RelationManager
                     ->columnSpan(2),
                 DatePicker::make('date')
                     ->label('Data contratto')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->required()
                     ->columnSpan(2),
                 TextInput::make('description')
@@ -87,6 +89,7 @@ class ContractDetailsRelationManager extends RelationManager
                     })
                     ->columnSpan(4),
                 DatePicker::make('contract_attachment_date')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->readonly()
                     ->dehydrated()
                     ->label('Data caricamento')

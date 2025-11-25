@@ -29,7 +29,8 @@ class SdiNotificationsRelationManager extends RelationManager
                 Forms\Components\Select::make('status')->options(SdiStatus::class)->columnSpanFull(),
                 Forms\Components\TextInput::make('code')->label('Codice')->columnSpan(1)
                     ->maxLength(255),
-                Forms\Components\DatePicker::make('date')->native(false)->displayFormat('d/m/Y')->label('Data')->columnSpan(1),
+                Forms\Components\DatePicker::make('date')
+                    ->extraInputAttributes(['class' => 'text-center'])->native(false)->displayFormat('d/m/Y')->label('Data')->columnSpan(1),
                 Forms\Components\TextInput::make('description')->label('Descrizione')->columnSpanFull()
                     ->maxLength(255),
             ])->columns(2);

@@ -44,9 +44,11 @@ class ContractsRelationManager extends RelationManager
                     ->preload(),
                 Forms\Components\TextInput::make('number')->label('Numero')
                     ->maxLength(255),
-                Forms\Components\DatePicker::make('validity_date')->label('Data validità'),
+                Forms\Components\DatePicker::make('validity_date')->label('Data validità')
+                    ->extraInputAttributes(['class' => 'text-center']),
 
-                Forms\Components\DatePicker::make('contract_date')->label('Data contratto'),
+                Forms\Components\DatePicker::make('contract_date')->label('Data contratto')
+                    ->extraInputAttributes(['class' => 'text-center']),
             ]);
     }
 

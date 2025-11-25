@@ -25,9 +25,9 @@ class ShipmentTypeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    // protected static ?string $navigationGroup = 'Gestione';
+    protected static ?string $navigationGroup = 'Parametri Costi not.';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
 

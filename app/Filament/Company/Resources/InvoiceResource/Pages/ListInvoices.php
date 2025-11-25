@@ -23,7 +23,7 @@ class ListInvoices extends ListRecords
             Actions\Action::make('stampa')
                 ->icon('heroicon-o-printer')
                 ->label('Stampa')
-                ->tooltip('Stampa elenco clienti')
+                ->tooltip('Stampa elenco fatture')
                 // ->iconButton() // mostro solo icona
                 ->color('primary')
                 ->action(function ($livewire) {

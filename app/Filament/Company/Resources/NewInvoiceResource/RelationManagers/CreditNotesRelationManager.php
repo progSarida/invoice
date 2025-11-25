@@ -355,8 +355,9 @@ class CreditNotesRelationManager extends RelationManager
                                     ->options(PaymentStatus::class)->disabled()->columnSpan(2),
 
                                 Forms\Components\DatePicker::make('last_payment_date')->label('Data ultimo pagamento')
-                                ->native(false)
-                                ->displayFormat('d F Y')->columnSpan(1)->disabled(),
+                                    ->extraInputAttributes(['class' => 'text-center'])
+                                    ->native(false)
+                                    ->displayFormat('d F Y')->columnSpan(1)->disabled(),
                                 Forms\Components\TextInput::make('total_payment')->label('Totale pagamenti')
                                     ->extraInputAttributes(['style' => 'text-align: right;'])
                                     ->numeric()->suffix('€')->columnSpan(1)->disabled(),
@@ -380,6 +381,7 @@ class CreditNotesRelationManager extends RelationManager
                                 ->required(fn (Get $get) => $get('timing_type') == 'differita')
                                 ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita'),
                             Forms\Components\DatePicker::make('delivery_date')->label('Data documento')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->required(fn (Get $get) => $get('timing_type') == 'differita')
                                 ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita')
                                 ->native(false)
@@ -577,6 +579,7 @@ class CreditNotesRelationManager extends RelationManager
                                 ->default(now()->year),
 
                             Forms\Components\DatePicker::make('invoice_date')->label('Data')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2)
                                 ->required()
                                 ->default(now()->toDateString()),

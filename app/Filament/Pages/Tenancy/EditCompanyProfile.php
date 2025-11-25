@@ -162,6 +162,7 @@ class EditCompanyProfile extends EditTenantProfile
                                     ->maxLength(255)
                                     ->columnSpan(3),
                                 DatePicker::make('register_date')->label('Data iscrizione')
+                                    ->extraInputAttributes(['class' => 'text-center'])
                                     ->columnSpan(3),
                             ])
                             ->columns(12),

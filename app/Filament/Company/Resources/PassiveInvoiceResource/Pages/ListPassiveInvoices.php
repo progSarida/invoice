@@ -30,6 +30,7 @@ class ListPassiveInvoices extends ListRecords
                             throw new \Exception($response->getMessage());
                         }
 
+                        $title = 'Fatture passive scaricate con successo.';
                         $msg = '';
                         if ($response->new_suppliers == 1) {
                             $msg .= 'Inserito ' . $response->new_suppliers . ' nuovo fornitore.<br> ';
@@ -42,11 +43,12 @@ class ListPassiveInvoices extends ListRecords
                             $msg .= 'Scaricate ' . $response->new_invoices . ' nuove fatture passive.';
                         }
                         if (empty($msg)) {
+                            $title = 'Procedura completata.';
                             $msg = 'Nessuna nuova fattura o fornitore scaricato.';
                         }
 
                         Notification::make()
-                            ->title('Fatture passive scaricate con successo.')
+                            ->title($title)
                             ->body($msg)
                             ->success()
                             ->send();

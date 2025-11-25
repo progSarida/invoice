@@ -40,12 +40,7 @@ class PassiveInvoiceResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione passiva';
 
-    protected static ?int $navigationSort = 3;
-
-    public static function getNavigationSort(): ?int
-    {
-        return 2;
-    }
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -109,17 +104,21 @@ class PassiveInvoiceResource extends Resource
                                     ,
                                 Forms\Components\DatePicker::make('payment_deadline')
                                     ->label('Scadenza pagamento')
+                                    ->extraInputAttributes(['class' => 'text-center'])
                                     ->columnSpan(2)
                                     ->disabled(),
 
                                 Forms\Components\DatePicker::make('last_payment_date')
                                     ->label('Data ultimo pagamento')
+                                    ->extraInputAttributes(['class' => 'text-center'])
                                     ->columnSpan(2)
                                     ->disabled()
                                     ,
 
                                 Forms\Components\TextInput::make('total_payment')
                                     ->label('Totale pagato')
+                                    ->extraInputAttributes(['class' => 'text-right'])
+                                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : number_format(0, 2, ',', '.'))
                                     ->columnSpan(2)
                                     // ->visible(fn (Get $get) => !is_null($get('bank')))
                                     ->disabled()
@@ -158,6 +157,7 @@ class PassiveInvoiceResource extends Resource
                                 ->disabled(),
                             Forms\Components\DatePicker::make('invoice_date')
                                 ->label('Data')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2)
                                 ->disabled()
                                 ,

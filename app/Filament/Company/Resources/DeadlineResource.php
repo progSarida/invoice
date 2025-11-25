@@ -31,12 +31,7 @@ class DeadlineResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatturazione passiva';
 
-    protected static ?int $navigationSort = 2;
-
-    public static function getNavigationSort(): ?int
-    {
-        return 4;
-    }
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -55,11 +50,23 @@ class DeadlineResource extends Resource
                     ->columnSpan(1),
                 DatePicker::make('date')
                     ->label('Scadenza pagamento')
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled()
                     ->columnSpan(1),
                 TextInput::make('amount')
                     ->label('Totale')
+                    ->live(onBlur: true)
+                    ->extraInputAttributes(['class' => 'text-right'])
+                    ->afterStateUpdated(function ($state, $component) {
+                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    ->suffix('€')
                     ->columnSpan(1),
         ]);
     }

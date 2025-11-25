@@ -92,9 +92,11 @@ class ListClients extends ListRecords
                                 ->optionsLimit(5),
                             DatePicker::make('from_date')
                                 ->label('Da data')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2),
                             DatePicker::make('to_date')
                                 ->label('A data')
+                                ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2),
                             Checkbox::make('prec_residue')
                                 ->label('Con residuo precedente')
