@@ -23,7 +23,7 @@ class InstrumentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Parametri Prima nota';
+    protected static ?string $navigationGroup = 'Tabelle Prima nota';
 
     protected static ?int $navigationSort = 1;
 

@@ -23,7 +23,7 @@ class InsuranceResource extends Resource
 
     protected static ?string $navigationIcon = 'ri-contract-line';
 
-    protected static ?string $navigationGroup = 'Parametri Cauzioni';
+    protected static ?string $navigationGroup = 'Tabelle Cauzioni';
 
     protected static ?int $navigationSort = 1;
 

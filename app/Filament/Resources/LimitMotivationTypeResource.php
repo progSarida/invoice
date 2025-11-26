@@ -18,12 +18,11 @@ use App\Filament\Resources\LimitMotivationTypeResource\RelationManagers;
 class LimitMotivationTypeResource extends Resource
 {
     protected static ?string $model = LimitMotivationType::class;
-
     protected static ?string $navigationIcon = 'tabler-clock-question';
-
     public static ?string $pluralModelLabel = 'Motivazioni Art. 26 633/72';
-
     public static ?string $modelLabel = 'Motivazioni Art. 26 633/72';
+    protected static ?string $navigationGroup = 'Tabelle';
+    protected static ?int $navigationSort = 7;
 
     public static function form(Form $form): Form
     {
@@ -78,15 +77,5 @@ class LimitMotivationTypeResource extends Resource
             'create' => Pages\CreateLimitMotivationType::route('/create'),
             'edit' => Pages\EditLimitMotivationType::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Parametri';
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 8;
     }
 }

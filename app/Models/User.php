@@ -131,7 +131,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     public function canAccessPanel(Panel $panel): bool
     {
         $panelId = $panel->getId();
-        
+
         if($this->isSuperAdmin())
             return true;
 
@@ -143,17 +143,18 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         return false;
     }
 
-    public function loginRedirect(): ?Response 
+    public function loginRedirect(): ?Response
     {
-        $destinationPanelId = null;
-        if ($this->isSuperAdmin() || $this->hasAdminAccess())
-            $destinationPanelId = 'admin';
-        else if ($this->hasCompanyAccess())
+        // $destinationPanelId = null;
+        // if ($this->isSuperAdmin() || $this->hasAdminAccess())
+        //     $destinationPanelId = 'admin';
+        // else if ($this->hasCompanyAccess())
+        if ($this->hasCompanyAccess())
             $destinationPanelId = 'company';
-        
+
         if (!$destinationPanelId)
             return abort(403, 'Accesso non autorizzato a nessun pannello.');
-        
+
         return redirect()->to(Filament::getPanel($destinationPanelId)->getUrl());
     }
 
@@ -165,9 +166,9 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     public function getTenants(Panel $panel): array|Collection
     {
         // Se l'utente ha un ruolo in [1000, 1002], restituisce tutti i tenant.
-        if ($this->hasCompanyAccess()) 
+        if ($this->hasCompanyAccess())
             return Company::all();
-        
+
         // Altrimenti, ritorna solo i tenant a cui l'utente è direttamente associato.
         return $this->companies()->get();
     }

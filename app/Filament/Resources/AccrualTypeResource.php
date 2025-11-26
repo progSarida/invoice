@@ -16,14 +16,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AccrualTypeResource extends Resource
 {
     protected static ?string $model = AccrualType::class;
-
     public static ?string $pluralModelLabel = 'Competenze';
-
     public static ?string $modelLabel = 'Competenze';
-
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    // protected static ?string $navigationGroup = 'Parametri';
+    protected static ?string $navigationGroup = 'Tabelle';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -90,15 +87,5 @@ class AccrualTypeResource extends Resource
             'create' => Pages\CreateAccrualType::route('/create'),
             'edit' => Pages\EditAccrualType::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Parametri';
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 4;
     }
 }

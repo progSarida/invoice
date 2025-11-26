@@ -16,12 +16,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ManageTypeResource extends Resource
 {
     protected static ?string $model = ManageType::class;
-
     public static ?string $pluralModelLabel = 'Gestioni';
-
     public static ?string $modelLabel = 'Gestioni';
-
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static ?string $navigationGroup = 'Tabelle';
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
@@ -88,15 +87,5 @@ class ManageTypeResource extends Resource
             'create' => Pages\CreateManageType::route('/create'),
             'edit' => Pages\EditManageType::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Parametri';
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 5;
     }
 }

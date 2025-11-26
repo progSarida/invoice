@@ -37,14 +37,11 @@ use Illuminate\Support\Facades\Auth;
 class CompanyResource extends Resource
 {
     protected static ?string $model = Company::class;
-
     public static ?string $pluralModelLabel = 'Aziende';
-
     public static ?string $modelLabel = 'Azienda';
-
     protected static ?string $navigationIcon = 'gmdi-business-center-r';
-
-    // protected static ?string $navigationGroup = 'Parametri';
+    protected static ?string $navigationGroup = 'Tabelle';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -589,15 +586,5 @@ class CompanyResource extends Resource
             'create' => Pages\CreateCompany::route('/create'),
             'edit' => Pages\EditCompany::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Parametri';
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 2;
     }
 }

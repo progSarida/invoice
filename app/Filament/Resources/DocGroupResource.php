@@ -16,12 +16,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class DocGroupResource extends Resource
 {
     protected static ?string $model = DocGroup::class;
-
     public static ?string $pluralModelLabel = 'Gruppi documenti';
-
     public static ?string $modelLabel = 'Gruppi documenti';
-
     protected static ?string $navigationIcon = 'heroicon-o-folder';
+    protected static ?string $navigationGroup = 'Tabelle';
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {
@@ -85,15 +84,5 @@ class DocGroupResource extends Resource
             'create' => Pages\CreateDocGroup::route('/create'),
             'edit' => Pages\EditDocGroup::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Parametri';
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 6;
     }
 }

@@ -16,12 +16,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class RegionResource extends Resource
 {
     protected static ?string $model = Region::class;
-
     public static ?string $pluralModelLabel = 'Regioni';
-
     public static ?string $modelLabel = 'Regione';
-
     protected static ?string $navigationIcon = 'phosphor-map-pin-simple-fill';
+    protected static ?string $navigationGroup = 'Tabelle';
+    protected static ?int $navigationSort = 10;
 
     // protected static ?string $navigationGroup = 'Gestione città';
 
@@ -81,15 +80,5 @@ class RegionResource extends Resource
             'create' => Pages\CreateRegion::route('/create'),
             'edit' => Pages\EditRegion::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Anagrafiche territoriali';
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 2;
     }
 }

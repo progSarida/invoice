@@ -21,12 +21,11 @@ use App\Filament\Resources\DocTypeResource\RelationManagers;
 class DocTypeResource extends Resource
 {
     protected static ?string $model = DocType::class;
-
     public static ?string $pluralModelLabel = 'Tipi documenti';
-
     public static ?string $modelLabel = 'Tipi documenti';
-
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationGroup = 'Tabelle';
+    protected static ?int $navigationSort = 6;
 
     public static function form(Form $form): Form
     {
@@ -99,15 +98,5 @@ class DocTypeResource extends Resource
             'create' => Pages\CreateDocType::route('/create'),
             'edit' => Pages\EditDocType::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Parametri';
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 7;
     }
 }

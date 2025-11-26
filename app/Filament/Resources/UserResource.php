@@ -25,12 +25,11 @@ use Illuminate\Support\Facades\Hash;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-
     public static ?string $pluralModelLabel = 'Utenti';
-
     public static ?string $modelLabel = 'Utente';
-
     protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationGroup = 'Tabelle';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -57,7 +56,7 @@ class UserResource extends Resource
                 //     ->dehydrated(fn ($state) => filled($state))
                 //     ->helperText(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord ? '' : ''),
 
-                
+
             ]);
     }
 
@@ -116,15 +115,5 @@ Tables\Columns\TextColumn::make('created_at')
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Parametri';
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 1;
     }
 }
