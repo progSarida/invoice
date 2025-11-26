@@ -159,7 +159,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 
         if (!$destinationPanelId)
             return abort(403, 'Accesso non autorizzato a nessun pannello.');
-
+dump($destinationPanelId);
         return redirect()->to(Filament::getPanel($destinationPanelId)->getUrl());
     }
 
