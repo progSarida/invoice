@@ -145,11 +145,11 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 
     public function loginRedirect(): ?Response
     {
-        // $destinationPanelId = null;
-        // if ($this->isSuperAdmin() || $this->hasAdminAccess())
-        //     $destinationPanelId = 'admin';
-        // else if ($this->hasCompanyAccess())
-        if ($this->isSuperAdmin() || $this->hasAdminAccess() || $this->hasCompanyAccess())
+        $destinationPanelId = null;
+        if ($this->isSuperAdmin() || $this->hasAdminAccess())
+            // $destinationPanelId = 'admin';
+            $destinationPanelId = 'company';
+        else if ($this->hasCompanyAccess())
             $destinationPanelId = 'company';
 
         if (!$destinationPanelId)
