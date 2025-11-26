@@ -146,20 +146,20 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     public function loginRedirect(): ?Response
     {
         $destinationPanelId = null;
-        // if ($this->isSuperAdmin() || $this->hasAdminAccess())
-        //     $destinationPanelId = 'admin';
-        if ($this->isSuperAdmin() || $this->hasAdminAccess()){
-            if($this->hasCompanyAccess())
-                $destinationPanelId = 'company';
-            else
-                $destinationPanelId = 'admin';
-        }
+        if ($this->isSuperAdmin() || $this->hasAdminAccess())
+            $destinationPanelId = 'admin';
+        // if ($this->isSuperAdmin() || $this->hasAdminAccess()){
+        //     if($this->hasCompanyAccess())
+        //         $destinationPanelId = 'company';
+        //     else
+        //         $destinationPanelId = 'admin';
+        // }
         else if ($this->hasCompanyAccess())
             $destinationPanelId = 'company';
 
         if (!$destinationPanelId)
             return abort(403, 'Accesso non autorizzato a nessun pannello.');
-dump($destinationPanelId);
+
         return redirect()->to(Filament::getPanel($destinationPanelId)->getUrl());
     }
 
