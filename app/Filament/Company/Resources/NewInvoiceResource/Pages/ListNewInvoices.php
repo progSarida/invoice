@@ -94,7 +94,7 @@ class ListNewInvoices extends ListRecords
             ExportAction::make('esporta')
                 ->icon('phosphor-export')
                 ->label('Esporta')
-                ->color('primary')
+                ->color(Color::rgb('rgb(0, 153, 0)'))
                 ->exporter(NewInvoiceExporter::class)
                 // ->keyBindings(['alt+e'])
                 ,

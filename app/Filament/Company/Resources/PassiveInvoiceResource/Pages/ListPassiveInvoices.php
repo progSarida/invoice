@@ -3,11 +3,14 @@
 namespace App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 
 use App\Filament\Company\Resources\PassiveInvoiceResource;
+use App\Filament\Exports\PassiveInvoiceExporter;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Notifications\Notification;
 use App\Services\AndxorSoapService;
+use Filament\Actions\ExportAction;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Colors\Color;
 use Filament\Support\Enums\MaxWidth;
 
 class ListPassiveInvoices extends ListRecords
@@ -69,7 +72,13 @@ class ListPassiveInvoices extends ListRecords
                     // TextInput::make('limit')
                     //     ->label('Numero fatture')
                 ])
-                ->requiresConfirmation()
+                ->requiresConfirmation(),
+            ExportAction::make('esporta')
+                ->icon('heroicon-s-table-cells')
+                ->label('Esporta')
+                ->tooltip('Esporta elenco fatture passive')
+                ->color(Color::rgb('rgb(0,153,0)'))
+                ->exporter(PassiveInvoiceExporter::class)
         ];
     }
 

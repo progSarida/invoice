@@ -3,7 +3,10 @@
 namespace App\Filament\Company\Resources\NewActivePaymentsResource\Pages;
 
 use App\Filament\Company\Resources\NewActivePaymentsResource;
+use App\Filament\Exports\ActivePaymentsExporter;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
+use Filament\Actions\ExportAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Colors\Color;
@@ -68,9 +71,14 @@ class ListNewActivePayments extends ListRecords
                         ->title('Stampa avviata')
                         ->success()
                         ->send();
-                })
-                // ->keyBindings(['alt+n'])
-                ,
+                }),
+                // ->keyBindings(['alt+n']),
+                ExportAction::make('esporta')
+                    ->icon('heroicon-s-table-cells')
+                    ->label('Esporta')
+                    ->tooltip('Esporta elenco pagamenti attivi')
+                    ->color(Color::rgb('rgb(0,153,0)'))
+                    ->exporter(ActivePaymentsExporter::class)
         ];
     }
 }
