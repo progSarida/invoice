@@ -24,6 +24,7 @@ use App\Models\ManageType;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\DB;
 
 class ListNewInvoices extends ListRecords
@@ -56,7 +57,7 @@ class ListNewInvoices extends ListRecords
                 ->label('Stampa')
                 ->tooltip('Stampa elenco fatture')
                 // ->iconButton() // mostro solo icona
-                ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 ->action(function ($livewire) {
                     $records = $livewire->getFilteredTableQuery()->get(); // recupero risultato della query
                     $filters = $livewire->tableFilters ?? []; // recupero i filtri

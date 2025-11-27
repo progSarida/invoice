@@ -7,6 +7,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Colors\Color;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Support\Facades\Blade;
 
@@ -23,7 +24,7 @@ class ListAttachments extends ListRecords
                 ->label('Stampa')
                 ->tooltip('Stampa elenco allegati')
                 // ->iconButton()                                                                                       // mostro solo icona
-                ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 // ->keyBindings(['alt+s'])
                 ->action(function ($livewire) {
                     $records = $livewire->getFilteredTableQuery()->get();                                               // recupero risultato della query

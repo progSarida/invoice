@@ -10,6 +10,7 @@ use App\Filament\Company\Resources\NewContractResource;
 use App\Models\NewContract;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Radio;
+use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use setasign\Fpdi\Fpdi;
@@ -29,7 +30,7 @@ class EditNewContract extends EditRecord
             Actions\Action::make('stampa_pdf')
                 ->label('Stampa')
                 ->icon('heroicon-o-printer')
-                ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 ->modalWidth('md')
                 ->form([
                     Checkbox::make('include_contract')

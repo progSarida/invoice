@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Colors\Color;
 
 class ViewNewInvoice extends ViewRecord
 {
@@ -23,7 +24,7 @@ class ViewNewInvoice extends ViewRecord
             Actions\Action::make('stampa_pdf')
                 ->label('Stampa')
                 ->icon('heroicon-o-printer')
-                ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 ->requiresConfirmation()
                 ->modalHeading('Selezione stampa')
                 ->modalDescription('Seleziona il tipo di stampa per la fattura')

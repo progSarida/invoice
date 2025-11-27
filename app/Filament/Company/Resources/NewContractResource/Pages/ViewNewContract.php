@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
 use Filament\Forms\Components\Checkbox;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Storage;
 use setasign\Fpdi\Fpdi;
 
@@ -25,7 +26,7 @@ class ViewNewContract extends ViewRecord
             Actions\Action::make('stampa_pdf')
                 ->label('Stampa')
                 ->icon('heroicon-o-printer')
-                ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 ->modalWidth('md')
                 ->form([
                     Checkbox::make('include_contract')

@@ -10,6 +10,7 @@ use App\Filament\Exports\InvoiceExporter;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Company\Resources\InvoiceResource;
 use Filament\Actions\ExportAction;
+use Filament\Support\Colors\Color;
 
 class ListInvoices extends ListRecords
 {
@@ -25,7 +26,7 @@ class ListInvoices extends ListRecords
                 ->label('Stampa')
                 ->tooltip('Stampa elenco fatture')
                 // ->iconButton() // mostro solo icona
-                ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 ->action(function ($livewire) {
                     $records = $livewire->getFilteredTableQuery()->get(); // recupero risultato della query
                     $filters = $livewire->tableFilters ?? []; // recupero i filtri
@@ -58,7 +59,7 @@ class ListInvoices extends ListRecords
             ExportAction::make('esporta')
                 ->icon('phosphor-export')
                 ->label('Esporta')
-                ->color('primary')
+                ->color(Color::rgb('rgb(0, 153, 0)'))
                 ->exporter(InvoiceExporter::class)
         ];
     }

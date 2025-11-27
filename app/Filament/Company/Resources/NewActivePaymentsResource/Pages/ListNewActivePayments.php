@@ -6,6 +6,7 @@ use App\Filament\Company\Resources\NewActivePaymentsResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Blade;
 
 class ListNewActivePayments extends ListRecords
@@ -20,20 +21,20 @@ class ListNewActivePayments extends ListRecords
                 ->icon('heroicon-o-printer')
                 ->label('Stampa')
                 ->tooltip('Stampa elenco pagamenti')
-                ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 ->action(function ($livewire) {
                     // Recupera i record dalla query filtrata della tabella
                     $records = $livewire->getFilteredTableQuery()->get();
-                    
+
                     // Recupera i filtri della tabella
                     $filters = $livewire->tableFilters ?? [];
-                    
+
                     // Recupera la stringa di ricerca
                     $search = $livewire->tableSearch ?? null;
-                    
+
                     // Genera il nome del file PDF
                     $fileName = 'Pagamenti_' . \Carbon\Carbon::today()->format('d-m-Y') . '.pdf';
-                    
+
                     // Nota: Assicurati che la query della tabella in PaymentResource sia aggiornata per gestire
                     // 'contract_accrual_types' con whereJsonContains per filtrare i contratti in base agli ID in accrual_types.
                     // Esempio:
@@ -58,10 +59,10 @@ class ListNewActivePayments extends ListRecords
                             'isPhpEnabled' => true, // Abilita PHP nel template
                             'isFontSubsettingEnabled' => true, // Ottimizza i font
                         ]);
-                        
+
                         echo $pdf->stream();
                     }, $fileName);
-                    
+
                     // Invia notifica di conferma
                     Notification::make()
                         ->title('Stampa avviata')

@@ -24,6 +24,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
+use Filament\Support\Colors\Color;
 use Illuminate\Database\Eloquent\Model;
 
 class ListClients extends ListRecords
@@ -43,7 +44,7 @@ class ListClients extends ListRecords
                 ->label('Stampa')
                 ->tooltip('Stampa elenco clienti')
                 // ->iconButton()                                                                                       // mostro solo icona
-                ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 // ->keyBindings(['alt+s'])
                 ->action(function ($livewire) {
                     $records = $livewire->getFilteredTableQuery()->get();                                               // recupero risultato della query
@@ -268,7 +269,7 @@ class ListClients extends ListRecords
                 ->icon('phosphor-export')
                 ->label('Esporta')
                 ->tooltip('Esporta elenco clienti')
-                ->color('primary')
+                ->color(Color::rgb('rgb(0, 153, 0)'))
                 ->exporter(ClientExporter::class)
                 // ->keyBindings(['alt+e'])
         ];

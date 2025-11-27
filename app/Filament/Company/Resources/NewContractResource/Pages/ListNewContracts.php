@@ -18,6 +18,7 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Filament\Support\Colors\Color;
 use Filament\Support\Enums\MaxWidth;
 
 
@@ -218,7 +219,7 @@ class ListNewContracts extends ListRecords
                 ->icon('heroicon-o-printer')
                 ->label('Stampa')
                 ->tooltip('Stampa elenco contratti')
-                ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 ->action(function ($livewire) {
                     $records = $livewire->getFilteredTableQuery()->get();                           // Recupero risultato della query
                     $filters = $livewire->tableFilters ?? [];                                       // Recupero i filtri
@@ -249,7 +250,7 @@ class ListNewContracts extends ListRecords
             ExportAction::make('esporta')
                 ->icon('phosphor-export')
                 ->label('Esporta')
-                ->color('primary')
+                ->color(Color::rgb('rgb(0, 153, 0)'))
                 ->exporter(NewContractExporter::class)
                 // ->keyBindings(['alt+e'])
         ];
