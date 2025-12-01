@@ -24,9 +24,9 @@ class BankAccountResource extends Resource
 
     protected static ?string $navigationIcon = 'clarity-bank-line';
 
-    protected static ?string $navigationGroup = 'Tabelle Fatt. attiva';
+    protected static ?string $navigationGroup = 'Tabelle';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
 
