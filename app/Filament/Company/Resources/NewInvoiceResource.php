@@ -816,7 +816,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(3),
                             Forms\Components\Select::make('invoice_reference')
                                 ->label('Riferimento')
-                                ->required()
+                                // ->required()
                                 ->live()
                                 ->options(InvoiceReference::class)
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
