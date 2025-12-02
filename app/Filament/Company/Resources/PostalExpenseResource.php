@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Query\JoinClause;
 
 use function PHPUnit\Framework\isNull;
 
@@ -54,6 +55,13 @@ class PostalExpenseResource extends Resource
 
     public static function form(Form $form): Form
     {
+        // 1. Definiamo la subquery per trovare l'ultima data di dettaglio per ogni contratto
+        // Lo facciamo fuori dalle closure principali per riutilizzarlo e per chiarezza
+        $latestDetailSubquery = \App\Models\ContractDetail::query()
+            ->selectRaw('contract_id, MAX(date) as latest_detail_date')
+            ->groupBy('contract_id')
+            ->toBase();
+
         return $form
             ->schema([
                 // SEZIONE: Informazioni Base e Identificazione
@@ -135,20 +143,129 @@ class PostalExpenseResource extends Resource
                             ->preload()
                             ->columnSpan(3),
 
+                        // Forms\Components\Select::make('new_contract_id')
+                        //     ->label('Contratto')
+                        //     ->relationship(
+                        //         name: 'contract',
+                        //         modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id', $get('client_id'))
+                        //     )
+                        //     ->getOptionLabelFromRecordUsing(
+                        //         fn (Model $record) => "{$record->office_name} ({$record->office_code}) - TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
+                        //     )
+                        //     ->afterStateUpdated(function (Set $set, $state, Get $get) {
+                        //         $contract = NewContract::find($state);
+                        //         if ($contract) {
+                        //             $set('reinvoice', $contract->reinvoice);
+                        //             // Resettiamo tax_type per evitare valori non validi
+                        //             $set('tax_type', null);
+                        //         } else {
+                        //             $set('reinvoice', false);
+                        //             $set('tax_type', null);
+                        //         }
+                        //     })
+                        //     ->required()
+                        //     ->searchable()
+                        //     ->live()
+                        //     ->preload()
+                        //     ->optionsLimit(5)
+                        //     ->columnSpan(6),
+
                         Forms\Components\Select::make('new_contract_id')
                             ->label('Contratto')
                             ->relationship(
                                 name: 'contract',
-                                modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id', $get('client_id'))
+                                modifyQueryUsing: function (Builder $query, Get $get) use ($latestDetailSubquery) {
+                                    // Filtro base (mantenuto)
+                                    $query->where('client_id', $get('client_id'));
+
+                                    // 1. Aggiungi la JOIN con la subquery per l'ultima data di dettaglio
+                                    $query->leftJoinSub($latestDetailSubquery, 'latest_details', function (JoinClause $join) {
+                                        $join->on('new_contracts.id', '=', 'latest_details.contract_id');
+                                    });
+
+                                    // 2. Seleziona tutte le colonne necessarie e aggiungi l'anno calcolato (calculated_year)
+                                    $query->select('new_contracts.*')
+                                        ->selectRaw('
+                                            COALESCE(
+                                                YEAR(new_contracts.start_validity_date),
+                                                YEAR(latest_details.latest_detail_date)
+                                            ) AS calculated_year' // Ora usa latest_details.latest_detail_date
+                                        )
+                                        ->distinct();
+
+                                    // 3. Ordina per l'anno calcolato (Ultimo Anno per Primo)
+                                    $query->orderByRaw('calculated_year DESC');
+
+                                    return $query;
+                                }
                             )
+                            ->getSearchResultsUsing(function (string $search, Get $get) use ($latestDetailSubquery) {
+                                // 1. Pulisci la stringa di ricerca
+                                $search = trim(preg_replace('/\s+/', ' ', $search));
+
+                                // 2. Query di base e JOIN
+                                $query = \App\Models\NewContract::query();
+
+                                // Aggiungi la JOIN con la subquery (necessaria per calculated_year)
+                                $query->leftJoinSub($latestDetailSubquery, 'latest_details', function (JoinClause $join) {
+                                    $join->on('new_contracts.id', '=', 'latest_details.contract_id');
+                                });
+
+                                // Aggiungi i filtri di base del form (mantenuti)
+                                $query->where('client_id', $get('client_id'));
+                                // NON includere il filtro tax_types che non è presente nel modifyQueryUsing originale.
+
+                                // 3. Applicazione del Filtro di Ricerca (CIG Code O Anno Calcolato)
+                                $query->where(function ($q) use ($search) {
+                                    // Cerca per CIG CODE
+                                    $q->where('new_contracts.cig_code', 'LIKE', "%{$search}%");
+
+                                    // Cerca per ANNO CALCOLATO (se il search è un numero)
+                                    if (is_numeric($search)) {
+                                        // Replicare la logica COALESCE per la ricerca
+                                        $q->orWhereRaw('
+                                            YEAR(COALESCE(
+                                                new_contracts.start_validity_date,
+                                                latest_details.latest_detail_date
+                                            )) = ?', [$search]
+                                        );
+                                    }
+                                });
+
+                                // 4. Selezione delle colonne e Ordinamento (Replicata da modifyQueryUsing)
+                                $query->select('new_contracts.*')
+                                    ->selectRaw('
+                                        COALESCE(
+                                            YEAR(new_contracts.start_validity_date),
+                                            YEAR(latest_details.latest_detail_date)
+                                        ) AS calculated_year'
+                                    )
+                                    ->distinct();
+
+                                // 5. Ordinamento corretto: Ultimo Anno per Primo
+                                $query->orderByRaw('calculated_year DESC')
+                                    ->orderBy('new_contracts.id', 'DESC'); // Tie-breaker
+
+                                // 6. Esecuzione e Mappatura dei risultati (Formato armonizzato con l'anno)
+                                return $query
+                                    ->limit(50)
+                                    ->get()
+                                    ->mapWithKeys(function ($record) {
+                                        // Usa l'attributo calcolato per l'etichetta nel formato desiderato
+                                        $label = "{$record->office_name} ({$record->office_code}) - TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code} - {$record->calculated_year}";
+                                        return [$record->id => $label];
+                                    })
+                                    ->toArray();
+                            })
                             ->getOptionLabelFromRecordUsing(
-                                fn (Model $record) => "{$record->office_name} ({$record->office_code}) - TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
+                                // Aggiornato per includere l'anno calcolato
+                                fn (Model $record) => "{$record->office_name} ({$record->office_code}) - TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code} - {$record->calculated_year}"
                             )
                             ->afterStateUpdated(function (Set $set, $state, Get $get) {
                                 $contract = NewContract::find($state);
                                 if ($contract) {
                                     $set('reinvoice', $contract->reinvoice);
-                                    // Resettiamo tax_type per evitare valori non validi
+                                    // Resettiamo tax_type per evitare valori non validi (logica originale mantenuta)
                                     $set('tax_type', null);
                                 } else {
                                     $set('reinvoice', false);

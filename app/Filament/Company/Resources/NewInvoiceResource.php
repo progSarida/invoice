@@ -57,6 +57,7 @@ use App\Models\SocialContribution;
 use App\Models\Withholding;
 use Exception;
 use Filament\Forms\Components\Placeholder;
+use Illuminate\Database\Query\JoinClause;
 
 class NewInvoiceResource extends Resource
 {
@@ -76,6 +77,13 @@ class NewInvoiceResource extends Resource
 
     public static function form(Form $form): Form
     {
+        // 1. Definiamo la subquery per trovare l'ultima data di dettaglio per ogni contratto
+        // Lo facciamo fuori dalle closure principali per riutilizzarlo e per chiarezza
+        $latestDetailSubquery = \App\Models\ContractDetail::query()
+            ->selectRaw('contract_id, MAX(date) as latest_detail_date')
+            ->groupBy('contract_id')
+            ->toBase();
+
         return $form
             ->schema([
                 // Grid::make('GRID')->columnSpan(2)->schema([
@@ -296,22 +304,105 @@ class NewInvoiceResource extends Resource
                                 // )
                                 ->relationship(
                                     name: 'contract',
-                                    modifyQueryUsing: function (Builder $query, Get $get, $livewire) {
+                                    modifyQueryUsing: function (Builder $query, Get $get, $livewire) use ($latestDetailSubquery) {
                                         $query->where('client_id', $get('client_id'))
-                                                ->whereJsonContains('tax_types', $get('tax_type'));
+                                            ->whereJsonContains('tax_types', $get('tax_type'));
+
+                                        // *** MODIFICA CHIAVE ***: Usiamo la subquery per ottenere SOLO l'ultima data
+                                        $query->leftJoinSub($latestDetailSubquery, 'latest_details', function (JoinClause $join) {
+                                            $join->on('new_contracts.id', '=', 'latest_details.contract_id');
+                                        });
 
                                         // applico i filtri di validità solo in fase di creazione
                                         if ($livewire instanceof \Filament\Resources\Pages\CreateRecord) {
-                                            $query
-                                                ->where('end_validity_date', '>=', today())
-                                                ->where('start_validity_date', '<=', today());
+                                            $query->where(function ($q) {
+                                                $q->whereNull('start_validity_date')
+                                                ->orWhere(function ($q2) {
+                                                    $q2->where('start_validity_date', '<=', today())
+                                                        ->where('end_validity_date', '>=', today());
+                                                });
+                                            });
                                         }
+
+                                        // 1. Seleziona tutte le colonne necessarie e aggiungi l'anno calcolato
+                                        $query->select('new_contracts.*')
+                                            ->selectRaw('
+                                                COALESCE(
+                                                    YEAR(new_contracts.start_validity_date),
+                                                    YEAR(latest_details.latest_detail_date)
+                                                ) AS calculated_year' // Ora usa latest_details.latest_detail_date
+                                            )
+                                            ->distinct();
+
+                                        // 2. Ordina per l'anno calcolato (Ultimo Anno per Primo)
+                                        $query->orderByRaw('calculated_year DESC');
 
                                         return $query;
                                     },
                                 )
+                                ->getSearchResultsUsing(function (string $search, Get $get) use ($latestDetailSubquery) {
+                                    // 1. Pulisci la stringa di ricerca
+                                    $search = trim(preg_replace('/\s+/', ' ', $search));
+
+                                    // 2. Query di base e JOIN (Replicata da modifyQueryUsing)
+                                    $query = \App\Models\NewContract::query();
+
+                                    // *** MODIFICA CHIAVE ***: Usiamo la subquery per ottenere SOLO l'ultima data
+                                    $query->leftJoinSub($latestDetailSubquery, 'latest_details', function (JoinClause $join) {
+                                        $join->on('new_contracts.id', '=', 'latest_details.contract_id');
+                                    });
+
+
+                                    // Aggiungi i filtri di base del form (necessario per limitare i risultati)
+                                    $query->where('client_id', $get('client_id'))
+                                        ->whereJsonContains('tax_types', $get('tax_type'));
+
+                                    // 3. Applicazione del Filtro di Ricerca
+                                    $query->where(function ($q) use ($search) {
+
+                                        // Cerca per CIG CODE
+                                        $q->where('new_contracts.cig_code', 'LIKE', "%{$search}%");
+
+                                        // Cerca per ANNO CALCOLATO (se il search è un numero)
+                                        if (is_numeric($search)) {
+                                            // Usiamo lo stesso COALESCE che definisce calculated_year per la ricerca
+                                            $q->orWhereRaw('
+                                                YEAR(COALESCE(
+                                                    new_contracts.start_validity_date,
+                                                    latest_details.latest_detail_date
+                                                )) = ?', [$search]
+                                            );
+                                        }
+                                    });
+
+                                    // 4. Selezione delle colonne e Ordinamento (Replicata da modifyQueryUsing)
+                                    $query->select('new_contracts.*')
+                                        ->selectRaw('
+                                            COALESCE(
+                                                YEAR(new_contracts.start_validity_date),
+                                                YEAR(latest_details.latest_detail_date)
+                                            ) AS calculated_year' // Ora usa latest_details.latest_detail_date
+                                        )
+                                        ->distinct();
+
+                                    // 5. Ordinamento corretto: Torniamo a DESC + Tie-breaker
+                                    // Dopo aver stabilizzato il calculated_year, l'ordinamento DESC dovrebbe funzionare.
+                                    $query->orderByRaw('calculated_year DESC')
+                                        ->orderBy('new_contracts.id', 'DESC'); // Tie-breaker
+
+                                    // 6. Esecuzione e Mappatura dei risultati (Formato armonizzato)
+                                    return $query
+                                        ->limit(50)
+                                        ->get()
+                                        ->mapWithKeys(function ($record) {
+                                            // Usa l'attributo calcolato per l'etichetta nel formato desiderato
+                                            $label = "{$record->office_name} ({$record->office_code}) TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code} - {$record->calculated_year}";
+                                            return [$record->id => $label];
+                                        })
+                                        ->toArray();
+                                })
                                 ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => "{$record->office_name} ({$record->office_code}) TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
+                                    fn (Model $record) => "{$record->office_name} ({$record->office_code}) TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code} - {$record->calculated_year}"
                                 )
                                 ->disabled(fn(Get $get): bool => ! filled($get('client_id')) || ! filled($get('tax_type')))
                                 ->afterStateUpdated(function (Set $set, $state) {

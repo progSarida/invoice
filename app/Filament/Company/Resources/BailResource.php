@@ -10,6 +10,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Query\JoinClause;
 
 class BailResource extends Resource
 {
@@ -32,6 +34,13 @@ class BailResource extends Resource
 
     public static function form(Form $form): Form
     {
+        // 1. Definiamo la subquery per trovare l'ultima data di dettaglio per ogni contratto
+        // Lo facciamo fuori dalle closure principali per riutilizzarlo e per chiarezza
+        $latestDetailSubquery = \App\Models\ContractDetail::query()
+            ->selectRaw('contract_id, MAX(date) as latest_detail_date')
+            ->groupBy('contract_id')
+            ->toBase();
+
         return $form
             ->columns(12)
             ->schema([
@@ -110,28 +119,164 @@ class BailResource extends Resource
                     ->live()
                     ->preload()
                     ->columnSpan(2),
+                // Forms\Components\Select::make('contract_id')->label('Contratto')
+                //     ->relationship(
+                //         name: 'contract',
+                //         modifyQueryUsing: fn (Builder $query, Get $get) => $query
+                //             ->where('client_id', $get('client_id'))
+                //             ->when($get('tax_types'), function ($q, $taxTypes) {
+                //                 foreach ($taxTypes as $taxType) {
+                //                     $q->whereJsonContains('tax_types', $taxType);
+                //                 }
+                //             })
+                //     )
+                //     ->getOptionLabelFromRecordUsing(
+                //         fn (Model $record) => "{$record->office_name} ({$record->office_code})\nCIG: ({$record->cig_code})"
+                //     )
+                //     ->afterStateUpdated(function (Set $set, $state) {
+                //         if ($state) {
+                //             $contract = NewContract::find($state);
+                //             $set('cig_code', $contract->cig_code);
+                //         }
+                //     })
+                //     ->disabled(fn (Get $get): bool => !filled($get('client_id')) || !filled($get('tax_types')))
+                //     ->searchable('cig_code')
+                //     ->live()
+                //     ->preload()
+                //     ->optionsLimit(5)
+                //     ->columnSpan(3),
                 Forms\Components\Select::make('contract_id')->label('Contratto')
                     ->relationship(
                         name: 'contract',
-                        modifyQueryUsing: fn (Builder $query, Get $get) => $query
-                            ->where('client_id', $get('client_id'))
+                        modifyQueryUsing: function (Builder $query, Get $get, $livewire) use ($latestDetailSubquery) {
+                            $query->where('client_id', $get('client_id'))
+                                ->when($get('tax_types'), function ($q, $taxTypes) {
+                                    foreach ($taxTypes as $taxType) {
+                                        $q->whereJsonContains('tax_types', $taxType);
+                                    }
+                                });
+
+                            // *** JOIN con subquery per calculated_year ***
+                            $query->leftJoinSub($latestDetailSubquery, 'latest_details', function (JoinClause $join) {
+                                $join->on('new_contracts.id', '=', 'latest_details.contract_id');
+                            });
+
+                            // Applico i filtri di validità solo in fase di creazione
+                            if ($livewire instanceof \Filament\Resources\Pages\CreateRecord) {
+                                $query->where(function ($q) {
+                                    $q->whereNull('start_validity_date')
+                                        ->orWhere(function ($q2) {
+                                            $q2->where('start_validity_date', '<=', today())
+                                                ->where('end_validity_date', '>=', today());
+                                        });
+                                });
+                            }
+
+                            // Seleziona tutte le colonne e aggiungi calculated_year
+                            $query->select('new_contracts.*')
+                                ->selectRaw('
+                                    COALESCE(
+                                        YEAR(new_contracts.start_validity_date),
+                                        YEAR(latest_details.latest_detail_date)
+                                    ) AS calculated_year'
+                                )
+                                ->distinct();
+
+                            // Ordina per anno calcolato DESC
+                            $query->orderByRaw('calculated_year DESC');
+
+                            return $query;
+                        }
+                    )
+                    ->getSearchResultsUsing(function (string $search, Get $get) use ($latestDetailSubquery) {
+                        // Pulisci la stringa di ricerca
+                        $search = trim(preg_replace('/\s+/', ' ', $search));
+
+                        // Query di base con JOIN
+                        $query = \App\Models\NewContract::query();
+
+                        $query->leftJoinSub($latestDetailSubquery, 'latest_details', function (JoinClause $join) {
+                            $join->on('new_contracts.id', '=', 'latest_details.contract_id');
+                        });
+
+                        // Filtri di base
+                        $query->where('client_id', $get('client_id'))
                             ->when($get('tax_types'), function ($q, $taxTypes) {
                                 foreach ($taxTypes as $taxType) {
                                     $q->whereJsonContains('tax_types', $taxType);
                                 }
+                            });
+
+                        // Filtro di ricerca
+                        $query->where(function ($q) use ($search) {
+                            // Cerca per CIG CODE
+                            $q->where('new_contracts.cig_code', 'LIKE', "%{$search}%");
+
+                            // Cerca per ANNO CALCOLATO (se numerico)
+                            if (is_numeric($search)) {
+                                $q->orWhereRaw('
+                                    YEAR(COALESCE(
+                                        new_contracts.start_validity_date,
+                                        latest_details.latest_detail_date
+                                    )) = ?', [$search]
+                                );
+                            }
+                        });
+
+                        // Selezione colonne
+                        $query->select('new_contracts.*')
+                            ->selectRaw('
+                                COALESCE(
+                                    YEAR(new_contracts.start_validity_date),
+                                    YEAR(latest_details.latest_detail_date)
+                                ) AS calculated_year'
+                            )
+                            ->distinct();
+
+                        // Ordinamento
+                        $query->orderByRaw('calculated_year DESC')
+                            ->orderBy('new_contracts.id', 'DESC');
+
+                        // Risultati
+                        return $query
+                            ->limit(50)
+                            ->get()
+                            ->mapWithKeys(function ($record) {
+                                $label = "{$record->office_name} ({$record->office_code})\nCIG: ({$record->cig_code}) - {$record->calculated_year}";
+                                return [$record->id => $label];
                             })
-                    )
+                            ->toArray();
+                    })
                     ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => "{$record->office_name} ({$record->office_code})\nCIG: ({$record->cig_code})"
+                        fn (Model $record) => "{$record->office_name} ({$record->office_code})\nCIG: ({$record->cig_code}) - {$record->calculated_year}"
                     )
                     ->afterStateUpdated(function (Set $set, $state) {
                         if ($state) {
                             $contract = NewContract::find($state);
+                            $lastDetail = $contract->lastDetail()->first();
+
+                            // Imposta cig_code come nella select semplice
                             $set('cig_code', $contract->cig_code);
+
+                            // Controllo dettagli come nel codice complesso
+                            if (!$lastDetail) {
+                                Notification::make()
+                                    ->title('Attenzione! E\' stato selezionato un contratto senza dettagli.')
+                                    ->warning()
+                                    ->duration(6000)
+                                    ->actions([
+                                        \Filament\Notifications\Actions\Action::make('edit')
+                                            ->label('Vai al contratto')
+                                            ->url(NewContractResource::getUrl('edit', ['record' => $contract->id]))
+                                            ->openUrlInNewTab()
+                                            ->color('warning'),
+                                    ])
+                                    ->send();
+                            }
                         }
                     })
                     ->disabled(fn (Get $get): bool => !filled($get('client_id')) || !filled($get('tax_types')))
-                    ->searchable('cig_code')
+                    ->searchable()
                     ->live()
                     ->preload()
                     ->optionsLimit(5)
