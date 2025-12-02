@@ -52,10 +52,10 @@ class ListNewInvoices extends ListRecords
 
                     // creo notifica su tabella notifications
 
-                    Notification::make()
-                        ->title("Rifiutate: " . ($refusedHide ? 'SI' : 'NO') . '\n' . "Scartate: " . ($discardedHide ? 'SI' : 'NO') . '\n' . "Non inviate: " . ($lateHide ? 'SI' : 'NO') . '\n' . "Senza esito: " . ($silentHide ? 'SI' : 'NO'))
-                        ->success()
-                        ->send();
+                    // Notification::make()
+                    //     ->title("Rifiutate: " . ($refusedHide ? 'SI' : 'NO') . '\n' . "Scartate: " . ($discardedHide ? 'SI' : 'NO') . '\n' . "Non inviate: " . ($lateHide ? 'SI' : 'NO') . '\n' . "Senza esito: " . ($silentHide ? 'SI' : 'NO'))
+                    //     ->success()
+                    //     ->send();
 
                     // \Log::info("Rifiutate: " . $refusedHide ? 'SI' : 'NO');
                     // \Log::info("Scartate: " . $discardedHide ? 'SI' : 'NO');
@@ -397,6 +397,7 @@ class ListNewInvoices extends ListRecords
 
         if ($refusedE->count() > 0) {                                                           // link fatture rifiutate
             $invoicesR = $refusedE->get();
+            $refused = false;
             foreach ($invoicesR as $index => $el) {
                 if (!\App\Models\Invoice::where('parent_id', $el->id)->exists()) {
                     Notification::make('refused_credit_note_' . $el->id)
@@ -411,9 +412,10 @@ class ListNewInvoices extends ListRecords
                                 ->color('warning'),
                         ])
                         ->send();
+                    $refused = true;
                 }
             }
-            return true;
+            if ($refused) return $refused;
         }
 
         return false;
