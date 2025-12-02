@@ -73,7 +73,57 @@ class CreditNotesRelationManager extends RelationManager
                                         ->modalHeading('')
                                         ->action(fn (array $data, Client $client, Get $get, Set $set) => NewInvoiceResource::saveClient($data, $client, $get, $set))
                                 )
-                                ->relationship(name: 'client', titleAttribute: 'denomination')
+                                // ->relationship(name: 'client', titleAttribute: 'denomination')
+                                ->getSearchResultsUsing(function (string $search) {
+                                    // Rimuovi spazi multipli e trim
+                                    $search = trim(preg_replace('/\s+/', ' ', $search));
+
+                                    // Query base con le stesse condizioni del relationship
+                                    $query = Client::query();
+
+                                    // Cerca separatori (spazio, virgola, slash, trattino)
+                                    $parts = preg_split('/[\s,\/\-]+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+
+                                    if (count($parts) >= 2) {
+                                        // Cerca ogni "parte" all'interno del campo denomination
+                                        $query->where(function ($q) use ($parts) {
+                                            foreach ($parts as $part) {
+                                                $q->where('denomination', 'LIKE', "%{$part}%");
+                                            }
+                                        });
+                                    } elseif (count($parts) === 1) {
+                                        // Un solo valore: cerca SOLO match esatto in number o year
+                                        $value = $parts[0];
+                                        $query->where(function ($q) use ($value) {
+                                            $q->where('denomination', 'LIKE', "%{$value}%");
+                                        });
+                                    }
+
+                                    return $query
+                                        ->orderBy('denomination', 'asc')
+                                        ->limit(50)
+                                        ->get()
+                                        ->mapWithKeys(function ($record) {
+                                            $subtype = $record->subtype->getLabel() ?? 'Cliente sconosciuto';
+                                            $denomination = $record->denomination ?? 'N/A';
+                                            $label = strtoupper("{$subtype}") . " - $denomination";
+
+                                            return [$record->id => $label];
+                                        })
+                                        ->toArray();
+                                })
+                                ->getOptionLabelUsing(function (?int $value) {
+                                    if (!$value) {
+                                        return null;
+                                    }
+                                    $record = Client::find($value);
+
+                                    if (!$record) {
+                                        return null;
+                                    }
+
+                                    return strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination";
+                                })
                                 ->getOptionLabelFromRecordUsing(
                                     fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
                                 )
@@ -153,7 +203,7 @@ class CreditNotesRelationManager extends RelationManager
                             Forms\Components\Select::make('contract_id')->label('Contratto')
                                 ->relationship(
                                     name: 'contract',
-                                    modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$get('client_id'))->where('tax_type',$get('tax_type'))
+                                    modifyQueryUsing: fn (Builder $query, Get $get) => $query->where('client_id',$get('client_id'))->whereJsonContains('tax_types',$get('tax_type'))
                                 )
                                 ->getOptionLabelFromRecordUsing(
                                     fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"

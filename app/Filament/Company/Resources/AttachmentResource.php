@@ -6,6 +6,7 @@ use App\Enums\AttachmentType;
 use App\Filament\Company\Resources\AttachmentResource\Pages;
 use App\Filament\Company\Resources\AttachmentResource\RelationManagers;
 use App\Models\Attachment;
+use App\Models\Client;
 use App\Models\NewContract;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -82,9 +83,59 @@ class AttachmentResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('client_id')->label('Cliente')
-                    ->relationship(name: 'client', titleAttribute: 'denomination')
+                    // ->relationship(name: 'client', titleAttribute: 'denomination')
+                    ->getSearchResultsUsing(function (string $search) {
+                        // Rimuovi spazi multipli e trim
+                        $search = trim(preg_replace('/\s+/', ' ', $search));
+
+                        // Query base con le stesse condizioni del relationship
+                        $query = Client::query();
+
+                        // Cerca separatori (spazio, virgola, slash, trattino)
+                        $parts = preg_split('/[\s,\/\-]+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+
+                        if (count($parts) >= 2) {
+                            // Cerca ogni "parte" all'interno del campo denomination
+                            $query->where(function ($q) use ($parts) {
+                                foreach ($parts as $part) {
+                                    $q->where('denomination', 'LIKE', "%{$part}%");
+                                }
+                            });
+                        } elseif (count($parts) === 1) {
+                            // Un solo valore: cerca SOLO match esatto in number o year
+                            $value = $parts[0];
+                            $query->where(function ($q) use ($value) {
+                                $q->where('denomination', 'LIKE', "%{$value}%");
+                            });
+                        }
+
+                        return $query
+                            ->orderBy('denomination', 'asc')
+                            ->limit(50)
+                            ->get()
+                            ->mapWithKeys(function ($record) {
+                                $subtype = $record->subtype->getLabel() ?? 'Cliente sconosciuto';
+                                $denomination = $record->denomination ?? 'N/A';
+                                $label = strtoupper("{$subtype}") . " - $denomination";
+
+                                return [$record->id => $label];
+                            })
+                            ->toArray();
+                    })
+                    ->getOptionLabelUsing(function (?int $value) {
+                        if (!$value) {
+                            return null;
+                        }
+                        $record = Client::find($value);
+
+                        if (!$record) {
+                            return null;
+                        }
+
+                        return strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination";
+                    })
                     ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
+                        fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
                     )
                     ->searchable()
                     ->preload()
