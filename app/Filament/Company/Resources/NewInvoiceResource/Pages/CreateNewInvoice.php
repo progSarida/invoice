@@ -23,17 +23,17 @@ class CreateNewInvoice extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        if ( $data['timing_type'] === 'contestuale' && Carbon::parse($data['invoice_date'])->lt(now()->subDays(9) )) {      // controllo 9 giorni indietro data fattura contestuale
-            Notification::make()
-                ->body('La data della fattura non può essere più vecchia di 9 giorni.')
-                ->danger()
-                ->duration(5000)
-                ->send();
+        // if ( $data['timing_type'] === 'contestuale' && Carbon::parse($data['invoice_date'])->lt(now()->subDays(9) )) {      // controllo 9 giorni indietro data fattura contestuale
+        //     Notification::make()
+        //         ->body('La data della fattura non può essere più vecchia di 9 giorni.')
+        //         ->danger()
+        //         ->duration(5000)
+        //         ->send();
 
-            $this->halt();
+        //     $this->halt();
 
-            return $data;
-        }
+        //     return $data;
+        // }
 
         if ( $data['timing_type'] === 'differita' && !empty($data['delivery_date']) ) {                                     // controllo 15 giorni mese successivo data fattura differita
             $deliveryDate = Carbon::parse($data['delivery_date']);
