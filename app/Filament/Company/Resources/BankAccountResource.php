@@ -49,8 +49,8 @@ class BankAccountResource extends Resource
                     ->label('Denominazione')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(4)
-                    ->autofocus(),
+                    // ->autofocus()
+                    ->columnspan(4),
                 Forms\Components\TextInput::make('holder')
                     ->label('Intestatario')
                     ->required()

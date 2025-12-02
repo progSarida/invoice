@@ -41,8 +41,8 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->live()
                     ->preload()
                     // ->optionsLimit(20)
-                    ->columnSpan(5)
-                    ->autofocus(),
+                    // ->autofocus()
+                    ->columnSpan(5),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()

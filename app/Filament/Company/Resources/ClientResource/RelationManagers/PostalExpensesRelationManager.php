@@ -56,7 +56,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->searchable()
                             ->live()
                             ->preload()
-                            ->autofocus(fn($record): bool => !$record)
+                            // ->autofocus(fn($record): bool => !$record)
                             ->columnSpan(3),
 
                         Forms\Components\Select::make('new_contract_id')->label('Contratto')
@@ -271,7 +271,7 @@ class PostalExpensesRelationManager extends RelationManager
 
                         Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
                             ->required()
-                            ->autofocus(fn($record): bool => $record && $record->shipmentInserted())
+                            // ->autofocus(fn($record): bool => $record && $record->shipmentInserted())
                             ->disk('public')
                             ->directory('reg_post_richiesta')
                             ->visibility('public')
@@ -418,7 +418,7 @@ class PostalExpensesRelationManager extends RelationManager
                     ->visible(fn($record): bool => $record && ($record->expense_insert_user_id && $record->expense_insert_date))
                     ->schema([
                         Forms\Components\Toggle::make('payed')->label('Spese pagate')
-                            ->autofocus(fn($record): bool => $record && $record->expenseInserted())
+                            // ->autofocus(fn($record): bool => $record && $record->expenseInserted())
                             ->live(),
 
                         Forms\Components\DatePicker::make('payment_date')->label('Data pagamento')
@@ -462,7 +462,7 @@ class PostalExpensesRelationManager extends RelationManager
                                     ->pluck('description', 'id')
                                     ->toArray();
                             })
-                            ->autofocus(fn($record): bool => $record && !$record->paymentInserted())
+                            // ->autofocus(fn($record): bool => $record && !$record->paymentInserted())
                             ->searchable()
                             ->preload()
                             ->live()
@@ -552,8 +552,8 @@ class PostalExpensesRelationManager extends RelationManager
                                 $extension = $file->getClientOriginalExtension();                                                       // estensione
 
                                 return sprintf('%s_REG-POST-RIGHIESTA_%s_%s_%s.%s', $date, $client, $taxType, $actType, $extension);
-                            })
-                            ->autofocus(fn($record): bool => $record && $record->reinvoiceInserted()),
+                            }),
+                            // ->autofocus(fn($record): bool => $record && $record->reinvoiceInserted()),
 
                         Forms\Components\DatePicker::make('reinvoice_attachment_date')->label('Data file fattura emessa caricato')
                             ->extraInputAttributes(['class' => 'text-center'])

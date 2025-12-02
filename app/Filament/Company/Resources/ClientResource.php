@@ -69,7 +69,7 @@ class ClientResource extends Resource
                     ->afterStateUpdated(function (callable $set, $state) {
                         $set('subtype', null);
                     })
-                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
+                    // ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
                     ->columnspan(3),
                 Forms\Components\Select::make('subtype')->label('Sottotipo')
                     ->options(function (callable $get) {
@@ -320,8 +320,8 @@ class ClientResource extends Resource
                     ->afterStateUpdated(function (callable $set, $state) {
                         $set('subtype', null);
                     })
-                    ->columnspan(3)
-                    ->autofocus(),
+                    // ->autofocus()
+                    ->columnspan(3),
                 Forms\Components\Select::make('subtype')->label('Sottotipo')
                     ->options(function (callable $get) {
                         $type = $get('type');

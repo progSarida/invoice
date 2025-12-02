@@ -123,7 +123,7 @@ class NewContractResource extends Resource
                     ->live()
                     // ->preload()
                     ->optionsLimit(5)
-                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
+                    // ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
                     ->columnSpan(5),
                 Forms\Components\Select::make('tax_types')
                     ->label('Entrate')

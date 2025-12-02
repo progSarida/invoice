@@ -58,7 +58,7 @@ class PassivePaymentResource extends Resource
                     ->live()
                     ->preload()
                     // ->optionsLimit(20)
-                    ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
+                    // ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
                     ->columnSpan(5),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
