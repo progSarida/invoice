@@ -82,13 +82,13 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
     {
         return match($this) {
             self::EMPTY => '',
-            self::DA_INVIARE => '',
-            self::INVIATA => '',
-            self::SCARTATA => 'gmdi-block',
-            self::CONSEGNATA => '',
-            self::MANCATA_CONSEGNA => '',
-            self::ACCETTATA => '',
-            self::RIFIUTATA => 'gmdi-block',
+            self::DA_INVIARE => 'fluentui-mail-clock-20-o',
+            self::INVIATA => 'fluentui-mail-arrow-forward-20-o',
+            self::SCARTATA => 'fluentui-mail-error-20-o',
+            self::CONSEGNATA => 'fluentui-mail-checkmark-20-o',
+            self::MANCATA_CONSEGNA => 'fluentui-mail-dismiss-20-o',
+            self::ACCETTATA => 'fluentui-mail-checkmark-20-o',
+            self::RIFIUTATA => 'fluentui-mail-dismiss-20-o',
             self::DECORRENZA_TERMINI => 'vaadin-time-forward',
             self::AVVENUTA_TRASMISSIONE => '',
             self::METADATA => '',
@@ -105,8 +105,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::IMPORTATA => '',
 
             // self::RIFIUTO_VALIDATO => 'gmdi-block',
-            self::RIFIUTO_EMESSO => '',
-            self::RIFIUTO_ARCHIVIATO => '',
+            self::RIFIUTO_EMESSO => 'fluentui-mail-arrow-forward-20-o',
+            self::RIFIUTO_ARCHIVIATO => 'fluentui-mail-prohibited-20-o',
             self::SCARTO_VALIDATO => '',
             self::AUTO_INVIATA => '',
             self::APERTA => ''

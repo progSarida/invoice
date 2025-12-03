@@ -1148,6 +1148,11 @@ class NewInvoiceResource extends Resource
                     ->searchable()
                     // ->badge()
                     ->color('black')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\IconColumn::make('sdi_status')
+                    ->label('Status')
+                    ->tooltip(fn (SdiStatus $state): string => $state->getLabel())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sdi_date')->label('Data status')
                     ->date()
