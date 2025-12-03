@@ -170,13 +170,99 @@ class PostalExpenseResource extends Resource
                         //     ->optionsLimit(5)
                         //     ->columnSpan(6),
 
+                        Forms\Components\Select::make('tax_type')
+                            ->label('Tipo entrata')
+                            ->required()
+                            // ->options(function (Get $get) {
+                            //     $contractId = $get('new_contract_id');
+                            //     if (!$contractId) {
+                            //         return [];
+                            //     }
+
+                            //     $contract = NewContract::find($contractId);
+                            //     if (!$contract || empty($contract->getAttribute('tax_types'))) {
+                            //         return [];
+                            //     }
+
+                            //     // Otteniamo i valori grezzi di tax_types (es. ["park"])
+                            //     $taxTypes = $contract->getAttribute('tax_types');
+
+                            //     // Filtra le opzioni di TaxType in base a tax_types
+                            //     return collect(TaxType::cases())
+                            //         ->filter(fn ($case) => in_array($case->getLabel(), $taxTypes))
+                            //         ->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])
+                            //         ->toArray();
+                            // })
+                            ->options(function (Get $get) {
+                                $clientId = $get('client_id');
+                                if (empty($clientId)) {
+                                    return TaxType::class;
+                                }
+
+                                // Recupera i contratti del cliente
+                                $contracts = \App\Models\NewContract::where('client_id', $clientId)->get();
+
+                                // Crea una mappa label => value per tutti i TaxType
+                                $labelToValue = [];
+                                foreach (TaxType::cases() as $case) {
+                                    $labelToValue[strtolower($case->getLabel())] = $case->value;
+                                }
+
+                                // \Log::info('Label to Value map:', $labelToValue);
+
+                                // Raccogli tutti i tax_types dal database
+                                $taxTypesFromDb = [];
+                                foreach ($contracts as $contract) {
+                                    if (is_array($contract->tax_types)) {
+                                        $taxTypesFromDb = array_merge($taxTypesFromDb, $contract->tax_types);
+                                    }
+                                }
+
+                                // \Log::info('Tax types from DB:', $taxTypesFromDb);
+
+                                // Converti i label in value
+                                $taxTypeValues = [];
+                                foreach ($taxTypesFromDb as $label) {
+                                    $normalizedLabel = strtolower($label);
+                                    if (isset($labelToValue[$normalizedLabel])) {
+                                        $taxTypeValues[] = $labelToValue[$normalizedLabel];
+                                    }
+                                }
+
+                                $taxTypeValues = array_unique(array_filter($taxTypeValues));
+
+                                // \Log::info('Converted to values:', $taxTypeValues);
+
+                                if (empty($taxTypeValues)) {
+                                    return TaxType::class;
+                                }
+
+                                // Crea l'array di opzioni
+                                $options = [];
+                                foreach (TaxType::cases() as $case) {
+                                    if (in_array($case->value, $taxTypeValues)) {
+                                        $options[$case->value] = $case->getLabel();
+                                    }
+                                }
+
+                                // \Log::info('Final options:', $options);
+
+                                return empty($options) ? TaxType::class : $options;
+                            })
+                            ->searchable()
+                            ->live()
+                            ->placeholder('Seleziona')
+                            ->preload()
+                            ->columnSpan(3),
+
                         Forms\Components\Select::make('new_contract_id')
                             ->label('Contratto')
                             ->relationship(
                                 name: 'contract',
                                 modifyQueryUsing: function (Builder $query, Get $get) use ($latestDetailSubquery) {
                                     // Filtro base (mantenuto)
-                                    $query->where('client_id', $get('client_id'));
+                                    $query->where('client_id', $get('client_id'))
+                                        ->whereJsonContains('tax_types', $get('tax_type'));
 
                                     // 1. Aggiungi la JOIN con la subquery per l'ultima data di dettaglio
                                     $query->leftJoinSub($latestDetailSubquery, 'latest_details', function (JoinClause $join) {
@@ -279,34 +365,34 @@ class PostalExpenseResource extends Resource
                             ->optionsLimit(5)
                             ->columnSpan(6),
 
-                        Forms\Components\Select::make('tax_type')
-                            ->label('Tipo entrata')
-                            ->required()
-                            ->options(function (Get $get) {
-                                $contractId = $get('new_contract_id');
-                                if (!$contractId) {
-                                    return [];
-                                }
+                        // Forms\Components\Select::make('tax_type')
+                        //     ->label('Tipo entrata')
+                        //     ->required()
+                        //     ->options(function (Get $get) {
+                        //         $contractId = $get('new_contract_id');
+                        //         if (!$contractId) {
+                        //             return [];
+                        //         }
 
-                                $contract = NewContract::find($contractId);
-                                if (!$contract || empty($contract->getAttribute('tax_types'))) {
-                                    return [];
-                                }
+                        //         $contract = NewContract::find($contractId);
+                        //         if (!$contract || empty($contract->getAttribute('tax_types'))) {
+                        //             return [];
+                        //         }
 
-                                // Otteniamo i valori grezzi di tax_types (es. ["park"])
-                                $taxTypes = $contract->getAttribute('tax_types');
+                        //         // Otteniamo i valori grezzi di tax_types (es. ["park"])
+                        //         $taxTypes = $contract->getAttribute('tax_types');
 
-                                // Filtra le opzioni di TaxType in base a tax_types
-                                return collect(TaxType::cases())
-                                    ->filter(fn ($case) => in_array($case->getLabel(), $taxTypes))
-                                    ->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])
-                                    ->toArray();
-                            })
-                            ->searchable()
-                            ->live()
-                            ->placeholder('Seleziona')
-                            ->preload()
-                            ->columnSpan(3),
+                        //         // Filtra le opzioni di TaxType in base a tax_types
+                        //         return collect(TaxType::cases())
+                        //             ->filter(fn ($case) => in_array($case->getLabel(), $taxTypes))
+                        //             ->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])
+                        //             ->toArray();
+                        //     })
+                        //     ->searchable()
+                        //     ->live()
+                        //     ->placeholder('Seleziona')
+                        //     ->preload()
+                        //     ->columnSpan(3),
                     ]),
 
                 // SEZIONE: Dati di Invio e Protocollo
@@ -582,16 +668,131 @@ class PostalExpenseResource extends Resource
                         //     ->preload()
                         //     ->columnSpanFull(),
 
-                        Forms\Components\Select::make('passive_invoice_id')->label('Fattura passiva')
+                        // Forms\Components\Select::make('passive_invoice_id')->label('Fattura passiva')
+                        //     ->required()
+                        //     // ->relationship('passiveInvoice', 'description')
+                        //     ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
+                        //     ->options(function (Get $get): array {
+                        //         $supplierId = $get('supplier_id');
+                        //         if (!$supplierId) { return []; }
+                        //         return PassiveInvoice::where('supplier_id', $supplierId)
+                        //             ->pluck('description', 'id')
+                        //             ->toArray();
+                        //     })
+                        //     ->searchable()
+                        //     ->preload()
+                        //     ->live()
+                        //     ->afterStateUpdated(function (Set $set, $state) {
+                        //         if ($state) {
+                        //             $passiveInvoice = PassiveInvoice::find($state);
+                        //             $set('notify_expense_amount', $passiveInvoice->total);
+                        //             $set('shipment_doc_number', $passiveInvoice->number);
+                        //             $set('shipment_doc_date', $passiveInvoice->invoice_date->toDateString());
+                        //         }
+                        //     })
+                        //     ->columnSpanFull(),
+
+                        Forms\Components\Select::make('passive_invoice_id')
+                            ->label('Fattura passiva')
                             ->required()
-                            // ->relationship('passiveInvoice', 'description')
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::SPEDIZIONE->value)
                             ->options(function (Get $get): array {
                                 $supplierId = $get('supplier_id');
                                 if (!$supplierId) { return []; }
+
                                 return PassiveInvoice::where('supplier_id', $supplierId)
-                                    ->pluck('description', 'id')
+                                    ->get()
+                                    ->mapWithKeys(function ($invoice) {
+                                        return [
+                                            $invoice->id => sprintf(
+                                                '%s del %s - %s',
+                                                $invoice->number,
+                                                $invoice->invoice_date->format('d/m/Y'),
+                                                $invoice->description
+                                            )
+                                        ];
+                                    })
                                     ->toArray();
+                            })
+                            // ->getSearchResultsUsing(function (Get $get, string $search): array {
+                            //     $supplierId = $get('supplier_id');
+                            //     if (!$supplierId) { return []; }
+
+                            //     return PassiveInvoice::where('supplier_id', $supplierId)
+                            //         ->where(function ($query) use ($search) {
+                            //             $query->where('number', 'like', "%{$search}%")
+                            //                 ->orWhere('description', 'like', "%{$search}%")
+                            //                 ->orWhereDate('invoice_date', 'like', "%{$search}%");
+                            //         })
+                            //         ->get()
+                            //         ->mapWithKeys(function ($invoice) {
+                            //             return [
+                            //                 $invoice->id => sprintf(
+                            //                     '%s - %s (%s)',
+                            //                     $invoice->number,
+                            //                     $invoice->description,
+                            //                     $invoice->invoice_date->format('d/m/Y')
+                            //                 )
+                            //             ];
+                            //         })
+                            //         ->toArray();
+                            // })
+                            ->getSearchResultsUsing(function (Get $get, string $search): array {
+                                $supplierId = $get('supplier_id');
+                                if (!$supplierId) { return []; }
+
+                                // 1. Pre-processamento: Rendi tutti i separatori uno spazio
+                                // Rimuovi caratteri di punteggiatura (es. , ; - /) e sostituiscili con uno spazio.
+                                // Il pattern [,\;\-\/] cattura virgola, punto e virgola, trattino e slash.
+                                $cleanedSearch = preg_replace('/[,\;\-\/]/', ' ', $search);
+
+                                // 2. Suddividi in parole chiave
+                                //    Rimuovi spazi multipli, trimma e dividi per spazio.
+                                $keywords = collect(explode(' ', $cleanedSearch))
+                                    ->map('trim')
+                                    ->filter() // Rimuove stringhe vuote
+                                    ->all();
+
+                                // Se non ci sono parole chiave valide dopo la pulizia, ritorna subito
+                                if (empty($keywords)) { return []; }
+
+                                // Inizializza la query
+                                $query = PassiveInvoice::where('supplier_id', $supplierId);
+
+                                // 3. Itera su ogni parola chiave e aggiungi le condizioni WHERE
+                                foreach ($keywords as $keyword) {
+                                    $query->where(function ($subQuery) use ($keyword) {
+                                        // Applica l'OR logico sui campi per la singola parola chiave
+                                        $subQuery->where('number', 'like', "%{$keyword}%")
+                                                ->orWhere('description', 'like', "%{$keyword}%")
+                                                ->orWhereDate('invoice_date', 'like', "%{$keyword}%");
+                                    });
+                                }
+
+                                // 4. Esegui la query finale e mappa i risultati
+                                return $query->get()
+                                    ->mapWithKeys(function ($invoice) {
+                                        return [
+                                            $invoice->id => sprintf(
+                                                '%s - %s (%s)',
+                                                $invoice->number,
+                                                $invoice->description,
+                                                $invoice->invoice_date->format('d/m/Y')
+                                            )
+                                        ];
+                                    })
+                                    ->toArray();
+                            })
+                            ->getOptionLabelUsing(function ($value): ?string {
+                                $invoice = PassiveInvoice::find($value);
+                                if (!$invoice) { return null; }
+
+                                return sprintf(
+                                    '%s - %s (%s)',
+                                    $invoice->number,
+                                    $invoice->description,
+                                    $invoice->invoice_date->format('d/m/Y')
+                                );
                             })
                             ->searchable()
                             ->preload()
