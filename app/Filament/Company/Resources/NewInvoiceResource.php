@@ -274,7 +274,6 @@ class NewInvoiceResource extends Resource
                                 // ->options(TaxType::class)
                                 ->options(function (Get $get) {
                                     $clientId = $get('client_id');
-
                                     if (empty($clientId)) {
                                         return TaxType::class;
                                     }
@@ -282,28 +281,50 @@ class NewInvoiceResource extends Resource
                                     // Recupera i contratti del cliente
                                     $contracts = \App\Models\NewContract::where('client_id', $clientId)->get();
 
-                                    // Raccogli tutti i tax_types e converti in minuscolo
-                                    $taxTypes = [];
+                                    // Crea una mappa label => value per tutti i TaxType
+                                    $labelToValue = [];
+                                    foreach (TaxType::cases() as $case) {
+                                        $labelToValue[strtolower($case->getLabel())] = $case->value;
+                                    }
+
+                                    // \Log::info('Label to Value map:', $labelToValue);
+
+                                    // Raccogli tutti i tax_types dal database
+                                    $taxTypesFromDb = [];
                                     foreach ($contracts as $contract) {
                                         if (is_array($contract->tax_types)) {
-                                            // Converti tutti i valori in minuscolo
-                                            $taxTypes = array_merge($taxTypes, array_map('strtolower', $contract->tax_types));
+                                            $taxTypesFromDb = array_merge($taxTypesFromDb, $contract->tax_types);
                                         }
                                     }
 
-                                    $taxTypes = array_unique(array_filter($taxTypes));
+                                    // \Log::info('Tax types from DB:', $taxTypesFromDb);
 
-                                    if (empty($taxTypes)) {
+                                    // Converti i label in value
+                                    $taxTypeValues = [];
+                                    foreach ($taxTypesFromDb as $label) {
+                                        $normalizedLabel = strtolower($label);
+                                        if (isset($labelToValue[$normalizedLabel])) {
+                                            $taxTypeValues[] = $labelToValue[$normalizedLabel];
+                                        }
+                                    }
+
+                                    $taxTypeValues = array_unique(array_filter($taxTypeValues));
+
+                                    // \Log::info('Converted to values:', $taxTypeValues);
+
+                                    if (empty($taxTypeValues)) {
                                         return TaxType::class;
                                     }
 
-                                    // Crea l'array di opzioni filtrando per i tax_types trovati
+                                    // Crea l'array di opzioni
                                     $options = [];
                                     foreach (TaxType::cases() as $case) {
-                                        if (in_array($case->value, $taxTypes)) {
+                                        if (in_array($case->value, $taxTypeValues)) {
                                             $options[$case->value] = $case->getLabel();
                                         }
                                     }
+
+                                    // \Log::info('Final options:', $options);
 
                                     return empty($options) ? TaxType::class : $options;
                                 })
