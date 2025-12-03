@@ -52,6 +52,16 @@ class ListNewInvoices extends ListRecords
 
                     // creo notifica su tabella notifications
 
+                    // Notification::make()
+                    //     ->title("Rifiutate: " . ($refusedHide ? 'SI' : 'NO') . '\n' . "Scartate: " . ($discardedHide ? 'SI' : 'NO') . '\n' . "Non inviate: " . ($lateHide ? 'SI' : 'NO') . '\n' . "Senza esito: " . ($silentHide ? 'SI' : 'NO'))
+                    //     ->success()
+                    //     ->send();
+
+                    // \Log::info("Rifiutate: " . $refusedHide ? 'SI' : 'NO');
+                    // \Log::info("Scartate: " . $discardedHide ? 'SI' : 'NO');
+                    // \Log::info("Non inviate: " . $lateHide ? 'SI' : 'NO');
+                    // \Log::info("Senza esito: " . $silentHide ? 'SI' : 'NO');
+
                     return ($refusedHide || $discardedHide || $lateHide || $silentHide);
                 }),
             Actions\Action::make('stampa')
