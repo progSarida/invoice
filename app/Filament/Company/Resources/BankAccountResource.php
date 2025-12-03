@@ -18,9 +18,9 @@ class BankAccountResource extends Resource
 {
     protected static ?string $model = BankAccount::class;
 
-    public static ?string $pluralModelLabel = 'Conti bancari';
+    public static ?string $pluralModelLabel = 'Conti correnti';
 
-    public static ?string $modelLabel = 'Conto bancario';
+    public static ?string $modelLabel = 'Conto corrente';
 
     protected static ?string $navigationIcon = 'clarity-bank-line';
 

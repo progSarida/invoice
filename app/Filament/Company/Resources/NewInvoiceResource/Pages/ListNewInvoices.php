@@ -387,6 +387,7 @@ class ListNewInvoices extends ListRecords
 
         if ($refusedE->count() > 0) {                                                           // link fatture rifiutate
             $invoicesR = $refusedE->get();
+            $refused = false;
             foreach ($invoicesR as $index => $el) {
                 if (!\App\Models\Invoice::where('parent_id', $el->id)->exists()) {
                     Notification::make('refused_credit_note_' . $el->id)
@@ -401,9 +402,10 @@ class ListNewInvoices extends ListRecords
                                 ->color('warning'),
                         ])
                         ->send();
+                    $refused = true;
                 }
             }
-            return true;
+            if ($refused) return $refused;
         }
 
         return false;

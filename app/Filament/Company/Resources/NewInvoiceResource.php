@@ -271,7 +271,42 @@ class NewInvoiceResource extends Resource
                             Forms\Components\Select::make('tax_type')->label('Entrata')
                                 ->required()
                                 ->columnSpan(2)
-                                ->options(TaxType::class)
+                                // ->options(TaxType::class)
+                                ->options(function (Get $get) {
+                                    $clientId = $get('client_id');
+
+                                    if (empty($clientId)) {
+                                        return TaxType::class;
+                                    }
+
+                                    // Recupera i contratti del cliente
+                                    $contracts = \App\Models\NewContract::where('client_id', $clientId)->get();
+
+                                    // Raccogli tutti i tax_types e converti in minuscolo
+                                    $taxTypes = [];
+                                    foreach ($contracts as $contract) {
+                                        if (is_array($contract->tax_types)) {
+                                            // Converti tutti i valori in minuscolo
+                                            $taxTypes = array_merge($taxTypes, array_map('strtolower', $contract->tax_types));
+                                        }
+                                    }
+
+                                    $taxTypes = array_unique(array_filter($taxTypes));
+
+                                    if (empty($taxTypes)) {
+                                        return TaxType::class;
+                                    }
+
+                                    // Crea l'array di opzioni filtrando per i tax_types trovati
+                                    $options = [];
+                                    foreach (TaxType::cases() as $case) {
+                                        if (in_array($case->value, $taxTypes)) {
+                                            $options[$case->value] = $case->getLabel();
+                                        }
+                                    }
+
+                                    return empty($options) ? TaxType::class : $options;
+                                })
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     if(empty($get('client_id')) || empty($get('tax_type')))
                                     $set('contract_id', null);
@@ -762,7 +797,7 @@ class NewInvoiceResource extends Resource
                                 ->dehydrated()
                                 ->default(now()->year),
 
-                            Forms\Components\DatePicker::make('invoice_date')->label('Data')
+                            Forms\Components\DatePicker::make('invoice_date')->label('Data documento')
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2)
                                 ->required()
@@ -816,7 +851,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(3),
                             Forms\Components\Select::make('invoice_reference')
                                 ->label('Riferimento')
-                                ->required()
+                                // ->required()
                                 ->live()
                                 ->options(InvoiceReference::class)
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
@@ -827,7 +862,8 @@ class NewInvoiceResource extends Resource
                                 ->label('Da data')
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 // ->required()
-                                ->live()
+                                // ->live()
+                                ->debounce(1000)
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') !== InvoiceReference::NUMBER->value)
                                 ->columnSpan(2),
@@ -836,7 +872,8 @@ class NewInvoiceResource extends Resource
                                 ->label('A data')
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 // ->required()
-                                ->live()
+                                // ->live()
+                                ->debounce(1000)
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') !== InvoiceReference::NUMBER->value)
                                 ->columnSpan(2),
@@ -846,16 +883,19 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(1),
                             Forms\Components\TextInput::make('reference_number_from')->label('Dal numero')
                                 // ->required()
+                                ->debounce(1000)
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
                                 ->columnSpan(1),
                             Forms\Components\TextInput::make('reference_number_to')->label('Al numero')
                                 // ->required()
+                                ->debounce(1000)
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
                                 ->columnSpan(1),
                             Forms\Components\TextInput::make('total_number')->label('Totali')
                                 // ->required()
+                                ->debounce(1000)
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
                                 ->columnSpan(1),
@@ -950,6 +990,7 @@ class NewInvoiceResource extends Resource
                             ->columns(6)
                             ->schema([
                                 Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
+                                    ->default(SdiStatus::DA_INVIARE)
                                     // ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))  decommentare dopo che Daniele ha corretto gli stati necessari
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('sdi_code')->label('Codice SdI')->readOnly()->columnSpan(2)->disabled(),
@@ -1078,7 +1119,7 @@ class NewInvoiceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('tot_res')->label('Totale a doversi')
                     ->money('EUR')
-                    ->state(fn (Invoice $invoice) => $invoice->getResidue())
+                    ->state(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getResidue())
                     ->sortable()
                     ->alignRight()
                     ->toggleable(isToggledHiddenByDefault: false),

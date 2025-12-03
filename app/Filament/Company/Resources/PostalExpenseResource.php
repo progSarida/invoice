@@ -475,12 +475,15 @@ class PostalExpenseResource extends Resource
                             ->numeric()
                             ->extraInputAttributes(['class' => 'text-right'])
                             ->rules(['digits:4'])
-                            ->default(now()->year),
+                            ->default(now()->year)
+                            ->readOnly(),
 
                         Forms\Components\Select::make('notify_month')->label('Mese ricezione')
                             ->options(Month::class)
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->disabled()
+                            ->dehydrated(true),
 
                         Forms\Components\TextInput::make('notify_amount')->label('Importo notifica')
                             ->required()
@@ -504,7 +507,8 @@ class PostalExpenseResource extends Resource
 
                         Forms\Components\DatePicker::make('amount_registration_date')->label('Data registrazione importo')
                             ->extraInputAttributes(['class' => 'text-center'])
-                            ->required(),
+                            ->required()
+                            ->readOnly(),
 
                         Forms\Components\DatePicker::make('notify_date')->label('Data notifica')
                             ->extraInputAttributes(['class' => 'text-center']),
@@ -539,7 +543,7 @@ class PostalExpenseResource extends Resource
                             ->maxSize(10240),
 
                         Forms\Components\DatePicker::make('notify_attachment_date')->label('Data caricamento notifica')
-                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->extraInputAttributes(['class' => 'text-center'])->readOnly()
                             // ->required()
                             // ->visible(function (Get $get, $record): bool {
                             //     $hasUploadedFile = !empty($get('notify_attachment_path'));

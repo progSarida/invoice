@@ -87,7 +87,8 @@ class InvoiceItemsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('quantity')->label('Quantità')
                     ->columnSpan(4)
                     ->numeric()
-                    ->live(debounce: 500)
+                    // ->live(debounce: 500)
+                    ->debounce(1000)
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
                         $unit_price = $get('unit_price');
                         if($state && $unit_price){
@@ -122,7 +123,8 @@ class InvoiceItemsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('unit_price')
                     ->label('Prezzo unitario')
                     ->columnSpan(4)
-                    ->live(debounce: 500)
+                    // ->live(debounce: 500)
+                    ->debounce(1000)
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
                         $quantity = $get('quantity');
                         if($state && $quantity){
@@ -156,7 +158,8 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->columnSpan(4)
                     ->prefix('€')
                     ->maxLength(255)
-                    ->live(debounce: 500)
+                    // ->live(debounce: 500)
+                    ->debounce(1000)
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
                         if (!is_numeric($state)) return;
                         // Calcolo importo IVA e totale quando amount cambia
@@ -301,7 +304,8 @@ class InvoiceItemsRelationManager extends RelationManager
                                     ->label('Importo')
                                     ->disabled()
                                     ->prefix('€')
-                                    ->live(debounce: 500)
+                                    // ->live(debounce: 500)
+                                    ->debounce(1000)
                                     ->columnSpan(2),
                                 Forms\Components\DatePicker::make('date')
                                     ->label('Data')
