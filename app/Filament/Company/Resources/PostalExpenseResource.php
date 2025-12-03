@@ -774,10 +774,10 @@ class PostalExpenseResource extends Resource
                                     ->mapWithKeys(function ($invoice) {
                                         return [
                                             $invoice->id => sprintf(
-                                                '%s - %s (%s)',
+                                                '%s del %s - %s',
                                                 $invoice->number,
-                                                $invoice->description,
-                                                $invoice->invoice_date->format('d/m/Y')
+                                                $invoice->invoice_date->format('d/m/Y'),
+                                                $invoice->description
                                             )
                                         ];
                                     })
@@ -788,10 +788,10 @@ class PostalExpenseResource extends Resource
                                 if (!$invoice) { return null; }
 
                                 return sprintf(
-                                    '%s - %s (%s)',
+                                    '%s del %s - %s',
                                     $invoice->number,
-                                    $invoice->description,
-                                    $invoice->invoice_date->format('d/m/Y')
+                                    $invoice->invoice_date->format('d/m/Y'),
+                                    $invoice->description
                                 );
                             })
                             ->searchable()
