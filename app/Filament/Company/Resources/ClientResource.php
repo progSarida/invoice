@@ -119,7 +119,9 @@ class ClientResource extends Resource
                 Forms\Components\TextInput::make('address')->label('Indirizzo')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(6),
+                    ->columnspan(5),
+                Forms\Components\View::make('links.ipa-link')
+                    ->columnSpan(1),
                 Forms\Components\Select::make('city_id')->label('Città')
                     ->relationship(name: 'city', titleAttribute: 'name')
                     ->required()
