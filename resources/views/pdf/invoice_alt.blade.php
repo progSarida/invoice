@@ -23,7 +23,8 @@
         .padding { padding-top: 1mm; padding-bottom: 1mm;}
         .padding_company { padding-left: 5mm;}
 
-        .description { padding-bottom: 10mm;}
+        .description { padding-bottom: 1mm;}
+        .free_description { padding-bottom: 10mm;}
 
         .note { font-style: italic; padding-top: 3mm;}
 
@@ -157,6 +158,9 @@
         <tr>
             <td colspan="5" class='description'>{{ $invoice->description }}</td>
         </tr>
+        <tr>
+            <td colspan="5" class='free_description'>{{ $invoice->free_description }}</td>
+        </tr>
         {{-- Voci fattura inserite dall'operatore --}}
         @foreach($invoice->invoiceItems as $item)
             @php
@@ -164,7 +168,7 @@
                 $fullTotal += $item->total;
                 $noVattedTotal += $item->total;
             @endphp
-            @if($item->invoice_element_id)
+            @if($item->invoice_element_id || $item->invoice_id <= 6338)
                 <tr>
                     <td style="width: 5%"></td>
                     <td style="width: 60%">{{ $item->description }}</td>
@@ -205,7 +209,8 @@
             @endphp
             <tr>
                 <td style="width: 5%; {{ $loop->first ? 'padding-top: 5mm;' : '' }}"></td>
-                <td style="width: 60%; {{ $loop->first ? 'padding-top: 5mm;' : '' }}">Totale imponibile {{ $labelImponibile }}</td>
+                {{-- <td style="width: 60%; {{ $loop->first ? 'padding-top: 5mm;' : '' }}">Totale imponibile {{ $labelImponibile }}</td> --}}
+                <td style="width: 60%; {{ $loop->first ? 'padding-top: 5mm;' : '' }}">Totale imponibile</td>
                 <td style="width: 15%; {{ $loop->first ? 'padding-top: 5mm;' : '' }}">{{ $invoice->currency ?? 'Euro' }}</td>
                 <td style="width: 15%; {{ $loop->first ? 'padding-top: 5mm;' : '' }}" class="right">{{ number_format($vat['taxable'], 2, ',', '.') }}</td>
                 <td style="width: 5%; {{ $loop->first ? 'padding-top: 5mm;' : '' }}"></td>
@@ -231,7 +236,7 @@
             $hasRimborso = false;
         @endphp
         @foreach($invoice->invoiceItems as $item)
-            @if(str_contains($item->description, 'Rimborsi escl.Art. 15 ex D.P.R. 633/72'))
+            @if(str_contains($item->description, 'Rimborsi'))
                 @php
                     $hasRimborso = true;
                 @endphp
@@ -245,10 +250,16 @@
                     </td>
                     <td style="width: 5%; padding-top: 5mm;"></td>
                 </tr>
+                <tr>
+                    <td style="width: 5%"></td>
+                    <td style="width: 60%"></td>
+                    <td colspan="2" style="width: 30%;" class="dashed_bottom">&nbsp;</td>
+                    <td style="width: 5%"></td>
+                </tr>
             @endif
         @endforeach
         {{-- Se nessun rimborso trovato, stampa riga con 0,00 --}}
-        @if(! $hasRimborso)
+        {{-- @if(! $hasRimborso)
             <tr>
                 <td style="width: 5%; padding-top: 5mm;"></td>
                 <td style="width: 60%; padding-top: 5mm;">Rimborso spese di notifica</td>
@@ -256,19 +267,20 @@
                 <td style="width: 15%; padding-top: 5mm; text-align: right;">0,00</td>
                 <td style="width: 5%; padding-top: 5mm;"></td>
             </tr>
-        @endif
-        <tr>
-            <td style="width: 5%"></td>
-            <td style="width: 60%"></td>
-            <td colspan="2" style="width: 30%;" class="dashed_bottom">&nbsp;</td>
-            <td style="width: 5%"></td>
-        </tr>
+            <tr>
+                <td style="width: 5%"></td>
+                <td style="width: 60%"></td>
+                <td colspan="2" style="width: 30%;" class="dashed_bottom">&nbsp;</td>
+                <td style="width: 5%"></td>
+            </tr>
+        @endif --}}
         {{-- Imposta di bollo --}}
         @php
             $stamp = false;
         @endphp
         @foreach($invoice->invoiceItems as $item)
-            @if(!$item->invoice_element_id && (! (int) $item->auto) && !str_contains($item->description, 'Rimborsi escl.Art. 15 ex D.P.R. 633/72'))
+            {{-- @if(!$item->invoice_element_id && (! (int) $item->auto) && !str_contains($item->description, 'Rimborsi escl.Art. 15 ex D.P.R. 633/72')) --}}
+            @if(!$item->invoice_element_id && (! (int) $item->auto) && !str_contains($item->description, 'Rimborsi')  && $item->invoice_id > 6338)
             @php
                 $stamp = true;
             @endphp

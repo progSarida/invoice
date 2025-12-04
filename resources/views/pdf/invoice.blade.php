@@ -68,7 +68,7 @@
             <tr>
                 <td class="padding"></td>
                 <td class="padding">
-                    Contratto {{ $invoice->contractDetail->number }} del {{ $invoice->contractDetail->date->format('d-m-Y') }}, CIG: {{ $invoice->contract->cig_code }}
+                    Contratto {{ $invoice->contractDetail?->number }} del {{ $invoice->contractDetail?->date->format('d-m-Y') }}, CIG: {{ $invoice->contract->cig_code }}
                 </td>
                 <td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td>
             </tr>
