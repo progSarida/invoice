@@ -569,7 +569,8 @@ class BailResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return $data['not_receipt'] ? $query->whereNull('receipt_attachment_path') : $query;
                     }),
-            ], layout: FiltersLayout::Modal)->filtersFormColumns(3)
+            // ], layout: FiltersLayout::Modal)->filtersFormColumns(3)
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),

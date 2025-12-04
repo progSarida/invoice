@@ -275,7 +275,8 @@ class ClientResource extends Resource
                 //
                 SelectFilter::make('type')->label('Tipo')->options(ClientType::class)->multiple(),
                 SelectFilter::make('subtype')->label('Sottotipo')->options(ClientSubType::class)->multiple()
-            ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
+            // ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),

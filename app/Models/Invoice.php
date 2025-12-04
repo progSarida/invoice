@@ -496,6 +496,7 @@ class Invoice extends Model
         $stampDuty = $this->company->stampDuty;
         if($stampDuty->active){
             $vats = $this->vatResume();
+            // dd($vats);
             $free = 0;
             $insert = true;
             foreach($vats as $key => $vat){
@@ -621,7 +622,7 @@ class Invoice extends Model
         $budgetExceededNotified = cache()->has($cacheKey);
 
         if ($totalInvoiced > $limit && !$budgetExceededNotified) {                          // supera il budget e non è stato ancora notificato
-            Notification::make()
+            Notification::make('exceed')
                 ->title('Budget contratto superato')
                 ->body("
                     <strong>Contratto:</strong> {$contract->office_name} ({$contract->office_code})<br>

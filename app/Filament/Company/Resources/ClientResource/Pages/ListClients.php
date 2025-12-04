@@ -74,7 +74,8 @@ class ListClients extends ListRecords
                 ->icon('tabler-report-search')
                 ->label('Partitario')
                 ->tooltip('Stampa partitario clienti')
-                ->color('primary')
+                // ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 ->modalWidth('5xl')
                 ->modalHeading('Partitario')
                 ->form([

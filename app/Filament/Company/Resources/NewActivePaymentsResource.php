@@ -335,7 +335,7 @@ class NewActivePaymentsResource extends Resource
                     ->label('Destinatario')
                     ->options(ClientType::class)
                     ->attribute(null)
-                    ->columnSpan(2)
+                    // ->columnSpan(2)
                     ->query(function (Builder $query, array $data) {
                         $value = $data['value'] ?? null;
                         if ($value) {
@@ -350,7 +350,7 @@ class NewActivePaymentsResource extends Resource
                 SelectFilter::make('invoice_client_id')
                     ->label('Cliente')
                     ->attribute(null)
-                    ->columnSpan(3)
+                    // ->columnSpan(3)
                     ->options(function () {
                         $tenant = Filament::getTenant();
 
@@ -378,7 +378,7 @@ class NewActivePaymentsResource extends Resource
                     ->label('Entrata')
                     ->options(TaxType::class)
                     ->attribute(null)
-                    ->columnSpan(2)
+                    // ->columnSpan(2)
                     ->multiple()
                     ->query(function (Builder $query, array $data) {
                         // dd($data);
@@ -413,7 +413,7 @@ class NewActivePaymentsResource extends Resource
                             ->toArray();
                     })
                     ->attribute(null)
-                    ->columnSpan(2)
+                    // ->columnSpan(2)
                     ->multiple()
                     ->query(function (Builder $query, array $data) {
                         $values = $data['values'] ?? [];
@@ -512,7 +512,8 @@ class NewActivePaymentsResource extends Resource
                         }
                         return $query;
                     }),
-            ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(8)
+            // ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(8)
+            ])->filtersFormColumns(2)
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),

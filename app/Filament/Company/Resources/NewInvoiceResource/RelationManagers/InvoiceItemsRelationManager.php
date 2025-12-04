@@ -68,91 +68,100 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->required()
                     ->columnSpan(8)
                     ->maxLength(255),
-                Forms\Components\Select::make('transaction_type')
-                    ->label('Tipo di transazione')
-                    ->options(
-                        collect(TransactionType::cases())->mapWithKeys(fn ($case) => [
-                            $case->value => $case->getLabel(),
-                        ])->toArray()
-                    )
-                    ->columnSpan(4),
-                Forms\Components\DatePicker::make('start_date')
-                    ->label('Data inizio periodo')
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(3),
-                Forms\Components\DatePicker::make('end_date')
-                    ->label('Data fine periodo')
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(3),
-                Forms\Components\TextInput::make('quantity')->label('Quantità')
-                    ->columnSpan(4)
-                    ->numeric()
-                    // ->live(debounce: 500)
-                    ->debounce(1000)
-                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        $unit_price = $get('unit_price');
-                        if($state && $unit_price){
-                            if (!is_numeric($state) || !is_numeric($unit_price)) return;
-                            // Calcolo importo in base a quantità e prezzo unitario
-                            $quantity = $state ?? 0;
-                            $amount = $quantity * $unit_price;
-                            $set('amount', $amount);
-                            // Calcolo importo IVA e totale quando amount cambia
-                            // $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
-                            // $rate = \App\Enums\VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
-                            $vatCode = $get('vat_code_type');
-                            if (!$vatCode instanceof \App\Enums\VatCodeType) {
-                                $vatCode = \App\Enums\VatCodeType::tryFrom($vatCode);
-                            }
-                            $rate = $vatCode?->getRate() / 100 ?? 0;
-                            $vatAmount = $amount * $rate;
-                            $total = $amount + $vatAmount;
 
-                            $set('vat_amount', number_format($vatAmount, 2, '.', ''));
-                            $set('total', number_format($total, 2, '.', ''));
-                        }
-                        else {
-                            $set('amount', 0);
-                            $set('vat_amount', 0);
-                            $set('total', 0);
-                        }
-                    }),
-                Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
-                    ->columnSpan(4)
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('unit_price')
-                    ->label('Prezzo unitario')
-                    ->columnSpan(4)
-                    // ->live(debounce: 500)
-                    ->debounce(1000)
-                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        $quantity = $get('quantity');
-                        if($state && $quantity){
-                            if (!is_numeric($state) || !is_numeric($quantity)) return;
-                            // Calcolo importo in base a quantità e prezzo unitario
-                            $unit_price = $state ?? 0;
-                            $amount = $quantity * $unit_price;
-                            $set('amount', $amount);
-                            // Calcolo importo IVA e totale quando amount cambia
-                            // $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
-                            // $rate = \App\Enums\VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
-                            $vatCode = $get('vat_code_type');
-                            if (!$vatCode instanceof \App\Enums\VatCodeType) {
-                                $vatCode = \App\Enums\VatCodeType::tryFrom($vatCode);
-                            }
-                            $rate = $vatCode?->getRate() / 100 ?? 0;
-                            $vatAmount = $amount * $rate;
-                            $total = $amount + $vatAmount;
+                Forms\Components\Section::make('Opzioni')
+                    // ->collapsible()
+                    ->columns(12)
+                    ->collapsed()
+                    ->label('')
+                    ->schema([
+                        Forms\Components\Select::make('transaction_type')
+                            ->label('Tipo di transazione')
+                            ->options(
+                                collect(TransactionType::cases())->mapWithKeys(fn ($case) => [
+                                    $case->value => $case->getLabel(),
+                                ])->toArray()
+                            )
+                            ->columnSpan(4),
+                        Forms\Components\DatePicker::make('start_date')
+                            ->label('Data inizio periodo')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->columnSpan(3),
+                        Forms\Components\DatePicker::make('end_date')
+                            ->label('Data fine periodo')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->columnSpan(3),
+                        Forms\Components\TextInput::make('quantity')->label('Quantità')
+                            ->columnSpan(4)
+                            ->numeric()
+                            // ->live(debounce: 500)
+                            ->debounce(1000)
+                            ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                $unit_price = $get('unit_price');
+                                if($state && $unit_price){
+                                    if (!is_numeric($state) || !is_numeric($unit_price)) return;
+                                    // Calcolo importo in base a quantità e prezzo unitario
+                                    $quantity = $state ?? 0;
+                                    $amount = $quantity * $unit_price;
+                                    $set('amount', $amount);
+                                    // Calcolo importo IVA e totale quando amount cambia
+                                    // $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
+                                    // $rate = \App\Enums\VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
+                                    $vatCode = $get('vat_code_type');
+                                    if (!$vatCode instanceof \App\Enums\VatCodeType) {
+                                        $vatCode = \App\Enums\VatCodeType::tryFrom($vatCode);
+                                    }
+                                    $rate = $vatCode?->getRate() / 100 ?? 0;
+                                    $vatAmount = $amount * $rate;
+                                    $total = $amount + $vatAmount;
 
-                            $set('vat_amount', number_format($vatAmount, 2, '.', ''));
-                            $set('total', number_format($total, 2, '.', ''));
-                        }
-                        else {
-                            $set('amount', 0);
-                            $set('vat_amount', 0);
-                            $set('total', 0);
-                        }
-                    }),
+                                    $set('vat_amount', number_format($vatAmount, 2, '.', ''));
+                                    $set('total', number_format($total, 2, '.', ''));
+                                }
+                                else {
+                                    $set('amount', 0);
+                                    $set('vat_amount', 0);
+                                    $set('total', 0);
+                                }
+                            }),
+                        Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
+                            ->columnSpan(4)
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('unit_price')
+                            ->label('Prezzo unitario')
+                            ->columnSpan(4)
+                            // ->live(debounce: 500)
+                            ->debounce(1000)
+                            ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                $quantity = $get('quantity');
+                                if($state && $quantity){
+                                    if (!is_numeric($state) || !is_numeric($quantity)) return;
+                                    // Calcolo importo in base a quantità e prezzo unitario
+                                    $unit_price = $state ?? 0;
+                                    $amount = $quantity * $unit_price;
+                                    $set('amount', $amount);
+                                    // Calcolo importo IVA e totale quando amount cambia
+                                    // $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
+                                    // $rate = \App\Enums\VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
+                                    $vatCode = $get('vat_code_type');
+                                    if (!$vatCode instanceof \App\Enums\VatCodeType) {
+                                        $vatCode = \App\Enums\VatCodeType::tryFrom($vatCode);
+                                    }
+                                    $rate = $vatCode?->getRate() / 100 ?? 0;
+                                    $vatAmount = $amount * $rate;
+                                    $total = $amount + $vatAmount;
+
+                                    $set('vat_amount', number_format($vatAmount, 2, '.', ''));
+                                    $set('total', number_format($total, 2, '.', ''));
+                                }
+                                else {
+                                    $set('amount', 0);
+                                    $set('vat_amount', 0);
+                                    $set('total', 0);
+                                }
+                            }),
+                    ]),
+
                 Forms\Components\TextInput::make('amount')->label('Importo')
                     ->required()
                     ->columnSpan(4)
@@ -221,6 +230,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->default(0.00),
                 // Forms\Components\Toggle::make('is_with_vat')->label('Iva')
                 //     ->required(),
+
             ]);
     }
 
@@ -361,39 +371,42 @@ class InvoiceItemsRelationManager extends RelationManager
                         // Crea gli invoice items per le spese selezionate
                         $invoice = $this->getOwnerRecord();
                         // dd($selectedExpenses);
+                        $totPostalExpense = 0;
                         foreach ($selectedExpenses as $expenseData) {
                             $expense = PostalExpense::find($expenseData['id']);
-                            $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
 
                             if ($expense) {
-                                // Crea l'invoice item
-                                $invoiceItem = InvoiceItem::create([
-                                    'invoice_id' => $invoice->id,
-                                    'description' => 'Rimborso spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier_name),
-                                    'amount' => $amount,
-                                    'total' => $amount,
-                                    'vat_code_type' => VatCodeType::VC06,
-                                    'auto' => false,
-                                    'postal_expense_id' => $expense->id
-                                ]);
+                                // $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                                $totPostalExpense += ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                                // // Crea l'invoice item
+                                // $invoiceItem = InvoiceItem::create([
+                                //     'invoice_id' => $invoice->id,
+                                //     // 'description' => 'Rimborso spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier_name),
+                                //     'description' => 'Rimborsi escl.Art. 15 ex D.P.R. 633/72',
+                                //     'amount' => $amount,
+                                //     'total' => $amount,
+                                //     'vat_code_type' => VatCodeType::VC06,
+                                //     'auto' => false,
+                                //     'postal_expense_id' => $expense->id
+                                // ]);
 
+                                // // $invoiceItem->invoice->updateTotal();
+                                // $invoiceItem->save();
+                                // $invoiceItem->checkStampDuty();
+                                // $invoiceItem->autoInsert();
                                 // $invoiceItem->invoice->updateTotal();
-                                $invoiceItem->save();
-                                $invoiceItem->checkStampDuty();
-                                $invoiceItem->autoInsert();
-                                $invoiceItem->invoice->updateTotal();
 
-                                // Aggiorna la spesa postale con l'ID della fattura
-                                PostalExpense::withoutEvents(function () use ($expense, $invoice) {
-                                    $expense->update([
-                                        'reinvoice_id' => $invoice->id,
-                                        'reinvoice_number' => $invoice->number,
-                                        'reinvoice_date' => $invoice->invoice_date,
-                                        'reinvoice_amount' => $invoice->total,
-                                        'reinvoice_insert_user_id' => Auth::id(),
-                                        'reinvoice_insert_date' => today()
-                                    ]);
-                                });
+                                // // Aggiorna la spesa postale con l'ID della fattura
+                                // PostalExpense::withoutEvents(function () use ($expense, $invoice) {
+                                //     $expense->update([
+                                //         'reinvoice_id' => $invoice->id,
+                                //         'reinvoice_number' => $invoice->number,
+                                //         'reinvoice_date' => $invoice->invoice_date,
+                                //         'reinvoice_amount' => $invoice->total,
+                                //         'reinvoice_insert_user_id' => Auth::id(),
+                                //         'reinvoice_insert_date' => today()
+                                //     ]);
+                                // });
 
                                 // $expense->update([
                                 //     'reinvoice_id' => $invoice->id,
@@ -405,6 +418,36 @@ class InvoiceItemsRelationManager extends RelationManager
                                 // ]);
                             }
                         }
+
+                        // Crea l'invoice item
+                        $invoiceItem = InvoiceItem::create([
+                            'invoice_id' => $invoice->id,
+                            // 'description' => 'Rimborso spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier_name),
+                            'description' => 'Rimborsi escl.Art. 15 ex D.P.R. 633/72',
+                            'amount' => $totPostalExpense,
+                            'total' => $totPostalExpense,
+                            'vat_code_type' => VatCodeType::VC06,
+                            'auto' => false,
+                            'postal_expense_id' => $expense->id
+                        ]);
+
+                        // $invoiceItem->invoice->updateTotal();
+                        $invoiceItem->save();
+                        $invoiceItem->checkStampDuty();
+                        $invoiceItem->autoInsert();
+                        $invoiceItem->invoice->updateTotal();
+
+                        // Aggiorna la spesa postale con l'ID della fattura
+                        PostalExpense::withoutEvents(function () use ($expense, $invoice) {
+                            $expense->update([
+                                'reinvoice_id' => $invoice->id,
+                                'reinvoice_number' => $invoice->number,
+                                'reinvoice_date' => $invoice->invoice_date,
+                                'reinvoice_amount' => $invoice->total,
+                                'reinvoice_insert_user_id' => Auth::id(),
+                                'reinvoice_insert_date' => today()
+                            ]);
+                        });
 
                         // Notifica di successo
                         \Filament\Notifications\Notification::make()

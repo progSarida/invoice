@@ -1822,8 +1822,8 @@ class PostalExpenseResource extends Resource
                         return $query
                             ->when($data['note'] ?? null, fn ($q, $v) => $q->where('note', 'like', "%{$v}%"));
                     }),
-            ], layout: FiltersLayout::Modal)
-            ->filtersFormColumns(1)
+            // ], layout: FiltersLayout::Modal)->filtersFormColumns(1)
+            ])->filtersFormColumns(1)
             ->persistFiltersInSession()
             ->filtersFormWidth(MaxWidth::SevenExtraLarge)
             ->actions([

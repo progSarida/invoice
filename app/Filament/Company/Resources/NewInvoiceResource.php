@@ -91,7 +91,7 @@ class NewInvoiceResource extends Resource
                     Section::make('Opzioni')
                     // ->collapsible()
                     ->columns(12)
-                    ->collapsed(false)
+                    ->collapsed()
                     ->label('')
                     ->schema([
                         Toggle::make('art_73')
@@ -1432,8 +1432,8 @@ class NewInvoiceResource extends Resource
                         }
                         return $query;
                     }),
-            ],layout: FiltersLayout::Modal)->filtersFormColumns(4)
-            // ])->filtersFormColumns(2)
+            // ],layout: FiltersLayout::Modal)->filtersFormColumns(4)
+            ])->filtersFormColumns(4)
             ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\ViewAction::make(),

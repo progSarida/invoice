@@ -114,7 +114,8 @@ class ListNewInvoices extends ListRecords
                 ->icon('carbon-compare')
                 ->label('Comparata')
                 ->tooltip('Stampa fatturazione comparata')
-                ->color('primary')
+                // ->color('primary')
+                ->color(Color::rgb('rgb(255, 0, 0)'))
                 ->modalWidth('6xl')
                 ->modalHeading('Fattura comparata')
                 ->form([

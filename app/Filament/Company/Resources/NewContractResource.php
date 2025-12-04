@@ -216,7 +216,7 @@ class NewContractResource extends Resource
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('cup_code')
                     ->label('CUP')
-                    ->required()
+                    // ->required()
                     ->columnSpan(2),
                 Forms\Components\Select::make('invoicing_cycle')
                     ->label('Periodicità fatturazione')
@@ -395,7 +395,8 @@ class NewContractResource extends Resource
                     ->preload(),
                 SelectFilter::make('payment_type')->label('Tipo pagamento')->options(TenderPaymentType::class)
                     ->multiple()->preload(),
-            ], layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
+            // ], layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),

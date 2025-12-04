@@ -55,6 +55,13 @@
         $logoBase64 = base64_encode(file_get_contents($logoPath));
         $logoSrc = 'data:image/png;base64,' . $logoBase64;
     }
+
+    use App\Enums\ClientType;
+    $split = $invoice->client->type == ClientType::PUBLIC;
+
+    $fullTotal = 0;
+    $vattedTotal = 0;
+    $noVattedTotal = 0;
 @endphp
 <body>
     <table>
@@ -154,6 +161,8 @@
         @foreach($invoice->invoiceItems as $item)
             @php
                 // dd($invoice->invoiceItems);
+                $fullTotal += $item->total;
+                $noVattedTotal += $item->total;
             @endphp
             @if($item->invoice_element_id)
                 <tr>
@@ -176,6 +185,7 @@
         @foreach($vats as $vat)
             @php
                 // dd($vats);
+                $free = $vat['free'];
                 $labelImponibile = (is_numeric($vat['%']) && $vat['%'])
                     ? 'I.V.A. ' . number_format($vat['%'], 2, ',', '.') . '%'
                     : ($vat['%'] ? 'I.V.A. ' . $vat['%'] : '');
@@ -185,6 +195,13 @@
                 $vatAmount = (is_numeric($vat['%']) && $vat['%'])
                     ? $vat['taxable'] * ($vat['%'] / 100)
                     : $vat['vat'];
+            @endphp
+            @if(!$free)
+            @php
+                if($split) {
+                    $vattedTotal += $vatAmount;
+                    $fullTotal += $vatAmount;
+                }
             @endphp
             <tr>
                 <td style="width: 5%; {{ $loop->first ? 'padding-top: 5mm;' : '' }}"></td>
@@ -200,6 +217,7 @@
                 <td style="width: 15%" class="right">{{ number_format($vatAmount, 2, ',', '.') }}</td>
                 <td style="width: 5%"></td>
             </tr>
+            @endif
         @endforeach
         <tr>
             <td style="width: 5%"></td>
@@ -213,7 +231,7 @@
             $hasRimborso = false;
         @endphp
         @foreach($invoice->invoiceItems as $item)
-            @if(str_contains($item->description, 'Rimborso spese di notifica da '))
+            @if(str_contains($item->description, 'Rimborsi escl.Art. 15 ex D.P.R. 633/72'))
                 @php
                     $hasRimborso = true;
                 @endphp
@@ -250,7 +268,7 @@
             $stamp = false;
         @endphp
         @foreach($invoice->invoiceItems as $item)
-            @if(!$item->invoice_element_id && (! (int) $item->auto))
+            @if(!$item->invoice_element_id && (! (int) $item->auto) && !str_contains($item->description, 'Rimborsi escl.Art. 15 ex D.P.R. 633/72'))
             @php
                 $stamp = true;
             @endphp
@@ -272,13 +290,16 @@
                 </tr>
             @endif
         @endforeach
-        {-- Totale --}
+        {-- Totale ivato --}
+        @php
+        // dd($fullTotal, $vattedTotal, $noVattedTotal, );
+        @endphp
         <tr>
             <td style="width: 5%; padding-top: 5mm;"></td>
             <td style="width: 60%; padding-top: 5mm;">TOTALE</td>
             <td style="width: 15%; padding-top: 5mm;">{{ $invoice->currency ?? 'Euro' }}</td>
             <td style="width: 15%; padding-top: 5mm; text-align: right;">
-                {{ number_format($invoice->total, 2, ',', '.') }}
+                {{ number_format(($fullTotal), 2, ',', '.') }}
             </td>
             <td style="width: 5%; padding-top: 5mm;"></td>
         </tr>
@@ -288,10 +309,28 @@
             <td colspan="2" style="width: 30%;" class="dashed_bottom">&nbsp;</td>
             <td style="width: 5%"></td>
         </tr>
+        @if($fullTotal != $noVattedTotal)
+        {-- Totale a doversi --}
+        <tr>
+            <td style="width: 5%; padding-top: 5mm;"></td>
+            <td style="width: 60%; padding-top: 5mm;">TOTALE A DOVERSI</td>
+            <td style="width: 15%; padding-top: 5mm;">{{ $invoice->currency ?? 'Euro' }}</td>
+            <td style="width: 15%; padding-top: 5mm; text-align: right;">
+                {{ number_format($noVattedTotal, 2, ',', '.') }}
+            </td>
+            <td style="width: 5%; padding-top: 5mm;"></td>
+        </tr>
+        <tr>
+            <td style="width: 5%"></td>
+            <td style="width: 60%"></td>
+            <td colspan="2" style="width: 30%;" class="dashed_bottom">&nbsp;</td>
+            <td style="width: 5%"></td>
+        </tr>
+        @endif
         @php
         // dd($invoice->company->stampDuty->virtual_stamp && $stamp);
-            use App\Enums\ClientType;
-            $split = $invoice->client->type == ClientType::PUBLIC;
+            // use App\Enums\ClientType;
+            // $split = $invoice->client->type == ClientType::PUBLIC;
         @endphp
         <tr>
             <td colspan="5" class="note">{{ $split ? 'Iva da versare a cura del concessionario o committente ai sensi dell\'art. 17 - ter del D.P.N.R. Nr 633/1972' : ''}}</td>
