@@ -23,6 +23,7 @@ class PassiveInvoice extends Model
         'payment_deadline',
         'bank',
         'iban',
+        'pi_validation_id',
         'filename',
         'xml_path',
         'pdf_path'
@@ -54,5 +55,9 @@ class PassiveInvoice extends Model
 
     public function passivePayments(){
         return $this->hasMany(PassivePayment::class);
+    }
+
+    public function piValidation(){
+        return $this->belongsTo(PiValidation::class);
     }
 }

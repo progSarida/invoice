@@ -3,8 +3,12 @@
 namespace App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 
 use App\Filament\Company\Resources\PassiveInvoiceResource;
+use App\Models\PassiveInvoice;
+use App\Models\PiValidation;
 use Filament\Actions;
+use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Auth;
 
 class EditPassiveInvoice extends EditRecord
@@ -14,6 +18,26 @@ class EditPassiveInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('validate')
+                ->label('Valida pagamento')
+                ->icon('fluentui-checkmark-starburst-20-o')
+                ->requiresConfirmation()
+                ->form([
+                    Select::make('pi_validation_id')
+                        ->label('')
+                        ->options(
+                            PiValidation::orderBy('order', 'asc')
+                                ->pluck('name', 'id')
+                                ->toArray()
+                        )
+                        ->default(fn (PassiveInvoice $record) => $record->pi_validation_id),
+                ])
+                ->action(function (PassiveInvoice $record, $data) {
+                    $record->update([
+                        'pi_validation_id' => $data['pi_validation_id']
+                    ]);
+                })
+                ->color(Color::rgb('rgb(51, 204, 51)')),
             // Actions\DeleteAction::make()
             //     ->visible(fn (): bool => Auth::user()->isManager()),
         ];

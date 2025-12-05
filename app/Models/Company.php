@@ -174,4 +174,9 @@ class Company extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function piValidations()
+    {
+        return $this->hasMany(PiValidation::class);
+    }
 }

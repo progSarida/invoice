@@ -4,6 +4,7 @@ namespace App\Filament\Company\Resources;
 
 use App\Enums\PaymentMode;
 use App\Enums\PaymentType;
+use App\Enums\PiValidationStatus;
 use App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassiveItemsRelationManager;
@@ -12,6 +13,7 @@ use App\Models\DocType;
 use App\Models\PassiveInvoice;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -48,6 +50,43 @@ class PassiveInvoiceResource extends Resource
             ->schema([
                 // Grid::make('GRID')->columnSpan(2)->schema([
 
+                    Placeholder::make('pi_validation')
+                        ->label('')
+                        ->visible(fn($record) => filled($record->pi_validation_id))
+                        ->content(function ($record) {
+                            if (! $record->pi_validation_id) {
+                                return 'Nessuna validazione selezionata';
+                            }
+
+                            return optional($record->piValidation)->name;
+                        })
+                        ->extraAttributes(function ($record) {
+                            $statusEnum = $record->piValidation->pi_validation_status;
+
+                            $color = $statusEnum?->getColor() ?? 'gray';
+
+                            $bgColorClass = "bg-{$color}-100";
+
+                            $borderColorClass = "border-{$color}-400";
+
+                            $baseClasses = 'text-lg font-semibold border pb-1 pt-2';
+
+                            $customClasses = [
+                                'rounded-lg', // Arrotondamento angoli
+
+                                'text-center', // Testo centrato
+
+                                $bgColorClass, // Colore di sfondo dinamico
+                                $borderColorClass,
+                                'text-gray-900', // Assicura che il testo sia leggibile su sfondi chiari
+                            ];
+
+                            return [
+                                'class' => $baseClasses . ' ' . implode(' ', $customClasses),
+                            ];
+                        })
+                        ->columnSpan('full'),
+
                     Section::make('Riferimenti')
                         ->collapsible(false)
                         ->columns(6)
@@ -68,6 +107,31 @@ class PassiveInvoiceResource extends Resource
                                     fn (Model $record) => $record->number
                                 )
                                 ->visible(fn (Get $get) => !is_null($get('parent_id')))
+                                ->disabled()
+                                ,
+                        ]),
+
+                        Section::make('')
+                        ->columns(12)
+                        ->schema([
+                            Forms\Components\Select::make('doc_type')
+                                ->label('Tipo documento')
+                                ->columnSpan(7)
+                                ->options(function (Get $get) {
+                                    $docs = DocType::select('doc_types.name', 'doc_types.description')
+                                        ->get();
+                                    return $docs->pluck('description', 'name')->toArray();
+                                })
+                                ->disabled()
+                                ,
+                            Forms\Components\TextInput::make('number')
+                                ->label('Numero')
+                                ->columnSpan(3)
+                                ->disabled(),
+                            Forms\Components\DatePicker::make('invoice_date')
+                                ->label('Data')
+                                ->extraInputAttributes(['class' => 'text-center'])
+                                ->columnSpan(2)
                                 ->disabled()
                                 ,
                         ]),
@@ -135,33 +199,8 @@ class PassiveInvoiceResource extends Resource
                                     ->disabled()
                                     ,
                             ]),
-                // ]),
-                // Grid::make('GRID')->columnSpan(3)->schema([
 
-                    Section::make('')
-                        ->columns(12)
-                        ->schema([
-                            Forms\Components\Select::make('doc_type')
-                                ->label('Tipo documento')
-                                ->columnSpan(7)
-                                ->options(function (Get $get) {
-                                    $docs = DocType::select('doc_types.name', 'doc_types.description')
-                                        ->get();
-                                    return $docs->pluck('description', 'name')->toArray();
-                                })
-                                ->disabled()
-                                ,
-                            Forms\Components\TextInput::make('number')
-                                ->label('Numero')
-                                ->columnSpan(3)
-                                ->disabled(),
-                            Forms\Components\DatePicker::make('invoice_date')
-                                ->label('Data')
-                                ->extraInputAttributes(['class' => 'text-center'])
-                                ->columnSpan(2)
-                                ->disabled()
-                                ,
-                        ]),
+
                     Section::make('Descrizione')
                         ->collapsible()
                         ->schema([
@@ -171,6 +210,8 @@ class PassiveInvoiceResource extends Resource
                                 ->disabled()
                                 ,
                         ]),
+                // ]),
+                // Grid::make('GRID')->columnSpan(3)->schema([
                     Section::make('Status SDI')
                             ->collapsed(false)
                             ->columns(6)
@@ -225,6 +266,10 @@ class PassiveInvoiceResource extends Resource
                 TextColumn::make('payment_deadline')
                     ->label('Scadenza')
                     ->date('d/m/Y')
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('piValidation.pi_validation_status')
+                    ->label('Status')
+                    ->tooltip(fn ($record): string => $record->piValidation ? $record->piValidation->name : '')
                     ->sortable(),
             ])
             ->filters([

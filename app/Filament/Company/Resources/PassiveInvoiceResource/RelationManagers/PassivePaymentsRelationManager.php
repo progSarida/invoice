@@ -2,7 +2,9 @@
 
 namespace App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
 
+use App\Enums\PiValidationStatus;
 use Carbon\Carbon;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
@@ -27,22 +29,22 @@ class PassivePaymentsRelationManager extends RelationManager
         return $form
             ->columns(12)
             ->schema([
-                Forms\Components\Select::make('passive_invoice_id')
-                    ->label('Fattura')
-                    ->placeholder('Seleziona una fattura...')
-                    ->relationship(name: 'passiveInvoice', titleAttribute: 'id')
-                    ->getOptionLabelFromRecordUsing(function (Model $record) {
-                        $fornitore = $record->supplier?->denomination ?? 'Fornitore sconosciuto';
-                        return "{$fornitore} - {$record->number}/{$record->invoice_date->format('d-m-Y')}";
-                    })
-                    ->required()
-                    ->disabled(fn ($get) => $get('validated'))
-                    ->searchable(['number', 'section', 'year'])
-                    ->live()
-                    ->preload()
-                    // ->optionsLimit(20)
-                    // ->autofocus()
-                    ->columnSpan(5),
+                // Forms\Components\Select::make('passive_invoice_id')
+                //     ->label('Fattura')
+                //     ->placeholder('Seleziona una fattura...')
+                //     ->relationship(name: 'passiveInvoice', titleAttribute: 'id')
+                //     ->getOptionLabelFromRecordUsing(function (Model $record) {
+                //         $fornitore = $record->supplier?->denomination ?? 'Fornitore sconosciuto';
+                //         return "{$fornitore} - {$record->number}/{$record->invoice_date->format('d-m-Y')}";
+                //     })
+                //     ->required()
+                //     ->disabled(fn ($get) => $get('validated'))
+                //     ->searchable(['number', 'section', 'year'])
+                //     ->live()
+                //     ->preload()
+                //     // ->optionsLimit(20)
+                //     // ->autofocus()
+                //     ->columnSpan(5),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()
@@ -51,27 +53,65 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->rules(['numeric', 'min:0'])
                     ->suffix('€')
+                    ->columnSpan(3),
+                Forms\Components\Placeholder::make('')
+                    ->content('')
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('payment_date')
                     ->label('Data pagamento')
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
                     ->date()
-                    ->columnSpan(2),
+                    ->columnSpan(3),
                 Forms\Components\Placeholder::make('')
                     ->content('')
-                    ->columnSpan(1),
+                    ->columnSpan(2),
                 Forms\Components\Toggle::make('validated')
                     ->label('Validato')
                     ->live()
                     ->default(false)
                     ->columnSpan(2),
+                Forms\Components\TextInput::make('bank')
+                    ->label('Banca')
+                    ->default(function ($operation, $record) {
+                        if ($operation === 'create') {
+                            $ownerRecord = $this->getOwnerRecord();
+                            return $ownerRecord?->bank;
+                        }
+                        return $record?->bank;
+                    })
+                    ->columnSpan(4),
+                Forms\Components\TextInput::make('iban')
+                    ->label('IBAN')
+                    ->default(function ($operation, $record) {
+                        if ($operation === 'create') {
+                            $ownerRecord = $this->getOwnerRecord();
+                            return $ownerRecord?->iban;
+                        }
+                        return $record?->iban;
+                    })
+                    ->columnSpan(3),
+                Forms\Components\Select::make('bank_account_id')->label('Conto')
+                    ->relationship(
+                        name: 'bankAccount',
+                        modifyQueryUsing: fn (Builder $query) =>
+                        $query->where('company_id',Filament::getTenant()->id)
+                    )
+                    ->getOptionLabelFromRecordUsing(
+                        fn (Model $record) => "{$record->name} - $record->iban"
+                    )
+                    ->searchable()
+                    ->required()
+                    ->columnSpan(5)
+                    ->preload(),
+                // Forms\Components\Placeholder::make('')
+                //     ->columnSpan(1),
                 Forms\Components\DatePicker::make('registration_date')
                     ->label('Data registrazione')
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled()
                     ->date()
-                    ->columnSpan(2),
+                    ->columnSpan(3),
                 Forms\Components\Select::make('registered_by_user_id')
                     ->label('Registrato da')
                     ->relationship('registrationUser', 'name')
@@ -153,10 +193,20 @@ class PassivePaymentsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->visible(function ($record) {
+                        $ownerRecord = $this->getOwnerRecord();
+                        $piValidation = $ownerRecord?->piValidation;
+
+                        if (!$piValidation) { return false; }
+
+                        return $piValidation->pi_validation_status === PiValidationStatus::OK;
+                    })
+                    ->modalWidth('6xl'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->modalWidth('6xl'),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

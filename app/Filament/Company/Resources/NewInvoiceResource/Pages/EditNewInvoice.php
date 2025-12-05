@@ -28,9 +28,30 @@ class EditNewInvoice extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        $currentDoc = $this->record;
+        $previousDoc = Invoice::where('id', '<', $currentDoc->id)->orderBy('id', 'desc')->first();
+        $nextDoc = Invoice::where('id', '>', $currentDoc->id)->orderBy('id', 'asc')->first();
         return [
             // Actions\DeleteAction::make()
             //     ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE),
+
+            // Scorrimento fatture
+            Actions\Action::make('previous_doc')
+                ->label('Precedente')
+                ->color('info')
+                ->icon('heroicon-o-arrow-left-circle')
+                ->visible(function () use ($previousDoc) { return $previousDoc;})
+                ->action(function () use ($previousDoc) {
+                    $this->redirect(NewInvoiceResource::getUrl('edit', ['record' => $previousDoc->id]));
+                }),
+            Actions\Action::make('next_doc')
+                ->label('Successiva')
+                ->color('info')
+                ->icon('heroicon-o-arrow-right-circle')
+                ->visible(function () use ($nextDoc) { return $nextDoc;})
+                ->action(function () use ($nextDoc) {
+                    $this->redirect(NewInvoiceResource::getUrl('edit', ['record' => $nextDoc->id]));
+                }),
 
             Actions\Action::make('duplica_fattura')
                 ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
