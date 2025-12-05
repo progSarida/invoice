@@ -18,11 +18,64 @@ class ViewNewContract extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        $currentContract = $this->record;
+        $previousDContract = NewContract::whereNotNull('start_validity_date')
+            ->when($currentContract->start_validity_date, function ($query, $date) use($currentContract) {
+                return $query->where('start_validity_date', '<=', $date)
+                            ->where('id', '!=', $currentContract->id);
+            })
+            ->orderBy('start_validity_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->first();
+        $nextDContract = NewContract::whereNotNull('start_validity_date')
+            ->when($currentContract->start_validity_date, function ($query, $date) use($currentContract) {
+                return $query->where('start_validity_date', '>=', $date)
+                            ->where('id', '!=', $currentContract->id);
+            })
+            ->orderBy('start_validity_date', 'asc')
+            ->orderBy('id', 'asc')
+            ->first();
+        $previousIContract = NewContract::where('id', '<', $currentContract->id)->orderBy('id', 'desc')->first();
+        $nextIContract = NewContract::where('id', '>', $currentContract->id)->orderBy('id', 'asc')->first();
         return [
             Actions\Action::make('back')
                 ->label('Indietro')
                 ->url($this->getResource()::getUrl('index'))
                 ->color('gray'),
+            // Scorrimento data
+            Actions\Action::make('previous_doc')
+                ->label('Inizio prec.')
+                ->color('info')
+                ->icon('heroicon-o-arrow-left-circle')
+                ->visible(function () use ($previousDContract) { return $previousDContract;})
+                ->action(function () use ($previousDContract) {
+                    $this->redirect(NewContractResource::getUrl('view', ['record' => $previousDContract->id]));
+                }),
+            Actions\Action::make('next_doc')
+                ->label('Inizio succ.')
+                ->color('info')
+                ->icon('heroicon-o-arrow-right-circle')
+                ->visible(function () use ($nextDContract) { return $nextDContract;})
+                ->action(function () use ($nextDContract) {
+                    $this->redirect(NewContractResource::getUrl('view', ['record' => $nextDContract->id]));
+                }),
+            // Scorrimento id
+            Actions\Action::make('previous_doc')
+                ->label('Id prec.')
+                ->color('gray')
+                ->icon('heroicon-o-arrow-left-circle')
+                ->visible(function () use ($previousIContract) { return $previousIContract;})
+                ->action(function () use ($previousIContract) {
+                    $this->redirect(NewContractResource::getUrl('view', ['record' => $previousIContract->id]));
+                }),
+            Actions\Action::make('next_doc')
+                ->label('Id succ.')
+                ->color('gray')
+                ->icon('heroicon-o-arrow-right-circle')
+                ->visible(function () use ($nextIContract) { return $nextIContract;})
+                ->action(function () use ($nextIContract) {
+                    $this->redirect(NewContractResource::getUrl('view', ['record' => $nextIContract->id]));
+                }),
             Actions\Action::make('stampa_pdf')
                 ->label('Stampa')
                 ->icon('heroicon-o-printer')

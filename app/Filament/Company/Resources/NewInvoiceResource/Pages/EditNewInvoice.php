@@ -29,28 +29,48 @@ class EditNewInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         $currentDoc = $this->record;
-        $previousDoc = Invoice::where('id', '<', $currentDoc->id)->orderBy('id', 'desc')->first();
-        $nextDoc = Invoice::where('id', '>', $currentDoc->id)->orderBy('id', 'asc')->first();
+        $previousIDoc = Invoice::where('id', '<', $currentDoc->id)->orderBy('id', 'desc')->first();
+        $nextIDoc = Invoice::where('id', '>', $currentDoc->id)->orderBy('id', 'asc')->first();
+        $previousDDoc = Invoice::where('invoice_date', '<=', $currentDoc->invoice_date)
+                ->where('id', '!=', $currentDoc->id)->orderBy('invoice_date', 'desc')->orderBy('id', 'desc')->first();
+        $nextDDoc = Invoice::where('invoice_date', '>=', $currentDoc->invoice_date)
+                ->where('id', '!=', $currentDoc->id)->orderBy('invoice_date', 'asc')->orderBy('id', 'asc')->first();
         return [
             // Actions\DeleteAction::make()
             //     ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE),
 
             // Scorrimento fatture
             Actions\Action::make('previous_doc')
-                ->label('Precedente')
+                ->label('Data prec.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-left-circle')
-                ->visible(function () use ($previousDoc) { return $previousDoc;})
-                ->action(function () use ($previousDoc) {
-                    $this->redirect(NewInvoiceResource::getUrl('edit', ['record' => $previousDoc->id]));
+                ->visible(function () use ($previousDDoc) { return $previousDDoc;})
+                ->action(function () use ($previousDDoc) {
+                    $this->redirect(NewInvoiceResource::getUrl('edit', ['record' => $previousDDoc->id]));
                 }),
             Actions\Action::make('next_doc')
-                ->label('Successiva')
+                ->label('Data succ.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-right-circle')
-                ->visible(function () use ($nextDoc) { return $nextDoc;})
-                ->action(function () use ($nextDoc) {
-                    $this->redirect(NewInvoiceResource::getUrl('edit', ['record' => $nextDoc->id]));
+                ->visible(function () use ($nextDDoc) { return $nextDDoc;})
+                ->action(function () use ($nextDDoc) {
+                    $this->redirect(NewInvoiceResource::getUrl('edit', ['record' => $nextDDoc->id]));
+                }),
+            Actions\Action::make('previous_doc')
+                ->label('Id prec.')
+                ->color('gray')
+                ->icon('heroicon-o-arrow-left-circle')
+                ->visible(function () use ($previousIDoc) { return $previousIDoc;})
+                ->action(function () use ($previousIDoc) {
+                    $this->redirect(NewInvoiceResource::getUrl('edit', ['record' => $previousIDoc->id]));
+                }),
+            Actions\Action::make('next_doc')
+                ->label('Id succ.')
+                ->color('gray')
+                ->icon('heroicon-o-arrow-right-circle')
+                ->visible(function () use ($nextIDoc) { return $nextIDoc;})
+                ->action(function () use ($nextIDoc) {
+                    $this->redirect(NewInvoiceResource::getUrl('edit', ['record' => $nextIDoc->id]));
                 }),
 
             Actions\Action::make('duplica_fattura')

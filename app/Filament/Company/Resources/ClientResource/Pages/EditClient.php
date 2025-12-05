@@ -3,6 +3,7 @@
 namespace App\Filament\Company\Resources\ClientResource\Pages;
 
 use App\Filament\Company\Resources\ClientResource;
+use App\Models\Client;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,46 @@ class EditClient extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        $currentClient = $this->record;
+        $previousAClient = Client::where('denomination', '<', $currentClient->denomination)->orderBy('denomination', 'desc')->first();
+        $nextAClient = Client::where('denomination', '>', $currentClient->denomination)->orderBy('denomination', 'asc')->first();
+        $previousIClient = Client::where('id', '<', $currentClient->id)->orderBy('id', 'desc')->first();
+        $nextIClient = Client::where('id', '>', $currentClient->id)->orderBy('id', 'asc')->first();
         return [
+            // Scorrimento alfabetico
+            Actions\Action::make('previous_doc')
+                ->label('Alfabetico prec.')
+                ->color('info')
+                ->icon('heroicon-o-arrow-left-circle')
+                ->visible(function () use ($previousAClient) { return $previousAClient;})
+                ->action(function () use ($previousAClient) {
+                    $this->redirect(ClientResource::getUrl('edit', ['record' => $previousAClient->id]));
+                }),
+            Actions\Action::make('next_doc')
+                ->label('Alfabetico succ.')
+                ->color('info')
+                ->icon('heroicon-o-arrow-right-circle')
+                ->visible(function () use ($nextAClient) { return $nextAClient;})
+                ->action(function () use ($nextAClient) {
+                    $this->redirect(ClientResource::getUrl('edit', ['record' => $nextAClient->id]));
+                }),
+            // Scorrimento alfabetico
+            Actions\Action::make('previous_doc')
+                ->label('Id prec.')
+                ->color('gray')
+                ->icon('heroicon-o-arrow-left-circle')
+                ->visible(function () use ($previousIClient) { return $previousIClient;})
+                ->action(function () use ($previousIClient) {
+                    $this->redirect(ClientResource::getUrl('edit', ['record' => $previousIClient->id]));
+                }),
+            Actions\Action::make('next_doc')
+                ->label('Id succ.')
+                ->color('gray')
+                ->icon('heroicon-o-arrow-right-circle')
+                ->visible(function () use ($nextIClient) { return $nextIClient;})
+                ->action(function () use ($nextIClient) {
+                    $this->redirect(ClientResource::getUrl('edit', ['record' => $nextIClient->id]));
+                }),
             // Actions\DeleteAction::make()
             //     ->keyBindings(['f4'])
             //     ->visible(fn (): bool => Auth::user()->isManager()),

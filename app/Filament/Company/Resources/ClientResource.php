@@ -231,6 +231,7 @@ class ClientResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('denomination', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('subtype')->label('Sottotipo')
                     // ->badge()

@@ -17,7 +17,47 @@ class EditPassiveInvoice extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        $currentDoc = $this->record;
+        $previousIDoc = PassiveInvoice::where('id', '<', $currentDoc->id)->orderBy('id', 'desc')->first();
+        $nextIDoc = PassiveInvoice::where('id', '>', $currentDoc->id)->orderBy('id', 'asc')->first();
+        $previousDDoc = PassiveInvoice::where('invoice_date', '<=', $currentDoc->invoice_date)
+                ->where('id', '!=', $currentDoc->id)->orderBy('invoice_date', 'desc')->orderBy('id', 'desc')->first();
+        $nextDDoc = PassiveInvoice::where('invoice_date', '>=', $currentDoc->invoice_date)
+                ->where('id', '!=', $currentDoc->id)->orderBy('invoice_date', 'asc')->orderBy('id', 'asc')->first();
         return [
+            // Scorrimento fatture
+            Actions\Action::make('previous_doc')
+                ->label('Data prec.')
+                ->color('info')
+                ->icon('heroicon-o-arrow-left-circle')
+                ->visible(function () use ($previousDDoc) { return $previousDDoc;})
+                ->action(function () use ($previousDDoc) {
+                    $this->redirect(PassiveInvoiceResource::getUrl('edit', ['record' => $previousDDoc->id]));
+                }),
+            Actions\Action::make('next_doc')
+                ->label('Data succ.')
+                ->color('info')
+                ->icon('heroicon-o-arrow-right-circle')
+                ->visible(function () use ($nextDDoc) { return $nextDDoc;})
+                ->action(function () use ($nextDDoc) {
+                    $this->redirect(PassiveInvoiceResource::getUrl('edit', ['record' => $nextDDoc->id]));
+                }),
+            Actions\Action::make('previous_doc')
+                ->label('Id prec.')
+                ->color('gray')
+                ->icon('heroicon-o-arrow-left-circle')
+                ->visible(function () use ($previousIDoc) { return $previousIDoc;})
+                ->action(function () use ($previousIDoc) {
+                    $this->redirect(PassiveInvoiceResource::getUrl('edit', ['record' => $previousIDoc->id]));
+                }),
+            Actions\Action::make('next_doc')
+                ->label('Id succ.')
+                ->color('gray')
+                ->icon('heroicon-o-arrow-right-circle')
+                ->visible(function () use ($nextIDoc) { return $nextIDoc;})
+                ->action(function () use ($nextIDoc) {
+                    $this->redirect(PassiveInvoiceResource::getUrl('edit', ['record' => $nextIDoc->id]));
+                }),
             Actions\Action::make('validate')
                 ->label('Valida pagamento')
                 ->icon('fluentui-checkmark-starburst-20-o')
