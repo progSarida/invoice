@@ -26,7 +26,7 @@ class EditClient extends EditRecord
         $nextIClient = Client::where('id', '>', $currentClient->id)->orderBy('id', 'asc')->first();
         return [
             // Scorrimento alfabetico
-            Actions\Action::make('previous_a_doc')
+            Actions\Action::make('previous_a_client')
                 ->label('Alfabetico prec.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-left-circle')
@@ -34,7 +34,7 @@ class EditClient extends EditRecord
                 ->action(function () use ($previousAClient) {
                     $this->redirect(ClientResource::getUrl('edit', ['record' => $previousAClient->id]));
                 }),
-            Actions\Action::make('next_a_doc')
+            Actions\Action::make('next_a_client')
                 ->label('Alfabetico succ.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-right-circle')
@@ -43,7 +43,7 @@ class EditClient extends EditRecord
                     $this->redirect(ClientResource::getUrl('edit', ['record' => $nextAClient->id]));
                 }),
             // Scorrimento alfabetico
-            Actions\Action::make('previous_i_doc')
+            Actions\Action::make('previous_i_client')
                 ->label('Id prec.')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-left-circle')
@@ -51,7 +51,7 @@ class EditClient extends EditRecord
                 ->action(function () use ($previousIClient) {
                     $this->redirect(ClientResource::getUrl('edit', ['record' => $previousIClient->id]));
                 }),
-            Actions\Action::make('next_i_doc')
+            Actions\Action::make('next_i_client')
                 ->label('Id succ.')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-right-circle')
