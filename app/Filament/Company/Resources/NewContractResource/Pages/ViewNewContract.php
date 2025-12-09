@@ -19,31 +19,42 @@ class ViewNewContract extends ViewRecord
     protected function getHeaderActions(): array
     {
         $currentContract = $this->record;
+        // Precedente per start_validity_date: data precedente O stessa data con ID minore
         $previousDContract = NewContract::whereNotNull('start_validity_date')
-            ->when($currentContract->start_validity_date, function ($query, $date) use($currentContract) {
-                return $query->where('start_validity_date', '<=', $date)
-                            ->where('id', '!=', $currentContract->id);
+            ->when($currentContract->start_validity_date, function ($query, $date) use ($currentContract) {
+                return $query->where(function ($q) use ($date, $currentContract) {
+                    $q->where('start_validity_date', '<', $date)
+                        ->orWhere(function ($subQ) use ($date, $currentContract) {
+                            $subQ->where('start_validity_date', '=', $date)
+                                ->where('id', '<', $currentContract->id);
+                        });
+                });
             })
-            ->orderBy('start_validity_date', 'desc')
-            ->orderBy('id', 'desc')
-            ->first();
+            ->orderBy('start_validity_date', 'desc')->orderBy('id', 'desc')->first();
+        // Successivo per start_validity_date: data successiva O stessa data con ID maggiore
         $nextDContract = NewContract::whereNotNull('start_validity_date')
-            ->when($currentContract->start_validity_date, function ($query, $date) use($currentContract) {
-                return $query->where('start_validity_date', '>=', $date)
-                            ->where('id', '!=', $currentContract->id);
+            ->when($currentContract->start_validity_date, function ($query, $date) use ($currentContract) {
+                return $query->where(function ($q) use ($date, $currentContract) {
+                    $q->where('start_validity_date', '>', $date)
+                        ->orWhere(function ($subQ) use ($date, $currentContract) {
+                            $subQ->where('start_validity_date', '=', $date)
+                                ->where('id', '>', $currentContract->id);
+                        });
+                });
             })
-            ->orderBy('start_validity_date', 'asc')
-            ->orderBy('id', 'asc')
-            ->first();
+            ->orderBy('start_validity_date', 'asc')->orderBy('id', 'asc')->first();
+        // Precedente per ID: semplicemente ID minore
         $previousIContract = NewContract::where('id', '<', $currentContract->id)->orderBy('id', 'desc')->first();
+        // Successivo per ID: semplicemente ID maggiore
         $nextIContract = NewContract::where('id', '>', $currentContract->id)->orderBy('id', 'asc')->first();
+
         return [
             Actions\Action::make('back')
                 ->label('Indietro')
                 ->url($this->getResource()::getUrl('index'))
                 ->color('gray'),
             // Scorrimento data
-            Actions\Action::make('previous_doc')
+            Actions\Action::make('previous_d_doc')
                 ->label('Inizio prec.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-left-circle')
@@ -51,7 +62,7 @@ class ViewNewContract extends ViewRecord
                 ->action(function () use ($previousDContract) {
                     $this->redirect(NewContractResource::getUrl('view', ['record' => $previousDContract->id]));
                 }),
-            Actions\Action::make('next_doc')
+            Actions\Action::make('next_d_doc')
                 ->label('Inizio succ.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-right-circle')
@@ -60,7 +71,7 @@ class ViewNewContract extends ViewRecord
                     $this->redirect(NewContractResource::getUrl('view', ['record' => $nextDContract->id]));
                 }),
             // Scorrimento id
-            Actions\Action::make('previous_doc')
+            Actions\Action::make('previou_i_doc')
                 ->label('Id prec.')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-left-circle')
@@ -68,7 +79,7 @@ class ViewNewContract extends ViewRecord
                 ->action(function () use ($previousIContract) {
                     $this->redirect(NewContractResource::getUrl('view', ['record' => $previousIContract->id]));
                 }),
-            Actions\Action::make('next_doc')
+            Actions\Action::make('next_i_doc')
                 ->label('Id succ.')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-right-circle')

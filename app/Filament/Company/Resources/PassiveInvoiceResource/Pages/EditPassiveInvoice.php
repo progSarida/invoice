@@ -17,16 +17,33 @@ class EditPassiveInvoice extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        $currentDoc = $this->record;
+         $currentDoc = $this->record;
+        // Precedente per ID: semplicemente ID minore
         $previousIDoc = PassiveInvoice::where('id', '<', $currentDoc->id)->orderBy('id', 'desc')->first();
+        // Successivo per ID: semplicemente ID maggiore
         $nextIDoc = PassiveInvoice::where('id', '>', $currentDoc->id)->orderBy('id', 'asc')->first();
-        $previousDDoc = PassiveInvoice::where('invoice_date', '<=', $currentDoc->invoice_date)
-                ->where('id', '!=', $currentDoc->id)->orderBy('invoice_date', 'desc')->orderBy('id', 'desc')->first();
-        $nextDDoc = PassiveInvoice::where('invoice_date', '>=', $currentDoc->invoice_date)
-                ->where('id', '!=', $currentDoc->id)->orderBy('invoice_date', 'asc')->orderBy('id', 'asc')->first();
+        // Precedente per invoice_date: data precedente O stessa data con ID minore
+        $previousDDoc = PassiveInvoice::where(function ($query) use ($currentDoc) {
+                $query->where('invoice_date', '<', $currentDoc->invoice_date)
+                    ->orWhere(function ($q) use ($currentDoc) {
+                        $q->where('invoice_date', '=', $currentDoc->invoice_date)
+                        ->where('id', '<', $currentDoc->id);
+                    });
+            })
+            ->orderBy('invoice_date', 'desc')->orderBy('id', 'desc')->first();
+        // Successivo per invoice_date: data successiva O stessa data con ID maggiore
+        $nextDDoc = PassiveInvoice::where(function ($query) use ($currentDoc) {
+                $query->where('invoice_date', '>', $currentDoc->invoice_date)
+                    ->orWhere(function ($q) use ($currentDoc) {
+                        $q->where('invoice_date', '=', $currentDoc->invoice_date)
+                        ->where('id', '>', $currentDoc->id);
+                    });
+            })
+            ->orderBy('invoice_date', 'asc')->orderBy('id', 'asc')->first();
+
         return [
             // Scorrimento fatture
-            Actions\Action::make('previous_doc')
+            Actions\Action::make('previous_d_doc')
                 ->label('Data prec.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-left-circle')
@@ -34,7 +51,7 @@ class EditPassiveInvoice extends EditRecord
                 ->action(function () use ($previousDDoc) {
                     $this->redirect(PassiveInvoiceResource::getUrl('edit', ['record' => $previousDDoc->id]));
                 }),
-            Actions\Action::make('next_doc')
+            Actions\Action::make('next_d_doc')
                 ->label('Data succ.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-right-circle')
@@ -42,7 +59,7 @@ class EditPassiveInvoice extends EditRecord
                 ->action(function () use ($nextDDoc) {
                     $this->redirect(PassiveInvoiceResource::getUrl('edit', ['record' => $nextDDoc->id]));
                 }),
-            Actions\Action::make('previous_doc')
+            Actions\Action::make('previous_i_doc')
                 ->label('Id prec.')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-left-circle')
@@ -50,7 +67,7 @@ class EditPassiveInvoice extends EditRecord
                 ->action(function () use ($previousIDoc) {
                     $this->redirect(PassiveInvoiceResource::getUrl('edit', ['record' => $previousIDoc->id]));
                 }),
-            Actions\Action::make('next_doc')
+            Actions\Action::make('next_i_doc')
                 ->label('Id succ.')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-right-circle')

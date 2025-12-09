@@ -116,7 +116,7 @@ class Bail extends Model
                 if (!$existB) { $billAttachment = Attachment::create($dataB); }
                 else { $existB->update($dataB); }
             }
-            else { $existB->delete(); }
+            else if($existB) { $existB->delete(); }
 
             if($bail->receipt_attachment_path){
                 $filenameR = basename($bail->receipt_attachment_path) ?: 'unknown';
@@ -137,7 +137,7 @@ class Bail extends Model
                 if (!$existR) { $billAttachment = Attachment::create($dataR); }
                 else { $existR->update($dataR); }
             }
-            else { $existR->delete(); }
+            else if($existR) { $existR->delete(); }
 
         });
 

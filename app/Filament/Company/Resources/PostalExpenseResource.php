@@ -472,6 +472,7 @@ class PostalExpenseResource extends Resource
                             ->visible(false),
 
                         Forms\Components\DatePicker::make('act_date')->label('Data atto')
+                            ->required()
                             ->extraInputAttributes(['class' => 'text-center']),
 
                         Forms\Components\FileUpload::make('act_attachment_path')->label('Allegato atto')

@@ -15,10 +15,25 @@ class EditPassivePayment extends EditRecord
     protected function getHeaderActions(): array
     {
         $currentPayment = $this->record;
-        $previousDPayment = PassivePayment::where('payment_date', '<=', $currentPayment->payment_date)
-                ->where('id', '!=', $currentPayment->id)->orderBy('payment_date', 'desc')->orderBy('id', 'desc')->first();
-        $nextDPayment = PassivePayment::where('payment_date', '>=', $currentPayment->payment_date)
-                ->where('id', '!=', $currentPayment->id)->orderBy('payment_date', 'asc')->orderBy('id', 'asc')->first();
+        // Precedente per payment_date: data precedente O stessa data con ID minore
+        $previousDPayment = PassivePayment::where(function ($query) use ($currentPayment) {
+                $query->where('payment_date', '<', $currentPayment->payment_date)
+                    ->orWhere(function ($q) use ($currentPayment) {
+                        $q->where('payment_date', '=', $currentPayment->payment_date)
+                        ->where('id', '<', $currentPayment->id);
+                    });
+            })
+            ->orderBy('payment_date', 'desc')->orderBy('id', 'desc')->first();
+        // Successivo per payment_date: data successiva O stessa data con ID maggiore
+        $nextDPayment = PassivePayment::where(function ($query) use ($currentPayment) {
+                $query->where('payment_date', '>', $currentPayment->payment_date)
+                    ->orWhere(function ($q) use ($currentPayment) {
+                        $q->where('payment_date', '=', $currentPayment->payment_date)
+                        ->where('id', '>', $currentPayment->id);
+                    });
+            })
+            ->orderBy('payment_date', 'asc')->orderBy('id', 'asc')->first();
+
         return [
             Actions\Action::make('previous_doc')
                 ->label('Data prec.')
@@ -26,7 +41,7 @@ class EditPassivePayment extends EditRecord
                 ->icon('heroicon-o-arrow-left-circle')
                 ->visible(function () use ($previousDPayment) { return $previousDPayment;})
                 ->action(function () use ($previousDPayment) {
-                    $this->redirect(PassivePaymentResource::getUrl('view', ['record' => $previousDPayment->id]));
+                    $this->redirect(PassivePaymentResource::getUrl('edit', ['record' => $previousDPayment->id]));
                 }),
             Actions\Action::make('next_doc')
                 ->label('Data succ.')
@@ -34,7 +49,7 @@ class EditPassivePayment extends EditRecord
                 ->icon('heroicon-o-arrow-right-circle')
                 ->visible(function () use ($nextDPayment) { return $nextDPayment;})
                 ->action(function () use ($nextDPayment) {
-                    $this->redirect(PassivePaymentResource::getUrl('view', ['record' => $nextDPayment->id]));
+                    $this->redirect(PassivePaymentResource::getUrl('edit', ['record' => $nextDPayment->id]));
                 }),
             // Actions\DeleteAction::make()
             //     ->visible(fn (): bool => Auth::user()->isManager()),

@@ -24,7 +24,7 @@ class ViewClient extends ViewRecord
                 ->url($this->getResource()::getUrl('index'))
                 ->color('gray'),
             // Scorrimento alfabetico
-            Actions\Action::make('previous_doc')
+            Actions\Action::make('previous_a_doc')
                 ->label('Alfabetico prec.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-left-circle')
@@ -32,7 +32,7 @@ class ViewClient extends ViewRecord
                 ->action(function () use ($previousAClient) {
                     $this->redirect(ClientResource::getUrl('view', ['record' => $previousAClient->id]));
                 }),
-            Actions\Action::make('next_doc')
+            Actions\Action::make('next_a_doc')
                 ->label('Alfabetico succ.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-right-circle')
@@ -41,7 +41,7 @@ class ViewClient extends ViewRecord
                     $this->redirect(ClientResource::getUrl('view', ['record' => $nextAClient->id]));
                 }),
             // Scorrimento id
-            Actions\Action::make('previous_doc')
+            Actions\Action::make('previous_i_doc')
                 ->label('Id prec.')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-left-circle')
@@ -49,7 +49,7 @@ class ViewClient extends ViewRecord
                 ->action(function () use ($previousIClient) {
                     $this->redirect(ClientResource::getUrl('view', ['record' => $previousIClient->id]));
                 }),
-            Actions\Action::make('next_doc')
+            Actions\Action::make('next_i_doc')
                 ->label('Id succ.')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-right-circle')
