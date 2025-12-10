@@ -26,6 +26,7 @@ class PostalExpense extends Model
         'send_protocol_number',
         'send_protocol_date',
         'shipment_type_id',
+        'send_types',
         'supplier_id',
         'supplier_name',
         'recipient',
@@ -167,7 +168,25 @@ class PostalExpense extends Model
         'manage_year' => 'integer',
         'notify_year' => 'integer',
         'act_year' => 'integer',
+
+        // json
+        'send_types' => 'json',
     ];
+
+    public function getSendTypesAttribute($value)
+    {
+        $values = is_string($value) ? json_decode($value, true) : $value;
+        if (!$values) return [];
+        $accrualTypes = SendType::whereIn('id', $values)->pluck('name', 'id')->toArray();
+        return array_map(function ($id) use ($accrualTypes) {
+            return $accrualTypes[$id] ?? 'Sconosciuto';
+        }, $values);
+    }
+
+    public function setSendTypesAttribute($values)
+    {
+        $this->attributes['send_types'] = json_encode($values);
+    }
 
     // relazioni
     public function company()
@@ -179,6 +198,11 @@ class PostalExpense extends Model
     {
         return $this->belongsTo(ShipmentType::class);
     }
+
+    // public function sendType()
+    // {
+    //     return $this->belongsTo(SendType::class);
+    // }
 
     public function actType()
     {

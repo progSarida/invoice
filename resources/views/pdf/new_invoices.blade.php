@@ -128,8 +128,8 @@
                     'tax_type' => 'Entrata',
                     'contract_id' => 'Contratto',
                     'sdi_status' => 'Status',
-                    'accrual_type_id' => 'Tipo competenza',
-                    'manage_type_id' => 'Tipo gestione',
+                    'accrual_type_id' => 'Gestione',
+                    'manage_type_id' => 'Servizio',
                 ];
                 $fieldValues = [
                     'doc_type_id' => \App\Models\DocType::pluck('description', 'id')->toArray(),

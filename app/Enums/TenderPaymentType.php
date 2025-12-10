@@ -12,6 +12,7 @@ enum TenderPaymentType: string implements HasLabel, HasColor, HasDescription
     case AGGIO = "aggio";
     case SERVIZIO = "servizio";
     case CANONE = "canone";
+    case PRATICA = "pratica";
 
     public function getLabel(): string
     {
@@ -19,6 +20,7 @@ enum TenderPaymentType: string implements HasLabel, HasColor, HasDescription
             self::AGGIO => 'Aggio',
             self::SERVIZIO => 'Servizio',
             self::CANONE => 'Canone',
+            self::PRATICA => 'Fisso a pratica',
         };
     }
 
@@ -28,6 +30,7 @@ enum TenderPaymentType: string implements HasLabel, HasColor, HasDescription
             self::AGGIO => 'danger',
             self::SERVIZIO => 'info',
             self::CANONE => 'success',
+            self::PRATICA => 'gray',
         };
     }
 
@@ -37,6 +40,7 @@ enum TenderPaymentType: string implements HasLabel, HasColor, HasDescription
             self::AGGIO => 'Pagamento ad aggio',
             self::SERVIZIO => 'Pagamento a servizio',
             self::CANONE => 'Pagamento a canone',
+            self::PRATICA => 'Fisso a pratica',
         };
     }
 }

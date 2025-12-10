@@ -61,7 +61,7 @@
                     'invoice_number' => 'Numero fattura',
                     'invoice_tax_type' => 'Entrata',
                     'validated' => 'Pagamenti validati',
-                    'contract_accrual_types' => 'Competenze', // MODIFICA: Cambiato da 'contract_accrual_type_id' a 'contract_accrual_types'
+                    'contract_accrual_types' => 'Gestioni', // MODIFICA: Cambiato da 'contract_accrual_type_id' a 'contract_accrual_types'
                     'invoice_year' => 'Anno fattura',
                     'invoice_budget_year' => 'Anno bilancio',
                     'invoice_accrual_year' => 'Anno competenza',

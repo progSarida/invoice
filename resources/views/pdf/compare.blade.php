@@ -77,7 +77,7 @@
                     'doc_type_id' => 'Tipo documento',
                     'tax_type' => 'Entrata',
                     'client_id' => 'Cliente',
-                    'manage_type_id' => 'Tipo di gestione',
+                    'manage_type_id' => 'Servizio',
                     'from_budget_year' => 'Anno bilancio da',
                     'to_budget_year' => 'Anno bilancio a',
                     'from_invoice_date' => 'Data fatturazione da',

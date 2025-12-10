@@ -184,4 +184,14 @@ class Company extends Model
     {
         return $this->hasMany(PiValidation::class);
     }
+
+    public function shipmentTypes()
+    {
+        return $this->hasMany(ShipmentType::class);
+    }
+
+    public function sendTypes()
+    {
+        return $this->hasMany(SendType::class);
+    }
 }

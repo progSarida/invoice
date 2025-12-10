@@ -72,7 +72,7 @@ class TenderResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload(),
-                Forms\Components\Select::make('type')->label('Tipo pagamento')
+                Forms\Components\Select::make('type')->label('Remunerazione')
                     ->options(TenderPaymentType::class)
                     ->required()
                     ->searchable()
@@ -178,7 +178,7 @@ class TenderResource extends Resource
                         ->required()
                         ->searchable()
                         ->preload()->columnSpan(1),
-                    Forms\Components\Select::make('type')->label('Tipo pagamento')
+                    Forms\Components\Select::make('type')->label('Remunerazione')
                         ->options(TenderPaymentType::class)
                         ->required()
                         ->searchable()

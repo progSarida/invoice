@@ -17,16 +17,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class PiValidationResource extends Resource
 {
     protected static ?string $model = PiValidation::class;
-
     protected static ?string $navigationIcon = 'ri-hand-coin-line';
-
     public static ?string $pluralModelLabel = 'Validazioni fatture passive';
-
     public static ?string $modelLabel = 'Validazione fatture passive';
-
     protected static ?string $navigationGroup = 'Tabelle';
-
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 8;
 
     public static function form(Form $form): Form
     {

@@ -406,7 +406,7 @@ class NewActivePaymentsResource extends Resource
                         return $query;
                     }),
                 SelectFilter::make('contract_accrual_types')
-                    ->label('Competenze')
+                    ->label('Gestioni')
                     ->options(function () {
                         return AccrualType::query()
                             ->pluck('name', 'id')

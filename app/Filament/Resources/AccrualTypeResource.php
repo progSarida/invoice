@@ -16,8 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AccrualTypeResource extends Resource
 {
     protected static ?string $model = AccrualType::class;
-    public static ?string $pluralModelLabel = 'Competenze';
-    public static ?string $modelLabel = 'Competenze';
+    public static ?string $pluralModelLabel = 'Gestioni';
+    public static ?string $modelLabel = 'Gestioni';
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?string $navigationGroup = 'Tabelle';
     protected static ?int $navigationSort = 3;

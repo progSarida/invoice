@@ -21,7 +21,7 @@ class NewInvoiceExporter extends Exporter
 
         $invoiceItemColumns = [];
 
-        
+
 
         for ($i = 0; $i < $maxItems; $i++) {
             $labelPrefix = 'Voce ' . ($i + 1);
@@ -103,7 +103,7 @@ class NewInvoiceExporter extends Exporter
             ExportColumn::make('budget_year')
                 ->label('Anno bilancio'),
             ExportColumn::make('accrual_type_id')
-                ->label('Competenza')
+                ->label('Gestione')
                 // ->formatStateUsing(fn ($state) => $state?->getLabel() ?? null),
                 ->formatStateUsing(fn ($state, $record) => $record->accrualType?->name ?? '-'),
             ExportColumn::make('accrual_year')

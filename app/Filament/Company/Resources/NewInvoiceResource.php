@@ -845,7 +845,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(2),
 
                             Forms\Components\Select::make('accrual_type_id')
-                                ->label('Tipo di competenza')
+                                ->label('Gestione')
                                 ->required()
                                 ->options(function (callable $get) {
                                     $contractId = $get('contract_id');
@@ -865,7 +865,7 @@ class NewInvoiceResource extends Resource
                                 })
                                 ->columnSpan(3),
 
-                            Forms\Components\Select::make('manage_type_id')->label('Tipo di gestione')
+                            Forms\Components\Select::make('manage_type_id')->label('Servizio')
                                 ->options(function () {
                                     return ManageType::orderBy('order')->pluck('name', 'id');
                                 })
@@ -1291,14 +1291,14 @@ class NewInvoiceResource extends Resource
                 SelectFilter::make('sdi_status')->label('Status')->options(SdiStatus::class)
                     ->multiple()->searchable()->preload(),
                 SelectFilter::make('accrual_type_id')
-                    ->label('Tipo competenza')
+                    ->label('Gestione')
                     ->options(function () {
                         return AccrualType::pluck('name', 'id')->toArray();
                     })
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('manage_type_id')
-                    ->label('Tipo gestione')
+                    ->label('Servizio')
                     ->options(function () {
                         return ManageType::pluck('name', 'id')->toArray();
                     })

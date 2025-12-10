@@ -16,8 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ManageTypeResource extends Resource
 {
     protected static ?string $model = ManageType::class;
-    public static ?string $pluralModelLabel = 'Gestioni';
-    public static ?string $modelLabel = 'Gestioni';
+    public static ?string $pluralModelLabel = 'Servizi';
+    public static ?string $modelLabel = 'Servizi';
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
     protected static ?string $navigationGroup = 'Tabelle';
     protected static ?int $navigationSort = 4;

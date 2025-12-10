@@ -17,6 +17,7 @@ use App\Models\Invoice;
 use App\Models\NewContract;
 use App\Models\PassiveInvoice;
 use App\Models\PostalExpense;
+use App\Models\SendType;
 use App\Models\ShipmentType;
 use App\Models\Supplier;
 use Filament\Forms;
@@ -352,7 +353,7 @@ class PostalExpenseResource extends Resource
                                 if ($contract) {
                                     $set('reinvoice', $contract->reinvoice);
                                     // Resettiamo tax_type per evitare valori non validi (logica originale mantenuta)
-                                    $set('tax_type', null);
+                                    // $set('tax_type', null);
                                 } else {
                                     $set('reinvoice', false);
                                     $set('tax_type', null);
@@ -410,18 +411,30 @@ class PostalExpenseResource extends Resource
                                     ->value('max_number');
 
                                 return $maxProtocolNumber ? $maxProtocolNumber + 1 : 1;
-                            }),
+                            })
+                            ->columnSpan(2),
 
                         Forms\Components\DatePicker::make('send_protocol_date')->label('Data protocollo invio')
                             ->extraInputAttributes(['class' => 'text-center'])
                             ->required()
-                            ->default(now()->toDateString()),
+                            ->default(now()->toDateString())
+                            ->columnSpan(2),
 
                         Forms\Components\Select::make('shipment_type_id')->label('Modalità di invio')
                             ->required()
                             ->relationship('shipmentType', 'name')
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->columnSpan(4),
+
+                        Forms\Components\Select::make('send_types')->label('Tipo di spedizione')
+                            ->options(SendType::pluck('name', 'id')->toArray())
+                            ->multiple()
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->rules(['array', 'exists:accrual_types,id'])
+                            ->columnSpan(4),
 
                         Forms\Components\TextInput::make('recipient')->label('Destinatario notifica/trasgressore')
                             ->maxLength(255)
@@ -450,15 +463,17 @@ class PostalExpenseResource extends Resource
                         Forms\Components\TextInput::make('manage_year')->label('Anno di gestione')
                             ->required()
                             ->extraInputAttributes(['class' => 'text-right'])
-                            ->numeric()
+                            // ->numeric()
                             ->rules(['digits:4'])
-                            ->default(now()->year),
+                            ->default(now()->year)
+                            ->columnSpan(4),
 
                         Forms\Components\Select::make('act_type_id')->label('Tipo atto')
                             ->required()
                             ->relationship('actType', 'name')
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->columnSpan(4),
 
                         Forms\Components\TextInput::make('act_id')->label('ID atto')
                             ->maxLength(255)
@@ -473,7 +488,8 @@ class PostalExpenseResource extends Resource
 
                         Forms\Components\DatePicker::make('act_date')->label('Data atto')
                             ->required()
-                            ->extraInputAttributes(['class' => 'text-center']),
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->columnSpan(4),
 
                         Forms\Components\FileUpload::make('act_attachment_path')->label('Allegato atto')
                             ->required()
@@ -502,12 +518,14 @@ class PostalExpenseResource extends Resource
 
                                 return sprintf('%s_%s_REG-RIGHIESTA_%s_%s_%s_%s.%s', $number, $date, $shipmentType, $client, $taxType, $actType, $extension);
                             })
-                            ->maxSize(10240),
+                            ->maxSize(10240)
+                            ->columnSpan(4),
 
                         Forms\Components\DatePicker::make('act_attachment_date')->label('Data caricamento atto')
                             ->extraInputAttributes(['class' => 'text-center'])
                             // ->required()
-                            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value),
+                            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                            ->columnSpan(4),
                             // ->visible(function (Get $get, $record): bool {
                             //     $hasUploadedFile = !empty($get('act_attachment_path'));
                             //     $hasSavedFile = $record && !empty($record->act_attachment_path);
@@ -520,14 +538,16 @@ class PostalExpenseResource extends Resource
                             ->relationship('shipmentInsertUser', 'name')
                             ->searchable()
                             ->preload()
-                            ->optionsLimit(5),
+                            ->optionsLimit(5)
+                            ->columnSpan(4),
 
                         Forms\Components\DatePicker::make('shipment_insert_date')->label('Data inserimento dati')
                             ->extraInputAttributes(['class' => 'text-center'])
                             ->disabled()
-                            ->visible(fn($record): bool => $record && $record->shipment_insert_date),
+                            ->visible(fn($record): bool => $record && $record->shipment_insert_date)
+                            ->columnSpan(4),
                     ])
-                    ->columns(3),
+                    ->columns(12),
 
                 // SEZIONE: Lavorazione e Notifica
                 Forms\Components\Section::make('Dati relativi alla lavorazione/notifica richiesta ed effettuata dal fornitore incaricato')
@@ -550,6 +570,7 @@ class PostalExpenseResource extends Resource
                             ->extraInputAttributes(['class' => 'text-center'])
                             ->required()
                             ->live()
+                            ->debounce(500)
                             ->afterStateUpdated(function (Set $set, $state) {
                                 if ($state) {
                                     $date = \Carbon\Carbon::parse($state);
@@ -559,11 +580,13 @@ class PostalExpenseResource extends Resource
                             }),
 
                         Forms\Components\TextInput::make('notify_year')->label('Anno ricezione')
-                            ->numeric()
+                            // ->numeric()
                             ->extraInputAttributes(['class' => 'text-right'])
                             ->rules(['digits:4'])
                             ->default(now()->year)
-                            ->readOnly(),
+                            // ->readOnly()
+                            ->disabled()
+                            ->dehydrated(),
 
                         Forms\Components\Select::make('notify_month')->label('Mese ricezione')
                             ->options(Month::class)
@@ -595,7 +618,9 @@ class PostalExpenseResource extends Resource
                         Forms\Components\DatePicker::make('amount_registration_date')->label('Data registrazione importo')
                             ->extraInputAttributes(['class' => 'text-center'])
                             ->required()
-                            ->readOnly(),
+                            // ->readOnly()
+                            ->disabled()
+                            ->dehydrated(),
 
                         Forms\Components\DatePicker::make('notify_date')->label('Data notifica')
                             ->extraInputAttributes(['class' => 'text-center']),
@@ -630,7 +655,10 @@ class PostalExpenseResource extends Resource
                             ->maxSize(10240),
 
                         Forms\Components\DatePicker::make('notify_attachment_date')->label('Data caricamento notifica')
-                            ->extraInputAttributes(['class' => 'text-center'])->readOnly()
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            // ->readOnly()
+                            ->disabled()
+                            ->dehydrated()
                             // ->required()
                             // ->visible(function (Get $get, $record): bool {
                             //     $hasUploadedFile = !empty($get('notify_attachment_path'));

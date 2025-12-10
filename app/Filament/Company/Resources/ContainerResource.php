@@ -114,7 +114,7 @@ class ContainerResource extends Resource
                             //     ->required()
                             //     ->searchable()
                             //     ->preload(),
-                            Forms\Components\Select::make('type')->label('Tipo pagamento')
+                            Forms\Components\Select::make('type')->label('Remunerazione')
                                 ->options(TenderPaymentType::class)
                                 ->required()
                                 ->searchable()

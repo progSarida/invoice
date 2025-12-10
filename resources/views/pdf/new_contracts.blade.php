@@ -77,7 +77,7 @@
                 $fieldTranslations = [
                     'client_id' => 'Cliente',
                     'tax_types' => 'Entrate',
-                    'accrual_types' => 'Competenze', // MODIFICA: Cambiato da 'accrual_type_id' a 'accrual_types'
+                    'accrual_types' => 'Gestioni', // MODIFICA: Cambiato da 'accrual_type_id' a 'accrual_types'
                     'payment_type' => 'Tipo pagamento'
                 ];
                 $fieldValues = [

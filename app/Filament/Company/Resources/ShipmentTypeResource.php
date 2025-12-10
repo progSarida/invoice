@@ -18,17 +18,11 @@ use Illuminate\Support\Facades\Auth;
 class ShipmentTypeResource extends Resource
 {
     protected static ?string $model = ShipmentType::class;
-
-    public static ?string $pluralModelLabel = 'Modalità di spedizione';
-
-    public static ?string $modelLabel = 'Modalità di spedizione';
-
+    public static ?string $pluralModelLabel = 'Modalità di invio';
+    public static ?string $modelLabel = 'Modalità di invio';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static ?string $navigationGroup = 'Tabelle';
-
     protected static ?int $navigationSort = 3;
-
     protected static ?string $recordTitleAttribute = 'name';
 
     /**
@@ -70,6 +64,7 @@ class ShipmentTypeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('order')
             ->columns([
                 Tables\Columns\TextColumn::make('order')->label('Posizione')
                     ->sortable(),

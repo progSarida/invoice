@@ -146,7 +146,7 @@ class NewContractResource extends Resource
                     ->date()
                     ->columnSpan(2),
                 Forms\Components\Select::make('accrual_types')
-                    ->label('Competenze')
+                    ->label('Gestioni')
                     ->multiple()
                     ->required()
                     ->searchable()
@@ -173,7 +173,7 @@ class NewContractResource extends Resource
                     ])
                     ->columnSpan(3),
                 Forms\Components\Select::make('payment_type')
-                    ->label('Tipo pagamento')
+                    ->label('Remunerazione')
                     ->options(TenderPaymentType::class)
                     ->required()
                     ->searchable()
@@ -297,7 +297,7 @@ class NewContractResource extends Resource
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('accrual_types')
-                    ->label('Competenze')
+                    ->label('Gestioni')
                     ->badge()
                     ->color('primary')
                     ->separator(', ')
@@ -307,7 +307,7 @@ class NewContractResource extends Resource
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('payment_type')
-                    ->label('Tipo pagamento')
+                    ->label('Remunerazione')
                     ->searchable()
                     ->color('black')
                     ->sortable(),
@@ -389,11 +389,11 @@ class NewContractResource extends Resource
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('accrual_types')
-                    ->label('Competenze')
+                    ->label('Gestioni')
                     ->options(AccrualType::pluck('name', 'id')->toArray())
                     ->multiple()
                     ->preload(),
-                SelectFilter::make('payment_type')->label('Tipo pagamento')->options(TenderPaymentType::class)
+                SelectFilter::make('payment_type')->label('Remunerazione')->options(TenderPaymentType::class)
                     ->multiple()->preload(),
             // ], layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
             ])
@@ -521,7 +521,7 @@ class NewContractResource extends Resource
                     ->date()
                     ->columnSpan(2),
                 Forms\Components\Select::make('accrual_types')
-                    ->label('Competenze')
+                    ->label('Gestioni')
                     ->options(AccrualType::pluck('name', 'id')->toArray())
                     ->multiple()
                     ->required()
@@ -530,7 +530,7 @@ class NewContractResource extends Resource
                     ->rules(['array', 'exists:accrual_types,id'])
                     ->columnSpan(3),
                 Forms\Components\Select::make('payment_type')
-                    ->label('Tipo pagamento')
+                    ->label('Remunerazione')
                     ->options(TenderPaymentType::class)
                     ->required()
                     ->searchable()
