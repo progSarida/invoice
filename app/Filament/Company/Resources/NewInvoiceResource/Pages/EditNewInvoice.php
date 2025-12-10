@@ -11,15 +11,27 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
 use App\Filament\Company\Resources\NewInvoiceResource;
+use App\Models\DocType;
 use App\Services\AndxorSoapService;
+use Carbon\Carbon;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Colors\Color;
+use Illuminate\Contracts\Support\Htmlable;
 
 class EditNewInvoice extends EditRecord
 {
     protected static string $resource = NewInvoiceResource::class;
+
+    public function getTitle(): string | Htmlable
+    {
+        $number = $this->record->getNewInvoiceNumber();
+        $doc = DocType::find($this->record->doc_type_id)->description;
+        $date = Carbon::parse($this->record->invoice_date)->format('d/m/Y');
+
+        return $doc . " n. " . $number . " del " . $date;
+    }
 
     protected function getRedirectUrl(): string
     {

@@ -6,10 +6,16 @@ use App\Filament\Company\Resources\SupplierResource;
 use App\Models\Supplier;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ViewSupplier extends ViewRecord
 {
     protected static string $resource = SupplierResource::class;
+
+    public function getTitle(): string | Htmlable
+    {
+        return $this->record->denomination;
+    }
 
     protected function getHeaderActions(): array
     {

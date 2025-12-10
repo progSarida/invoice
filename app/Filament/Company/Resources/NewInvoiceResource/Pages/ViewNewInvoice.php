@@ -5,17 +5,29 @@ namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 use App\Enums\InvoiceReference;
 use App\Filament\Company\Resources\InvoiceResource;
 use App\Filament\Company\Resources\NewInvoiceResource;
+use App\Models\DocType;
 use App\Models\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Colors\Color;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ViewNewInvoice extends ViewRecord
 {
     protected static string $resource = NewInvoiceResource::class;
+
+    public function getTitle(): string | Htmlable
+    {
+        $number = $this->record->getNewInvoiceNumber();
+        $doc = DocType::find($this->record->doc_type_id)->description;
+        $date = Carbon::parse($this->record->invoice_date)->format('d/m/Y');
+
+        return $doc . " n. " . $number . " del " . $date;
+    }
 
     protected function getHeaderActions(): array
     {

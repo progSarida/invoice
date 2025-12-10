@@ -6,11 +6,17 @@ use App\Filament\Company\Resources\ClientResource;
 use App\Models\Client;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 
 class EditClient extends EditRecord
 {
     protected static string $resource = ClientResource::class;
+
+    public function getTitle(): string | Htmlable
+    {
+        return $this->record->denomination;
+    }
 
     protected function getRedirectUrl(): string
     {

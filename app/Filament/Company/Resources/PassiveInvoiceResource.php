@@ -47,12 +47,13 @@ class PassiveInvoiceResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            // ->disabled()
             ->schema([
                 // Grid::make('GRID')->columnSpan(2)->schema([
 
                     Placeholder::make('pi_validation')
                         ->label('')
-                        ->visible(fn($record) => filled($record->pi_validation_id))
+                        ->visible(fn($record) => $record && filled($record->pi_validation_id))
                         ->content(function ($record) {
                             if (! $record->pi_validation_id) {
                                 return 'Nessuna validazione selezionata';
@@ -96,7 +97,7 @@ class PassiveInvoiceResource extends Resource
                                 ->label('Fornitore')
                                 ->columnSpan(3)
                                 ->relationship('supplier', 'denomination')
-                                ->disabled()
+                                //  ->disabled()
                                 ,
 
                             Forms\Components\Select::make('parent_id')
@@ -107,7 +108,7 @@ class PassiveInvoiceResource extends Resource
                                     fn (Model $record) => $record->number
                                 )
                                 ->visible(fn (Get $get) => !is_null($get('parent_id')))
-                                ->disabled()
+                                //  ->disabled()
                                 ,
                         ]),
 
@@ -122,17 +123,18 @@ class PassiveInvoiceResource extends Resource
                                         ->get();
                                     return $docs->pluck('description', 'name')->toArray();
                                 })
-                                ->disabled()
+                                //  ->disabled()
                                 ,
                             Forms\Components\TextInput::make('number')
                                 ->label('Numero')
                                 ->columnSpan(3)
-                                ->disabled(),
+                                //  ->disabled()
+                                ,
                             Forms\Components\DatePicker::make('invoice_date')
                                 ->label('Data')
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2)
-                                ->disabled()
+                                //  ->disabled()
                                 ,
                         ]),
 
@@ -151,7 +153,7 @@ class PassiveInvoiceResource extends Resource
                                             ])
                                             ->toArray()
                                     )
-                                    ->disabled()
+                                    //  ->disabled()
                                     ,
                                 Forms\Components\Select::make('payment_type')
                                     ->label('Metodo di pagamento')
@@ -164,19 +166,20 @@ class PassiveInvoiceResource extends Resource
                                             ])
                                             ->toArray()
                                     )
-                                    ->disabled()
+                                    //  ->disabled()
                                     ,
                                 Forms\Components\DatePicker::make('payment_deadline')
                                     ->label('Scadenza pagamento')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->columnSpan(2)
-                                    ->disabled(),
+                                    //  ->disabled()
+                                    ,
 
                                 Forms\Components\DatePicker::make('last_payment_date')
                                     ->label('Data ultimo pagamento')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->columnSpan(2)
-                                    ->disabled()
+                                    //  ->disabled()
                                     ,
 
                                 Forms\Components\TextInput::make('total_payment')
@@ -185,18 +188,19 @@ class PassiveInvoiceResource extends Resource
                                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : number_format(0, 2, ',', '.'))
                                     ->columnSpan(2)
                                     // ->visible(fn (Get $get) => !is_null($get('bank')))
-                                    ->disabled()
+                                    //  ->disabled()
                                     ,
 
                                 Forms\Components\TextInput::make('bank')
                                     ->label('Istituto finanziario')
                                     ->columnSpan(3)
-                                    ->disabled(),
+                                    //  ->disabled()
+                                    ,
                                 Forms\Components\TextInput::make('iban')
                                     ->label('IBAN')
                                     ->columnSpan(3)
                                     // ->visible(fn (Get $get) => !is_null($get('iban')))
-                                    ->disabled()
+                                    //  ->disabled()
                                     ,
                             ]),
 
@@ -207,7 +211,7 @@ class PassiveInvoiceResource extends Resource
                             Forms\Components\Textarea::make('description')
                                 ->label('')
                                 ->columnSpanFull()
-                                ->disabled()
+                                //  ->disabled()
                                 ,
                         ]),
                 // ]),
@@ -219,12 +223,12 @@ class PassiveInvoiceResource extends Resource
                                 Forms\Components\TextInput::make('sdi_status')
                                     ->label('Status')
                                     ->columnSpan(3)
-                                    ->disabled()
+                                    //  ->disabled()
                                     ,
                                 Forms\Components\TextInput::make('sdi_code')
                                     ->label('Codice SDI')
                                     ->columnSpan(3)
-                                    ->disabled()
+                                    //  ->disabled()
                                     ,
                             ]),
                 // ]),

@@ -3,17 +3,29 @@
 namespace App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 
 use App\Filament\Company\Resources\PassiveInvoiceResource;
+use App\Models\DocType;
 use App\Models\PassiveInvoice;
 use App\Models\PiValidation;
+use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Colors\Color;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 
 class EditPassiveInvoice extends EditRecord
 {
     protected static string $resource = PassiveInvoiceResource::class;
+
+    public function getTitle(): string | Htmlable
+    {
+        $number = $this->record->number;
+        $doc = DocType::where('name', $this->record->doc_type)->select('description')->first()->description;
+        $date = Carbon::parse($this->record->invoice_date)->format('d/m/Y');
+
+        return $doc . " n. " . $number . " del " . $date;
+    }
 
     protected function getHeaderActions(): array
     {

@@ -246,7 +246,7 @@ class Invoice extends Model
         $tenant = Filament::getTenant();
         return $query->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
                     //  ->where('flow', 'out')
-                     ->whereNotNull('contract_id')
+                    //  ->whereNotNull('contract_id')
                      ->orderByRaw("FIELD(sdi_status, 'rifiutata', 'scartata') DESC")
                      ->orderBy('invoice_date', 'desc')
                      ->orderBy('year', 'desc')
