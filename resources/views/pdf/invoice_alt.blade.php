@@ -167,8 +167,12 @@
                 // dd($invoice->invoiceItems);
                 $fullTotal += $item->total;
                 $noVattedTotal += $item->total;
+                $voice = false;
             @endphp
-            @if($item->invoice_element_id || $item->invoice_id <= 6338)
+            @if(($item->invoice_element_id || $item->invoice_id <= 6338) && !str_contains($item->description, 'Rimborsi'))
+                @php
+                    $voice = true;
+                @endphp
                 <tr>
                     <td style="width: 5%"></td>
                     <td style="width: 60%">{{ $item->description }}</td>
@@ -178,6 +182,7 @@
                 </tr>
             @endif
         @endforeach
+        @if($voice)
         <tr>
             <td style="width: 5%"></td>
             <td style="width: 60%;"></td>
@@ -185,7 +190,11 @@
                 &nbsp;
             </td>
         </tr>
+        @endif
         {{-- Riepiloghi IVA --}}
+        @php
+            $voiceVat = false;
+        @endphp
         @foreach($vats as $vat)
             @php
                 // dd($vats);
@@ -206,6 +215,7 @@
                     $vattedTotal += $vatAmount;
                     $fullTotal += $vatAmount;
                 }
+                $voiceVat = true;
             @endphp
             <tr>
                 <td style="width: 5%; {{ $loop->first ? 'padding-top: 5mm;' : '' }}"></td>
@@ -224,6 +234,7 @@
             </tr>
             @endif
         @endforeach
+        @if($voiceVat)
         <tr>
             <td style="width: 5%"></td>
             <td style="width: 60%;"></td>
@@ -231,6 +242,7 @@
                 &nbsp;
             </td>
         </tr>
+        @endif
         {{-- Rimborso spese notifica --}}
         @php
             $hasRimborso = false;
