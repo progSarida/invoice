@@ -35,4 +35,24 @@ class Supplier extends Model
     public function company(){
         return $this->belongsTo(Company::class);
     }
+
+    protected static function booted()
+    {
+        static::saving(function ($supplier) {
+            // 1. Pulizia vat_code
+            $vat = (string) $supplier->vat_code;
+            if (strlen($vat) === 13) {
+                $supplier->vat_code = substr($vat, 2);
+            }
+            // 2. Pulizia tax_code
+            $tax = (string) $supplier->tax_code;
+            if (strlen($tax) === 13) {
+                $supplier->tax_code = substr($tax, 2);
+            }
+        });
+
+        static::deleted(function ($supplier) {
+            //
+        });
+    }
 }

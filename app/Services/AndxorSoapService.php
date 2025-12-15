@@ -677,9 +677,36 @@ class AndxorSoapService
         //                     ->first();
 
         $query = Supplier::query();
-        $vatCode = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice');
-        $taxCode1 = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice'); // può essere lo stesso del precedente
+
+        // $vatCode = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice');
+        // $taxCode1 = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice'); // può essere lo stesso del precedente
+        // $taxCode2 = data_get($param, 'CedentePrestatore.DatiAnagrafici.CodiceFiscale');
+
+        $temp = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice');
         $taxCode2 = data_get($param, 'CedentePrestatore.DatiAnagrafici.CodiceFiscale');
+        $vatCode = '';
+        $taxCode1 = '';
+
+        if ($temp) {
+            $lunghezza = strlen($temp);
+
+            if ($lunghezza === 11) {
+                // Formato italiano standard (11 caratteri)
+                $vatCode = $temp;
+            } elseif ($lunghezza === 13) {
+                // Formato estero con prefisso (es: IT12345678901)
+                // Rimuove i primi due caratteri (il codice paese) e assegna il risultato.
+                $vatCode = substr($temp, 2);
+            } else {
+                // Gestisci eventuali lunghezze anomale o lascia stringa vuota
+                $vatCode = '';
+            }
+
+            // Assegna la Partita IVA pulita anche a $taxCode1 (come richiesto nella logica precedente)
+            // Se non vuoi che $taxCode1 sia uguale a $vatCode, puoi rimuovere la riga successiva.
+            $taxCode1 = $vatCode;
+        }
+
         if ($vatCode) {
             $query->orWhere('vat_code', $vatCode);
         }
