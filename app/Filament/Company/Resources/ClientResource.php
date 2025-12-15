@@ -44,7 +44,7 @@ class ClientResource extends Resource
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
-        return ["Tipo"=>$record->type->getLabel(), "Codice univoco"=>$record->ipa_code];
+        return ["Tipo"=>$record->type->getLabel(), "Codice cliente"=>$record->ipa_code];
     }
 
     public static function getGlobalSearchResultUrl(Model $record): string
@@ -185,7 +185,7 @@ class ClientResource extends Resource
                     ->required(fn (callable $get) => ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
                     ->columnspan(2),
                 Forms\Components\TextInput::make('ipa_code')
-                    ->label('Codice univoco')
+                    ->label('Codice cliente')
                     ->maxLength(255)
                     ->visible(fn (callable $get) => $get('type') === 'private')
                     ->required(fn (callable $get) => $get('type') === 'private')
@@ -262,7 +262,7 @@ class ClientResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('ipa_code')->label('Codice univoco')
+                Tables\Columns\TextColumn::make('ipa_code')->label('Codice cliente')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Data creazione')
@@ -439,7 +439,7 @@ class ClientResource extends Resource
                     ->required(fn (callable $get) => ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
                     ->columnspan(2),
                 Forms\Components\TextInput::make('ipa_code')
-                    ->label('Codice univoco')
+                    ->label('Codice cliente')
                     ->maxLength(255)
                     ->visible(fn (callable $get) => $get('type') === 'private')
                     ->required(fn (callable $get) => $get('type') === 'private')

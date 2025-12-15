@@ -846,7 +846,7 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\Select::make('accrual_type_id')
                                 ->label('Gestione')
-                                ->required()
+                                ->required(fn(callable $get) => $get('client_id') ? Client::find($get('client_id'))->type == ClientType::PUBLIC : true)
                                 ->options(function (callable $get) {
                                     $contractId = $get('contract_id');
                                     if (!$contractId) {
