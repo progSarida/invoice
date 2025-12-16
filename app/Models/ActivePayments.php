@@ -70,7 +70,8 @@ class ActivePayments extends Model
         $tenant = Filament::getTenant();
         return $query
                     // ->whereNotNull('registration_user_id')
-                    ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id));
+                    ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                    ->orderBy('registration_date', 'desc');
     }
 
     protected static function booted()
