@@ -68,8 +68,9 @@ class ActivePayments extends Model
     public function scopeNewActivePayments($query)
     {
         $tenant = Filament::getTenant();
-        return $query->whereNotNull('registration_user_id')
-                     ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id));
+        return $query
+                    // ->whereNotNull('registration_user_id')
+                    ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id));
     }
 
     protected static function booted()
