@@ -186,6 +186,7 @@ class NewActivePaymentsResource extends Resource
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
                     ->reactive()
+                    ->debounce(500)
                     ->afterStateUpdated(function ($state, Get $get, Set $set) {
                         $invoice = Invoice::find($get('invoice_id'));
                         $paymentDate = $get('payment_date');
