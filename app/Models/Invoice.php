@@ -360,7 +360,7 @@ class Invoice extends Model
                                     ? 'S (scissione dei pagamenti)'
                                     : (($this->company->fiscalProfile->tax_regime->value == 'rf16' || $this->company->fiscalProfile->tax_regime->value == 'rf17')
                                         ? 'D (esigibilità differita)'
-                                        : 'I (esigibilità immediata')),
+                                        : 'I (esigibilità immediata)')),
                     // 'norm' => $item->vat_code_type->getRate() == '0'
                     //             ? 'ART. 15 DPR 633/72'
                     //             :  $this->vat_enforce_type?->getCode()."(".$this->vat_enforce_type?->getLabel().")",
@@ -601,6 +601,7 @@ class Invoice extends Model
             Notification::make()
                 ->title('La voce è stata inserita in una fattura che fa riferimento ad un contratto scaduto')
                 ->danger()
+                ->duration(6000)
                 ->send();
 
             cache()->put($cacheKey, true, now()->addSeconds(5));                            // memorizzo in cache per bloccare duplicazione dovuta a update concatenati
@@ -630,7 +631,8 @@ class Invoice extends Model
                     <strong>Totale fatturato:</strong> " . number_format($totalInvoiced, 2) . " €
                 ")
                 ->danger()
-                ->persistent()
+                ->duration(6000)
+                // ->persistent()
                 ->send();
 
             // cache()->put($cacheKey, true, now()->addDay());

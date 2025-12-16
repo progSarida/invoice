@@ -171,7 +171,8 @@ class NewActivePaymentsResource extends Resource
                             Notification::make()
                                 ->title('Attenzione! Con questo inserimento il totale dei pagamenti della fattura ' . $invoice->getNewInvoiceNumber() . ' eccederebbe il dovuto.')
                                 ->danger()
-                                ->persistent()
+                                ->duration(6000)
+                                // ->persistent()
                                 ->send();
                         }
                     })
@@ -189,19 +190,21 @@ class NewActivePaymentsResource extends Resource
                         $invoice = Invoice::find($get('invoice_id'));
                         $paymentDate = $get('payment_date');
 
-                        if ($paymentDate && $invoice && $paymentDate < $invoice->invoice_date) {
-                            Notification::make()
+                        if ($paymentDate && $invoice && ($paymentDate < $invoice->invoice_date)) {
+                            Notification::make('date')
                                 ->title('Attenzione! La data del pagamento è inferiore alla data della fattura.')
                                 ->danger()
-                                ->persistent()
+                                ->duration(6000)
+                                // ->persistent()
                                 ->send();
                         }
 
                         if ($paymentDate && $paymentDate > today()) {
-                            Notification::make()
+                            Notification::make('today')
                                 ->title('Attenzione! La data del pagamento è successiva alla data di oggi.')
                                 ->warning()
-                                ->persistent()
+                                ->duration(6000)
+                                // ->persistent()
                                 ->send();
                         }
                     })

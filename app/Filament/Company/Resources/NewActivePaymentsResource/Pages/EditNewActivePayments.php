@@ -20,8 +20,8 @@ class EditNewActivePayments extends EditRecord
         $invoice = Invoice::find($data['invoice_id']);
         $paymentDate = $data['payment_date'];
 
-        if ($paymentDate && $invoice && $paymentDate < $invoice->invoice_date) {
-            Notification::make()
+        if ($paymentDate && $invoice && ($paymentDate < $invoice->invoice_date)) {
+            Notification::make('date')
                 ->title('Attenzione! La data del pagamento è inferiore alla data della fattura.')
                 ->danger()
                 ->duration(6000)
