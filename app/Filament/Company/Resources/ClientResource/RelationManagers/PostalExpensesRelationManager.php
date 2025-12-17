@@ -164,12 +164,13 @@ class PostalExpensesRelationManager extends RelationManager
                             ->default(now()->year)
                             ->visible(false),
 
-                        Forms\Components\FileUpload::make('act_attachment_path')->label('Allegato atto')
+                        Forms\Components\FileUpload::make('act_attachment_path')
+                            ->label('Allegato atto')
                             ->required()
                             ->directory('reg_richiesta')
-                            ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                            ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
                                     $set('act_attachment_date', now()->toDateString());
                                 }
