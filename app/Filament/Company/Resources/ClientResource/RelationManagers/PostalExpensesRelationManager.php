@@ -165,9 +165,7 @@ class PostalExpensesRelationManager extends RelationManager
 
                         Forms\Components\FileUpload::make('act_attachment_path')->label('Allegato atto')
                             ->required()
-                            ->disk('public')
                             ->directory('reg_richiesta')
-                            ->visibility('public')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
                             ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
@@ -272,9 +270,7 @@ class PostalExpensesRelationManager extends RelationManager
                         Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
                             ->required()
                             // ->autofocus(fn($record): bool => $record && $record->shipmentInserted())
-                            ->disk('public')
                             ->directory('reg_post_richiesta')
-                            ->visibility('public')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
                                     $set('notify_attachment_date', now()->toDateString());
@@ -533,9 +529,7 @@ class PostalExpensesRelationManager extends RelationManager
 
                         Forms\Components\FileUpload::make('reinvoice_attachment_path')->label('Allegato fattura emessa')
                             ->required()
-                            ->disk('public')
                             ->directory('reg_not_db')
-                            ->visibility('public')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->maxSize(10240)
                             ->afterStateUpdated(function (Set $set, $state) {
@@ -643,6 +637,20 @@ class PostalExpensesRelationManager extends RelationManager
                         return $counterpart;
                     })
                     ->limit(20),
+                Tables\Columns\TextColumn::make('act_attachment_path')
+                    ->label('Allegato')
+                    ->icon('heroicon-m-paper-clip')
+                    ->formatStateUsing(fn () => 'Visualizza File')
+                    ->url(function ($record) {
+                        if (!$record->act_attachment_path) return null;
+                        
+                        // Usa il disco di default (private) per generare l'URL temporaneo
+                        return Storage::temporaryUrl(
+                            $record->act_attachment_path,
+                            now()->addMinutes(15)
+                        );
+                    })
+                    ->openUrlInNewTab(),
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Importo da rimborsare')
                     ->getStateUsing(function ($record) {
