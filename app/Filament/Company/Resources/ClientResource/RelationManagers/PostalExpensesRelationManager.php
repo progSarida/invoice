@@ -174,18 +174,18 @@ class PostalExpensesRelationManager extends RelationManager
                                     $set('act_attachment_date', now()->toDateString());
                                 }
                             })
-                            ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
-                                // Genera un nome personalizzato per il file
-                                $number = $get('send_protocol_number') ?? '******';                                 // numero protocollo invio
-                                $date = $get('send_protocol_date') ?? '******';                                     // data protocollo invio
-                                $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';   // modalità invio
-                                $client = $this->getOwnerRecord()->denomination;                                    // cliente
-                                $taxType = TaxType::tryFrom($get('tax_type'))->getLabel() ?? '';                                          // entrata
-                                $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                      // tipo atto
-                                $extension = $file->getClientOriginalExtension();                                   // estensione
+                            // ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
+                            //     // Genera un nome personalizzato per il file
+                            //     $number = $get('send_protocol_number') ?? '******';                                 // numero protocollo invio
+                            //     $date = $get('send_protocol_date') ?? '******';                                     // data protocollo invio
+                            //     $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';   // modalità invio
+                            //     $client = $this->getOwnerRecord()->denomination;                                    // cliente
+                            //     $taxType = TaxType::tryFrom($get('tax_type'))->getLabel() ?? '';                                          // entrata
+                            //     $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                      // tipo atto
+                            //     $extension = $file->getClientOriginalExtension();                                   // estensione
 
-                                return sprintf('%s_%s_REG-RIGHIESTA_%s_%s_%s_%s.%s', $number, $date, $shipmentType, $client, $taxType, $actType, $extension);
-                            })
+                            //     return sprintf('%s_%s_REG-RIGHIESTA_%s_%s_%s_%s.%s', $number, $date, $shipmentType, $client, $taxType, $actType, $extension);
+                            // })
                             ->maxSize(10240),
 
                         Forms\Components\DatePicker::make('act_attachment_date')->label('Data allegato atto')
