@@ -21,6 +21,7 @@ use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -179,7 +180,7 @@ class PostalExpensesRelationManager extends RelationManager
                                 $date = $get('send_protocol_date') ?? '******';                                     // data protocollo invio
                                 $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';   // modalità invio
                                 $client = $this->getOwnerRecord()->denomination;                                    // cliente
-                                $taxType = $get('tax_type')->getLabel();                                            // entrata
+                                $taxType = TaxType::tryFrom($get('tax_type'))->getLabel() ?? '';                                          // entrata
                                 $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                      // tipo atto
                                 $extension = $file->getClientOriginalExtension();                                   // estensione
 
@@ -637,10 +638,8 @@ class PostalExpensesRelationManager extends RelationManager
                         return $counterpart;
                     })
                     ->limit(20),
-                Tables\Columns\TextColumn::make('act_attachment_path')
-                    ->label('Allegato')
-                    ->icon('heroicon-m-paper-clip')
-                    ->formatStateUsing(fn () => 'Visualizza File')
+                ImageColumn::make('act_attachment_path')
+                    ->label('Preview')
                     ->url(function ($record) {
                         if (!$record->act_attachment_path) return null;
                         
@@ -651,6 +650,7 @@ class PostalExpensesRelationManager extends RelationManager
                         );
                     })
                     ->openUrlInNewTab(),
+                
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Importo da rimborsare')
                     ->getStateUsing(function ($record) {
