@@ -23,6 +23,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        FileUpload::configureUsing(function (FileUpload $component): void {
+
+                $diskName = $component->getDiskName() ?? Config::get('filesystems.default');
+                $diskConfig = Config::get("filesystems.disks.{$diskName}");
+
+                if (
+                    $diskConfig && 
+                    ($diskConfig['driver'] ?? '') === 's3' && 
+                    empty($diskConfig['url'])
+                ) {
+                    $component->visibility('private');
+                }
+            });
     }
 }
