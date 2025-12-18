@@ -38,18 +38,6 @@ return [
             'report' => false,
         ],
 
-        'private' => [
-            'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),      // Deve corrispondere a "access_key_id" nel JSON
-            'secret' => env('AWS_SECRET_ACCESS_KEY'), // Deve corrispondere a "access_key_secret"
-            'region' => env('AWS_DEFAULT_REGION', 'auto'),
-            'bucket' => env('AWS_BUCKET'),          // Deve corrispondere a "bucket" (quello che inizia con fls-...)
-            'endpoint' => env('AWS_ENDPOINT'),      // Deve essere l'URL di Cloudflare R2 nel JSON
-            'use_path_style_endpoint' => false,     // Cloudflare R2 preferisce false
-            'throw' => true,                        // METTI TRUE PER IL DEBUG: ti dice perché non salva
-            'visibility' => 'private',
-        ],
-
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -70,6 +58,7 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
             'report' => false,
+            'visibility' => 'private',
         ],
 
     ],
