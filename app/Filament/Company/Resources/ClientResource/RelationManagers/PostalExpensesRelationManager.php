@@ -169,6 +169,7 @@ class PostalExpensesRelationManager extends RelationManager
                             ->required()
                             ->directory('reg_richiesta')
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                            ->downloadable()
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
@@ -639,18 +640,6 @@ class PostalExpensesRelationManager extends RelationManager
                         return $counterpart;
                     })
                     ->limit(20),
-                ImageColumn::make('act_attachment_path')
-                    ->label('Preview')
-                    ->url(function ($record) {
-                        if (!$record->act_attachment_path) return null;
-                        
-                        // Usa il disco di default (private) per generare l'URL temporaneo
-                        return Storage::temporaryUrl(
-                            $record->act_attachment_path,
-                            now()->addMinutes(15)
-                        );
-                    })
-                    ->openUrlInNewTab(),
                 
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Importo da rimborsare')
@@ -697,19 +686,19 @@ class PostalExpensesRelationManager extends RelationManager
                     Tables\Actions\Action::make('view_act_attachment')
                         ->label('Allegato Atto')
                         ->icon('heroicon-o-document')
-                        ->url(fn($record): ?string => $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
+                        ->url(fn($record): ?string => $record->act_attachment_path ? Storage::temporaryUrl($record->act_attachment_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->visible(fn($record): bool => (bool)$record->act_attachment_path),             // Nascondo se l'allegato non esiste
                     Tables\Actions\Action::make('view_notify_attachment')
                         ->label('Allegato Notifica')
                         ->icon('heroicon-o-document')
-                        ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
+                        ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::temporaryUrl($record->notify_attachment_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->visible(fn($record): bool => (bool)$record->notify_attachment_path),          // Nascondo se l'allegato non esiste
                     Tables\Actions\Action::make('view_reinvoice_attachment')
                         ->label('Allegato Rifatturazione')
                         ->icon('heroicon-o-document')
-                        ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
+                        ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::temporaryUrl($record->reinvoice_attachment_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->visible(fn($record): bool => (bool)$record->reinvoice_attachment_path),       // Nascondo se l'allegato non esiste
                 ])
