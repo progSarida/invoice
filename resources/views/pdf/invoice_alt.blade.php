@@ -72,9 +72,22 @@
                         $invoice->company->city->zip_code . ' ' .
                         $invoice->company->city->name .
                         ' (' . $invoice->company->city->province->code . ')';
-            $contatti = 'Tel. ' .  $invoice->company->phone . ' - Fax ' . $invoice->company->fax;
-            $cf = $invoice->company->register . $invoice->company->registerProvince?->name . ' - CF ' . $invoice->company->tax_number . ' - P.I. ' . $invoice->company->vat_number;
-            $rea = 'R.E.A. ' . $invoice->company->rea_number . ' - Cap. Soc. I.V. Euro' . $invoice->company->nominal_capital;
+            $contatti = '';
+            if($invoice->company->phone) $contatti .= 'Tel. ' .  $invoice->company->phone;
+            if($invoice->company->phone && $invoice->company->fax) $contatti .= ' - ';
+            if($invoice->company->fax) $contatti .= 'Fax ' . $invoice->company->fax;
+            $cf = '';
+            if($invoice->company->register) $cf .= $invoice->company->register;
+            if($invoice->company->register && $invoice->company->registerProvince) $cf .= ' ';
+            if($invoice->company->registerProvince) $cf .= $invoice->company->registerProvince?->name;
+            if($invoice->company->phregisterone || $invoice->company->registerProvince) $cf .= ' - ';
+            if($invoice->company->tax_number) $cf .= 'CF ' . $invoice->company->tax_number;
+            if($invoice->company->tax_number && $invoice->company->vat_number) $cf .= ' - ';
+            if($invoice->company->vat_number) $cf .= 'P.I. ' . $invoice->company->vat_number;
+            $rea = '';
+            if($invoice->company->rea_number) $rea .= 'R.E.A. ' . $invoice->company->rea_number;
+            if($invoice->company->rea_number && $invoice->company->nominal_capital) $rea .= ' - ';
+            if($invoice->company->rea_number) $rea .= 'Cap. Soc. I.V. Euro' . $invoice->company->nominal_capital;
             $voice = false;
         @endphp
         <tr>
@@ -92,9 +105,15 @@
         <tr>
             <td colspan="4" class='left padding_company'>Sede Legale: {{ $sedeLegale }}</td>
         </tr>
+        @if($contatti !== '')
         <tr><td colspan="4" class='left padding_company'>{{ $contatti }}</td></tr>
+        @endif
+        @if($cf !== '')
         <tr><td colspan="4" class='left padding_company'>{{ $cf }}</td></tr>
+        @endif
+        @if($rea !== '')
         <tr><td colspan="4" class='left padding_company'>{{ $rea }}</td></tr>
+        @endif
         <tr>
             <td style="padding-top: 5mm; padding-bottom: 5mm;" colspan="5"></td>
         </tr>

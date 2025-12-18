@@ -189,7 +189,8 @@ class EditNewInvoice extends EditRecord
                                 "soft" => "Semplice",
                                 "hard" => "Strutturata"
                             ]
-                        ),
+                        )
+                        ->default('soft'),
                 ])
                 ->action(function (Invoice $record, $data) {
                     $vats = $record->vatResume();                                           // Creazione array con dati riepiloghi IVA
