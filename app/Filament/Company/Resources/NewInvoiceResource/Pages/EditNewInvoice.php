@@ -146,14 +146,14 @@ class EditNewInvoice extends EditRecord
 
                                 if ($key === $lastKey) {
                                     // $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
-                                    $newInvoice->checkStampDuty();                              // verifico e inserisco eventuale imposta di bollo (non fa nulla)
+                                    $newInvoice->invoiceCheckStampDuty();                              // verifico e inserisco eventuale imposta di bollo (non fa nulla)
                                     $newItem->autoInsert();                                     // crea voci fattura di ritenute, riepiloghi e casse previdenziali
                                     $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
                                 }
                             }
                         } else {
                             // Se non si duplicano le voci, aggiorno comunque i totali e verifico l'imposta di bollo
-                            $newInvoice->checkStampDuty();
+                            $newInvoice->invoiceCheckStampDuty();
                             $newInvoice->updateTotal();
                         }
 

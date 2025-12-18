@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\ClientType;
 use App\Enums\SdiStatus;
 use App\Enums\TransactionType;
 use App\Enums\VatCodeType;
 use App\Enums\WithholdingType;
 use Filament\Facades\Filament;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class InvoiceItem extends Model
@@ -53,6 +55,13 @@ class InvoiceItem extends Model
         return $this->belongsTo(PostalExpense::class, 'postal_expense_id', 'id');
     }
 
+    protected function effectiveTotal(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->amount ?? $this->total,
+        );
+    }
+
     protected static function booted()
     {
         static::saved(function ($item) {
@@ -64,7 +73,11 @@ class InvoiceItem extends Model
         });
 
         static::deleted(function ($item) {
+            // dd($item->invoice->vatResume());
+            $item->checkStampDuty();
+            // dd($item->invoice->vatResume());                    // 'Spese', 'Bollo' eliminati
             $item->autoInsert();
+            // dd($item->invoice->vatResume());
             $item->invoice?->updateTotal();
 
             if ($item->invoice?->parent_id) {
@@ -76,9 +89,11 @@ class InvoiceItem extends Model
     // Calcola il totale della voce della fattura
     public function calculateTotal(): void
     {
-        $rate = $this->vat_code_type?->getRate() / 100 ?? 0;
-        // $this->total = $this->amount + ($this->amount * $rate);
-        $this->total = $this->amount;
+        // $rate = $this->vat_code_type?->getRate() / 100 ?? 0;
+        // if($this->invoice->client->client_type == ClientType::PRIVATE)
+        //     $this->total = $this->amount + ($this->amount * $rate);
+        // else if($this->invoice->client->client_type == ClientType::PUBLIC)
+        //     $this->total = $this->amount;
     }
 
     // Verifica se ci sono le condizioni per inserire l'imposta di bollo (gli importi esenti IVA sono uguali o superiori al valore indicato) e nel caso lo fa
@@ -90,27 +105,35 @@ class InvoiceItem extends Model
             $free = 0;
             $insert = true;
             foreach($vats as $key => $vat){
-                if($key == 'vc06a') $insert = false;
+                if($key == 'vc06a') {
+                    // $insert = false;
+                    InvoiceItem::where('invoice_id', $this->invoice->id)
+                        ->where('vat_code_type', 'vc06a')
+                        ->delete();
+                }
                 if($vat['free']) $free += $vat['taxable'];
             }
-            if($insert && $free >= $stampDuty->value){
+            // if($insert && $free >= $stampDuty->value){
+            if($free >= $stampDuty->value){
                 $a = [
                     'invoice_id' => $this->invoice->id,
                     'invoice_element_id' => null,
                     'description' => $stampDuty->row_description,
                     'amount' => (string) $stampDuty->amount,
-                    'vat_code_type' => 'vc06a'
+                    'vat_code_type' => 'vc06a',
+                    'total' => (string) $stampDuty->amount,
                 ];
                 $item = InvoiceItem::create($a);
                 $item->calculateTotal();
                 $item->save();
                 return $item;
-            } else {
-                // Le condizioni NON sono soddisfatte: elimina l'eventuale voce di bollo
-                InvoiceItem::where('invoice_id', $this->invoice->id)
-                    ->where('vat_code_type', 'vc06a')
-                    ->delete();
             }
+            // else {
+            //     // Le condizioni NON sono soddisfatte: elimina l'eventuale voce di bollo
+            //     InvoiceItem::where('invoice_id', $this->invoice->id)
+            //         ->where('vat_code_type', 'vc06a')
+            //         ->delete();
+            // }
         }
     }
 
@@ -118,9 +141,12 @@ class InvoiceItem extends Model
     public function autoInsert()
     {
         // Elimino tutti gli InvoiceItem auto-generati per questa fattura
+        // dd(InvoiceItem::where('invoice_id', $this->invoice->id)->where('auto', true)->get());
+
         InvoiceItem::where('invoice_id', $this->invoice->id)
             ->where('auto', true)
             ->delete();
+        // dd('STOP');
 
         // $vats = $this->vatResume();                                             // Creazione array con dati riepiloghi IVA
         // $funds = $this->getFundBreakdown();                                     // Creazione array con dati casse previdenziali
@@ -128,6 +154,7 @@ class InvoiceItem extends Model
         //     $vats = $this->updateResume($vats, $funds);                         // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
         // --------------------------------------------------------------------------------------------------------------------------------------------
         $vats = $this->invoice->vatResume();                                                                 // Creazione array con dati riepiloghi IVA
+        // dd($vats);
         $funds = array_filter($this->invoice->getFundBreakdown(), function ($fund) {                         // Creazione array con dati casse previdenziali
             return isset($fund['fund_code'], $fund['rate'], $fund['amount'], $fund['taxable_base']);
         });
@@ -156,8 +183,9 @@ class InvoiceItem extends Model
             return;
         }
         // dd($vats);
-        foreach($vats as $vat) {
+        foreach($vats as $key => $vat) {
             // dd($vat);
+            if($key == 'vc06a') continue;
             $a = [
                 'invoice_id' => $this->invoice->id,
                 'invoice_element_id' => null,

@@ -83,7 +83,7 @@
             <td colspan="8" class="center">{{ $invoice->art_73 ? 'SI'  : '' }}</td>
             <td colspan="24" class="right">{{ $invoice->getNewInvoiceNumber() }}</td>
             <td colspan="20" class="center">{{ $invoice->invoice_date->format('d/m/Y') }}</td>
-            <td colspan="23" class="center">{{ $invoice->contract->office_code }}</td>
+            <td colspan="23" class="center">{{ $invoice->contract?->office_code }}</td>
         </tr>
     </table>
 </div>

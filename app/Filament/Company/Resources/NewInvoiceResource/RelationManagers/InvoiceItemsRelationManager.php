@@ -238,6 +238,9 @@ class InvoiceItemsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('description')
+            ->modifyQueryUsing(fn ($query) =>
+                $query->selectRaw('invoice_items.*, COALESCE(amount, total) as display_total')
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('description')->label('Elemento'),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
@@ -268,17 +271,29 @@ class InvoiceItemsRelationManager extends RelationManager
                 //             ->label('')
                 //             ->money('EUR', true, 'it_IT'),
                 //     ]),
-                Tables\Columns\TextColumn::make('total')->label('Totale')
-                    // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
-                    // ->numeric()
-                    ->money('EUR', true, 'it_IT')
-                    ->sortable()
-                    ->summarize([
-                        Tables\Columns\Summarizers\Sum::make()
-                            ->label('')
-                            ->money('EUR', true, 'it_IT'),
-                            // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €'),
-                    ]),
+                Tables\Columns\TextColumn::make('display_total')
+                ->label('Totale')
+                ->money('EUR', true, 'it_IT')
+                ->sortable()
+                ->summarize([
+                    Tables\Columns\Summarizers\Sum::make()
+                        ->label('')
+                        ->money('EUR', true, 'it_IT'),
+                ]),
+                // Tables\Columns\TextColumn::make('total')->label('Totale')
+                //     // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
+                //     // ->numeric()
+                //     ->getStateUsing(function ($record) {
+                //         return $record->amount ?? $record->total;
+                //     })
+                //     ->money('EUR', true, 'it_IT')
+                //     ->sortable()
+                //     ->summarize([
+                //         Tables\Columns\Summarizers\Sum::make()
+                //             ->label('')
+                //             ->money('EUR', true, 'it_IT'),
+                //             // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €'),
+                //     ]),
                 // Tables\Columns\IconColumn::make('is_with_vat')->label('Iva')
                 //     ->boolean(),
             ])
@@ -485,7 +500,8 @@ class InvoiceItemsRelationManager extends RelationManager
                         return $record;
                     }),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn ($record) => $record->vat_code_type !== VatCodeType::VC06A && $record->auto !== true)
+                    // ->visible(fn ($record) => $record->vat_code_type !== VatCodeType::VC06A && $record->auto !== true)
+                    ->visible(fn ($record) => $record->invoice_element_id)
                     ->using(function (InvoiceItem $record): InvoiceItem {
                         $invoice = $record->invoice;
 
@@ -522,7 +538,7 @@ class InvoiceItemsRelationManager extends RelationManager
 
                         // $invoice->updateTotal();
                         $record->delete();
-                        $invoice->checkStampDuty();
+                        $invoice->invoiceCheckStampDuty();
                         $record->autoInsert();
                         $invoice->updateTotal();
 

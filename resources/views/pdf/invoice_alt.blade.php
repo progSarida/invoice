@@ -75,6 +75,7 @@
             $contatti = 'Tel. ' .  $invoice->company->phone . ' - Fax ' . $invoice->company->fax;
             $cf = $invoice->company->register . $invoice->company->registerProvince?->name . ' - CF ' . $invoice->company->tax_number . ' - P.I. ' . $invoice->company->vat_number;
             $rea = 'R.E.A. ' . $invoice->company->rea_number . ' - Cap. Soc. I.V. Euro' . $invoice->company->nominal_capital;
+            $voice = false;
         @endphp
         <tr>
             <td rowspan="5" style="width: 20%; vertical-align: top; text-align: center;">
@@ -107,18 +108,19 @@
                 case "man":
                 case "woman":
                 case "professional":
-                    $cliente .= "Spett.le ";
+                    $cliente .= " ";
+                    break;
                 case "city":
-                    $cliente .= "Spett.le Amministrazione Comunale di ";
+                    $cliente .= " Amministrazione Comunale di ";
                     break;
                 case "union":
-                    $cliente .= "Spett.le Unione di comuni ";
+                    $cliente .= " Unione di comuni ";
                     break;
                 case "federation":
-                    $cliente .= "Spett.le Federazione di comuni ";
+                    $cliente .= " Federazione di comuni ";
                     break;
                 case "province":
-                    $cliente .= "Spett.le amministrazione provinciale di ";
+                    $cliente .= " Amministrazione provinciale di ";
                     break;
             }
             $cliente .= $invoice->client->denomination;
@@ -138,14 +140,18 @@
             <td class="right" style="width: 55%;"></td>
             <td style="width: 45%">{{ $indirizzoCliente }}</td>
         </tr>
+        @if($invoice->client->vat_code)
         <tr>
             <td class="right" style="width: 55%;"></td>
             <td style="width: 45%">P.I. {{ $invoice->client->vat_code }}</td>
         </tr>
+        @endif
+        @if($invoice->client->tax_code)
         <tr>
             <td class="right" style="width: 55%;"></td>
             <td style="width: 45%">C.F. {{ $invoice->client->tax_code }}</td>
         </tr>
+        @endif
         <tr>
             <td style="padding-top: 5mm; padding-bottom: 5mm;" colspan="5"></td>
         </tr>
@@ -156,7 +162,7 @@
             <td colspan="5" class='bold'>{{ $doc }}</td>
         </tr>
         <tr>
-            <td colspan="5" class='description'>{{ $invoice->description }}</td>
+            <td colspan="5" class='description'>({{ substr($invoice->budget_year, -2) }}) {{ $invoice->description }}</td>
         </tr>
         <tr>
             <td colspan="5" class='free_description'>{{ $invoice->free_description }}</td>
@@ -166,10 +172,19 @@
             @php
                 // dd($invoice->invoiceItems);
                 $fullTotal += $item->total;
-                $noVattedTotal += $item->total;
-                $voice = false;
+                $noVattedTotal += $item->amount;
             @endphp
-            @if(($item->invoice_element_id || $item->invoice_id <= 6338) && !str_contains($item->description, 'Rimborsi'))
+            @if(!str_contains($item->description, 'Rimborsi') &&                                    // la descrizione non contiene la scritta 'Rimborsi' e
+                (
+                    ($item->invoice_element_id && !$item->auto) ||                                      // è una voce inserira dall'operatore oppure
+                        ($item->invoice_id <= 6338 &&                                                       // è una fattura importata dal vecchio programma e
+                            !$item->auto &&                                                                     // non è una voce inserita automaticamente e
+                            (!str_contains($item->description, '633/72') &&                                     // non fa riferimento al DPR 633/72
+                                !str_contains($item->description, 'esente')                                     // non è indicata come esente iva
+                            )
+                        )
+                )
+            )
                 @php
                     $voice = true;
                 @endphp
@@ -177,7 +192,7 @@
                     <td style="width: 5%"></td>
                     <td style="width: 60%">{{ $item->description }}</td>
                     <td style="width: 15%">{{ $invoice->currency ?? 'Euro' }}</td>
-                    <td style="width: 15%" class="right">{{ number_format($item->total, 2, ',', '.') }}</td>
+                    <td style="width: 15%" class="right">{{ number_format($item->amount, 2, ',', '.') }}</td>
                     <td style="width: 5%"></td>
                 </tr>
             @endif
@@ -212,8 +227,8 @@
             @if(!$free)
             @php
                 if($split) {
-                    $vattedTotal += $vatAmount;
-                    $fullTotal += $vatAmount;
+                    // $vattedTotal += $vatAmount;
+                    // $fullTotal += $vatAmount;
                 }
                 $voiceVat = true;
             @endphp
@@ -292,7 +307,8 @@
         @endphp
         @foreach($invoice->invoiceItems as $item)
             {{-- @if(!$item->invoice_element_id && (! (int) $item->auto) && !str_contains($item->description, 'Rimborsi escl.Art. 15 ex D.P.R. 633/72')) --}}
-            @if(!$item->invoice_element_id && (! (int) $item->auto) && !str_contains($item->description, 'Rimborsi')  && $item->invoice_id > 6338)
+            @if(!$item->invoice_element_id && (! (int) $item->auto) && !str_contains($item->description, 'Rimborsi')  && ($item->invoice_id > 6338 ||
+                $item->invoice_id <= 6338 && (str_contains($item->description, '633/72') || str_contains($item->description, 'esente'))))
             @php
                 $stamp = true;
             @endphp
@@ -323,7 +339,7 @@
             <td style="width: 60%; padding-top: 5mm;">TOTALE</td>
             <td style="width: 15%; padding-top: 5mm;">{{ $invoice->currency ?? 'Euro' }}</td>
             <td style="width: 15%; padding-top: 5mm; text-align: right;">
-                {{ number_format(($fullTotal), 2, ',', '.') }}
+                {{ number_format(($invoice->total), 2, ',', '.') }}
             </td>
             <td style="width: 5%; padding-top: 5mm;"></td>
         </tr>
@@ -333,14 +349,25 @@
             <td colspan="2" style="width: 30%;" class="dashed_bottom">&nbsp;</td>
             <td style="width: 5%"></td>
         </tr>
-        @if($fullTotal != $noVattedTotal)
+        @php
+            $split = false;
+            if($invoice->client->type == \App\Enums\ClientType::PUBLIC){
+                $totalPay = $invoice->no_vat_total;
+                $split = true;
+            }
+            else{
+                $totalPay = $invoice->total;
+            }
+        @endphp
+        {{-- @if($fullTotal != $noVattedTotal) --}}
+        @if($split)
         {-- Totale a doversi --}
         <tr>
             <td style="width: 5%; padding-top: 5mm;"></td>
             <td style="width: 60%; padding-top: 5mm;">TOTALE A DOVERSI</td>
             <td style="width: 15%; padding-top: 5mm;">{{ $invoice->currency ?? 'Euro' }}</td>
             <td style="width: 15%; padding-top: 5mm; text-align: right;">
-                {{ number_format($noVattedTotal, 2, ',', '.') }}
+                {{ number_format($totalPay, 2, ',', '.') }}
             </td>
             <td style="width: 5%; padding-top: 5mm;"></td>
         </tr>
@@ -384,7 +411,13 @@
         </tr>
         <tr><td colspan="5" class=""></td></tr>
         <tr>
-            <td style="padding-top: 5mm;" colspan="5" class="right">CIG: {{$invoice->contract->cig_code}} - Codice Unico Ufficio: {{$invoice->contract->office_code}} - A.B. {{$invoice->budget_year}}</td>
+            @php
+                $cig_code = '';
+                $office_code = '';
+                if($invoice->contract?->cig_code) $cig_code = 'CIG: ' . $invoice->contract?->cig_code . ' - ';
+                if($invoice->contract?->cig_code) $office_code = 'Codice Unico Ufficio: ' . $invoice->contract?->office_code . ' - ';
+            @endphp
+            <td style="padding-top: 5mm;" colspan="5" class="right">{{$cig_code}}{{$office_code}}A.B. {{$invoice->budget_year}}</td>
         </tr>
     </table>
 </body>

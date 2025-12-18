@@ -68,7 +68,7 @@
             <tr>
                 <td class="padding"></td>
                 <td class="padding">
-                    Contratto {{ $invoice->contractDetail?->number }} del {{ $invoice->contractDetail?->date->format('d-m-Y') }}, CIG: {{ $invoice->contract->cig_code }}
+                    Contratto {{ $invoice->contractDetail?->number }} del {{ $invoice->contractDetail?->date->format('d-m-Y') }}, CIG: {{ $invoice->contract?->cig_code }}
                 </td>
                 <td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td>
             </tr>
@@ -81,8 +81,12 @@
                 $items = $invoice->invoiceItems instanceof \Illuminate\Support\Collection
                     ? $invoice->invoiceItems->where('auto', false)
                     : $invoice->invoiceItems()->where('auto', false)->get();
+                $stamp = false;
             @endphp
             @foreach ($items as $item)
+                @php
+                    if($item->vat_code_type == \App\Enums\VatCodeType::VC06A) $stamp = true;
+                @endphp
                 <tr>
                     <td class="padding"></td>
                     <td class="padding">{{ $item->description }}</td>
@@ -176,7 +180,8 @@
         $hasWithholdingTax = collect($withholdings)
             ->search(fn($withholding) => in_array($withholding->withholding_type, $accontoValues));
         $withholdingAmount = 0;
-        if(count($invoice->withholdings) > 0 && $hasWithholdingTax !== false &&
+        $count = is_array($invoice->withholdings) ? count($invoice->withholdings) : 0;
+        if($count > 0 && $hasWithholdingTax !== false &&
             !in_array($invoice->client->subtype, [ \App\Enums\ClientSubtype::MAN, \App\Enums\ClientSubtype::WOMAN, ])){
                 $taxable = $invoice->getTaxable();
                 $withholdingAmount = $taxable * ($invoice->company->withholdings[$hasWithholdingTax]->rate / 100);
@@ -189,9 +194,15 @@
         if(count($funds) > 0)
             $fundTotal = array_sum(array_column($funds, 'amount'));
         $vatTotal = array_sum(array_column($funds, 'vat'));
-        $total = $invoice->total + $withholdingAmount;
+        // if($invoice->client->type == \App\Enums\ClientType::PUBLIC)
+        //     $total = $invoice->no_vat_total + $withholdingAmount;
+        // else
+            $total = $invoice->total + $withholdingAmount;
     @endphp
     <table class="total">
+        @php
+            $showStamp = $invoice->company->stampDuty->virtual_stamp && $stamp;
+        @endphp
         <tr class="center bold border_bottom">
             <td colspan="5" class="padding">TOTALI</td>
         </tr>
@@ -203,8 +214,8 @@
             <td style="width: 25%" class="border_right padding">Totale documento</td>
         </tr>
         <tr>
-            <td style="width: 19%" class="right padding">{{ $invoice->company->stampDuty->virtual_stamp ? number_format((float) $invoice->company->stampDuty->virtual_amount, 2, ',', '.')  : ''}}</td>
-            <td style="width: 19%" class="center padding">{{ $invoice->company->stampDuty->virtual_stamp ? 'SI' : ''}}</td>
+            <td style="width: 19%" class="right padding">{{ $showStamp ? number_format((float) $invoice->company->stampDuty->virtual_amount, 2, ',', '.')  : ''}}</td>
+            <td style="width: 19%" class="center padding">{{ $showStamp ? 'SI' : ''}}</td>
             <td style="width: 32%" class="padding"></td>
             <td style="width: 5%" class="padding"></td>
             <td style="width: 25%" class="right padding bold">{{ number_format((float) ($total), 2, ',', '.') }}</td>
@@ -232,7 +243,11 @@
     {{-- Pagamento --}}
     @php
         // $totalPay = $invoice->total - $withholdingAmount;
-        $totalPay = $invoice->total;
+        if($invoice->client->type == \App\Enums\ClientType::PUBLIC)
+            $totalPay = $invoice->no_vat_total + $withholdingAmount;
+        else
+            $totalPay = $invoice->total + $withholdingAmount;
+        // $totalPay = $invoice->total;
     @endphp
     <table>
         <tr class="center border_bottom">

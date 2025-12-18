@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ClientType;
 use App\Enums\InvoiceReference;
 use App\Enums\TaxType;
 use App\Enums\SdiStatus;
@@ -257,12 +258,14 @@ class Invoice extends Model
     // Aggiorna i totali (con e senza IVA della fattura) ad ogni inserimento di una voce
     public function updateTotal(): void
     {
-        $total = $this->invoiceItems()->sum('total');
+        $totals = $this->invoiceItems()->where('auto', false)->sum('total');
+        $amounts = $this->invoiceItems()->sum('amount');
+        // dd($totals, $amounts);
         // $total = $this->invoiceItems()->where('auto', false)->sum('total');
         $no_vat_total = $this->invoiceItems()->where('auto', false)->sum('amount');
-        $this->vat = $total - $no_vat_total;
-        $this->total = $total;
-        $this->no_vat_total = $no_vat_total;
+        $this->vat = $totals - $amounts;
+        $this->total = $totals;
+        $this->no_vat_total = $amounts;
         $this->save();
     }
 
@@ -347,9 +350,15 @@ class Invoice extends Model
     public function vatResume(): array
     {
         $vats = [];
-        $items = $this->invoiceItems instanceof \Illuminate\Support\Collection
-            ? $this->invoiceItems->where('auto', false)
-            : $this->invoiceItems()->where('auto', false)->get();
+        // $items = $this->invoiceItems instanceof \Illuminate\Support\Collection
+        //     ? $this->invoiceItems->where('auto', false)
+        //     : $this->invoiceItems()->where('auto', false)->get();
+        $items = $this->invoiceItems()
+            ->where('auto', false)
+            ->get();
+
+        // dd($items);
+
         foreach ($items as $item) {
             $rate = $item->vat_code_type->value;
             if (!isset($vats[$rate])) {
@@ -372,9 +381,15 @@ class Invoice extends Model
                 ];
             }
             $vats[$rate]['taxable'] += $item->amount;
-            $vats[$rate]['vat'] += $item->total - $item->amount;
+            // if($item->invoice->client->type == ClientType::PRIVATE)
+                $vats[$rate]['vat'] += $item->amount * ($item->vat_code_type->getRate() / 100);
+            // else if($item->invoice->client->type == ClientType::PUBLIC){
+                // $vats[$rate]['vat'] += $item->total - $item->amount;
+                // $vats[$rate]['vat'] += 0;
+            // }
             $vats[$rate]['total'] += $item->total;
         }
+        // dd($vats);
         return $vats;
     }
 
@@ -491,7 +506,7 @@ class Invoice extends Model
     }
 
     // Verifica se ci sono le condizioni per inserire l'imposta di bollo (gli importi esenti IVA sono uguali o superiori al valore indicato) e nel caso lo fa
-    public function checkStampDuty()
+    public function invoiceCheckStampDuty()
     {
         $stampDuty = $this->company->stampDuty;
         if($stampDuty->active){

@@ -792,7 +792,7 @@ class CreditNotesRelationManager extends RelationManager
                                                 }
                                             }
 
-                                        $invoice->checkStampDuty();
+                                        $invoice->invoiceCheckStampDuty();
                                         $record->autoInsert();
                                         $invoice->updateTotal();
                                         if ($record->invoice) {
