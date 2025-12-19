@@ -338,14 +338,14 @@ class NewInvoiceResource extends Resource
                                 ->visible(
                                     function(Get $get){
                                         if(filled ( $get('client_id') )){
-                                            if(Client::find($get('client_id'))->subtype->isCompany())
-                                                return false;
-                                            else
-                                                return true;
+                                            // if(Client::find($get('client_id'))->subtype->isCompany())
+                                            //     return false;
+                                            // else
+                                            //     return true;
+                                            return Client::find($get('client_id'))->subtype->isContractable();
                                         }
                                         else
                                             return false;
-
                                     }
                                 ),
 
@@ -491,14 +491,14 @@ class NewInvoiceResource extends Resource
                                 ->visible(
                                     function(Get $get){
                                         if(filled ( $get('client_id') )){
-                                            if(Client::find($get('client_id'))->subtype->isCompany())
-                                                return false;
-                                            else
-                                                return true;
+                                            // if(Client::find($get('client_id'))->subtype->isCompany())
+                                            //     return false;
+                                            // else
+                                            //     return true;
+                                            return Client::find($get('client_id'))->subtype->isContractable();
                                         }
                                         else
                                             return false;
-
                                     }
                                 )
                                 ->afterStateUpdated(function (Get $get, Set $set, $state) {
