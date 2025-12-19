@@ -135,16 +135,18 @@ class EditCompanyProfile extends EditTenantProfile
                                     ->columnSpan(8),
                                 FileUpload::make('logo_path')
                                     ->label('Logo')
-                                    ->live()
-                                    ->disk('public')
+                                    // ->live()
+                                    // ->disk('public')
                                     ->directory('logos')
-                                    ->visibility('public')
-                                    ->acceptedFileTypes(['image/*'])
+                                    // ->openable()
+                                    // ->visibility('public')
+                                    // ->acceptedFileTypes(['image/*'])
                                     ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get) {
-                                        $vatTax = $get('vat_number') ? $get('vat_number') : $get('tx_number');
+                                        $vatTax = $get('vat_number') ? $get('vat_number') : $get('tax_number');
                                         $extension = $file->getClientOriginalExtension();
                                         return sprintf('logo_%s.%s', $vatTax, $extension);
                                     })
+                                    ->maxSize(10240)
                                     ->columnSpan(4),
                             ])
                             ->columns(12),

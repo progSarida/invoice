@@ -164,30 +164,29 @@ class PostalExpensesRelationManager extends RelationManager
                             ->default(now()->year)
                             ->visible(false),
 
-                        Forms\Components\FileUpload::make('act_attachment_path')
-                            ->label('Allegato atto')
+                        Forms\Components\FileUpload::make('act_attachment_path')->label('Allegato atto')
                             ->required()
                             ->directory('reg_richiesta')
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-                            ->downloadable()
+                            // ->downloadable()
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
                                     $set('act_attachment_date', now()->toDateString());
                                 }
                             })
-                            // ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
-                            //     // Genera un nome personalizzato per il file
-                            //     $number = $get('send_protocol_number') ?? '******';                                 // numero protocollo invio
-                            //     $date = $get('send_protocol_date') ?? '******';                                     // data protocollo invio
-                            //     $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';   // modalità invio
-                            //     $client = $this->getOwnerRecord()->denomination;                                    // cliente
-                            //     $taxType = TaxType::tryFrom($get('tax_type'))->getLabel() ?? '';                                          // entrata
-                            //     $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                      // tipo atto
-                            //     $extension = $file->getClientOriginalExtension();                                   // estensione
+                            ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
+                                // Genera un nome personalizzato per il file
+                                $number = $get('send_protocol_number') ?? '******';                                 // numero protocollo invio
+                                $date = $get('send_protocol_date') ?? '******';                                     // data protocollo invio
+                                $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';   // modalità invio
+                                $client = $this->getOwnerRecord()->denomination;                                    // cliente
+                                $taxType = TaxType::tryFrom($get('tax_type'))->getLabel() ?? '';                    // entrata
+                                $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                      // tipo atto
+                                $extension = $file->getClientOriginalExtension();                                   // estensione
 
-                            //     return sprintf('%s_%s_REG-RIGHIESTA_%s_%s_%s_%s.%s', $number, $date, $shipmentType, $client, $taxType, $actType, $extension);
-                            // })
+                                return sprintf('%s_%s_REG-RICHIESTA_%s_%s_%s_%s.%s', $number, $date, $shipmentType, $client, $taxType, $actType, $extension);
+                            })
                             ->maxSize(10240),
 
                         Forms\Components\DatePicker::make('act_attachment_date')->label('Data allegato atto')
@@ -274,7 +273,8 @@ class PostalExpensesRelationManager extends RelationManager
                             ->required()
                             // ->autofocus(fn($record): bool => $record && $record->shipmentInserted())
                             ->directory('reg_post_richiesta')
-                            ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
                                     $set('notify_attachment_date', now()->toDateString());
                                 }
@@ -284,7 +284,7 @@ class PostalExpensesRelationManager extends RelationManager
                                 $date = $get('receive_protocol_date') ?? '******';                                                      // data protocollo ricezione
                                 $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';                       // modalità invio
                                 $client = $this->getOwnerRecord()->denomination;                                                        // cliente
-                                $taxType = TaxType::from($get('tax_type'))->getLabel();                                                 // entrata
+                                $taxType = TaxType::tryFrom($get('tax_type'))->getLabel() ?? '';                                        // entrata
                                 $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                                          // tipo atto
                                 $rifOrder = $get('order_rif');                                                                          // rif2 (commessa)
                                 $rifList = $get('list_rif');                                                                            // rif2 (distinta)
@@ -593,7 +593,8 @@ class PostalExpensesRelationManager extends RelationManager
                             Forms\Components\Actions\Action::make('view_act_attachment')
                                 ->label('Visualizza Allegato Atto')
                                 ->icon('heroicon-o-eye')
-                                ->url(fn($record): ?string => $record && $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
+                                // ->url(fn($record): ?string => $record && $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
+                                ->url(fn($record): ?string => $record->act_attachment_path ? Storage::temporaryUrl($record->act_attachment_path,now()->addMinutes(1)) : null)
                                 ->openUrlInNewTab()
                                 ->visible(fn($record): bool => $record && $record->act_attachment_path)
                                 ->color('primary'),
@@ -601,7 +602,8 @@ class PostalExpensesRelationManager extends RelationManager
                             Forms\Components\Actions\Action::make('view_notify_attachment')
                                 ->label('Visualizza Allegato Notifica')
                                 ->icon('heroicon-o-eye')
-                                ->url(fn($record): ?string => $record && $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
+                                // ->url(fn($record): ?string => $record && $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
+                                ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::temporaryUrl($record->notify_attachment_path,now()->addMinutes(1)) : null)
                                 ->openUrlInNewTab()
                                 ->visible(fn($record): bool => $record && $record->notify_attachment_path)
                                 ->color('primary'),
@@ -609,7 +611,8 @@ class PostalExpensesRelationManager extends RelationManager
                             Forms\Components\Actions\Action::make('view_reinvoice_attachment')
                                 ->label('Visualizza Allegato Rifatturazione')
                                 ->icon('heroicon-o-eye')
-                                ->url(fn($record): ?string => $record && $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
+                                // ->url(fn($record): ?string => $record && $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
+                                ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::temporaryUrl($record->reinvoice_attachment_path,now()->addMinutes(1)) : null)
                                 ->openUrlInNewTab()
                                 ->visible(fn($record): bool => $record && $record->reinvoice_attachment_path)
                                 ->color('primary'),
@@ -640,7 +643,7 @@ class PostalExpensesRelationManager extends RelationManager
                         return $counterpart;
                     })
                     ->limit(20),
-                
+
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Importo da rimborsare')
                     ->getStateUsing(function ($record) {

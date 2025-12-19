@@ -252,7 +252,8 @@ class NewContractResource extends Resource
                     Forms\Components\Actions\Action::make('view_new_contract_copy')
                         ->label('Contratto in vigore')
                         ->icon('heroicon-o-eye')
-                        ->url(fn($record): ?string => $record && $record->new_contract_copy_path ? Storage::url($record->new_contract_copy_path) : null)
+                        // ->url(fn($record): ?string => $record && $record->new_contract_copy_path ? Storage::url($record->new_contract_copy_path) : null)
+                        ->url(fn($record): ?string => $record->new_contract_copy_path ? Storage::temporaryUrl($record->new_contract_copy_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->visible(fn($record): bool => $record && $record->new_contract_copy_path)
                         ->color('primary'),
@@ -599,7 +600,8 @@ class NewContractResource extends Resource
                     Forms\Components\Actions\Action::make('view_new_contract_copy')
                         ->label('Contratto in vigore')
                         ->icon('heroicon-o-eye')
-                        ->url(fn($record): ?string => $record && $record->new_contract_copy_path ? Storage::url($record->new_contract_copy_path) : null)
+                        // ->url(fn($record): ?string => $record && $record->new_contract_copy_path ? Storage::url($record->new_contract_copy_path) : null)
+                        ->url(fn($record): ?string => $record->new_contract_copy_path ? Storage::temporaryUrl($record->new_contract_copy_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->visible(fn($record): bool => $record && $record->new_contract_copy_path)
                         ->color('primary'),
