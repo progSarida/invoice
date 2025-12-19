@@ -29,8 +29,8 @@ class AppServiceProvider extends ServiceProvider
                 $diskConfig = Config::get("filesystems.disks.{$diskName}");
 
                 if (
-                    $diskConfig && 
-                    ($diskConfig['driver'] ?? '') === 's3' && 
+                    $diskConfig &&
+                    ($diskConfig['driver'] ?? '') === 's3' &&
                     empty($diskConfig['url'])
                 ) {
                     $component->visibility('private');

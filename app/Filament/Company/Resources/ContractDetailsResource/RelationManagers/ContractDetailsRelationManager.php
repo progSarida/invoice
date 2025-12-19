@@ -54,9 +54,9 @@ class ContractDetailsRelationManager extends RelationManager
                 Forms\Components\FileUpload::make('contract_attachment_path')
                     ->label('Contratto')
                     ->live()
-                    ->disk('public')
+                    // ->disk('public')
                     ->directory('new_contracts')
-                    ->visibility('public')
+                    // ->visibility('public')
                     ->acceptedFileTypes(['application/pdf', 'image/*'])
                     ->afterStateUpdated(function (Set $set, $state) {
                         if (!empty($state)) {

@@ -192,19 +192,21 @@ class AttachmentResource extends Resource
                     ->tooltip('Scarica file')
                     ->icon('tabler-file-download')
                     ->iconSize('lg')
-                    ->action(function ($record) {
-                        $filePath = $record->attachment_path;
-                        // dd($filePath);
-                        if ($filePath && Storage::disk('public')->exists($filePath)) {
-                            $filename = explode("/", $filePath)[1];
-                            return response()->download(
-                                Storage::disk('public')->path($filePath),
-                                // 'document_' . $record->number . '.pdf'
-                                $filename
-                            );
-                        }
-                        return redirect()->back()->with('error', 'File PDF non trovato.');
-                    }),
+                    ->url(fn($record): ?string => $record->attachment_path ? Storage::temporaryUrl($record->attachment_path,now()->addMinutes(1)) : null)
+                    ->openUrlInNewTab()
+                    // ->action(function ($record) {
+                    //     $filePath = $record->attachment_path;
+                    //     // dd($filePath);
+                    //     if ($filePath && Storage::disk('public')->exists($filePath)) {
+                    //         $filename = explode("/", $filePath)[1];
+                    //         return response()->download(
+                    //             Storage::disk('public')->path($filePath),
+                    //             // 'document_' . $record->number . '.pdf'
+                    //             $filename
+                    //         );
+                    //     }
+                    //     return redirect()->back()->with('error', 'File PDF non trovato.');
+                    // }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
