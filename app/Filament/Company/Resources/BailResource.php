@@ -363,9 +363,11 @@ class BailResource extends Resource
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(1),
                 Forms\Components\DatePicker::make('bill_start')->label('Inizio Polizza')
+                    ->required()
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('bill_deadline')->label('Scadenza Polizza')
+                    ->required()
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('original_premium')->label('Importo Premio Originario')
