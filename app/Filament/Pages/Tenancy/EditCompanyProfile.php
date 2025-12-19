@@ -135,18 +135,29 @@ class EditCompanyProfile extends EditTenantProfile
                                     ->columnSpan(8),
                                 FileUpload::make('logo_path')
                                     ->label('Logo')
-                                    // ->live()
-                                    // ->disk('public')
                                     ->directory('logos')
-                                    // ->openable()
+                                    ->acceptedFileTypes(['image/*'])
+                                    ->imageResizeMode('cover') // Previene il calcolo dimensioni
+                                    ->imageCropAspectRatio(null) // Disabilita crop con ratio
+                                    ->imageResizeTargetWidth(null) // Disabilita resize automatico
+                                    ->imageResizeTargetHeight(null) // Disabilita resize automatico
+                                    // ->disk('public')
                                     // ->visibility('public')
-                                    // ->acceptedFileTypes(['image/*'])
-                                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get) {
-                                        $vatTax = $get('vat_number') ? $get('vat_number') : $get('tax_number');
+                                    ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get, $livewire) {
+                                        $record = method_exists($livewire, 'getTenant')
+                                            ? $livewire->getTenant()
+                                            : ($livewire->record ?? null);
+                                        if ($record) {
+                                            $vatTax = $record->vat_number ?: $record->tax_number;
+                                        } else {
+                                            $vatTax = $get('vat_number') ?: $get('tax_number');
+                                        }
                                         $extension = $file->getClientOriginalExtension();
                                         return sprintf('logo_%s.%s', $vatTax, $extension);
                                     })
                                     ->maxSize(10240)
+                                    // ->downloadable()
+                                    // ->loadingIndicatorPosition('center')
                                     ->columnSpan(4),
                             ])
                             ->columns(12),

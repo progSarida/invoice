@@ -173,6 +173,8 @@ class PostalExpensesRelationManager extends RelationManager
                             ->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
                                     $set('act_attachment_date', now()->toDateString());
+                                } else {
+                                    $set('act_attachment_date', null);
                                 }
                             })
                             ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {
@@ -291,7 +293,7 @@ class PostalExpensesRelationManager extends RelationManager
                                 $amount = ($record->notify_amount ?? 0);                                                                // importo
                                 $extension = $file->getClientOriginalExtension();                                                       // estensione
 
-                                return sprintf('%s_REG-POST-RIGHIESTA_%s_%s_%s_%s_%s_%s_%s.%s', $date, $shipmentType, $client, $taxType, $actType, $rifOrder, $rifList, $amount, $extension);
+                                return sprintf('%s_REG-POST-RICHIESTA_%s_%s_%s_%s_%s_%s_%s.%s', $date, $shipmentType, $client, $taxType, $actType, $rifOrder, $rifList, $amount, $extension);
                             })
                             ->maxSize(10240),
 
@@ -538,6 +540,8 @@ class PostalExpensesRelationManager extends RelationManager
                             ->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
                                     $set('reinvoice_attachment_date', now()->toDateString());
+                                } else {
+                                    $set('reinvoice_attachment_date', null);
                                 }
                             })
                             ->getUploadedFileNameForStorageUsing(function (UploadedFile $file,Get $get, $record) {

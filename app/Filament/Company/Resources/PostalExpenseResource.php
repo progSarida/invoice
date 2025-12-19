@@ -493,11 +493,11 @@ class PostalExpenseResource extends Resource
 
                         Forms\Components\FileUpload::make('act_attachment_path')->label('Allegato atto')
                             ->required()
-                            ->disk('public')
+                            // ->disk('public')
                             ->directory('reg_richiesta')
-                            ->visibility('public')
-                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            // ->visibility('public')
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
+                            // ->downloadable()
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
@@ -512,11 +512,11 @@ class PostalExpenseResource extends Resource
                                 $date = $get('send_protocol_date') ?? '******';                                     // data protocollo invio
                                 $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';   // modalità invio
                                 $client = Client::find($get('client_id'))->denomination;                            // cliente
-                                $taxType = TaxType::from($get('tax_type'))->getLabel();                             // entrata
+                                $taxType = TaxType::tryFrom($get('tax_type'))->getLabel() ?? '';                    // entrata
                                 $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                      // tipo atto
                                 $extension = $file->getClientOriginalExtension();                                   // estensione
 
-                                return sprintf('%s_%s_REG-RIGHIESTA_%s_%s_%s_%s.%s', $number, $date, $shipmentType, $client, $taxType, $actType, $extension);
+                                return sprintf('%s_%s_REG-RICHIESTA_%s_%s_%s_%s.%s', $number, $date, $shipmentType, $client, $taxType, $actType, $extension);
                             })
                             ->maxSize(10240)
                             ->columnSpan(4),
@@ -628,10 +628,11 @@ class PostalExpenseResource extends Resource
                         Forms\Components\FileUpload::make('notify_attachment_path')->label('Allegato notifica')
                             ->required()
                             // ->autofocus(fn($record): bool => $record && $record->shipmentInserted())
-                            ->disk('public')
+                            // ->disk('public')
                             ->directory('reg_post_richiesta')
-                            ->visibility('public')
-                            ->acceptedFileTypes(['application/pdf', 'image/*'])->afterStateUpdated(function (Set $set, $state) {
+                            // ->visibility('public')
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->afterStateUpdated(function (Set $set, $state) {
                                 if (!empty($state)) {
                                     $set('notify_attachment_date', now()->toDateString());
                                 } else {
@@ -643,14 +644,14 @@ class PostalExpenseResource extends Resource
                                 $date = $get('receive_protocol_date') ?? '******';                                                      // data protocollo ricezione
                                 $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';                       // modalità invio
                                 $client = Client::find($get('client_id'))->denomination;                                                // cliente
-                                $taxType = TaxType::from($get('tax_type'))->getLabel();                                                 // entrata
+                                $taxType = TaxType::tryFrom($get('tax_type'))->getLabel() ?? '';                                        // entrata
                                 $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';                                          // tipo atto
                                 $rifOrder = $get('order_rif');                                                                          // rif2 (commessa)
                                 $rifList = $get('list_rif');                                                                            // rif2 (distinta)
                                 $amount = ($record->notify_amount ?? 0);                                                                // importo
                                 $extension = $file->getClientOriginalExtension();                                                       // estensione
 
-                                return sprintf('%s_REG-POST-RIGHIESTA_%s_%s_%s_%s_%s_%s_%s.%s', $date, $shipmentType, $client, $taxType, $actType, $rifOrder, $rifList, $amount, $extension);
+                                return sprintf('%s_REG-POST-RICHIESTA_%s_%s_%s_%s_%s_%s_%s.%s', $date, $shipmentType, $client, $taxType, $actType, $rifOrder, $rifList, $amount, $extension);
                             })
                             ->maxSize(10240),
 
@@ -1133,9 +1134,9 @@ class PostalExpenseResource extends Resource
 
                         Forms\Components\FileUpload::make('reinvoice_attachment_path')->label('Allegato fattura emessa')
                             ->required()
-                            ->disk('public')
+                            // ->disk('public')
                             ->directory('reg_not_db')
-                            ->visibility('public')
+                            // ->visibility('public')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->maxSize(10240)
                             ->afterStateUpdated(function (Set $set, $state) {
@@ -1198,7 +1199,8 @@ class PostalExpenseResource extends Resource
                             Forms\Components\Actions\Action::make('view_act_attachment')
                                 ->label('Visualizza Allegato Atto')
                                 ->icon('heroicon-o-eye')
-                                ->url(fn($record): ?string => $record && $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
+                                // ->url(fn($record): ?string => $record && $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
+                                ->url(fn($record): ?string => $record->act_attachment_path ? Storage::temporaryUrl($record->act_attachment_path,now()->addMinutes(1)) : null)
                                 ->openUrlInNewTab()
                                 ->visible(fn($record): bool => $record && $record->act_attachment_path)
                                 ->color('primary'),
@@ -1206,7 +1208,8 @@ class PostalExpenseResource extends Resource
                             Forms\Components\Actions\Action::make('view_notify_attachment')
                                 ->label('Visualizza Allegato Notifica')
                                 ->icon('heroicon-o-eye')
-                                ->url(fn($record): ?string => $record && $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
+                                // ->url(fn($record): ?string => $record && $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
+                                ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::temporaryUrl($record->notify_attachment_path,now()->addMinutes(1)) : null)
                                 ->openUrlInNewTab()
                                 ->visible(fn($record): bool => $record && $record->notify_attachment_path)
                                 ->color('primary'),
@@ -1214,7 +1217,8 @@ class PostalExpenseResource extends Resource
                             Forms\Components\Actions\Action::make('view_reinvoice_attachment')
                                 ->label('Visualizza Allegato Rifatturazione')
                                 ->icon('heroicon-o-eye')
-                                ->url(fn($record): ?string => $record && $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
+                                // ->url(fn($record): ?string => $record && $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
+                                ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::temporaryUrl($record->reinvoice_attachment_path,now()->addMinutes(1)) : null)
                                 ->openUrlInNewTab()
                                 ->visible(fn($record): bool => $record && $record->reinvoice_attachment_path)
                                 ->color('primary'),
@@ -1866,19 +1870,22 @@ class PostalExpenseResource extends Resource
                     Tables\Actions\Action::make('view_act_attachment')
                         ->label('Allegato Atto')
                         ->icon('heroicon-o-document')
-                        ->url(fn($record): ?string => $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
+                        // ->url(fn($record): ?string => $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
+                        ->url(fn($record): ?string => $record->act_attachment_path ? Storage::temporaryUrl($record->act_attachment_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->visible(fn($record): bool => (bool)$record->act_attachment_path),             // Nascondo se l'allegato non esiste
                     Tables\Actions\Action::make('view_notify_attachment')
                         ->label('Allegato Notifica')
                         ->icon('heroicon-o-document')
-                        ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
+                        // ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
+                        ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::temporaryUrl($record->notify_attachment_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->visible(fn($record): bool => (bool)$record->notify_attachment_path),          // Nascondo se l'allegato non esiste
                     Tables\Actions\Action::make('view_reinvoice_attachment')
                         ->label('Allegato Rifatturazione')
                         ->icon('heroicon-o-document')
-                        ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
+                        // ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
+                        ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::temporaryUrl($record->reinvoice_attachment_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->visible(fn($record): bool => (bool)$record->reinvoice_attachment_path),       // Nascondo se l'allegato non esiste
                 ])

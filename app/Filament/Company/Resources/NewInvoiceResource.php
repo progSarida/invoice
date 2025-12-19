@@ -335,19 +335,13 @@ class NewInvoiceResource extends Resource
                                 ->searchable()
                                 ->live()
                                 ->preload()
-                                ->visible(
-                                    function(Get $get){
-                                        if(filled ( $get('client_id') )){
-                                            // if(Client::find($get('client_id'))->subtype->isCompany())
-                                            //     return false;
-                                            // else
-                                            //     return true;
-                                            return Client::find($get('client_id'))->subtype->isContractable();
-                                        }
-                                        else
-                                            return false;
-                                    }
-                                ),
+                                ->visible(fn(Get $get): bool => filled($get('client_id')))
+                                ->hidden(function (?Model $record = null) {
+                                    // In edit, usa il record
+                                    if ($record) { return $record->tax_type == TaxType::EMPTY; }
+                                    // In create, usa il valore del form
+                                    return false;
+                                }),
 
                             Forms\Components\Select::make('contract_id')->label('Contratto')
                                 // ->relationship(
@@ -488,19 +482,13 @@ class NewInvoiceResource extends Resource
                                 ->preload()
                                 ->optionsLimit(5)
                                 ->columnSpan(3)
-                                ->visible(
-                                    function(Get $get){
-                                        if(filled ( $get('client_id') )){
-                                            // if(Client::find($get('client_id'))->subtype->isCompany())
-                                            //     return false;
-                                            // else
-                                            //     return true;
-                                            return Client::find($get('client_id'))->subtype->isContractable();
-                                        }
-                                        else
-                                            return false;
-                                    }
-                                )
+                                ->visible(fn(Get $get): bool => filled($get('client_id')))
+                                ->hidden(function (?Model $record = null) {
+                                    // In edit, usa il record
+                                    if ($record) { return !$record->contract_id; }
+                                    // In create, usa il valore del form
+                                    return false;
+                                })
                                 ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                     if ($state) {
                                         $contract = \App\Models\NewContract::find($state);

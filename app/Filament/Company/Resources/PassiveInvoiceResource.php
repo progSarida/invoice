@@ -287,39 +287,45 @@ class PassiveInvoiceResource extends Resource
                     ->tooltip('Scarica PDF')
                     ->icon('hugeicons-pdf-01')
                     ->iconSize('lg')
-                    ->action(function ($record) {
-                        $pdfPath = $record->pdf_path;
-                        if ($pdfPath && Storage::disk('public')->exists($pdfPath)) {
-                            return response()->download(
-                                Storage::disk('public')->path($pdfPath),
-                                'document_' . $record->number . '.pdf'
-                            );
-                        }
-                        return redirect()->back()->with('error', 'File PDF non trovato.');
-                    })
-                    ->visible(function ($record) {
-                        $visible = !empty($record->pdf_path) && Storage::disk('public')->exists($record->pdf_path);
-                        return $visible;
-                    }),
+                    ->url(fn($record): ?string => $record->pdf_path ? Storage::temporaryUrl($record->pdf_path,now()->addMinutes(1)) : null)
+                    // ->action(function ($record) {
+                    //     $pdfPath = $record->pdf_path;
+                    //     if ($pdfPath && Storage::disk('public')->exists($pdfPath)) {
+                    //         return response()->download(
+                    //             Storage::disk('public')->path($pdfPath),
+                    //             'document_' . $record->number . '.pdf'
+                    //         );
+                    //     }
+                    //     return redirect()->back()->with('error', 'File PDF non trovato.');
+                    // })
+                    ->visible(fn($record) => $record && $record->pdf_path)
+                    // ->visible(function ($record) {
+                    //     $visible = !empty($record->pdf_path) && Storage::disk('public')->exists($record->pdf_path);
+                    //     return $visible;
+                    // })
+                    ,
                 Action::make('download_xml')
                     ->label('')
                     ->tooltip('Scarica XML')
                     ->icon('hugeicons-xml-01')
                     ->iconSize('lg')
-                    ->action(function ($record) {
-                        $xmlPath = $record->xml_path;
-                        if ($xmlPath && Storage::disk('public')->exists($xmlPath)) {
-                            return response()->download(
-                                Storage::disk('public')->path($xmlPath),
-                                'document_' . $record->number . '.xml'
-                            );
-                        }
-                        return redirect()->back()->with('error', 'File XML non trovato.');
-                    })
-                    ->visible(function ($record) {
-                        $visible = !empty($record->xml_path) && Storage::disk('public')->exists($record->xml_path);
-                        return $visible;
-                    }),
+                    ->url(fn($record): ?string => $record->xml_path ? Storage::temporaryUrl($record->xml_path,now()->addMinutes(1)) : null)
+                    // ->action(function ($record) {
+                    //     $xmlPath = $record->xml_path;
+                    //     if ($xmlPath && Storage::disk('public')->exists($xmlPath)) {
+                    //         return response()->download(
+                    //             Storage::disk('public')->path($xmlPath),
+                    //             'document_' . $record->number . '.xml'
+                    //         );
+                    //     }
+                    //     return redirect()->back()->with('error', 'File XML non trovato.');
+                    // })
+                    ->visible(fn($record) => $record && $record->xml_path)
+                    // ->visible(function ($record) {
+                    //     $visible = !empty($record->xml_path) && Storage::disk('public')->exists($record->xml_path);
+                    //     return $visible;
+                    // })
+                    ,
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

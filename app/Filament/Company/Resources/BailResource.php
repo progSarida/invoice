@@ -332,9 +332,9 @@ class BailResource extends Resource
                     ->columnSpan(2),
                 Forms\Components\FileUpload::make('bill_attachment_path')->label('Allegato Polizza')
                     ->live()
-                    ->disk('public')
+                    // ->disk('public')
                     ->directory('bail/bill-attachments')
-                    ->visibility('public')
+                    // ->visibility('public')
                     ->getUploadedFileNameForStorageUsing(
                         fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '.' . $file->getClientOriginalExtension()
                     )
@@ -344,7 +344,8 @@ class BailResource extends Resource
                     \Filament\Forms\Components\Actions\Action::make('view_bill_attachment')
                         ->label('Visualizza')
                         ->icon('heroicon-o-eye')
-                        ->url(fn($record): ?string => $record && $record->bill_attachment_path ? Storage::url($record->bill_attachment_path) : null)
+                        // ->url(fn($record): ?string => $record && $record->bill_attachment_path ? Storage::url($record->bill_attachment_path) : null)
+                        ->url(fn($record): ?string => $record && $record->bill_attachment_path ? Storage::temporaryUrl($record->bill_attachment_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->hidden(fn ($record) => !$record || !$record->bill_attachment_path),
                 ])
@@ -421,9 +422,9 @@ class BailResource extends Resource
                     ->nullable(),
                 Forms\Components\FileUpload::make('receipt_attachment_path')->label('Allegato Ricevuta Pagamento')
                     ->live()
-                    ->disk('public')
+                    // ->disk('public')
                     ->directory('bail/receipt-attachments')
-                    ->visibility('public')
+                    // ->visibility('public')
                     ->getUploadedFileNameForStorageUsing(
                         fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '.' . $file->getClientOriginalExtension()
                     )
@@ -433,7 +434,8 @@ class BailResource extends Resource
                     \Filament\Forms\Components\Actions\Action::make('view_receipt_attachment')
                         ->label('Visualizza')
                         ->icon('heroicon-o-eye')
-                        ->url(fn($record): ?string => $record && $record->receipt_attachment_path ? Storage::url($record->receipt_attachment_path) : null)
+                        // ->url(fn($record): ?string => $record && $record->receipt_attachment_path ? Storage::url($record->receipt_attachment_path) : null)
+                        ->url(fn($record): ?string => $record && $record->receipt_attachment_path ? Storage::temporaryUrl($record->receipt_attachment_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->hidden(fn ($record) => !$record || !$record->receipt_attachment_path),
                 ])
