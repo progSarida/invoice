@@ -27,7 +27,7 @@ class DeadlineResource extends Resource
 
     public static ?string $modelLabel = 'Scadenza';
 
-    protected static ?string $navigationIcon = 'akar-schedule';
+    protected static ?string $navigationIcon = 'tabler-calendar-clock';
 
     protected static ?string $navigationGroup = 'Fatturazione passiva';
 

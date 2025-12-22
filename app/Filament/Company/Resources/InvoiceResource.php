@@ -70,7 +70,7 @@ class InvoiceResource extends Resource
                             Forms\Components\Select::make('client_id')->label('Cliente')
                                 ->hintAction(
                                     Action::make('Nuovo')
-                                        ->icon('govicon-user-suit')
+                                        ->icon('ri-user-2-line')
                                         ->form( fn(Form $form) => ClientResource::modalForm($form) )
                                         ->modalHeading('')
                                         ->action( fn(array $data, Client $client) => InvoiceResource::saveClient($data, $client) )
@@ -143,7 +143,7 @@ class InvoiceResource extends Resource
 
                                 ->hintAction(
                                     Action::make('Nuovo')
-                                        ->icon('healthicons-f-construction-worker')
+                                        ->icon('ri-user-2-line')
                                         ->fillForm(fn (Get $get): array => [
                                             'client_id' => $get('client_id'),
                                             'tax_type' => $get('tax_type'),

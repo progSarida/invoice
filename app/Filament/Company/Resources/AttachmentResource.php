@@ -29,7 +29,7 @@ class AttachmentResource extends Resource
 
     public static ?string $modelLabel = 'Allegato';
 
-    protected static ?string $navigationIcon = 'tni-attachment-o';
+    protected static ?string $navigationIcon = 'ri-attachment-line';
 
     protected static ?string $navigationGroup = 'Generale';
 

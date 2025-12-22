@@ -22,7 +22,7 @@ class BankAccountResource extends Resource
 
     public static ?string $modelLabel = 'Conto corrente';
 
-    protected static ?string $navigationIcon = 'clarity-bank-line';
+    protected static ?string $navigationIcon = 'phosphor-bank';
 
     protected static ?string $navigationGroup = 'Tabelle';
 

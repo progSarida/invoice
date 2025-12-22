@@ -18,7 +18,7 @@ class StateResource extends Resource
     protected static ?string $model = State::class;
     public static ?string $pluralModelLabel = 'Stati';
     public static ?string $modelLabel = 'Stati';
-    protected static ?string $navigationIcon = 'fas-globe-europe';
+    protected static ?string $navigationIcon = 'phosphor-globe-hemisphere-east-light';
     protected static ?string $navigationGroup = 'Tabelle';
     protected static ?int $navigationSort = 11;
 

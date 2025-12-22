@@ -83,7 +83,7 @@ class AdminPanelProvider extends PanelProvider
                 MenuItem::make()
                     ->label('Passa alle aziende')
                     ->url('/company')
-                    ->icon('gmdi-business-center-s'),
+                    ->icon('tabler-briefcase-f'),
                 'logout'=>MenuItem::make()
                     ->label('Vai al Portale')
                     ->icon('heroicon-o-arrow-left-start-on-rectangle'),

@@ -39,7 +39,7 @@ class NewContractResource extends Resource
     protected static ?string $model = NewContract::class;
     public static ?string $pluralModelLabel = 'Contratti';
     public static ?string $modelLabel = 'Contratto';
-    protected static ?string $navigationIcon = 'govicon-file-contract-o';
+    protected static ?string $navigationIcon = 'tabler-contract';
     protected static ?string $navigationGroup = 'Fatturazione attiva';
     protected static ?int $navigationSort = 3;
     protected static ?int $navigationGroupSort = 2;
@@ -53,7 +53,7 @@ class NewContractResource extends Resource
                 Forms\Components\Select::make('client_id')->label('Cliente')
                     ->hintAction(
                         Action::make('Nuovo')
-                            ->icon('govicon-user-suit')
+                            ->icon('ri-user-2-line')
                             ->form(fn(Form $form) => ClientResource::modalForm($form))
                             ->modalWidth('7xl')
                             ->modalHeading('')

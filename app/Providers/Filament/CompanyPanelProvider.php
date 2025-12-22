@@ -91,7 +91,7 @@ class CompanyPanelProvider extends PanelProvider
                 // ->visible(fn (): bool => Auth::user()->is_admin)
                 ->visible(fn (): bool => Auth::user()->hasAdminAccess())
                 ->url('/admin')
-                ->icon('clarity-administrator-line'),
+                ->icon('ri-admin-fill'),
                 'logout'=>MenuItem::make()
                     ->label('Vai al Portale')
                     ->icon('heroicon-o-arrow-left-start-on-rectangle'),

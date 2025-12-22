@@ -25,7 +25,7 @@ class ContractResource extends Resource
 
     public static ?string $modelLabel = 'Contratto';
 
-    protected static ?string $navigationIcon = 'govicon-file-contract-o';
+    protected static ?string $navigationIcon = 'tabler-contract';
 
     protected static ?string $navigationParentItem = 'Repertorio';
 

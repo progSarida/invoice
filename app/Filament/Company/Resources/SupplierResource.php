@@ -29,7 +29,7 @@ class SupplierResource extends Resource
 
     public static ?string $modelLabel = 'Fornitore';
 
-    protected static ?string $navigationIcon = 'healthicons-f-construction-worker';
+    protected static ?string $navigationIcon = 'ri-user-2-line';
 
     protected static ?string $navigationGroup = 'Fatturazione passiva';
 

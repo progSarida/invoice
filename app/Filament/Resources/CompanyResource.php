@@ -39,7 +39,7 @@ class CompanyResource extends Resource
     protected static ?string $model = Company::class;
     public static ?string $pluralModelLabel = 'Aziende';
     public static ?string $modelLabel = 'Azienda';
-    protected static ?string $navigationIcon = 'gmdi-business-center-r';
+    protected static ?string $navigationIcon = 'tabler-briefcase-f';
     protected static ?string $navigationGroup = 'Tabelle';
     protected static ?int $navigationSort = 2;
 

@@ -32,7 +32,7 @@ class ClientResource extends Resource
 
     public static ?string $modelLabel = 'Cliente';
 
-    protected static ?string $navigationIcon = 'govicon-user-suit';
+    protected static ?string $navigationIcon = 'ri-user-2-line';
 
     protected static ?string $navigationGroup = 'Fatturazione attiva';
 

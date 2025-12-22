@@ -285,7 +285,7 @@ class PassiveInvoiceResource extends Resource
                 Action::make('download_pdf')
                     ->label('')
                     ->tooltip('Scarica PDF')
-                    ->icon('hugeicons-pdf-01')
+                    ->icon('phosphor-file-pdf-duotone')
                     ->iconSize('lg')
                     ->url(fn($record): ?string => $record->pdf_path ? Storage::temporaryUrl($record->pdf_path,now()->addMinutes(1)) : null)
                     // ->action(function ($record) {
@@ -307,7 +307,7 @@ class PassiveInvoiceResource extends Resource
                 Action::make('download_xml')
                     ->label('')
                     ->tooltip('Scarica XML')
-                    ->icon('hugeicons-xml-01')
+                    ->icon('tabler-file-type-xml')
                     ->iconSize('lg')
                     ->url(fn($record): ?string => $record->xml_path ? Storage::temporaryUrl($record->xml_path,now()->addMinutes(1)) : null)
                     // ->action(function ($record) {

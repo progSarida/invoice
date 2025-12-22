@@ -45,7 +45,7 @@ class NewActivePaymentsResource extends Resource
 
     public static ?string $modelLabel = 'Pagamento';
 
-    protected static ?string $navigationIcon = 'polaris-payment-icon';
+    protected static ?string $navigationIcon = 'fluentui-payment-20-o';
 
     protected static ?string $navigationGroup = 'Fatturazione attiva';
 

@@ -68,7 +68,7 @@ class CreditNotesRelationManager extends RelationManager
                             Forms\Components\Select::make('client_id')->label('Cliente')
                                 ->hintAction(
                                     Action::make('Nuovo')
-                                        ->icon('govicon-user-suit')
+                                        ->icon('ri-user-2-line')
                                         ->form(fn (Form $form) => ClientResource::modalForm($form))
                                         ->modalHeading('')
                                         ->action(fn (array $data, Client $client, Get $get, Set $set) => NewInvoiceResource::saveClient($data, $client, $get, $set))
@@ -244,7 +244,7 @@ class CreditNotesRelationManager extends RelationManager
                                 })
                                 ->hintAction(
                                     Action::make('Nuovo')
-                                        ->icon('govicon-file-contract-o')
+                                        ->icon('tabler-contract')
                                         ->fillForm(fn (Get $get): array => [
                                             'client_id' => $get('client_id'),
                                             'tax_type' => $get('tax_type'),

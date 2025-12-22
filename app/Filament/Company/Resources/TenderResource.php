@@ -27,7 +27,7 @@ class TenderResource extends Resource
 
     public static ?string $modelLabel = 'Appalto';
 
-    protected static ?string $navigationIcon = 'healthicons-f-construction-worker';
+    protected static ?string $navigationIcon = 'ri-user-2-line';
 
     protected static ?string $navigationParentItem = 'Repertorio';
 

@@ -89,7 +89,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::MANCATA_CONSEGNA => 'fluentui-mail-dismiss-20-o',
             self::ACCETTATA => 'fluentui-mail-checkmark-20-o',
             self::RIFIUTATA => 'fluentui-mail-dismiss-20-o',
-            self::DECORRENZA_TERMINI => 'vaadin-time-forward',
+            self::DECORRENZA_TERMINI => 'ri-time-fill',
             self::AVVENUTA_TRASMISSIONE => '',
             self::METADATA => '',
 
@@ -104,7 +104,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::RIELABORATA => '',
             self::IMPORTATA => '',
 
-            // self::RIFIUTO_VALIDATO => 'gmdi-block',
+            // self::RIFIUTO_VALIDATO => 'fluentui-presence-blocked-20-o',
             self::RIFIUTO_EMESSO => 'fluentui-mail-arrow-forward-20-o',
             self::RIFIUTO_ARCHIVIATO => 'fluentui-mail-prohibited-20-o',
             self::SCARTO_VALIDATO => '',

@@ -111,7 +111,7 @@ class ListNewInvoices extends ListRecords
                 // ->keyBindings(['alt+e'])
                 ,
             Actions\Action::make('compare')
-                ->icon('carbon-compare')
+                ->icon('fluentui-column-double-compare-20-o')
                 ->label('Comparata')
                 ->tooltip('Stampa fatturazione comparata')
                 // ->color('primary')
@@ -390,7 +390,7 @@ class ListNewInvoices extends ListRecords
             Notification::make('refused_status')
                 ->title('Sono presenti fatture rifiutate<br>(Status: NE EC02 - Rifiuto)<br>L\'inserimento di nuove fatture sarà bloccato fino alla loro gestione')
                 ->color('danger')
-                ->icon('gmdi-block')
+                ->icon('fluentui-presence-blocked-20-o')
                 ->persistent()
                 ->send();
             return true;
@@ -477,7 +477,7 @@ class ListNewInvoices extends ListRecords
             Notification::make('late_status')
                 ->title('Sono presenti fatture da inviare da almeno 2 giorni<br>L\'inserimento di nuove fatture sarà bloccato fino alla loro gestione')
                 ->color('danger')
-                ->icon('gmdi-block')
+                ->icon('fluentui-presence-blocked-20-o')
                 ->persistent()
                 ->send();
             return true;
@@ -494,7 +494,7 @@ class ListNewInvoices extends ListRecords
             Notification::make('silent_status')
                 ->title('Sono presenti fatture senza esito da oltre 3 giorni<br>L\'inserimento di nuove fatture sarà bloccato fino alla loro gestione')
                 ->color('danger')
-                ->icon('gmdi-block')
+                ->icon('fluentui-presence-blocked-20-o')
                 ->persistent()
                 ->send();
             return true;
