@@ -395,18 +395,24 @@ class BailResource extends Resource
                     ->getUploadedFileNameForStorageUsing(
                         fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '.' . $file->getClientOriginalExtension()
                     )
-                    ->columnSpan(3)
+                    ->columnSpan(2)
                     ->extraAttributes(['class' => 'file-upload-with-preview']),
                 Forms\Components\Actions::make([
                     \Filament\Forms\Components\Actions\Action::make('view_bill_attachment')
-                        ->label('Visualizza')
+                        // ->label('Visualizza')
+                        ->label('')
+                        ->tooltip('Visualizza polizza')
                         ->icon('heroicon-o-eye')
                         // ->url(fn($record): ?string => $record && $record->bill_attachment_path ? Storage::url($record->bill_attachment_path) : null)
                         ->url(fn($record): ?string => $record && $record->bill_attachment_path ? Storage::temporaryUrl($record->bill_attachment_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->hidden(fn ($record) => !$record || !$record->bill_attachment_path),
                 ])
-                ->columnSpan(2),
+                ->columnSpan(1),
+                Forms\Components\DatePicker::make('release_date')->label('Data Rilascio')
+                    ->extraInputAttributes(['class' => 'text-center'])
+                    ->columnSpan(2)
+                    ->nullable(),
                 Forms\Components\TextInput::make('year_duration')->label('Anni')
                     ->maxLength(255)
                     ->extraInputAttributes(['class' => 'text-right'])
@@ -451,10 +457,15 @@ class BailResource extends Resource
                     ->columnSpan(3)
                     ->options(\App\Enums\BailStatus::class)
                     ->nullable(),
-                Forms\Components\DatePicker::make('release_date')->label('Data Rilascio')
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(3)
-                    ->nullable(),
+                // Forms\Components\DatePicker::make('release_date')->label('Data Rilascio')
+                //     ->extraInputAttributes(['class' => 'text-center'])
+                //     ->columnSpan(3)
+                //     ->nullable(),
+                Forms\Components\Placeholder::make('')
+                    ->label('')
+                    ->content('')
+                    ->visible()
+                    ->columnspan(3),
                 Forms\Components\TextInput::make('renew_premium')->label('Importo Rinnovo')
                     ->columnSpan(2)
                     ->live(onBlur: true)
