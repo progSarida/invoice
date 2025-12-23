@@ -288,6 +288,7 @@ class PassiveInvoiceResource extends Resource
                     ->icon('phosphor-file-pdf-duotone')
                     ->iconSize('lg')
                     ->url(fn($record): ?string => $record->pdf_path ? Storage::temporaryUrl($record->pdf_path,now()->addMinutes(1)) : null)
+                    ->openUrlInNewTab()
                     // ->action(function ($record) {
                     //     $pdfPath = $record->pdf_path;
                     //     if ($pdfPath && Storage::disk('public')->exists($pdfPath)) {
@@ -310,6 +311,7 @@ class PassiveInvoiceResource extends Resource
                     ->icon('tabler-file-type-xml')
                     ->iconSize('lg')
                     ->url(fn($record): ?string => $record->xml_path ? Storage::temporaryUrl($record->xml_path,now()->addMinutes(1)) : null)
+                    ->openUrlInNewTab()
                     // ->action(function ($record) {
                     //     $xmlPath = $record->xml_path;
                     //     if ($xmlPath && Storage::disk('public')->exists($xmlPath)) {

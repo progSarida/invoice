@@ -30,7 +30,8 @@ class AndxorSoapService
 
     public function __construct()
     {
-        $wsdl = 'https://tinv-test.andxor.it/userServices?wsdl';
+        $wsdl = 'https://tinv-test.andxor.it/userServices?wsdl';                // WSDL di test
+        // $wsdl = 'https://tinv.andxor.it/userServices?wsdl';                     // WSDL di produzione
         $options = [
             'trace' => true,
             'exceptions' => true,
@@ -647,8 +648,11 @@ class AndxorSoapService
         // Definisco il percorso relativo per il file XML
         $relativePath = 'passive_invoices/xml_files/' . $filename;
 
+        $disk = config('filesystems.default');
+
         // Salvo il file usando il disco 'public'
-        if (Storage::disk('public')->put($relativePath, $content)) {
+        if (Storage::disk($disk)->put($relativePath, $content)) {
+        // if (Storage::disk('public')->put($relativePath, $content)) {
             return $relativePath; // Restituisco il percorso relativo
         } else {
             throw new \Exception("Errore durante il salvataggio del file XML: $filename");
@@ -660,8 +664,11 @@ class AndxorSoapService
         // Definisco il percorso relativo per il file PDF
         $relativePath = 'passive_invoices/pdf_files/' . $filename;
 
+        $disk = config('filesystems.default');
+
         // Salvo il file usando il disco 'public'
-        if (Storage::disk('public')->put($relativePath, $content)) {
+        if (Storage::disk($disk)->put($relativePath, $content)) {
+        // if (Storage::disk('public')->put($relativePath, $content)) {
             return $relativePath; // Restituisco il percorso relativo
         } else {
             throw new \Exception("Errore durante il salvataggio del file PDF: $filename");

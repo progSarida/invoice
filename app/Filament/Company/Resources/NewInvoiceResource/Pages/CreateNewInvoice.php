@@ -64,7 +64,8 @@ class CreateNewInvoice extends CreateRecord
             $this->halt();
         }
 
-        $data['contract_detail_id'] = NewContract::find($data['contract_id'])?->lastDetail?->id;
+        if(!empty($data['contract_id']))
+            $data['contract_detail_id'] = NewContract::find($data['contract_id'])?->lastDetail?->id;
         $data['flow'] = 'out';
 
         return $data;

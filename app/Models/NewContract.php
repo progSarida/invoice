@@ -96,6 +96,11 @@ class NewContract extends Model
         return $this->hasMany(Invoice::class, 'contract_id');
     }
 
+    public function invoicedTotal()
+    {
+        return $this->invoices->sum('no_vat_total');
+    }
+
     protected static function booted()
     {
         static::creating(function ($contract) {

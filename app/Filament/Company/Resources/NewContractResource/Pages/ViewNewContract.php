@@ -97,10 +97,19 @@ class ViewNewContract extends ViewRecord
                         ->label('Allegare copia contratto originale')
                         ->helperText('Se selezionato, verrà allegato il PDF del contratto originale')
                         ->default(true)
-                        ->visible(fn (NewContract $record): bool =>
-                            !empty($record->new_contract_copy_path) &&
-                            file_exists(storage_path('app/public/' . $record->new_contract_copy_path))
-                        ),
+                        // ->visible(fn (NewContract $record): bool =>
+                        //     !empty($record->new_contract_copy_path) &&
+                        //     file_exists(storage_path('app/public/' . $record->new_contract_copy_path))
+                        // ),
+                        ->visible(function (NewContract $record): bool {
+                                if (empty($record->new_contract_copy_path)) {
+                                    return false;
+                                }
+                                // Recupero il disco configurato per i file (es. 's3' in prod, 'public' in locale)
+                                $disk = config('filesystems.default');
+
+                                return Storage::disk($disk)->exists($record->new_contract_copy_path);
+                            }),
                 ])
                 ->action(function (NewContract $record, array $data) {
 

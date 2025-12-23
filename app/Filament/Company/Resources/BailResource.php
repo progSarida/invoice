@@ -162,12 +162,30 @@ class BailResource extends Resource
                             });
 
                             // Applico i filtri di validità solo in fase di creazione
+                            // if ($livewire instanceof \Filament\Resources\Pages\CreateRecord) {
+                            //     $query->where(function ($q) {
+                            //         $q->whereNull('start_validity_date')
+                            //             ->orWhere(function ($q2) {
+                            //                 $q2->where('start_validity_date', '<=', today())
+                            //                     ->where('end_validity_date', '>=', today());
+                            //             });
+                            //     });
+                            // }
+
                             if ($livewire instanceof \Filament\Resources\Pages\CreateRecord) {
                                 $query->where(function ($q) {
                                     $q->whereNull('start_validity_date')
                                         ->orWhere(function ($q2) {
                                             $q2->where('start_validity_date', '<=', today())
-                                                ->where('end_validity_date', '>=', today());
+                                                ->where(function ($q3) {
+                                                    // Contratti con end_validity_date valida
+                                                    $q3->where('end_validity_date', '>=', today())
+                                                        // OPPURE end_validity_date null con capienza residua
+                                                        ->orWhere(function ($q4) {
+                                                            $q4->whereNull('end_validity_date')
+                                                                ->whereRaw('amount > (SELECT COALESCE(SUM(no_vat_total), 0) FROM invoices WHERE invoices.contract_id = new_contracts.id)');
+                                                        });
+                                                });
                                         });
                                 });
                             }
@@ -247,6 +265,27 @@ class BailResource extends Resource
                             })
                             ->toArray();
                     })
+                    ->getOptionLabelUsing(function ($value) use ($latestDetailSubquery) {
+                        if (!$value) return null;
+
+                        $contract = \App\Models\NewContract::query()
+                            ->leftJoinSub($latestDetailSubquery, 'latest_details', function (JoinClause $join) {
+                                $join->on('new_contracts.id', '=', 'latest_details.contract_id');
+                            })
+                            ->select('new_contracts.*')
+                            ->selectRaw('
+                                COALESCE(
+                                    YEAR(new_contracts.start_validity_date),
+                                    YEAR(latest_details.latest_detail_date)
+                                ) AS calculated_year'
+                            )
+                            ->where('new_contracts.id', $value)
+                            ->first();
+
+                        if (!$contract) return null;
+
+                        return "{$contract->office_name} ({$contract->office_code})\nCIG: ({$contract->cig_code}) - {$contract->calculated_year}";
+                    })
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->office_name} ({$record->office_code})\nCIG: ({$record->cig_code}) - {$record->calculated_year}"
                     )
@@ -257,6 +296,8 @@ class BailResource extends Resource
 
                             // Imposta cig_code come nella select semplice
                             $set('cig_code', $contract->cig_code);
+                            // mostra descrizione contratto
+                            $set('aid', $contract->lastDetail->description);
 
                             // Controllo dettagli come nel codice complesso
                             if (!$lastDetail) {
@@ -284,6 +325,21 @@ class BailResource extends Resource
                 Forms\Components\TextInput::make('cig_code')->label('CIG')
                     ->maxLength(255)
                     ->columnSpan(2),
+                Forms\Components\Textarea::make('aid')->label('Descrizione contratto')
+                    ->disabled()
+                    ->visible(fn(Get $get): bool => filled($get('contract_id')))
+                    ->formatStateUsing(function ($state, Get $get, $record) {
+                        $contractId = $get('contract_id') ?? $record?->contract_id;
+
+                        if ($contractId) {
+                            $contract = \App\Models\NewContract::find($contractId);
+                            return $contract?->lastDetail?->description;
+                        }
+
+                        return null;
+                    })
+                    ->dehydrated(false)
+                    ->columnSpanFull(),
                 Forms\Components\Select::make('insurance_id')
                     ->label('Assicurazione')
                     ->required()
@@ -325,6 +381,7 @@ class BailResource extends Resource
                     })
                     ->columnSpan(4),
                 Forms\Components\TextInput::make('bill_number')->label('Numero Polizza')
+                    ->required()
                     ->maxLength(255)
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('bill_date')->label('Data Polizza')
@@ -422,26 +479,26 @@ class BailResource extends Resource
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(2)
                     ->nullable(),
-                Forms\Components\FileUpload::make('receipt_attachment_path')->label('Allegato Ricevuta Pagamento')
-                    ->live()
-                    // ->disk('public')
-                    ->directory('bail/receipt-attachments')
-                    // ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing(
-                        fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '.' . $file->getClientOriginalExtension()
-                    )
-                    ->columnSpan(3)
-                    ->extraAttributes(['class' => 'file-upload-with-preview']),
-                Forms\Components\Actions::make([
-                    \Filament\Forms\Components\Actions\Action::make('view_receipt_attachment')
-                        ->label('Visualizza')
-                        ->icon('heroicon-o-eye')
-                        // ->url(fn($record): ?string => $record && $record->receipt_attachment_path ? Storage::url($record->receipt_attachment_path) : null)
-                        ->url(fn($record): ?string => $record && $record->receipt_attachment_path ? Storage::temporaryUrl($record->receipt_attachment_path,now()->addMinutes(1)) : null)
-                        ->openUrlInNewTab()
-                        ->hidden(fn ($record) => !$record || !$record->receipt_attachment_path),
-                ])
-                ->columnSpan(2),
+                // Forms\Components\FileUpload::make('receipt_attachment_path')->label('Allegato Ricevuta Pagamento')
+                //     ->live()
+                //     // ->disk('public')
+                //     ->directory('bail/receipt-attachments')
+                //     // ->visibility('public')
+                //     ->getUploadedFileNameForStorageUsing(
+                //         fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '.' . $file->getClientOriginalExtension()
+                //     )
+                //     ->columnSpan(3)
+                //     ->extraAttributes(['class' => 'file-upload-with-preview']),
+                // Forms\Components\Actions::make([
+                //     \Filament\Forms\Components\Actions\Action::make('view_receipt_attachment')
+                //         ->label('Visualizza')
+                //         ->icon('heroicon-o-eye')
+                //         // ->url(fn($record): ?string => $record && $record->receipt_attachment_path ? Storage::url($record->receipt_attachment_path) : null)
+                //         ->url(fn($record): ?string => $record && $record->receipt_attachment_path ? Storage::temporaryUrl($record->receipt_attachment_path,now()->addMinutes(1)) : null)
+                //         ->openUrlInNewTab()
+                //         ->hidden(fn ($record) => !$record || !$record->receipt_attachment_path),
+                // ])
+                // ->columnSpan(2),
                 Forms\Components\Textarea::make('note')->label('Note')
                     ->columnSpanFull(),
             ]);

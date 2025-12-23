@@ -90,15 +90,13 @@
             if($invoice->company->rea_number) $rea .= 'Cap. Soc. I.V. Euro' . $invoice->company->nominal_capital;
             $voice = false;
         @endphp
+        {{-- Con logo --}}
+        @if($logoSrc)
         <tr>
             <td rowspan="5" style="width: 20%; vertical-align: top; text-align: center;">
-                @if($logoSrc)
-                    <img src="{{ $logoSrc }}"
-                        style="max-width: 100%; height: auto;"
-                        alt="Logo">
-                @else
-                    <div>Logo non disponibile</div>
-                @endif
+                <img src="{{ $logoSrc }}"
+                    style="max-width: 100%; height: auto;"
+                    alt="Logo">
             </td>
             <td colspan="4" class='bold left padding_company'>{{ $invoice->company->name }}</td>
         </tr>
@@ -117,6 +115,27 @@
         <tr>
             <td style="padding-top: 5mm; padding-bottom: 5mm;" colspan="5"></td>
         </tr>
+        @else
+        {{-- Senza logo --}}
+        <tr>
+            <td colspan="4" class='bold center padding_company'>{{ $invoice->company->name }}</td>
+        </tr>
+        <tr>
+            <td colspan="4" class='center padding_company'>Sede Legale: {{ $sedeLegale }}</td>
+        </tr>
+        @if($contatti !== '')
+        <tr><td colspan="4" class='center padding_company'>{{ $contatti }}</td></tr>
+        @endif
+        @if($cf !== '')
+        <tr><td colspan="4" class='center padding_company'>{{ $cf }}</td></tr>
+        @endif
+        @if($rea !== '')
+        <tr><td colspan="4" class='center padding_company'>{{ $rea }}</td></tr>
+        @endif
+        <tr>
+            <td style="padding-top: 5mm; padding-bottom: 5mm;" colspan="4"></td>
+        </tr>
+        @endif
     </table>
     <table>
         {{-- Destinatario --}}

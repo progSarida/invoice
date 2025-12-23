@@ -269,7 +269,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(4),
 
                             Forms\Components\Select::make('tax_type')->label('Entrata')
-                                ->required()
+                                ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic())
                                 ->columnSpan(2)
                                 // ->options(TaxType::class)
                                 ->options(function (Get $get) {
@@ -476,7 +476,7 @@ class NewInvoiceResource extends Resource
                                         }
                                     }
                                 })
-                                ->required()
+                                ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic())
                                 ->searchable()
                                 ->live()
                                 ->preload()

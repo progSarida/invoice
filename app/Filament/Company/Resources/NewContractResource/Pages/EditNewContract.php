@@ -101,10 +101,17 @@ class EditNewContract extends EditRecord
                         ->label('Allegare copia contratto originale')
                         ->helperText('Se selezionato, verrà allegato il PDF del contratto originale')
                         ->default(true)
-                        ->visible(fn (NewContract $record): bool =>
-                            !empty($record->new_contract_copy_path) &&
-                            file_exists(storage_path('app/public/' . $record->new_contract_copy_path))
-                        ),
+                        // ->visible(fn (NewContract $record): bool =>
+                        //     !empty($record->new_contract_copy_path) &&
+                        //     file_exists(storage_path('app/public/' . $record->new_contract_copy_path))
+                        // ),
+                        ->visible(function (NewContract $record): bool {
+                            // Recupera il disco di default dal sistema (legge FILESYSTEM_DISK dal .env)
+                            $defaultDisk = config('filesystems.default');
+
+                            return !empty($record->new_contract_copy_path) &&
+                                Storage::disk($defaultDisk)->exists($record->new_contract_copy_path);
+                        }),
                 ])
                 ->action(function (NewContract $record, array $data) {
 

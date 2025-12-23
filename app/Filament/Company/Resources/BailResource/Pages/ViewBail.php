@@ -3,13 +3,24 @@
 namespace App\Filament\Company\Resources\BailResource\Pages;
 
 use App\Filament\Company\Resources\BailResource;
+use App\Models\Agency;
 use App\Models\Bail;
+use App\Models\Insurance;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ViewBail extends ViewRecord
 {
     protected static string $resource = BailResource::class;
+
+    public function getTitle(): string | Htmlable
+    {
+        $number = $this->record->bill_number;
+        $agency = Agency::find($this->record->agency_id)->name;
+
+        return 'Polizza n. ' . $number . " con " . $agency;
+    }
 
     protected function getHeaderActions(): array
     {

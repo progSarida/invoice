@@ -280,7 +280,7 @@ class Invoice extends Model
     protected static function booted()
     {
         static::creating(function ($invoice) {
-            $invoice->contract_detail_id = $invoice->updatedContract()->id; // Cristallizza nella fattura lo stato dei dettagli del contratto
+            $invoice->contract_detail_id = $invoice->updatedContract()?->id; // Cristallizza nella fattura lo stato dei dettagli del contratto
             $invoice->flow = 'out';                                         // Indica che la fattura è in uscita (attiva)
             // $invoice->user_id = Auth::id();                                 // Registro l'utente che crea la fattura
         });
@@ -325,6 +325,11 @@ class Invoice extends Model
         static::saved(function ($invoice) {
             static::checkContractValidity($invoice);
             static::checkBudgetExceeded($invoice);
+        });
+
+        static::saving(function ($invoice) {
+            if(empty($invoice->tax_type))
+                $invoice->tax_type = '';
         });
 
         static::deleted(function ($invoice) {
