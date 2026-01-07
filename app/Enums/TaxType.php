@@ -16,6 +16,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
     case CUP = "cup";
     case LIBERO = "libero";
     case PARK = "park";
+    case PARCHEGGIO = "parcheggio";
     case PUB = "pub";
     case TARI = "tari";
     case TEP = "tep";
@@ -33,6 +34,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
             self::CUP => 'Canone unico patrimoniale',
             self::LIBERO => 'Libera',
             self::PARK => 'Parcheggio',
+            self::PARCHEGGIO => 'Parcheggio',
             self::PUB => 'Imposta sulla Pubblicità (In disuso)',
             self::TARI => 'Smaltimento rifiuti solidi urbani',
             self::TEP => 'TEP',
@@ -52,6 +54,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
             self::CUP => 'CUP',
             self::LIBERO => 'LIBERO',
             self::PARK => 'PARCHEGGIO',
+            self::PARCHEGGIO => 'PARCHEGGIO',
             self::PUB => 'PUBBLICITA\'',
             self::TARI => 'RSU',
             self::TEP => 'TEP',
@@ -71,6 +74,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
             self::CUP => 'CUP',
             self::LIBERO => 'LIB',
             self::PARK => 'PAR',
+            self::PARCHEGGIO => 'PAR',
             self::PUB => 'PUB',
             self::TARI => 'RSU',
             self::TEP => 'TEP',
@@ -89,6 +93,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
         //     self::IMU => 'success',
         //     self::LIBERO => 'danger',
         //     self::PARK =>  Color::Blue,
+        //     self::PARCHEGGIO =>  Color::Blue,
         //     self::PUB => Color::Cyan,
         //     self::TARI =>  Color::Orange,
         //     self::TEP => Color::Amber,
@@ -106,6 +111,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
             "cup" => 'primary',
             "libero" => 'danger',
             "park" =>  'info',
+            "parcheggio" =>  'info',
             "pub" => 'info',
             "tari" =>  'primary',
             "tep" => 'primary',
