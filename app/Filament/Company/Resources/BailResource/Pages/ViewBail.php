@@ -19,7 +19,8 @@ class ViewBail extends ViewRecord
         $number = $this->record->bill_number;
         $agency = Agency::find($this->record->agency_id)->name;
 
-        return 'Polizza n. ' . $number . " con " . $agency;
+        // return 'Polizza n. ' . $number . " con " . $agency;
+        return 'Polizza n. ' . $number;
     }
 
     protected function getHeaderActions(): array

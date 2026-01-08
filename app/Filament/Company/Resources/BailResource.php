@@ -1,6 +1,7 @@
 <?php
 namespace App\Filament\Company\Resources;
 
+use App\Enums\TaxType;
 use App\Filament\Company\Resources\BailResource\Pages;
 use App\Filament\Company\Resources\BailResource\RelationManagers;
 use App\Models\Bail;
@@ -107,7 +108,66 @@ class BailResource extends Resource
                     ->columnSpan(5),
                 Forms\Components\Select::make('tax_types') // MODIFICA: Rinominato da 'tax_type' a 'tax_types'
                     ->label('Tipo Entrata')
-                    ->options(\App\Enums\TaxType::class)
+                    // ->options(\App\Enums\TaxType::class)
+                    ->options(function (Get $get) {
+                        $clientId = $get('client_id');
+                        if (empty($clientId)) {
+                            return TaxType::class;
+                        }
+
+                        // Recupera i contratti del cliente
+                        $contracts = \App\Models\NewContract::where('client_id', $clientId)
+                                        ->where('closed', false)->get();
+
+                        if(count($contracts) == 0) return [];
+
+                        // Crea una mappa label => value per tutti i TaxType
+                        $labelToValue = [];
+                        foreach (TaxType::cases() as $case) {
+                            $labelToValue[strtolower($case->getLabel())] = $case->value;
+                        }
+
+                        // \Log::info('Label to Value map:', $labelToValue);
+
+                        // Raccogli tutti i tax_types dal database
+                        $taxTypesFromDb = [];
+                        foreach ($contracts as $contract) {
+                            if (is_array($contract->tax_types)) {
+                                $taxTypesFromDb = array_merge($taxTypesFromDb, $contract->tax_types);
+                            }
+                        }
+
+                        // \Log::info('Tax types from DB:', $taxTypesFromDb);
+
+                        // Converti i label in value
+                        $taxTypeValues = [];
+                        foreach ($taxTypesFromDb as $label) {
+                            $normalizedLabel = strtolower($label);
+                            if (isset($labelToValue[$normalizedLabel])) {
+                                $taxTypeValues[] = $labelToValue[$normalizedLabel];
+                            }
+                        }
+
+                        $taxTypeValues = array_unique(array_filter($taxTypeValues));
+
+                        // \Log::info('Converted to values:', $taxTypeValues);
+
+                        if (empty($taxTypeValues)) {
+                            return TaxType::class;
+                        }
+
+                        // Crea l'array di opzioni
+                        $options = [];
+                        foreach (TaxType::cases() as $case) {
+                            if (in_array($case->value, $taxTypeValues)) {
+                                $options[$case->value] = $case->getLabel();
+                            }
+                        }
+
+                        // \Log::info('Final options:', $options);
+
+                        return empty($options) ? TaxType::class : $options;
+                    })
                     ->multiple() // MODIFICA: Aggiunto per consentire selezione multipla
                     ->afterStateUpdated(function (Get $get, Set $set) { // MODIFICA: Aggiornato per gestire array
                         if (empty($get('client_id')) || empty($get('tax_types'))) {
@@ -173,21 +233,22 @@ class BailResource extends Resource
                             // }
 
                             if ($livewire instanceof \Filament\Resources\Pages\CreateRecord) {
-                                $query->where(function ($q) {
-                                    $q->whereNull('start_validity_date')
-                                        ->orWhere(function ($q2) {
-                                            $q2->where('start_validity_date', '<=', today())
-                                                ->where(function ($q3) {
-                                                    // Contratti con end_validity_date valida
-                                                    $q3->where('end_validity_date', '>=', today())
-                                                        // OPPURE end_validity_date null con capienza residua
-                                                        ->orWhere(function ($q4) {
-                                                            $q4->whereNull('end_validity_date')
-                                                                ->whereRaw('amount > (SELECT COALESCE(SUM(no_vat_total), 0) FROM invoices WHERE invoices.contract_id = new_contracts.id)');
-                                                        });
-                                                });
-                                        });
-                                });
+                                // $query->where(function ($q) {
+                                //     $q->whereNull('start_validity_date')
+                                //         ->orWhere(function ($q2) {
+                                //             $q2->where('start_validity_date', '<=', today())
+                                //                 ->where(function ($q3) {
+                                //                     // Contratti con end_validity_date valida
+                                //                     $q3->where('end_validity_date', '>=', today())
+                                //                         // OPPURE end_validity_date null con capienza residua
+                                //                         ->orWhere(function ($q4) {
+                                //                             $q4->whereNull('end_validity_date')
+                                //                                 ->whereRaw('amount > (SELECT COALESCE(SUM(no_vat_total), 0) FROM invoices WHERE invoices.contract_id = new_contracts.id)');
+                                //                         });
+                                //                 });
+                                //         });
+                                // });
+                                $query->where('closed', false);
                             }
 
                             // Seleziona tutte le colonne e aggiungi calculated_year
@@ -449,13 +510,13 @@ class BailResource extends Resource
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->prefix('€')
                     ->nullable(),
-                Forms\Components\DatePicker::make('original_pay_date')->label('Data Pagamento Premio Originario')
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(3)
-                    ->nullable(),
-                Forms\Components\Select::make('bail_status')->label('Stato Cauzione')
+                Forms\Components\Select::make('bail_status')->label('Stato Pagamento')
                     ->columnSpan(3)
                     ->options(\App\Enums\BailStatus::class)
+                    ->nullable(),
+                Forms\Components\DatePicker::make('original_pay_date')->label('In Data')
+                    ->extraInputAttributes(['class' => 'text-center'])
+                    ->columnSpan(3)
                     ->nullable(),
                 // Forms\Components\DatePicker::make('release_date')->label('Data Rilascio')
                 //     ->extraInputAttributes(['class' => 'text-center'])

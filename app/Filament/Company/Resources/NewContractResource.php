@@ -125,15 +125,6 @@ class NewContractResource extends Resource
                     ->optionsLimit(5)
                     // ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
                     ->columnSpan(5),
-                Forms\Components\Select::make('tax_types')
-                    ->label('Entrate')
-                    ->options(TaxType::class)
-                    ->multiple()
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    // ->rules(['array', 'in:'.implode(',', collect(TaxType::cases())->pluck('value')->toArray())])
-                    ->columnSpan(3),
                 DatePicker::make('start_validity_date')
                     ->label('Inizio Validità')
                     ->extraInputAttributes(['class' => 'text-center'])
@@ -145,6 +136,22 @@ class NewContractResource extends Resource
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->date()
                     ->columnSpan(2),
+                Placeholder::make('second')
+                    ->label('')
+                    ->columnSpan(1),
+                Forms\Components\Toggle::make('closed')
+                    ->label('Contratto chiuso')
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->columnSpan(2),
+                Forms\Components\Select::make('tax_types')
+                    ->label('Entrate')
+                    ->options(TaxType::class)
+                    ->multiple()
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    // ->rules(['array', 'in:'.implode(',', collect(TaxType::cases())->pluck('value')->toArray())])
+                    ->columnSpan(4),
                 Forms\Components\Select::make('accrual_types')
                     ->label('Gestioni')
                     ->multiple()
@@ -171,7 +178,34 @@ class NewContractResource extends Resource
                             \App\Models\AccrualType::pluck('id')->map('strval')->toArray()
                         ),
                     ])
-                    ->columnSpan(3),
+                    ->columnSpan(4),
+                Forms\Components\Select::make('manage_types')
+                    ->label('Servizi')
+                    ->multiple()
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->options(\App\Models\ManageType::pluck('name', 'id'))
+                    ->formatStateUsing(function ($record) {
+                        if (!$record) return [];
+
+                        $raw = $record->getRawOriginal('manage_types');                                        // bypasso il getter
+
+                        if (is_string($raw)) {
+                            $raw = json_decode($raw, true) ?: [];
+                        }
+
+                        return is_array($raw) ? array_map('intval', $raw) : [];
+                    })
+                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_map('intval', $state) : [])
+                    ->rules([
+                        'required',
+                        'array',
+                        'array.*' => Rule::in(
+                            \App\Models\ManageType::pluck('id')->map('strval')->toArray()
+                        ),
+                    ])
+                    ->columnSpan(4),
                 Forms\Components\Select::make('payment_type')
                     ->label('Remunerazione')
                     ->options(TenderPaymentType::class)
@@ -180,7 +214,7 @@ class NewContractResource extends Resource
                     ->preload()
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('amount')
-                    ->label('Capienza')
+                    ->label('Capienza (iva esclusa)')
                     ->required()
                     ->columnSpan(3)
                     ->inputMode('decimal')
@@ -200,6 +234,12 @@ class NewContractResource extends Resource
                     ->label('Rifatturazione spese postali')
                     ->dehydrated(fn ($state) => filled($state))
                     ->columnSpan(3),
+                Forms\Components\Select::make('invoicing_cycle')
+                    ->label('Periodicità fatturazione')
+                    ->options(InvoicingCicle::class)
+                    ->required()
+                    ->preload()
+                    ->columnSpan(3),
                 Forms\Components\TextInput::make('office_name')
                     ->label('Nome ufficio')
                     ->required()
@@ -218,12 +258,6 @@ class NewContractResource extends Resource
                     ->label('CUP')
                     // ->required()
                     ->columnSpan(2),
-                Forms\Components\Select::make('invoicing_cycle')
-                    ->label('Periodicità fatturazione')
-                    ->options(InvoicingCicle::class)
-                    ->required()
-                    ->preload()
-                    ->columnSpan(3),
                 // Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
                 //     ->live()
                 //     ->disk('public')
@@ -410,7 +444,7 @@ class NewContractResource extends Resource
                         ->visible(fn (): bool => Auth::user()->isManager()),
                 ]),
             ])
-            ->defaultSort('start_validity_date', 'asc');
+            ->defaultSort('start_validity_date', 'desc');
     }
 
     public static function getRelations(): array

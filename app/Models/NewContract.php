@@ -17,6 +17,7 @@ class NewContract extends Model
         'start_validity_date',
         'end_validity_date',
         'accrual_types',
+        'manage_types',
         'payment_type',
         'cig_code',
         'cup_code',
@@ -26,7 +27,8 @@ class NewContract extends Model
         'invoicing_cycle',
         'new_contract_copy_path',
         'new_contract_copy_date',
-        'reinvoice'
+        'reinvoice',
+        'closed'
     ];
 
     protected $casts = [
@@ -38,7 +40,9 @@ class NewContract extends Model
         'invoicing_cycle' => InvoicingCicle::class,
         'new_contract_copy_date' => 'date',
         'reinvoice' => 'boolean',
+        'closed' => 'boolean',
         'accrual_types' => 'json',
+        'manage_types' => 'json',
     ];
 
     public function getTaxTypesAttribute($value)

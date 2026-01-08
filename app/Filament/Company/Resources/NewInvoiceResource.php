@@ -279,7 +279,10 @@ class NewInvoiceResource extends Resource
                                     }
 
                                     // Recupera i contratti del cliente
-                                    $contracts = \App\Models\NewContract::where('client_id', $clientId)->get();
+                                    $contracts = \App\Models\NewContract::where('client_id', $clientId)
+                                                    ->where('closed', false)->get();
+
+                                    if(count($contracts) == 0) return [];
 
                                     // Crea una mappa label => value per tutti i TaxType
                                     $labelToValue = [];
@@ -365,13 +368,14 @@ class NewInvoiceResource extends Resource
 
                                         // applico i filtri di validità solo in fase di creazione
                                         if ($livewire instanceof \Filament\Resources\Pages\CreateRecord) {
-                                            $query->where(function ($q) {
-                                                $q->whereNull('start_validity_date')
-                                                ->orWhere(function ($q2) {
-                                                    $q2->where('start_validity_date', '<=', today())
-                                                        ->where('end_validity_date', '>=', today());
-                                                });
-                                            });
+                                            // $query->where(function ($q) {
+                                            //     $q->whereNull('start_validity_date')
+                                            //     ->orWhere(function ($q2) {
+                                            //         $q2->where('start_validity_date', '<=', today())
+                                            //             ->where('end_validity_date', '>=', today());
+                                            //     });
+                                            // });
+                                            $query->where('closed', false);
                                         }
 
                                         // 1. Seleziona tutte le colonne necessarie e aggiungi l'anno calcolato
@@ -628,7 +632,7 @@ class NewInvoiceResource extends Resource
                     Section::make('')
                         ->columns(6)
                         ->schema([
-                            Forms\Components\Select::make('timing_type')->label('Modalità')->options(TimingType::class)
+                            Forms\Components\Select::make('timing_type')->label('Modalità di fatturazione')->options(TimingType::class)
                                 ->required(fn (Get $get) => $get('timing_type') == 'differita')
                                 ->placeholder(null)
                                 ->default('contestuale')
@@ -656,9 +660,13 @@ class NewInvoiceResource extends Resource
                                     $docType = DocType::find($state);
                                     if($docType?->name === 'TD00'){
                                         $set('number', 0);
+                                        NewInvoiceResource::invoiceNumber($get, $set);
                                     }
                                     else if (!$docType || $docType->docGroup?->name !== 'Note di variazione') {
                                         $set('parent_id', null);
+                                        $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                        $set('number', $number);
+                                        NewInvoiceResource::invoiceNumber($get, $set);
                                     }
                                 })
                                 ->options(function (Get $get) {
@@ -774,20 +782,29 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\TextInput::make('year')->label('Anno')
                                 ->columnSpan(2)
-                                ->afterStateUpdated(function (Get $get, Set $set) {
+                                ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                     $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
                                     $set('number', $number);
                                     NewInvoiceResource::invoiceNumber($get, $set);
+                                    $currentYear = now()->format('Y');
+                                    if ($state !== $currentYear) {
+                                        $set('invoice_date', "{$state}-12-31");
+                                    } else {
+                                        $set('invoice_date', now()->format('Y-m-d'));
+                                    }
                                 })
                                 ->live()
+                                ->debounce(1000)
                                 ->extraInputAttributes(['class' => 'text-right'])
                                 ->disabled(function (Get $get): bool {
                                     $timingType = $get('timing_type');
                                     $today = now();
 
-                                    $contestualeCutoff = now()->copy()->startOfYear()->month(1)->day(12);
+                                    // $contestualeCutoff = now()->copy()->startOfYear()->month(1)->day(12);
+                                    $contestualeCutoff = now()->copy()->startOfYear()->month(1)->day(9);
 
                                     $differitaCutoff = now()->copy()->startOfYear()->month(1)->day(15);
+                                    // $differitaCutoff = now()->copy()->startOfYear()->month(1)->day(12);
 
                                     if ($timingType === 'contestuale') {
                                         return $today->gt($contestualeCutoff);
@@ -800,7 +817,7 @@ class NewInvoiceResource extends Resource
                                     return false;
                                 })
                                 ->required()
-                                // ->numeric()
+                                ->numeric()
                                 // ->minValue(1900)
                                 ->rules(['digits:4'])
                                 ->dehydrated()
@@ -853,9 +870,27 @@ class NewInvoiceResource extends Resource
                                 })
                                 ->columnSpan(3),
 
-                            Forms\Components\Select::make('manage_type_id')->label('Servizio')
-                                ->options(function () {
-                                    return ManageType::orderBy('order')->pluck('name', 'id');
+                            Forms\Components\Select::make('manage_type_id')
+                                ->label('Servizio')
+                                ->required(fn(callable $get) => $get('client_id') ? Client::find($get('client_id'))->type == ClientType::PUBLIC : true)
+                                // ->options(function () {
+                                //     return ManageType::orderBy('order')->pluck('name', 'id');
+                                // })
+                                ->options(function (callable $get) {
+                                    $contractId = $get('contract_id');
+                                    if (!$contractId) {
+                                        return [];
+                                    }
+
+                                    $contract = NewContract::find($contractId);
+                                    if (!$contract || empty($contract->manage_types)) {
+                                        return [];
+                                    }
+
+                                    return ManageType::whereIn('id', $contract->manage_types)
+                                        ->orderBy('order')
+                                        ->pluck('name', 'id')
+                                        ->toArray();
                                 })
                                 ->columnSpan(3),
                             Forms\Components\Select::make('invoice_reference')
