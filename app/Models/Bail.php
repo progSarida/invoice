@@ -192,7 +192,6 @@ class Bail extends Model
             $existB = Attachment::where('attachment_type', 'bail_bill')->where('element_id', $bail->id)->first();       // controllo se esiste l'allegato della polizza
             $existC = Attachment::where('attachment_type', 'bail_condition')->where('element_id', $bail->id)->first();  // controllo se esiste l'allegato delle condizioni
             // $existR = Attachment::where('attachment_type', 'bail_receipt')->where('element_id', $bail->id)->first();    // controllo se esiste l'allegato della ricevuta
-
             if($existB) { $existB->delete(); }
             if($existC) { $existB->delete(); }
             // if($existR) { $existR->delete(); }

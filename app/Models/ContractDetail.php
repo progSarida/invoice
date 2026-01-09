@@ -112,25 +112,26 @@ class ContractDetail extends Model
             if (!empty($updateData)) { $detail->contract->update($updateData); }                            // aggiorno NewContract se ci sono dati da aggiornare
 
             $exist = Attachment::where('attachment_type', 'contract')->where('element_id', $detail->id)->first();  // controllo se l'Attachment esiste già
+            if ($exist) { $exist->delete(); }
 
-            if ($mostRecentDetail && $exist) {
-                $filename = basename($mostRecentDetail->contract_attachment_path) ?: 'unknown';             // aggiorno l'Attachment con i dati del ContractDetail più recente
-                $dataA = [
-                    'company_id' => \Filament\Facades\Filament::getTenant()->id,
-                    'client_id' => $detail->contract->client_id,
-                    'contract_id' => $detail->contract->id,
-                    'element_table' => 'new_contracts',
-                    'element_id' => $detail->contract->id,
-                    'attachment_type' => 'contract',
-                    'attachment_filename' => $filename,
-                    'attachment_date' => $mostRecentDetail->date,
-                    'attachment_upload_date' => now()->toDateString(),
-                    'attachment_path' => $mostRecentDetail->contract_attachment_path,
-                ];
-                $exist->update($dataA);
-            } elseif (!$mostRecentDetail && $exist) {
-                $exist->delete();                                                                           // nessun ContractDetail rimasto, rimuovo l'Attachment
-            }
+            // if ($mostRecentDetail && $exist) {
+            //     $filename = basename($mostRecentDetail->contract_attachment_path) ?: 'unknown';             // aggiorno l'Attachment con i dati del ContractDetail più recente
+            //     $dataA = [
+            //         'company_id' => \Filament\Facades\Filament::getTenant()->id,
+            //         'client_id' => $detail->contract->client_id,
+            //         'contract_id' => $detail->contract->id,
+            //         'element_table' => 'new_contracts',
+            //         'element_id' => $detail->contract->id,
+            //         'attachment_type' => 'contract',
+            //         'attachment_filename' => $filename,
+            //         'attachment_date' => $mostRecentDetail->date,
+            //         'attachment_upload_date' => now()->toDateString(),
+            //         'attachment_path' => $mostRecentDetail->contract_attachment_path,
+            //     ];
+            //     $exist->update($dataA);
+            // } elseif (!$mostRecentDetail && $exist) {
+            //     $exist->delete();                                                                           // nessun ContractDetail rimasto, rimuovo l'Attachment
+            // }
         });
 
     }
