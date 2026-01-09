@@ -72,8 +72,8 @@ class BailDetailsRelationManager extends RelationManager
                 Forms\Components\Actions::make([
                     \Filament\Forms\Components\Actions\Action::make('view_attachment')
                         // ->label('Visualizza')
-                        ->label('')
-                        ->tooltip('Visualizza polizza')
+                        ->label('Quietanza')
+                        ->tooltip('Visualizza quietanza')
                         ->icon('heroicon-o-eye')
                         // ->url(fn($record): ?string => $record && $record->attachment_path ? Storage::url($record->attachment_path) : null)
                         ->url(fn($record): ?string => $record && $record->attachment_path ? Storage::temporaryUrl($record->attachment_path,now()->addMinutes(1)) : null)
@@ -82,8 +82,9 @@ class BailDetailsRelationManager extends RelationManager
                 ])
                 ->columnSpan(1),
 
-                Forms\Components\TextInput::make('premium')->label('Importo Premio Originario')
+                Forms\Components\TextInput::make('premium')->label('Importo Premio')
                     ->columnSpan(2)
+                    ->required()
                     // ->numeric()
                     ->live(onBlur: true)
                     ->debounce(1000)
@@ -97,8 +98,8 @@ class BailDetailsRelationManager extends RelationManager
                     })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    ->prefix('€')
-                    ->nullable(),
+                    // ->nullable()
+                    ->prefix('€'),
                 Forms\Components\Select::make('bail_status')->label('Stato Pagamento')
                     ->columnSpan(2)
                     ->options(\App\Enums\BailStatus::class)

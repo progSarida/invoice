@@ -9,6 +9,7 @@ use App\Models\Bail;
 use App\Models\Client;
 use App\Models\NewContract;
 use Filament\Forms;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -444,6 +445,7 @@ class BailResource extends Resource
                     ->columnSpan(4),
                 Forms\Components\Select::make('bail_type')->label('Tipo Polizza')
                     ->columnSpan(3)
+                    ->required()
                     ->options(\App\Enums\BailType::class)
                     ->nullable(),
                 Forms\Components\TextInput::make('bill_number')->label('Numero Polizza')
@@ -452,55 +454,12 @@ class BailResource extends Resource
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('bill_date')->label('Data Polizza')
                     ->extraInputAttributes(['class' => 'text-center'])
+                    ->required()
                     ->columnSpan(2),
-                Forms\Components\FileUpload::make('bill_attachment_path')->label('Allegato Polizza')
-                    ->live()
-                    // ->disk('public')
-                    ->directory('bail/bill-attachments')
-                    // ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing(
-                        fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '_Polizza.' . $file->getClientOriginalExtension()
-                    )
-                    ->columnSpan(2)
-                    ->extraAttributes(['class' => 'file-upload-with-preview']),
-                Forms\Components\Actions::make([
-                    \Filament\Forms\Components\Actions\Action::make('view_condition_attachment')
-                        // ->label('Visualizza')
-                        ->label('')
-                        ->tooltip('Visualizza polizza')
-                        ->icon('heroicon-o-eye')
-                        // ->url(fn($record): ?string => $record && $record->bill_attachment_path ? Storage::url($record->bill_attachment_path) : null)
-                        ->url(fn($record): ?string => $record && $record->bill_attachment_path ? Storage::temporaryUrl($record->bill_attachment_path,now()->addMinutes(1)) : null)
-                        ->openUrlInNewTab()
-                        ->hidden(fn ($record) => !$record || !$record->bill_attachment_path),
-                ])
-                ->columnSpan(1),
-                Forms\Components\FileUpload::make('condition_attachment_path')->label('Allegato Condizioni')
-                    ->live()
-                    // ->disk('public')
-                    ->directory('bail/bill-attachments')
-                    // ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing(
-                        fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '_Condizioni.' . $file->getClientOriginalExtension()
-                    )
-                    ->columnSpan(2)
-                    ->extraAttributes(['class' => 'file-upload-with-preview']),
-                Forms\Components\Actions::make([
-                    \Filament\Forms\Components\Actions\Action::make('view_condition_attachment')
-                        // ->label('Visualizza')
-                        ->label('')
-                        ->tooltip('Visualizza condizioni')
-                        ->icon('heroicon-o-eye')
-                        // ->url(fn($record): ?string => $record && $record->condition_attachment_path ? Storage::url($record->condition_attachment_path) : null)
-                        ->url(fn($record): ?string => $record && $record->condition_attachment_path ? Storage::temporaryUrl($record->condition_attachment_path,now()->addMinutes(1)) : null)
-                        ->openUrlInNewTab()
-                        ->hidden(fn ($record) => !$record || !$record->condition_attachment_path),
-                ])
-                ->columnSpan(1),
-                Forms\Components\DatePicker::make('release_date')->label('Data Rilascio')
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(2)
-                    ->nullable(),
+                // Forms\Components\DatePicker::make('release_date')->label('Data Rilascio')
+                //     ->extraInputAttributes(['class' => 'text-center'])
+                //     ->columnSpan(2)
+                //     ->nullable(),
                 Forms\Components\TextInput::make('year_duration')->label('Anni')
                     ->maxLength(255)
                     ->extraInputAttributes(['class' => 'text-right'])
@@ -513,6 +472,53 @@ class BailResource extends Resource
                     ->maxLength(255)
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(1),
+                Placeholder::make('')
+                    ->label('')
+                    ->columnSpan(4),
+                Forms\Components\FileUpload::make('bill_attachment_path')->label('Allegato Polizza')
+                    ->live()
+                    // ->disk('public')
+                    ->directory('bail/bill-attachments')
+                    // ->visibility('public')
+                    ->getUploadedFileNameForStorageUsing(
+                        fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '_Polizza.' . $file->getClientOriginalExtension()
+                    )
+                    ->columnSpan(4)
+                    ->extraAttributes(['class' => 'file-upload-with-preview']),
+                Forms\Components\Actions::make([
+                    \Filament\Forms\Components\Actions\Action::make('view_condition_attachment')
+                        // ->label('Visualizza')
+                        ->label('Polizza')
+                        ->tooltip('Visualizza polizza')
+                        ->icon('heroicon-o-eye')
+                        // ->url(fn($record): ?string => $record && $record->bill_attachment_path ? Storage::url($record->bill_attachment_path) : null)
+                        ->url(fn($record): ?string => $record && $record->bill_attachment_path ? Storage::temporaryUrl($record->bill_attachment_path,now()->addMinutes(1)) : null)
+                        ->openUrlInNewTab()
+                        ->hidden(fn ($record) => !$record || !$record->bill_attachment_path),
+                ])
+                ->columnSpan(2),
+                Forms\Components\FileUpload::make('condition_attachment_path')->label('Allegato Condizioni')
+                    ->live()
+                    // ->disk('public')
+                    ->directory('bail/bill-attachments')
+                    // ->visibility('public')
+                    ->getUploadedFileNameForStorageUsing(
+                        fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '_Condizioni.' . $file->getClientOriginalExtension()
+                    )
+                    ->columnSpan(4)
+                    ->extraAttributes(['class' => 'file-upload-with-preview']),
+                Forms\Components\Actions::make([
+                    \Filament\Forms\Components\Actions\Action::make('view_condition_attachment')
+                        // ->label('Visualizza')
+                        ->label('Condizioni')
+                        ->tooltip('Visualizza condizioni')
+                        ->icon('heroicon-o-eye')
+                        // ->url(fn($record): ?string => $record && $record->condition_attachment_path ? Storage::url($record->condition_attachment_path) : null)
+                        ->url(fn($record): ?string => $record && $record->condition_attachment_path ? Storage::temporaryUrl($record->condition_attachment_path,now()->addMinutes(1)) : null)
+                        ->openUrlInNewTab()
+                        ->hidden(fn ($record) => !$record || !$record->condition_attachment_path),
+                ])
+                ->columnSpan(2),
                 // Forms\Components\DatePicker::make('bill_start')->label('Inizio Polizza')
                 //     ->required()
                 //     ->extraInputAttributes(['class' => 'text-center'])
