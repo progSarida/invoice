@@ -4,6 +4,7 @@ namespace App\Filament\Company\Resources;
 use App\Enums\TaxType;
 use App\Filament\Company\Resources\BailResource\Pages;
 use App\Filament\Company\Resources\BailResource\RelationManagers;
+use App\Filament\Company\Resources\BailResource\RelationManagers\BailDetailsRelationManager;
 use App\Models\Bail;
 use App\Models\Client;
 use App\Models\NewContract;
@@ -25,10 +26,10 @@ use Illuminate\Database\Query\JoinClause;
 class BailResource extends Resource
 {
     protected static ?string $model = Bail::class;
-    public static ?string $pluralModelLabel = 'Cauzioni';
-    public static ?string $modelLabel = 'Cauzione';
+    public static ?string $pluralModelLabel = 'Polizze';
+    public static ?string $modelLabel = 'Polizza';
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
-    protected static ?string $navigationGroup = 'Cauzioni';
+    protected static ?string $navigationGroup = 'Polizze';
     protected static ?int $navigationSort = 1;
     protected static ?int $navigationGroupSort = 3;
     protected static ?string $recordTitleAttribute = 'bill_number';
@@ -441,6 +442,10 @@ class BailResource extends Resource
                         }
                     })
                     ->columnSpan(4),
+                Forms\Components\Select::make('bail_type')->label('Tipo Polizza')
+                    ->columnSpan(3)
+                    ->options(\App\Enums\BailType::class)
+                    ->nullable(),
                 Forms\Components\TextInput::make('bill_number')->label('Numero Polizza')
                     ->required()
                     ->maxLength(255)
@@ -454,12 +459,12 @@ class BailResource extends Resource
                     ->directory('bail/bill-attachments')
                     // ->visibility('public')
                     ->getUploadedFileNameForStorageUsing(
-                        fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '.' . $file->getClientOriginalExtension()
+                        fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '_Polizza.' . $file->getClientOriginalExtension()
                     )
                     ->columnSpan(2)
                     ->extraAttributes(['class' => 'file-upload-with-preview']),
                 Forms\Components\Actions::make([
-                    \Filament\Forms\Components\Actions\Action::make('view_bill_attachment')
+                    \Filament\Forms\Components\Actions\Action::make('view_condition_attachment')
                         // ->label('Visualizza')
                         ->label('')
                         ->tooltip('Visualizza polizza')
@@ -468,6 +473,28 @@ class BailResource extends Resource
                         ->url(fn($record): ?string => $record && $record->bill_attachment_path ? Storage::temporaryUrl($record->bill_attachment_path,now()->addMinutes(1)) : null)
                         ->openUrlInNewTab()
                         ->hidden(fn ($record) => !$record || !$record->bill_attachment_path),
+                ])
+                ->columnSpan(1),
+                Forms\Components\FileUpload::make('condition_attachment_path')->label('Allegato Condizioni')
+                    ->live()
+                    // ->disk('public')
+                    ->directory('bail/bill-attachments')
+                    // ->visibility('public')
+                    ->getUploadedFileNameForStorageUsing(
+                        fn ($file, Get $get): string => Client::find($get('client_id'))->denomination . '_' . $get('bill_number') . '_Condizioni.' . $file->getClientOriginalExtension()
+                    )
+                    ->columnSpan(2)
+                    ->extraAttributes(['class' => 'file-upload-with-preview']),
+                Forms\Components\Actions::make([
+                    \Filament\Forms\Components\Actions\Action::make('view_condition_attachment')
+                        // ->label('Visualizza')
+                        ->label('')
+                        ->tooltip('Visualizza condizioni')
+                        ->icon('heroicon-o-eye')
+                        // ->url(fn($record): ?string => $record && $record->condition_attachment_path ? Storage::url($record->condition_attachment_path) : null)
+                        ->url(fn($record): ?string => $record && $record->condition_attachment_path ? Storage::temporaryUrl($record->condition_attachment_path,now()->addMinutes(1)) : null)
+                        ->openUrlInNewTab()
+                        ->hidden(fn ($record) => !$record || !$record->condition_attachment_path),
                 ])
                 ->columnSpan(1),
                 Forms\Components\DatePicker::make('release_date')->label('Data Rilascio')
@@ -486,71 +513,72 @@ class BailResource extends Resource
                     ->maxLength(255)
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(1),
-                Forms\Components\DatePicker::make('bill_start')->label('Inizio Polizza')
-                    ->required()
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(2),
-                Forms\Components\DatePicker::make('bill_deadline')->label('Scadenza Polizza')
-                    ->required()
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(2),
-                Forms\Components\TextInput::make('original_premium')->label('Importo Premio Originario')
-                    ->columnSpan(3)
-                    // ->numeric()
-                    ->live(onBlur: true)
-                    ->extraInputAttributes(['class' => 'text-right'])
-                    ->afterStateUpdated(function ($state, $component) {
-                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
-                        $number = str_replace(',', '.', $clean);
-                        $float = floatval($number);
-                        $formatted = number_format($float, 2, ',', '.');
-                        $component->state($formatted);
-                    })
-                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    ->prefix('€')
-                    ->nullable(),
-                Forms\Components\Select::make('bail_status')->label('Stato Pagamento')
-                    ->columnSpan(3)
-                    ->options(\App\Enums\BailStatus::class)
-                    ->nullable(),
-                Forms\Components\DatePicker::make('original_pay_date')->label('In Data')
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(3)
-                    ->nullable(),
-                // Forms\Components\DatePicker::make('release_date')->label('Data Rilascio')
+                // Forms\Components\DatePicker::make('bill_start')->label('Inizio Polizza')
+                //     ->required()
+                //     ->extraInputAttributes(['class' => 'text-center'])
+                //     ->columnSpan(2),
+                // Forms\Components\DatePicker::make('bill_deadline')->label('Scadenza Polizza')
+                //     ->required()
+                //     ->extraInputAttributes(['class' => 'text-center'])
+                //     ->columnSpan(2),
+                // Forms\Components\TextInput::make('original_premium')->label('Importo Premio Originario')
+                //     ->columnSpan(3)
+                //     // ->numeric()
+                //     ->live(onBlur: true)
+                //     ->extraInputAttributes(['class' => 'text-right'])
+                //     ->afterStateUpdated(function ($state, $component) {
+                //         $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                //         $number = str_replace(',', '.', $clean);
+                //         $float = floatval($number);
+                //         $formatted = number_format($float, 2, ',', '.');
+                //         $component->state($formatted);
+                //     })
+                //     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                //     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                //     ->prefix('€')
+                //     ->nullable(),
+                // Forms\Components\Select::make('bail_status')->label('Stato Pagamento')
+                //     ->columnSpan(3)
+                //     ->options(\App\Enums\BailStatus::class)
+                //     ->nullable(),
+                // Forms\Components\DatePicker::make('original_pay_date')->label('In Data')
                 //     ->extraInputAttributes(['class' => 'text-center'])
                 //     ->columnSpan(3)
                 //     ->nullable(),
-                Forms\Components\Placeholder::make('')
-                    ->label('')
-                    ->content('')
-                    ->visible()
-                    ->columnspan(3),
-                Forms\Components\TextInput::make('renew_premium')->label('Importo Rinnovo')
-                    ->columnSpan(2)
-                    ->live(onBlur: true)
-                    ->extraInputAttributes(['class' => 'text-right'])
-                    ->afterStateUpdated(function ($state, $component) {
-                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
-                        $number = str_replace(',', '.', $clean);
-                        $float = floatval($number);
-                        $formatted = number_format($float, 2, ',', '.');
-                        $component->state($formatted);
-                    })
-                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    // ->numeric()
-                    ->prefix('€')
-                    ->nullable(),
-                Forms\Components\DatePicker::make('renew_date')->label('Data Rinnovo')
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(2)
-                    ->nullable(),
-                Forms\Components\DatePicker::make('receipt_date')->label('Data Ricevuta')
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(2)
-                    ->nullable(),
+                // // Forms\Components\DatePicker::make('release_date')->label('Data Rilascio')
+                // //     ->extraInputAttributes(['class' => 'text-center'])
+                // //     ->columnSpan(3)
+                // //     ->nullable(),
+                // Forms\Components\Placeholder::make('')
+                //     ->label('')
+                //     ->content('')
+                //     ->visible()
+                //     ->columnspan(3),
+                // Forms\Components\TextInput::make('renew_premium')->label('Importo Rinnovo')
+                //     ->columnSpan(2)
+                //     ->live(onBlur: true)
+                //     ->extraInputAttributes(['class' => 'text-right'])
+                //     ->afterStateUpdated(function ($state, $component) {
+                //         $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                //         $number = str_replace(',', '.', $clean);
+                //         $float = floatval($number);
+                //         $formatted = number_format($float, 2, ',', '.');
+                //         $component->state($formatted);
+                //     })
+                //     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                //     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                //     // ->numeric()
+                //     ->prefix('€')
+                //     ->nullable(),
+                // Forms\Components\DatePicker::make('renew_date')->label('Data Rinnovo')
+                //     ->extraInputAttributes(['class' => 'text-center'])
+                //     ->columnSpan(2)
+                //     ->nullable(),
+                // Forms\Components\DatePicker::make('receipt_date')->label('Data Ricevuta')
+                //     ->extraInputAttributes(['class' => 'text-center'])
+                //     ->columnSpan(2)
+                //     ->nullable(),
+
                 // Forms\Components\FileUpload::make('receipt_attachment_path')->label('Allegato Ricevuta Pagamento')
                 //     ->live()
                 //     // ->disk('public')
@@ -608,14 +636,21 @@ class BailResource extends Resource
                         $query->whereJsonContains('tax_types', $search);
                     }),
                 Tables\Columns\TextColumn::make('insurance.name')
-                    ->label('Assicurazione')
+                    ->label('Compagnia')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('bail_type')
+                    ->label('Tipo')
+                    ->formatStateUsing(fn ($state) => $state?->getLabel() ?? 'N/A'),
                 Tables\Columns\TextColumn::make('bill_number')
                     ->label('Numero Polizza')
                     ->searchable()
                     ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
-                Tables\Columns\TextColumn::make('bill_deadline')
+                Tables\Columns\TextColumn::make('lastDetail.premium')
+                    ->label('Premio')
+                    ->searchable()
+                    ->money('EUR', true, 'it_IT'),
+                Tables\Columns\TextColumn::make('lastDetail.bill_deadline')
                     ->label('Scadenza Polizza')
                     ->date()
                     ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : 'N/A'),
@@ -623,24 +658,41 @@ class BailResource extends Resource
                     ->label('Giorni rimanenti')
                     ->sortable(query: fn (Builder $query, string $direction) => $query->orderBy('bill_deadline', $direction))
                     ->getStateUsing(function ($record) {
-                        if (!$record->bill_deadline) {
+                        $detail = $record->lastDetail;
+                        if (!$detail || !$detail->bill_deadline) {
                             return 'N/A';
                         }
                         try {
-                            $deadline = \Carbon\Carbon::parse($record->bill_deadline);
+                            $deadline = \Carbon\Carbon::parse($detail->bill_deadline);
                             $today = \Carbon\Carbon::today();
                             $daysRemaining = $today->diffInDays($deadline, false);
-                            return $daysRemaining;
+                            return $daysRemaining >= 0 ? $daysRemaining : 'Scaduta';
                         } catch (\Exception $e) {
                             \Illuminate\Support\Facades\Log::error('Errore nel calcolo dei giorni rimanenti: ' . $e->getMessage());
                             return 'Errore';
                         }
                     }),
-                Tables\Columns\TextColumn::make('bail_status')
-                    ->label('Stato Cauzione')
-                    ->formatStateUsing(fn ($state) => $state?->getLabel() ?? 'N/A'),
+                // Tables\Columns\TextColumn::make('bail_status')
+                //     ->label('Stato Cauzione')
+                //     ->formatStateUsing(fn ($state) => $state?->getLabel() ?? 'N/A'),
             ])
             ->filters([
+                Tables\Filters\Filter::make('active_at_date') // Cambiato il nome per coerenza
+                    ->form([
+                        Forms\Components\DatePicker::make('selected_date')
+                            ->label('Attive al')
+                            ->default(today()),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['selected_date'])) {
+                            return $query;
+                        }
+
+                        return $query->whereHas('bailDetails', function (Builder $subQuery) use ($data) {
+                            $subQuery->where('bill_start', '<=', $data['selected_date'])
+                                    ->where('bill_deadline', '>=', $data['selected_date']);
+                        });
+                    }),
                 Tables\Filters\SelectFilter::make('insurance')
                     ->options(function () {
                         return \App\Models\Insurance::all()->pluck('name', 'id')->toArray();
@@ -662,45 +714,120 @@ class BailResource extends Resource
                             }
                         }
                     }),
+                // Tables\Filters\SelectFilter::make('bail_status')
+                //     ->options(\App\Enums\BailStatus::class)
+                //     ->label('Stato')
+                //     ->query(function (Builder $query, array $data) {
+                //         if (!empty($data['value'])) {
+                //             $query->where('bail_status', $data['value']);
+                //         }
+                //     }),
                 Tables\Filters\SelectFilter::make('bail_status')
                     ->options(\App\Enums\BailStatus::class)
                     ->label('Stato')
                     ->query(function (Builder $query, array $data) {
                         if (!empty($data['value'])) {
-                            $query->where('bail_status', $data['value']);
+                            // Utilizziamo doveHas per entrare nella relazione lastDetail
+                            $query->whereHas('lastDetail', function (Builder $subQuery) use ($data) {
+                                $subQuery->where('bail_status', $data['value']);
+                            });
                         }
                     }),
+                // Tables\Filters\SelectFilter::make('expiration_status')
+                //     ->label('Stato Scadenza')
+                //     ->options([
+                //         '' => 'Tutti',
+                //         'expired' => 'Scaduti',
+                //         'expired_not_paid' => 'Scaduti e non pagati',
+                //         'expired_not_released' => 'Scaduti e non svincolati',
+                //     ])
+                //     ->query(function (Builder $query, array $data): Builder {
+                //         return match ($data['value']) {
+                //             'expired' => $query->where('bill_deadline', '<', now()),
+                //             'expired_not_paid' => $query->where('bill_deadline', '<', now())->whereNull('original_pay_date'),
+                //             'expired_not_released' => $query->where('bill_deadline', '<', now())->whereNull('release_date'),
+                //             default => $query,
+                //         };
+                //     }),
                 Tables\Filters\SelectFilter::make('expiration_status')
                     ->label('Stato Scadenza')
                     ->options([
-                        '' => 'Tutti',
                         'expired' => 'Scaduti',
                         'expired_not_paid' => 'Scaduti e non pagati',
                         'expired_not_released' => 'Scaduti e non svincolati',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return match ($data['value']) {
-                            'expired' => $query->where('bill_deadline', '<', now()),
-                            'expired_not_paid' => $query->where('bill_deadline', '<', now())->whereNull('original_pay_date'),
-                            'expired_not_released' => $query->where('bill_deadline', '<', now())->whereNull('release_date'),
-                            default => $query,
-                        };
+                        if (empty($data['value'])) {
+                            return $query;
+                        }
+
+                        return $query->whereHas('lastDetail', function (Builder $subQuery) use ($data) {
+                            $now = now();
+
+                            return match ($data['value']) {
+                                'expired' => $subQuery->where('bill_deadline', '<', $now),
+
+                                'expired_not_paid' => $subQuery->where('bill_deadline', '<', $now)
+                                    ->where(function($q) {
+                                        // Verifica che non sia pagato (controlla il tuo enum o la data)
+                                        $q->whereNull('pay_date')
+                                        ->orWhere('bail_status', '!=', 'payed');
+                                    }),
+
+                                'expired_not_released' => $subQuery->where('bill_deadline', '<', $now)
+                                    ->whereNull('release_date'), // Assicurati che release_date sia in bail_details
+
+                                default => $subQuery,
+                            };
+                        });
                     }),
+                // Tables\Filters\Filter::make('not_paid')
+                //     ->form([
+                //         Forms\Components\Checkbox::make('not_paid')
+                //             ->label('Senza data di pagamento'),
+                //     ])
+                //     ->query(function (Builder $query, array $data): Builder {
+                //         return $data['not_paid'] ? $query->whereNull('original_pay_date') : $query;
+                //     }),
                 Tables\Filters\Filter::make('not_paid')
                     ->form([
                         Forms\Components\Checkbox::make('not_paid')
                             ->label('Senza data di pagamento'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return $data['not_paid'] ? $query->whereNull('original_pay_date') : $query;
+                        // Se la checkbox non è spuntata, non applichiamo filtri
+                        if (!$data['not_paid']) {
+                            return $query;
+                        }
+
+                        // Entriamo nella relazione lastDetail
+                        return $query->whereHas('lastDetail', function (Builder $subQuery) {
+                            $subQuery->whereNull('pay_date')
+                                        ->where('bail_status', '!=', \App\Enums\BailStatus::PAYED);
+                        });
                     }),
+                // Tables\Filters\Filter::make('not_receipt')
+                //     ->form([
+                //         Forms\Components\Checkbox::make('not_receipt')
+                //             ->label('Senza allegato pagamento'),
+                //     ])
+                //     ->query(function (Builder $query, array $data): Builder {
+                //         return $data['not_receipt'] ? $query->whereNull('receipt_attachment_path') : $query;
+                //     }),
                 Tables\Filters\Filter::make('not_receipt')
                     ->form([
                         Forms\Components\Checkbox::make('not_receipt')
-                            ->label('Senza allegato pagamento'),
+                            ->label('Senza allegato quietanza'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        return $data['not_receipt'] ? $query->whereNull('receipt_attachment_path') : $query;
+                        if (!$data['not_receipt']) {
+                            return $query;
+                        }
+
+                        return $query->whereHas('lastDetail', function (Builder $subQuery) {
+                            $subQuery->whereNull('attachment_path')
+                                    ->orWhere('attachment_path', '');
+                        });
                     }),
             // ], layout: FiltersLayout::Modal)->filtersFormColumns(3)
             ])
@@ -718,7 +845,7 @@ class BailResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            BailDetailsRelationManager::class,
         ];
     }
 

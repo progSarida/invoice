@@ -67,7 +67,7 @@ class ContractDetail extends Model
                     'client_id' => $detail->contract->client_id,
                     'contract_id' => $detail->contract->id,
                     // 'element_table' => 'new_contracts',
-                    'element_id' => $detail->contract->id,
+                    'element_id' => $detail->id,
                     'attachment_type' => 'contract',
                     'attachment_filename' => $filename,
                     'attachment_date' => $detail->date,
@@ -75,7 +75,7 @@ class ContractDetail extends Model
                     'attachment_path' => $detail->contract_attachment_path,
                 ];
 
-                $exist = Attachment::where('attachment_type', 'contract')->where('element_id', $detail->contract->id)->first();
+                $exist = Attachment::where('attachment_type', 'contract')->where('element_id', $detail->id)->first();
 
                 if (!$exist) { $contractAttachment = Attachment::create($dataA); }
                 else { $exist->update($dataA); }
@@ -111,7 +111,7 @@ class ContractDetail extends Model
 
             if (!empty($updateData)) { $detail->contract->update($updateData); }                            // aggiorno NewContract se ci sono dati da aggiornare
 
-            $exist = Attachment::where('element_table', 'new_contracts')->where('element_id', $detail->contract->id)->first();  // controllo se l'Attachment esiste già
+            $exist = Attachment::where('attachment_type', 'contract')->where('element_id', $detail->id)->first();  // controllo se l'Attachment esiste già
 
             if ($mostRecentDetail && $exist) {
                 $filename = basename($mostRecentDetail->contract_attachment_path) ?: 'unknown';             // aggiorno l'Attachment con i dati del ContractDetail più recente

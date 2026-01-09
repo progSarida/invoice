@@ -49,7 +49,7 @@ class CompanyPanelProvider extends PanelProvider
                 NavigationGroup::make('Fatturazione passiva'),
                 NavigationGroup::make('Prima nota'),
                 NavigationGroup::make('Costi di notifica'),
-                NavigationGroup::make('Cauzioni'),
+                NavigationGroup::make('Polizze'),
                 NavigationGroup::make('Tabelle'),
                 NavigationGroup::make('Generale'),
             ])

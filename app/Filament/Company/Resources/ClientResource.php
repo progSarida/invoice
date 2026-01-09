@@ -185,7 +185,7 @@ class ClientResource extends Resource
                     ->required(fn (callable $get) => ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
                     ->columnspan(2),
                 Forms\Components\TextInput::make('ipa_code')
-                    ->label('Codice cliente')
+                    ->label('Codice cliente (SDI)')
                     ->maxLength(255)
                     ->visible(fn (callable $get) => $get('type') === 'private')
                     ->required(fn (callable $get) => $get('type') === 'private')
@@ -262,7 +262,7 @@ class ClientResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('ipa_code')->label('Codice cliente')
+                Tables\Columns\TextColumn::make('ipa_code')->label('Codice cliente (SDI)')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Data creazione')
@@ -439,7 +439,7 @@ class ClientResource extends Resource
                     ->required(fn (callable $get) => ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
                     ->columnspan(2),
                 Forms\Components\TextInput::make('ipa_code')
-                    ->label('Codice cliente')
+                    ->label('Codice cliente (SDI)')
                     ->maxLength(255)
                     ->visible(fn (callable $get) => $get('type') === 'private')
                     ->required(fn (callable $get) => $get('type') === 'private')

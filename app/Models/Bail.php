@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use App\Enums\BailStatus;
+use App\Enums\BailType;
 use App\Enums\TaxType;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,28 +15,31 @@ class Bail extends Model
         'tax_types',                                                // MODIFICA: Rinominato da 'tax_type' a 'tax_types' per supporto multiplo
         'insurance_id',                                             // assicurazione
         'agency_id',                                                // agenzia
+        'bail_type',                                                // tipo polizza
         'bill_number',                                              // numero polizza
         'bill_date',                                                // data polizza
         'bill_attachment_path',                                     // percorso file polizza
-        'bill_start',                                               // inizio polizza
-        'bill_deadline',                                            // scadenza polizza
+        'condition_attachment_path',                                // percorso file condizioni
+        // 'bill_start',                                               // inizio polizza
+        // 'bill_deadline',                                            // scadenza polizza
         'year_duration',                                            // durata polizza
         'month_duration',                                           // durata polizza
         'day_duration',                                             // durata polizza
-        'original_premium',                                         // importo
-        'original_pay_date',                                        // data pagamento premio originario
-        'bail_status',                                              // stato cauzione (Enum)
-        'release_date',                                             // scadenza polizza
-        'renew_premium',                                            // importo
-        'renew_date',                                               // scadenza polizza
-        'receipt_attachment_path',                                  // percorso file ricevuta di quietanza
-        'receipt_date',                                             // data ricevuta di quietanza
+        // 'original_premium',                                         // importo
+        // 'original_pay_date',                                        // data pagamento premio originario
+        // 'bail_status',                                              // stato cauzione (Enum)
+        'release_date',                                             // data rilascio
+        // 'renew_premium',                                            // importo
+        // 'renew_date',                                               // scadenza polizza
+        // 'receipt_attachment_path',                                  // percorso file condizioni polizza
+        // 'receipt_date',                                             // data ricevuta di quietanza
         'note',                                                     // note
     ];
 
     protected $casts = [
         'tax_types' => 'array',                                     // MODIFICA: Cambiato da 'TaxType::class' a 'array' per supporto multiplo
-        'bail_status' => BailStatus::class
+        // 'bail_status' => BailStatus::class,
+        'bail_type' => BailType::class
     ];
 
     // MODIFICA: Aggiunto getter per tax_types
@@ -78,6 +82,23 @@ class Bail extends Model
         return $this->belongsTo(Agency::class);
     }
 
+    public function bailDetails(){
+        return $this->hasMany(BailDetail::class);
+    }
+
+    public function lastDetail()
+    {
+        return $this->hasOne(BailDetail::class, 'bail_id')->latestOfMany('receipt_date');
+    }
+
+    public function selectedDetail($date)
+    {
+        return $this->hasOne(BailDetail::class, 'bail_id')
+                    ->where('bill_start', '<=', $date)
+                    ->where('bill_deadline', '>=', $date)
+                    ->first();
+    }
+
     protected static function booted()
     {
         static::creating(function ($bail) {
@@ -95,7 +116,8 @@ class Bail extends Model
         static::saved(function ($bail) {
 
             $existB = Attachment::where('attachment_type', 'bail_bill')->where('element_id', $bail->id)->first();       // controllo se esiste l'allegato della polizza
-            $existR = Attachment::where('attachment_type', 'bail_receipt')->where('element_id', $bail->id)->first();    // controllo se esiste l'allegato della ricevuta
+            $existC = Attachment::where('attachment_type', 'bail_condition')->where('element_id', $bail->id)->first();  // controllo se esiste l'allegato delle condizioni
+            // $existR = Attachment::where('attachment_type', 'bail_receipt')->where('element_id', $bail->id)->first();    // controllo se esiste l'allegato della ricevuta
 
             if($bail->bill_attachment_path){
                 $filenameB = basename($bail->bill_attachment_path) ?: 'unknown';
@@ -118,8 +140,8 @@ class Bail extends Model
             }
             else if($existB) { $existB->delete(); }
 
-            if($bail->receipt_attachment_path){
-                $filenameR = basename($bail->receipt_attachment_path) ?: 'unknown';
+            if($bail->condition_attachment_path){
+                $filenameC = basename($bail->condition_attachment_path) ?: 'unknown';
 
                 $dataR = [
                     'company_id' => \Filament\Facades\Filament::getTenant()->id,
@@ -127,17 +149,38 @@ class Bail extends Model
                     'contract_id' => $bail->contract->id,
                     // 'element_table' => 'bails',
                     'element_id' => $bail->id,
-                    'attachment_type' => 'bail_receipt',
-                    'attachment_filename' => $filenameR,
-                    'attachment_date' => $bail->receipt_date,
+                    'attachment_type' => 'bail_condition',
+                    'attachment_filename' => $filenameC,
+                    'attachment_date' => $bail->bill_date,
                     'attachment_upload_date' => today()->toDateString(),
-                    'attachment_path' => $bail->receipt_attachment_path,
+                    'attachment_path' => $bail->condition_attachment_path,
                 ];
 
-                if (!$existR) { $billAttachment = Attachment::create($dataR); }
-                else { $existR->update($dataR); }
+                if (!$existC) { $billAttachment = Attachment::create($dataR); }
+                else { $existC->update($dataR); }
             }
-            else if($existR) { $existR->delete(); }
+            else if($existC) { $existC->delete(); }
+
+            // if($bail->receipt_attachment_path){
+            //     $filenameR = basename($bail->receipt_attachment_path) ?: 'unknown';
+
+            //     $dataR = [
+            //         'company_id' => \Filament\Facades\Filament::getTenant()->id,
+            //         'client_id' => $bail->contract->client_id,
+            //         'contract_id' => $bail->contract->id,
+            //         // 'element_table' => 'bails',
+            //         'element_id' => $bail->id,
+            //         'attachment_type' => 'bail_receipt',
+            //         'attachment_filename' => $filenameR,
+            //         'attachment_date' => $bail->receipt_date,
+            //         'attachment_upload_date' => today()->toDateString(),
+            //         'attachment_path' => $bail->receipt_attachment_path,
+            //     ];
+
+            //     if (!$existR) { $billAttachment = Attachment::create($dataR); }
+            //     else { $existR->update($dataR); }
+            // }
+            // else if($existR) { $existR->delete(); }
 
         });
 
@@ -147,10 +190,12 @@ class Bail extends Model
 
         static::deleted(function ($bail) {
             $existB = Attachment::where('attachment_type', 'bail_bill')->where('element_id', $bail->id)->first();       // controllo se esiste l'allegato della polizza
-            $existR = Attachment::where('attachment_type', 'bail_receipt')->where('element_id', $bail->id)->first();    // controllo se esiste l'allegato della ricevuta
+            $existC = Attachment::where('attachment_type', 'bail_condition')->where('element_id', $bail->id)->first();  // controllo se esiste l'allegato delle condizioni
+            // $existR = Attachment::where('attachment_type', 'bail_receipt')->where('element_id', $bail->id)->first();    // controllo se esiste l'allegato della ricevuta
 
             if($existB) { $existB->delete(); }
-            if($existR) { $existR->delete(); }
+            if($existC) { $existB->delete(); }
+            // if($existR) { $existR->delete(); }
         });
 
     }

@@ -16,8 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class InsuranceResource extends Resource
 {
     protected static ?string $model = Insurance::class;
-    public static ?string $pluralModelLabel = 'Assicurazioni';
-    public static ?string $modelLabel = 'Assicurazione';
+    public static ?string $pluralModelLabel = 'Compagnie Assicurative';
+    public static ?string $modelLabel = 'Compagnia';
     protected static ?string $navigationIcon = 'ri-contract-line';
     protected static ?string $navigationGroup = 'Tabelle';
     protected static ?int $navigationSort = 6;

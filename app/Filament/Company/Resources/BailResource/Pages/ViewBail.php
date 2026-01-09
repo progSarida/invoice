@@ -23,6 +23,11 @@ class ViewBail extends ViewRecord
         return 'Polizza n. ' . $number;
     }
 
+    public function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
+
     protected function getHeaderActions(): array
     {
         $currentBail = $this->record;

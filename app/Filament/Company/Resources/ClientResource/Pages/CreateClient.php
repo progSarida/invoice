@@ -7,6 +7,7 @@ use App\Models\Client;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Company\Resources\ClientResource;
+use Filament\Facades\Filament;
 
 class CreateClient extends CreateRecord
 {
@@ -26,10 +27,13 @@ class CreateClient extends CreateRecord
     {
         $existsCF = false;
         $existsPI = false;
+        $tenantId = Filament::getTenant()->id;
         if ($data['subtype'] === 'man' || $data['subtype'] === 'woman')
-            $existsCF = Client::where('tax_code', $data['tax_code'])->exists();
+            $existsCF = Client::where('tax_code', $data['tax_code'])
+                            ->where('company_id', $tenantId)->exists();
         else
-            $existsPI = Client::orWhere('vat_code', $data['vat_code'])->exists();
+            $existsPI = Client::orWhere('vat_code', $data['vat_code'])
+                            ->where('company_id', $tenantId)->exists();
         if ($existsCF) {
             Notification::make()
                 ->title('Attenzione')
