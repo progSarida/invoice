@@ -26,8 +26,6 @@ return new class extends Migration
             $table->date('pay_date')->nullable();                                                           // data pagamento premio
             $table->date('receipt_date')->nullable();                                                       // data polizza
             $table->string('attachment_path')->nullable();                                                  // percorso allegato quietanza
-            $table->date('release_date')->nullable();                                                       // data svincolo
-            $table->string('release_path')->nullable();                                                     // percorso allegato svincolo
             $table->timestamps();
         });
     }
