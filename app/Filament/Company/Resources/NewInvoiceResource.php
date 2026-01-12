@@ -175,7 +175,7 @@ class NewInvoiceResource extends Resource
                                         ->icon('ri-user-2-line')
                                         ->form(fn (Form $form) => ClientResource::modalForm($form))
                                         ->modalHeading('')
-                                        ->modalWidth('6xl')
+                                        ->modalWidth('7xl')
                                         ->action(fn (array $data, Client $client, Get $get, Set $set) => NewInvoiceResource::saveClient($data, $client, $get, $set))
                                 )
                                 // ->relationship(name: 'client', titleAttribute: 'denomination')
@@ -1520,6 +1520,7 @@ class NewInvoiceResource extends Resource
         $client->place = $data['place'] ?? null;
         $client->tax_code = $data['tax_code'] ?? null;
         $client->vat_code = $data['vat_code'] ?? null;
+        $client->ipa_code = $data['ipa_code'] ?? null;
         $client->phone = $data['phone'] ?? null;
         $client->email = $data['email'] ?? null;
         $client->pec = $data['pec'] ?? null;

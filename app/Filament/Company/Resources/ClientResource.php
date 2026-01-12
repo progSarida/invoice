@@ -176,6 +176,11 @@ class ClientResource extends Resource
                     ->maxLength(255)
                     ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
                     ->columnspan(3),
+                Forms\Components\Placeholder::make('person')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
+                    ->columnspan(6),
                 Forms\Components\TextInput::make('tax_code')->label('Codice Fiscale')
                     ->maxLength(255)
                     ->required(fn (callable $get) => ($get('subtype') === 'man' || $get('subtype') === 'woman'))
@@ -315,6 +320,7 @@ class ClientResource extends Resource
 
         return $form
             ->columns(12)
+            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('type')->label('Tipo')
                     ->options(ClientType::class)
@@ -325,7 +331,7 @@ class ClientResource extends Resource
                     ->afterStateUpdated(function (callable $set, $state) {
                         $set('subtype', null);
                     })
-                    // ->autofocus()
+                    // ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
                     ->columnspan(3),
                 Forms\Components\Select::make('subtype')->label('Sottotipo')
                     ->options(function (callable $get) {
@@ -375,14 +381,9 @@ class ClientResource extends Resource
                 Forms\Components\TextInput::make('address')->label('Indirizzo')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(6),
-                Forms\Components\TextInput::make('zip_code')->label('Cap')
-                    ->required()
-                    ->maxLength(5)
-                    ->disabled()
-                    ->dehydrated()
-                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
-                    ->columnspan(1),
+                    ->columnspan(5),
+                Forms\Components\View::make('links.ipa-link')
+                    ->columnSpan(1),
                 Forms\Components\Select::make('city_id')->label('Città')
                     ->relationship(name: 'city', titleAttribute: 'name')
                     ->required()
@@ -401,6 +402,13 @@ class ClientResource extends Resource
                             $set('province_id', null);
                         }
                     }),
+                Forms\Components\TextInput::make('zip_code')->label('Cap')
+                    ->required()
+                    ->maxLength(5)
+                    ->disabled()
+                    ->visible(fn (callable $get) => $get('state_id') == $italyId)
+                    ->columnspan(1),
+
                 Forms\Components\Select::make('province_id')->label('Provincia')
                     ->options(Province::pluck('code', 'id')->toArray())
                     ->searchable()
@@ -430,6 +438,11 @@ class ClientResource extends Resource
                     ->maxLength(255)
                     ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
                     ->columnspan(3),
+                Forms\Components\Placeholder::make('person')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
+                    ->columnspan(6),
                 Forms\Components\TextInput::make('tax_code')->label('Codice Fiscale')
                     ->maxLength(255)
                     ->required(fn (callable $get) => ($get('subtype') === 'man' || $get('subtype') === 'woman'))
@@ -448,12 +461,26 @@ class ClientResource extends Resource
                     ->label('')
                     ->content('')
                     ->visible(fn (callable $get) => $get('type') !== 'private' || ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
-                    ->columnspan(6),
+                    ->columnspan(1),
                 Forms\Components\Placeholder::make('ipa_code')
                     ->label('')
                     ->content('')
                     ->visible(fn (callable $get) => $get('type') !== 'private')
                     ->columnspan(2),
+                Forms\Components\Toggle::make('is_historical')
+                    ->label('Cliente storico')
+                    ->live()
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->columnspan(2),
+                Forms\Components\TextInput::make('residue')->label('Residuo al 31/12/2024')
+                    ->maxLength(255)
+                    ->visible(fn (callable $get) => $get('is_historical'))
+                    ->columnspan(3),
+                Forms\Components\Placeholder::make('residue')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => !$get('is_historical'))
+                    ->columnspan(3),
                 Forms\Components\TextInput::make('phone')->label('Tel.')
                     ->maxLength(255)
                     ->columnspan(2),

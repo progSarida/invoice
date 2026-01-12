@@ -71,6 +71,7 @@ class CreditNotesRelationManager extends RelationManager
                                         ->icon('ri-user-2-line')
                                         ->form(fn (Form $form) => ClientResource::modalForm($form))
                                         ->modalHeading('')
+                                        ->modalWidth('7xl')
                                         ->action(fn (array $data, Client $client, Get $get, Set $set) => NewInvoiceResource::saveClient($data, $client, $get, $set))
                                 )
                                 // ->relationship(name: 'client', titleAttribute: 'denomination')

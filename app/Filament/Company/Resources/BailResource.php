@@ -52,16 +52,16 @@ class BailResource extends Resource
             ->columns(12)
             ->schema([
                 Forms\Components\Select::make('client_id')->label('Cliente')
-                    // ->hintAction(
-                    //     Action::make('Nuovo')
-                    //         ->icon('ri-user-2-line')
-                    //         ->form(fn (Form $form) => ClientResource::modalForm($form))
-                    //         ->modalHeading('')
-                    //         ->modalWidth('6xl')
-                    //         ->action(fn (array $data, Client $client, Get $get, Set $set) => BailResource::saveClient($data, $client, $get, $set))
-                    //         ->visible(fn (?Model $record): bool => $record === null)
-                    // )
-                    // ->relationship(name: 'client', titleAttribute: 'denomination')
+                    ->hintAction(
+                        Action::make('Nuovo')
+                            ->icon('ri-user-2-line')
+                            ->form(fn (Form $form) => ClientResource::modalForm($form))
+                            ->modalHeading('')
+                            ->modalWidth('7xl')
+                            ->action(fn (array $data, Client $client, Get $get, Set $set) => BailResource::saveClient($data, $client, $get, $set))
+                            ->visible(fn (?Model $record): bool => $record === null)
+                    )
+                    ->relationship(name: 'client', titleAttribute: 'denomination')
                     ->getSearchResultsUsing(function (string $search) {
                         // Rimuovi spazi multipli e trim
                         $search = trim(preg_replace('/\s+/', ' ', $search));
@@ -118,7 +118,7 @@ class BailResource extends Resource
                     ->required()
                     ->searchable('denomination')
                     ->live()
-                    ->preload()
+                    // ->preload()
                     ->optionsLimit(5)
                     ->columnSpan(5),
                 Forms\Components\Select::make('tax_types') // MODIFICA: Rinominato da 'tax_type' a 'tax_types'
@@ -910,6 +910,7 @@ class BailResource extends Resource
         $client->place = $data['place'] ?? null;
         $client->tax_code = $data['tax_code'] ?? null;
         $client->vat_code = $data['vat_code'] ?? null;
+        $client->ipa_code = $data['ipa_code'] ?? null;
         $client->phone = $data['phone'] ?? null;
         $client->email = $data['email'] ?? null;
         $client->pec = $data['pec'] ?? null;
