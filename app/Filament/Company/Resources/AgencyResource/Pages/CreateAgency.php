@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateAgency extends CreateRecord
 {
     protected static string $resource = AgencyResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuova agenzia";
+    }
 }

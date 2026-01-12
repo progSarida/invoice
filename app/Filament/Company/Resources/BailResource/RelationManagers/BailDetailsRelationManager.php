@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources\BailResource\RelationManagers;
 
+use App\Enums\BailStatus;
 use App\Models\Client;
 use Filament\Forms;
 use Filament\Forms\Components\Placeholder;
@@ -70,7 +71,7 @@ class BailDetailsRelationManager extends RelationManager
                     ->columnSpan(3)
                     ->extraAttributes(['class' => 'file-upload-with-preview']),
                 Forms\Components\Actions::make([
-                    \Filament\Forms\Components\Actions\Action::make('view_attachment')
+                    \Filament\Forms\Components\Actions\Action::make('view_receipt')
                         // ->label('Visualizza')
                         ->label('Quietanza')
                         ->tooltip('Visualizza quietanza')
@@ -102,12 +103,48 @@ class BailDetailsRelationManager extends RelationManager
                     ->prefix('€'),
                 Forms\Components\Select::make('bail_status')->label('Stato Pagamento')
                     ->columnSpan(2)
+                    ->live()
                     ->options(\App\Enums\BailStatus::class)
                     ->nullable(),
                 Forms\Components\DatePicker::make('pay_date')->label('In Data')
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(2)
                     ->nullable(),
+
+                Forms\Components\DatePicker::make('release_date')->label('Data Svincolo')
+                    ->extraInputAttributes(['class' => 'text-center'])
+                    ->columnSpan(2)
+                    ->required()
+                    ->visible(fn (Get $get) => $get('bail_status') === BailStatus::RELEASED->value),
+                Forms\Components\FileUpload::make('release_path')->label('Attestazione di Svincolo')
+                    ->live()
+                    ->required()
+                    // ->disk('public')
+                    // ->directory('bail/bill-attachments')
+                    ->directory(function (Get $get) {
+                        $ownerRecord = $this->getOwnerRecord();
+                        $client = Client::find($ownerRecord->client_id)->denomination;
+                        return "bail/bill-attachments/{$client}_{$ownerRecord->bill_number}";
+                    })
+                    // ->visibility('public')
+                    ->getUploadedFileNameForStorageUsing(
+                        fn ($file, Get $get): string => 'Svincolo_' . $get('release_date') . '.' . $file->getClientOriginalExtension()
+                    )
+                    ->columnSpan(3)
+                    ->extraAttributes(['class' => 'file-upload-with-preview'])
+                    ->visible(fn (Get $get) => $get('bail_status') === BailStatus::RELEASED->value),
+                Forms\Components\Actions::make([
+                    \Filament\Forms\Components\Actions\Action::make('view_release')
+                        // ->label('Visualizza')
+                        ->label('Quietanza')
+                        ->tooltip('Visualizza quietanza')
+                        ->icon('heroicon-o-eye')
+                        // ->url(fn($record): ?string => $record && $record->attachment_path ? Storage::url($record->attachment_path) : null)
+                        ->url(fn($record): ?string => $record && $record->attachment_path ? Storage::temporaryUrl($record->attachment_path,now()->addMinutes(1)) : null)
+                        ->openUrlInNewTab()
+                        ->hidden(fn ($record) => !$record || !$record->release_path),
+                ])
+                ->columnSpan(1),
             ]);
     }
 
@@ -133,11 +170,14 @@ class BailDetailsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->modalHeading('Crea rinnovo polizza'),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->modalHeading('Visualizza rinnovo polizza'),
+                Tables\Actions\EditAction::make()
+                    ->modalHeading('Modifica rinnovo polizza'),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

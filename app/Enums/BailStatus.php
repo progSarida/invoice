@@ -14,10 +14,10 @@ enum BailStatus: string implements HasLabel
     public function getLabel(): string
     {
         return match($this) {
-            self::PAYED => 'Pagato',
+            self::PAYED => 'Pagata',
             self::EXPIRING => 'In scadenza',
             self::EXPIRED => 'Scaduta',
-            self::RELEASED => 'Svincolato',
+            self::RELEASED => 'Svincolata',
 
         };
     }

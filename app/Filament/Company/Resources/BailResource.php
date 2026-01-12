@@ -5,10 +5,14 @@ use App\Enums\TaxType;
 use App\Filament\Company\Resources\BailResource\Pages;
 use App\Filament\Company\Resources\BailResource\RelationManagers;
 use App\Filament\Company\Resources\BailResource\RelationManagers\BailDetailsRelationManager;
+use App\Models\Agency;
 use App\Models\Bail;
 use App\Models\Client;
+use App\Models\Insurance;
 use App\Models\NewContract;
+use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -48,6 +52,15 @@ class BailResource extends Resource
             ->columns(12)
             ->schema([
                 Forms\Components\Select::make('client_id')->label('Cliente')
+                    // ->hintAction(
+                    //     Action::make('Nuovo')
+                    //         ->icon('ri-user-2-line')
+                    //         ->form(fn (Form $form) => ClientResource::modalForm($form))
+                    //         ->modalHeading('')
+                    //         ->modalWidth('6xl')
+                    //         ->action(fn (array $data, Client $client, Get $get, Set $set) => BailResource::saveClient($data, $client, $get, $set))
+                    //         ->visible(fn (?Model $record): bool => $record === null)
+                    // )
                     // ->relationship(name: 'client', titleAttribute: 'denomination')
                     ->getSearchResultsUsing(function (string $search) {
                         // Rimuovi spazi multipli e trim
@@ -404,7 +417,16 @@ class BailResource extends Resource
                     ->dehydrated(false)
                     ->columnSpanFull(),
                 Forms\Components\Select::make('insurance_id')
-                    ->label('Assicurazione')
+                    ->hintAction(
+                        Action::make('Nuova')
+                            ->icon('ri-contract-line')
+                            ->form(fn (Form $form) => InsuranceResource::modalForm($form))
+                            ->modalHeading('')
+                            ->modalWidth('4xl')
+                            ->action(fn (array $data, Insurance $insurance, Get $get, Set $set) => BailResource::saveInsurance($data, $insurance, $get, $set))
+                            ->visible(fn (?Model $record): bool => $record === null)
+                    )
+                    ->label('Compagnia assicurativa')
                     ->required()
                     ->options(function () {
                         return \App\Models\Insurance::query()
@@ -418,6 +440,15 @@ class BailResource extends Resource
                     })
                     ->columnSpan(4),
                 Forms\Components\Select::make('agency_id')
+                    ->hintAction(
+                        Action::make('Nuova')
+                            ->icon('phosphor-house-light')
+                            ->form(fn (Form $form) => AgencyResource::modalForm($form))
+                            ->modalHeading('')
+                            ->modalWidth('4xl')
+                            ->action(fn (array $data, Agency $agency, Get $get, Set $set) => BailResource::saveAgency($data, $agency, $get, $set))
+                            ->visible(fn (?Model $record): bool => $record === null)
+                    )
                     ->label('Agenzia')
                     ->required()
                     ->options(function () {
@@ -703,7 +734,7 @@ class BailResource extends Resource
                     ->options(function () {
                         return \App\Models\Insurance::all()->pluck('name', 'id')->toArray();
                     })
-                    ->label('Assicurazione')
+                    ->label('Compagnia assicurativa')
                     ->query(function ($query, $data) {
                         if (!empty($data['value'])) {
                             $query->where('insurance_id', $data);
@@ -863,5 +894,65 @@ class BailResource extends Resource
             'edit' => Pages\EditBail::route('/{record}/edit'),
             'view' => Pages\ViewBail::route('/{record}'),
         ];
+    }
+
+    public static function saveClient(array $data, Client $client, Get $get, Set $set): void
+    {
+        // dd($data);
+        $client->company_id = Filament::getTenant()->id;
+        $client->type = $data['type'] ?? null;
+        $client->subtype = $data['subtype'] ?? null;
+        $client->denomination = $data['denomination'] ?? null;
+        $client->state_id = $data['state_id'] ?? null;
+        $client->address = $data['address'] ?? null;
+        $client->zip_code = $data['zip_code'] ?? null;
+        $client->city_id = $data['city_id'] ?? null;
+        $client->place = $data['place'] ?? null;
+        $client->tax_code = $data['tax_code'] ?? null;
+        $client->vat_code = $data['vat_code'] ?? null;
+        $client->phone = $data['phone'] ?? null;
+        $client->email = $data['email'] ?? null;
+        $client->pec = $data['pec'] ?? null;
+        $client->save();
+
+        $set('client_id', $client->id);
+
+        Notification::make()
+            ->title('Cliente salvato con successo')
+            ->success()
+            ->send();
+    }
+
+    public static function saveInsurance(array $data, Insurance $insurance, Get $get, Set $set): void
+    {
+        // dd($data);
+        $insurance->company_id = Filament::getTenant()->id;
+        $insurance->name = $data['name'] ?? null;
+        $insurance->description = $data['description'] ?? null;
+        $insurance->save();
+
+        $set('insurance_id', $insurance->id);
+
+        Notification::make()
+            ->title('Compagnia assicurativa salvata con successo')
+            ->success()
+            ->send();
+    }
+
+    public static function saveAgency(array $data, Agency $agency, Get $get, Set $set): void
+    {
+        // dd($data);
+        $agency->company_id = Filament::getTenant()->id;
+        $agency->insurance_id = $data['insurance_id'] ?? null;
+        $agency->name = $data['name'] ?? null;
+        $agency->description = $data['description'] ?? null;
+        $agency->save();
+
+        $set('agency_id', $agency->id);
+
+        Notification::make()
+            ->title('Agenzia salvata con successo')
+            ->success()
+            ->send();
     }
 }

@@ -88,7 +88,7 @@ class Bail extends Model
 
     public function lastDetail()
     {
-        return $this->hasOne(BailDetail::class, 'bail_id')->latestOfMany('receipt_date');
+        return $this->hasOne(BailDetail::class, 'bail_id')->latestOfMany('bill_start');
     }
 
     public function selectedDetail($date)

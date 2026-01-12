@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateBail extends CreateRecord
 {
     protected static string $resource = BailResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuova polizza";
+    }
 }

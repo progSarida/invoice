@@ -28,7 +28,7 @@ class AgencyResource extends Resource
             ->columns(6)
             ->schema([
                 Forms\Components\Select::make('insurance_id')
-                    ->label('Assicurazione')
+                    ->label('Compagnia assicurativa')
                     ->options(function () {
                         return \App\Models\Insurance::query()
                             ->pluck('name', 'id')
@@ -36,7 +36,7 @@ class AgencyResource extends Resource
                     })
                     ->searchable()
                     ->columnSpan(3),
-                Forms\Components\TextInput::make('name')->label('Nome')
+                Forms\Components\TextInput::make('name')->label('Denominazione')
                     ->required()
                     ->maxLength(255)
                     ->columnspan(3),
@@ -92,5 +92,30 @@ class AgencyResource extends Resource
             'edit' => Pages\EditAgency::route('/{record}/edit'),
             'view' => Pages\ViewAgency::route('/{record}'),
         ];
+    }
+
+    public static function modalForm(Form $form): Form
+    {
+        return $form
+            ->columns(6)
+            ->schema([
+                Forms\Components\Select::make('insurance_id')
+                    ->label('Compagnia assicurativa')
+                    ->options(function () {
+                        return \App\Models\Insurance::query()
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('name')->label('Denominazione')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnspan(3),
+                Forms\Components\TextInput::make('description')->label('Descrizione')
+                    ->maxLength(255)
+                    ->columnspan(6),
+            ]);
+
     }
 }

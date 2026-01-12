@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateInsurance extends CreateRecord
 {
     protected static string $resource = InsuranceResource::class;
+
+    public function getTitle(): string
+    {
+        return "Nuova compagnia assicurativa";
+    }
 }

@@ -26,7 +26,7 @@ class InsuranceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')->label('Nome')
+                Forms\Components\TextInput::make('name')->label('Denominazione')
                     ->required()
                     ->maxLength(255)
                     ->columnspan(2),
@@ -82,5 +82,20 @@ class InsuranceResource extends Resource
             'edit' => Pages\EditInsurance::route('/{record}/edit'),
             'view' => Pages\ViewInsurance::route('/{record}'),
         ];
+    }
+
+    public static function modalForm(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('name')->label('Denominazione')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnspan(2),
+                Forms\Components\TextInput::make('description')->label('Descrizione')
+                    ->maxLength(255)
+                    ->columnspan(3),
+            ]);
+
     }
 }

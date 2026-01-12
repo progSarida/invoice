@@ -31,42 +31,121 @@ class EditBail extends EditRecord
     protected function getHeaderActions(): array
     {
         $currentBail = $this->record;
-        // Precedente per bill_start: data precedente O stessa data con ID minore
-        $previousSBail = Bail::where(function ($query) use ($currentBail) {
-                $query->where('bill_start', '<', $currentBail->bill_start)
-                    ->orWhere(function ($q) use ($currentBail) {
-                        $q->where('bill_start', '=', $currentBail->bill_start)
-                          ->where('id', '<', $currentBail->id);
+        // // Precedente per bill_start: data precedente O stessa data con ID minore
+        // $previousSBail = Bail::where(function ($query) use ($currentBail) {
+        //         $query->where('bill_start', '<', $currentBail->bill_start)
+        //             ->orWhere(function ($q) use ($currentBail) {
+        //                 $q->where('bill_start', '=', $currentBail->bill_start)
+        //                   ->where('id', '<', $currentBail->id);
+        //             });
+        //     })
+        //     ->orderBy('bill_start', 'desc')->orderBy('id', 'desc')->first();
+        // // Successivo per bill_start: data successiva O stessa data con ID maggiore
+        // $nextSBail = Bail::where(function ($query) use ($currentBail) {
+        //         $query->where('bill_start', '>', $currentBail->bill_start)
+        //             ->orWhere(function ($q) use ($currentBail) {
+        //                 $q->where('bill_start', '=', $currentBail->bill_start)
+        //                   ->where('id', '>', $currentBail->id);
+        //             });
+        //     })
+        //     ->orderBy('bill_start', 'asc')->orderBy('id', 'asc')->first();
+        // // Precedente per bill_deadline: data precedente O stessa data con ID minore
+        // $previousDBail = Bail::where(function ($query) use ($currentBail) {
+        //         $query->where('bill_deadline', '<', $currentBail->bill_deadline)
+        //             ->orWhere(function ($q) use ($currentBail) {
+        //                 $q->where('bill_deadline', '=', $currentBail->bill_deadline)
+        //                   ->where('id', '<', $currentBail->id);
+        //             });
+        //     })
+        //     ->orderBy('bill_deadline', 'desc')->orderBy('id', 'desc')->first();
+        // // Successivo per bill_deadline: data successiva O stessa data con ID maggiore
+        // $nextDBail = Bail::where(function ($query) use ($currentBail) {
+        //         $query->where('bill_deadline', '>', $currentBail->bill_deadline)
+        //             ->orWhere(function ($q) use ($currentBail) {
+        //                 $q->where('bill_deadline', '=', $currentBail->bill_deadline)
+        //                   ->where('id', '>', $currentBail->id);
+        //             });
+        //     })
+        //     ->orderBy('bill_deadline', 'asc')->orderBy('id', 'asc')->first();
+
+        $currentBail = $this->record;
+
+        // Verifica se esiste un lastDetail
+        if (!$currentBail->lastDetail) {
+            // Se non esiste lastDetail, non ci sono precedenti/successivi
+            $previousSBail = null;
+            $nextSBail = null;
+            $previousDBail = null;
+            $nextDBail = null;
+        } else {
+            $currentBillStart = $currentBail->lastDetail->bill_start;
+            $currentBillDeadline = $currentBail->lastDetail->bill_deadline;
+            $currentBailId = $currentBail->id;
+
+            // Precedente per bill_start: data precedente O stessa data con ID minore
+            $previousSBail = Bail::whereHas('bailDetails', function ($query) use ($currentBillStart, $currentBailId) {
+                $query->where('bill_start', '<', $currentBillStart)
+                    ->orWhere(function ($q) use ($currentBillStart, $currentBailId) {
+                        $q->where('bill_start', '=', $currentBillStart)
+                        ->where('bail_id', '<', $currentBailId);
                     });
             })
-            ->orderBy('bill_start', 'desc')->orderBy('id', 'desc')->first();
-        // Successivo per bill_start: data successiva O stessa data con ID maggiore
-        $nextSBail = Bail::where(function ($query) use ($currentBail) {
-                $query->where('bill_start', '>', $currentBail->bill_start)
-                    ->orWhere(function ($q) use ($currentBail) {
-                        $q->where('bill_start', '=', $currentBail->bill_start)
-                          ->where('id', '>', $currentBail->id);
+            ->with('lastDetail')
+            ->get()
+            ->filter(fn($bail) => $bail->lastDetail !== null)
+            ->sortByDesc(function ($bail) {
+                return [$bail->lastDetail->bill_start, $bail->id];
+            })
+            ->first();
+
+            // Successivo per bill_start: data successiva O stessa data con ID maggiore
+            $nextSBail = Bail::whereHas('bailDetails', function ($query) use ($currentBillStart, $currentBailId) {
+                $query->where('bill_start', '>', $currentBillStart)
+                    ->orWhere(function ($q) use ($currentBillStart, $currentBailId) {
+                        $q->where('bill_start', '=', $currentBillStart)
+                        ->where('bail_id', '>', $currentBailId);
                     });
             })
-            ->orderBy('bill_start', 'asc')->orderBy('id', 'asc')->first();
-        // Precedente per bill_deadline: data precedente O stessa data con ID minore
-        $previousDBail = Bail::where(function ($query) use ($currentBail) {
-                $query->where('bill_deadline', '<', $currentBail->bill_deadline)
-                    ->orWhere(function ($q) use ($currentBail) {
-                        $q->where('bill_deadline', '=', $currentBail->bill_deadline)
-                          ->where('id', '<', $currentBail->id);
+            ->with('lastDetail')
+            ->get()
+            ->filter(fn($bail) => $bail->lastDetail !== null)
+            ->sortBy(function ($bail) {
+                return [$bail->lastDetail->bill_start, $bail->id];
+            })
+            ->first();
+
+            // Precedente per bill_deadline: data precedente O stessa data con ID minore
+            $previousDBail = Bail::whereHas('bailDetails', function ($query) use ($currentBillDeadline, $currentBailId) {
+                $query->where('bill_deadline', '<', $currentBillDeadline)
+                    ->orWhere(function ($q) use ($currentBillDeadline, $currentBailId) {
+                        $q->where('bill_deadline', '=', $currentBillDeadline)
+                        ->where('bail_id', '<', $currentBailId);
                     });
             })
-            ->orderBy('bill_deadline', 'desc')->orderBy('id', 'desc')->first();
-        // Successivo per bill_deadline: data successiva O stessa data con ID maggiore
-        $nextDBail = Bail::where(function ($query) use ($currentBail) {
-                $query->where('bill_deadline', '>', $currentBail->bill_deadline)
-                    ->orWhere(function ($q) use ($currentBail) {
-                        $q->where('bill_deadline', '=', $currentBail->bill_deadline)
-                          ->where('id', '>', $currentBail->id);
+            ->with('lastDetail')
+            ->get()
+            ->filter(fn($bail) => $bail->lastDetail !== null)
+            ->sortByDesc(function ($bail) {
+                return [$bail->lastDetail->bill_deadline, $bail->id];
+            })
+            ->first();
+
+            // Successivo per bill_deadline: data successiva O stessa data con ID maggiore
+            $nextDBail = Bail::whereHas('bailDetails', function ($query) use ($currentBillDeadline, $currentBailId) {
+                $query->where('bill_deadline', '>', $currentBillDeadline)
+                    ->orWhere(function ($q) use ($currentBillDeadline, $currentBailId) {
+                        $q->where('bill_deadline', '=', $currentBillDeadline)
+                        ->where('bail_id', '>', $currentBailId);
                     });
             })
-            ->orderBy('bill_deadline', 'asc')->orderBy('id', 'asc')->first();
+            ->with('lastDetail')
+            ->get()
+            ->filter(fn($bail) => $bail->lastDetail !== null)
+            ->sortBy(function ($bail) {
+                return [$bail->lastDetail->bill_deadline, $bail->id];
+            })
+            ->first();
+        }
 
         return [
             Actions\Action::make('back')
@@ -101,7 +180,6 @@ class EditBail extends EditRecord
                 ->icon('heroicon-o-arrow-right-circle')
                 ->visible(fn() => $nextDBail !== null)
                 ->action(fn() => $this->redirect(BailResource::getUrl('edit', ['record' => $nextDBail->id]))),
-            // Actions\DeleteAction::make(),
         ];
     }
 

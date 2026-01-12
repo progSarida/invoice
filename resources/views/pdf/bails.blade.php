@@ -4,7 +4,7 @@
     <style>
         body {
             font-family: DejaVu Sans, sans-serif;
-            font-size: 12px;
+            font-size: 10px;
         }
 
         table {
@@ -144,6 +144,7 @@
                 <th>Premio</th>
                 <th>Inizio</th>
                 <th>Scadenza</th>
+                <th>Stato</th>
             </tr>
         </thead>
         <tbody>
@@ -157,11 +158,15 @@
                     <td>{{ $bail->bill_number }}</td>
                     {{-- @if ($filters["active_at_date"]["selected_date"]) --}}
                     @php
-                        $detail = $bail->selectedDetail($filters["active_at_date"]["selected_date"])
+                        // recupero il dettaglio alla data indicata
+                        $detail = $bail->selectedDetail($filters["active_at_date"]["selected_date"]);
+                        // se la polizza non è attiva alla data indicata o non è indicata nessuna data usa il dettaglio dell'ultimo rinnovo
+                        if(!$detail) $detail = $bail->lastDetail;
                     @endphp
-                        <td>{{ $detail->premium }}</td>
-                        <td>{{ \Carbon\Carbon::parse($detail->bill_start)->format('d/m/Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($detail->bill_deadline)->format('d/m/Y') }}</td>
+                    <td>{{ $detail?->premium }}</td>
+                    <td>{{ \Carbon\Carbon::parse($detail?->bill_start)->format('d/m/Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($detail?->bill_deadline)->format('d/m/Y') }}</td>
+                    <td>{{ $detail?->bail_status?->getLabel() }}</td>
                     {{-- @else
                         <td>{{ $bail->lastDetail->premium }}</td>
                         <td>{{ $bail->lastDetail->bill_start }}</td>
