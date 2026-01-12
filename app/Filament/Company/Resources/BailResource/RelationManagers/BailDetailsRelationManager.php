@@ -88,7 +88,7 @@ class BailDetailsRelationManager extends RelationManager
                     ->required()
                     // ->numeric()
                     ->live(onBlur: true)
-                    ->debounce(1000)
+                    ->debounce(3000)
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->afterStateUpdated(function ($state, $component) {
                         $clean = preg_replace('/[^\d,\.-]/', '', $state);
@@ -166,6 +166,7 @@ class BailDetailsRelationManager extends RelationManager
                     ->label('Stato')
                     ->formatStateUsing(fn ($state) => $state?->getLabel() ?? 'N/A'),
             ])
+            ->defaultSort('bill_start', 'desc')
             ->filters([
                 //
             ])
