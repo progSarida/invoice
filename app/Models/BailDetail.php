@@ -49,16 +49,17 @@ class BailDetail extends Model
 
             if ($mostRecentDetail && $mostRecentDetail->id === $detail->id) {           // controllo che sia il dettaglio di contratto più recente
 
-                $filename = basename($detail->attachment_path) ?: 'unknown';
+                $filenameA = basename($detail->attachment_path) ?: 'unknown';
+                $filenameR = basename($detail->release_path) ?: 'unknown';
 
                 $dataA = [
                     'company_id' => \Filament\Facades\Filament::getTenant()->id,
-                    'client_id' => $detail->bail->contract->client_id,
-                    'contract_id' => $detail->bail->contract->id,
+                    'client_id' => $detail->bail->client_id,
+                    'contract_id' => $detail->bail->contract?->id,
                     // 'element_table' => 'new_contracts',
                     'element_id' => $detail->id,
                     'attachment_type' => 'bail_detail',
-                    'attachment_filename' => $filename,
+                    'attachment_filename' => $filenameA,
                     'attachment_date' => $detail->receipt_date,
                     'attachment_upload_date' => now()->toDateString(),
                     'attachment_path' => $detail->attachment_path,
@@ -68,6 +69,24 @@ class BailDetail extends Model
 
                 if (!$exist) { $bailAttachment = Attachment::create($dataA); }
                 else { $exist->update($dataA); }
+
+                $dataR = [
+                    'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                    'client_id' => $detail->bail->client_id,
+                    'contract_id' => $detail->bail->contract?->id,
+                    // 'element_table' => 'new_contracts',
+                    'element_id' => $detail->id,
+                    'attachment_type' => 'bail_detail',
+                    'attachment_filename' => $filenameR,
+                    'attachment_date' => $detail->receipt_date,
+                    'attachment_upload_date' => now()->toDateString(),
+                    'attachment_path' => $detail->attachment_path,
+                ];
+
+                $exist = Attachment::where('attachment_type', 'bail_release')->where('element_id', $detail->id)->first();
+
+                if (!$exist) { $bailAttachment = Attachment::create($dataR); }
+                else { $exist->update($dataR); }
             }
         });
 

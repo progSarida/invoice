@@ -124,8 +124,8 @@ class Bail extends Model
 
                 $dataB = [
                     'company_id' => \Filament\Facades\Filament::getTenant()->id,
-                    'client_id' => $bail->contract->client_id,
-                    'contract_id' => $bail->contract->id,
+                    'client_id' => $bail->client_id,
+                    'contract_id' => $bail->contract?->id,
                     // 'element_table' => 'bails',
                     'element_id' => $bail->id,
                     'attachment_type' => 'bail_bill',
@@ -145,8 +145,8 @@ class Bail extends Model
 
                 $dataR = [
                     'company_id' => \Filament\Facades\Filament::getTenant()->id,
-                    'client_id' => $bail->contract->client_id,
-                    'contract_id' => $bail->contract->id,
+                    'client_id' => $bail->client_id,
+                    'contract_id' => $bail->contract?->id,
                     // 'element_table' => 'bails',
                     'element_id' => $bail->id,
                     'attachment_type' => 'bail_condition',

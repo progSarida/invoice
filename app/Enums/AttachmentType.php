@@ -10,6 +10,7 @@ enum AttachmentType: string implements HasLabel
     case BAIL_RECEIPT = "bail_receipt";
     case BAIL_CONDITION = "bail_condition";
     case BAIL_DETAIL = "bail_detail";
+    case BAIL_RELEASE = "bail_release";
     case CONTRACT = "contract";
     case POSTAL_ACT = "postal_act";
     case POSTAL_NOTIFY = "postal_notify";
@@ -22,6 +23,7 @@ enum AttachmentType: string implements HasLabel
             self::BAIL_RECEIPT => 'Ricevute di pagamento',
             self::BAIL_CONDITION => 'Condizioni polizza',
             self::BAIL_DETAIL => 'Dettaglio polizza',
+            self::BAIL_RELEASE => 'Svincolo polizza',
             self::CONTRACT => 'Contratti',
             self::POSTAL_ACT => 'Atti notificati',
             self::POSTAL_NOTIFY => 'Notifiche',
