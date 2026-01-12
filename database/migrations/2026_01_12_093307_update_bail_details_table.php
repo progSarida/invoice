@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('bail_deatils', function (Blueprint $table) {
-            $table->date('release_date')->nullable();                                                       // data svincolo
-            $table->string('release_path')->nullable();                                                     // percorso allegato svincolo
+        Schema::table('bail_details', function (Blueprint $table) {
+            $table->date('release_date')->after('attachment_path')->nullable();                                                       // data svincolo
+            $table->string('release_path')->after('release_date')->nullable();                                                     // percorso allegato svincolo
         });
     }
 
