@@ -150,7 +150,7 @@
         <tbody>
             @foreach($bails as $bail)
                 <tr>
-                    <td>{{ $bail->contract->client->denomination }}</td>
+                    <td>{{ $bail->client->denomination }}</td>
                     <td>{{ $bail->cig_code }}</td>
                     <td>{{ !empty($bail->tax_types) ? implode(', ', $bail->tax_types) : 'N/A' }}</td>
                     <td>{{ $bail->insurance->name }}</td>
@@ -159,7 +159,7 @@
                     {{-- @if ($filters["active_at_date"]["selected_date"]) --}}
                     @php
                         // recupero il dettaglio alla data indicata
-                        $detail = $bail->selectedDetail($filters["active_at_date"]["selected_date"]);
+                        $detail = $filters["active_at_date"]["selected_date"] ? $bail->selectedDetail($filters["active_at_date"]["selected_date"]) : null;
                         // se la polizza non è attiva alla data indicata o non è indicata nessuna data usa il dettaglio dell'ultimo rinnovo
                         if(!$detail) $detail = $bail->lastDetail;
                     @endphp
