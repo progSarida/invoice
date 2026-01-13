@@ -356,10 +356,13 @@ class EditNewInvoice extends EditRecord
     protected function getFormActions(): array
     {
         return [
-            $this->getSaveFormAction()->color('success'),
+            $this->getSaveFormAction()
+                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
+                ->color('success'),
             $this->getCancelFormAction(),
             $this->getResetFormAction(),
             $this->getDeleteFormAction()
+                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
                 ->extraAttributes([
                     'class' => ' md:ml-auto md:w-auto ',
                 ]),
@@ -370,7 +373,6 @@ class EditNewInvoice extends EditRecord
     {
         return Actions\DeleteAction::make('delete')
                 ->requiresConfirmation()
-                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
                 ->modalHeading('Conferma eliminazione documento')
                 ->modalDescription('Sei sicuro di voler eliminare questo documento? Questa azione non può essere annullata.')
                 ->modalSubmitActionLabel('Elimina')
