@@ -29,7 +29,7 @@ class DeadlineResource extends Resource
 
     protected static ?string $navigationIcon = 'tabler-calendar-clock';
 
-    protected static ?string $navigationGroup = 'Fatturazione passiva';
+    protected static ?string $navigationGroup = 'Fatture passive';
 
     protected static ?int $navigationSort = 3;
 

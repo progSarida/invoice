@@ -40,7 +40,7 @@ class PassiveInvoiceResource extends Resource
 
     protected static ?string $navigationIcon = 'phosphor-invoice-duotone';
 
-    protected static ?string $navigationGroup = 'Fatturazione passiva';
+    protected static ?string $navigationGroup = 'Fatture passive';
 
     protected static ?int $navigationSort = 1;
 

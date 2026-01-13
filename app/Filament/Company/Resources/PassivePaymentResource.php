@@ -29,7 +29,7 @@ class PassivePaymentResource extends Resource
 
     protected static ?string $navigationIcon = 'fluentui-payment-20-o';
 
-    protected static ?string $navigationGroup = 'Fatturazione passiva';
+    protected static ?string $navigationGroup = 'Fatture passive';
 
     protected static ?int $navigationSort = 2;
 
