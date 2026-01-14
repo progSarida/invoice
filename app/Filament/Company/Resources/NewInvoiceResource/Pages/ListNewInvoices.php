@@ -33,6 +33,15 @@ class ListNewInvoices extends ListRecords
 {
     protected static string $resource = NewInvoiceResource::class;
 
+    protected function getDefaultTableFilters(): array
+    {
+        return [
+            'invoice_year_from' => [
+                'value' => now()->year,
+            ],
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

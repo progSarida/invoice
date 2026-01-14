@@ -48,7 +48,7 @@ class NewContractResource extends Resource
     {
         return $form
             ->columns(12)
-            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
+            // ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('client_id')->label('Cliente')
                     ->hintAction(
@@ -241,18 +241,37 @@ class NewContractResource extends Resource
                     ->preload()
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('office_name')
-                    ->label('Nome ufficio')
+                    ->label('Denominazione UO')
                     ->required()
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('office_code')
-                    ->label('Codice ufficio')
+                    ->label('Codice Univoco')
                     ->required()
                     ->columnSpan(3),
                 View::make('links.ipa-link')
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('cig_code')
-                    ->label('CIG')
+                    ->label('CIG (Rif. contratto)')
+                    ->hintIcon('heroicon-o-information-circle', tooltip: "Il codice CIG deve essere univoco e di 15 caratteri. In caso di contratto senza CIG (solo con privati o con enti pubblici per il recupero delle spese postali) si deve inserire il dato preceduto da '#' e la procedura elude questo controllo.")
                     ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function ($state){
+                        if (strpos($state, '#') === false && strlen($state) !== 15) {
+                                Notification::make()
+                                    ->title('Errore! Il codice CIG deve essere lungo 15 caratteri')
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+                            }
+                    })
+                    ->rules([
+                        fn (): \Closure => function (string $attribute, $value, \Closure $fail) {
+                            // Se non c'è il cancelletto e la lunghezza non è 15
+                            if (strpos($value, '#') === false && strlen($value) !== 15) {
+                                $fail("Il codice CIG deve essere lungo 15 caratteri");
+                            }
+                        },
+                    ])
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('cup_code')
                     ->label('CUP')
@@ -281,7 +300,7 @@ class NewContractResource extends Resource
                 //     ->columnSpan(5),
                 Placeholder::make('')
                     ->content('')
-                    ->columnSpan(5),
+                    ->columnSpan(10),
                 Forms\Components\Actions::make([
                     Forms\Components\Actions\Action::make('view_new_contract_copy')
                         ->label('Contratto in vigore')

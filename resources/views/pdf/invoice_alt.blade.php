@@ -200,7 +200,8 @@
             <td colspan="5" class='bold'>{{ $doc }}</td>
         </tr>
         <tr>
-            <td colspan="5" class='description'>({{ substr($invoice->budget_year, -2) }}) {{ $invoice->description }}</td>
+            {{-- <td colspan="5" class='description'>({{ substr($invoice->budget_year, -2) }}) {{ $invoice->description }}</td> --}}
+            <td colspan="5" class='description'>{{ $invoice->description }}</td>
         </tr>
         <tr>
             <td colspan="5" class='free_description'>{{ $invoice->free_description }}</td>
@@ -445,14 +446,14 @@
             <td style="padding-top: 2mm; padding-bottom: 2mm;" colspan="5" class="dashed_bottom"></td>
         </tr>
         <tr>
-            <td colspan="5" class="">Documento privo di valenza fiscale ai sensi dell'art. 21 Dpr 633/72. L'originale è disponibile all'indirizzo telematico da Lei fornito oppure nella Sua area riservata dell'Agenzia delle Entrate.</td>
+            <td colspan="5" class="">Documento privo di valenza fiscale ai sensi dell'art. 21 DPR 633/72. L'originale è disponibile all'indirizzo telematico da Lei fornito oppure nella Sua area riservata dell'Agenzia delle Entrate.</td>
         </tr>
         <tr><td colspan="5" class=""></td></tr>
         <tr>
             @php
                 $cig_code = '';
                 $office_code = '';
-                if($invoice->contract?->cig_code) $cig_code = 'CIG: ' . $invoice->contract?->cig_code . ' - ';
+                if($invoice->contract?->cig_code && strpos($invoice->contract?->cig_code, '#') === false) $cig_code = 'CIG: ' . $invoice->contract?->cig_code . ' - ';
                 if($invoice->contract?->cig_code) $office_code = 'Codice Unico Ufficio: ' . $invoice->contract?->office_code . ' - ';
             @endphp
             <td style="padding-top: 5mm;" colspan="5" class="right">{{$cig_code}}{{$office_code}}A.B. {{$invoice->budget_year}}</td>

@@ -58,6 +58,7 @@ use App\Models\Withholding;
 use Exception;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\Storage;
 
 class NewInvoiceResource extends Resource
 {
@@ -268,7 +269,7 @@ class NewInvoiceResource extends Resource
                                 ->optionsLimit(5)
                                 ->columnSpan(4),
 
-                            Forms\Components\Select::make('tax_type')->label('Entrata')
+                            Forms\Components\Select::make('tax_type')->label('Entrata (1)')
                                 ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic())
                                 ->columnSpan(2)
                                 // ->options(TaxType::class)
@@ -456,7 +457,52 @@ class NewInvoiceResource extends Resource
                                         ->toArray();
                                 })
                                 ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => "{$record->office_name} ({$record->office_code}) TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code} - {$record->calculated_year}"
+                                    // fn (Model $record) => "{$record->office_name} ({$record->office_code}) TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code} - {$record->calculated_year}"
+                                    function(Model $record, $livewire){
+                                        if ($livewire instanceof \Filament\Resources\Pages\CreateRecord) {
+                                            $accruals = '';
+                                            $manages = '';
+                                            for($i = 0; $i < count($record->accrual_types); $i++){
+                                                if($i != 0)
+                                                    $accruals .= ', ';
+                                                $accruals .= $record->accrual_types[$i];
+                                            }
+                                            for($j = 0; $j < count($record->manage_types); $j++){
+                                                if($j != 0)
+                                                    $manages .= ', ';
+                                                $manages .= ManageType::find($record->manage_types[$j])->name;
+                                            }
+                                            return $record->calculated_year . ' - ' . 'TIPO: ' . $record->payment_type->getLabel() . ' - ' . 'GESTIONI: ' . $accruals . ' - ' . 'SERVIZI: ' . $manages;
+                                        }
+                                        else {
+                                            // 1. Fallback per l'anno: in Edit/View 'calculated_year' non esiste nella query standard
+                                            $year = $record->start_validity_date ? $record->start_validity_date->format('Y') : '----';
+
+                                            // 2. Gestione Accruals (Gestioni)
+                                            // Il tuo accessor getAccrualTypesAttribute restituisce già i nomi degli AccrualType.
+                                            // Basta unirli con una virgola.
+                                            $accrualList = $record->accrual_types ?? [];
+                                            $accruals = is_array($accrualList) ? implode(', ', $accrualList) : '';
+
+                                            // 3. Gestione Manages (Servizi)
+                                            // manage_types è castato come 'json', quindi Laravel lo trasforma in array.
+                                            $manageIds = $record->manage_types ?? [];
+                                            $manages = '';
+
+                                            if (is_array($manageIds) && count($manageIds) > 0) {
+                                                $manages = collect($manageIds)
+                                                    ->map(fn($id) => \App\Models\ManageType::find($id)?->name ?? "ID: {$id}")
+                                                    ->filter()
+                                                    ->implode(', ');
+                                            }
+
+                                            // 4. Composizione finale
+                                            $paymentTypeLabel = $record->payment_type ? $record->payment_type->getLabel() : 'N/D';
+
+                                            return "{$year} - TIPO: {$paymentTypeLabel} - GESTIONI: " . ($accruals ?: 'Nessuna') . " - SERVIZI: " . ($manages ?: 'Nessuno');
+                                        }
+
+                                    }
                                 )
                                 ->disabled(fn(Get $get): bool => ! filled($get('client_id')) || ! filled($get('tax_type')))
                                 ->afterStateUpdated(function (Set $set, $state) {
@@ -485,7 +531,7 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 ->preload()
                                 ->optionsLimit(5)
-                                ->columnSpan(3)
+                                ->columnSpan(6)
                                 ->visible(fn(Get $get): bool => filled($get('client_id')))
                                 ->hidden(function (?Model $record = null) {
                                     // In edit, usa il record
@@ -621,7 +667,7 @@ class NewInvoiceResource extends Resource
                                     }
                                 )
                                 ->preload()
-                                ->columnSpan(3)
+                                ->columnSpan(6)
                                 // ->optionsLimit(10)
                                 ->searchable()
                         ]),
@@ -850,7 +896,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(2),
 
                             Forms\Components\Select::make('accrual_type_id')
-                                ->label('Gestione')
+                                ->label('Gestione (2)')
                                 ->required(fn(callable $get) => $get('client_id') ? Client::find($get('client_id'))->type == ClientType::PUBLIC : true)
                                 ->options(function (callable $get) {
                                     $contractId = $get('contract_id');
@@ -871,7 +917,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(3),
 
                             Forms\Components\Select::make('manage_type_id')
-                                ->label('Servizio')
+                                ->label('Servizio (3)')
                                 ->required(fn(callable $get) => $get('client_id') ? Client::find($get('client_id'))->type == ClientType::PUBLIC : true)
                                 // ->options(function () {
                                 //     return ManageType::orderBy('order')->pluck('name', 'id');
@@ -894,61 +940,64 @@ class NewInvoiceResource extends Resource
                                 })
                                 ->columnSpan(3),
                             Forms\Components\Select::make('invoice_reference')
-                                ->label('Riferimento')
+                                ->label('Riferimento (4)')
                                 // ->required()
                                 ->live()
                                 ->options(InvoiceReference::class)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'new'))
                                 ->preload()
                                 ->columnSpan(2),
 
                             Forms\Components\DatePicker::make('reference_date_from')
-                                ->label('Da data')
+                                ->label('Da data (5)')
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 // ->required()
                                 // ->live()
                                 ->debounce(1000)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'continue'))
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') !== InvoiceReference::NUMBER->value)
                                 ->columnSpan(2),
 
                             Forms\Components\DatePicker::make('reference_date_to')
-                                ->label('A data')
+                                ->label('A data (6)')
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 // ->required()
                                 // ->live()
                                 ->debounce(1000)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'continue'))
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') !== InvoiceReference::NUMBER->value)
                                 ->columnSpan(2),
                             Placeholder::make('')
                                 ->content('')
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->columnSpan(1),
-                            Forms\Components\TextInput::make('reference_number_from')->label('Dal numero')
+                            Forms\Components\TextInput::make('reference_number_from')->label('Dal numero (5)')
                                 // ->required()
-                                ->debounce(1000)
+                                ->debounce(500)
+                                ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'continue'))
                                 ->columnSpan(1),
-                            Forms\Components\TextInput::make('reference_number_to')->label('Al numero')
+                            Forms\Components\TextInput::make('reference_number_to')->label('Al numero (6)')
                                 // ->required()
-                                ->debounce(1000)
+                                ->debounce(500)
+                                ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'continue'))
                                 ->columnSpan(1),
-                            Forms\Components\TextInput::make('total_number')->label('Totali')
+                            Forms\Components\TextInput::make('total_number')->label('Totali (7)')
                                 // ->required()
-                                ->debounce(1000)
+                                ->debounce(500)
+                                ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set))
+                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'continue'))
                                 ->columnSpan(1),
                         ]),
 
                     Section::make('Descrizioni')
                         ->collapsible()
                         ->schema([
-                            Forms\Components\Textarea::make('description')->label('Descrizione')
+                            Forms\Components\Textarea::make('description')->label('Descrizione (composizione automatica tramite i campi: 1+2+3+4+5+6+7)')
                                 ->required()
                                 ->columnSpanFull(),
                             Forms\Components\Textarea::make('free_description')->label('Descrizione libera')
@@ -1331,19 +1380,43 @@ class NewInvoiceResource extends Resource
                 SelectFilter::make('invoice_year_from')
                     ->label('Anno fattura da')
                     ->attribute(null)
+                    ->selectablePlaceholder(false)
                     ->options(function () {
                         $tenant = \Filament\Facades\Filament::getTenant();
-                        return \App\Models\Invoice::query()
-                            ->select('year')
-                            ->distinct()
-                            ->where('flow', 'out')
+
+                        // 1. Recuperiamo l'anno meno recente
+                        $minYear = \App\Models\Invoice::query()
                             ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
-                            ->orderBy('year')
+                            ->min('year') ?? now()->year;
+
+                        // 2. Recuperiamo la lista degli anni per il menu
+                        $years = \App\Models\Invoice::query()
+                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                            ->orderByDesc('year')
+                            ->distinct()
                             ->pluck('year', 'year')
                             ->toArray();
+
+                        // 3. Uniamo "Tutti" (puntando al minYear) con l'elenco degli anni
+                        // Usiamo l'operatore + per preservare le chiavi numeriche
+                        return [
+                            now()->year => 'Anno corrente',
+                            $minYear => 'Tutti',
+                        ] + $years;
                     })
+                    // ->options(function () {
+                    //     $tenant = \Filament\Facades\Filament::getTenant();
+                    //     return \App\Models\Invoice::query()
+                    //         ->select('year')
+                    //         ->distinct()
+                    //         // ->where('flow', 'out')
+                    //         ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                    //         ->orderByDesc('year')
+                    //         ->pluck('year', 'year')
+                    //         ->toArray();
+                    // })
                     ->query(function (Builder $query, array $data) {
-                        $value = $data['value'] ?? null;
+                        $value = $data['value'] ?? now()->year;
                         if ($value) {
                             return $query->where('year', ">=", $value);
                         }
@@ -1357,9 +1430,9 @@ class NewInvoiceResource extends Resource
                         return \App\Models\Invoice::query()
                             ->select('year')
                             ->distinct()
-                            ->where('flow', 'out')
+                            // ->where('flow', 'out')
                             ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
-                            ->orderBy('year')
+                            ->orderByDesc('year')
                             ->pluck('year', 'year')
                             ->toArray();
                     })
@@ -1379,7 +1452,7 @@ class NewInvoiceResource extends Resource
                         return \App\Models\Invoice::query()
                             ->select('budget_year')
                             ->distinct()
-                            ->where('flow', 'out')
+                            // ->where('flow', 'out')
                             ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
                             ->orderByDesc('budget_year')
                             ->pluck('budget_year', 'budget_year')
@@ -1393,14 +1466,14 @@ class NewInvoiceResource extends Resource
                         return $query;
                     }),
                 SelectFilter::make('invoice_budget_year_to')
-                    ->label('Anno bilancio da')
+                    ->label('Anno bilancio a')
                     ->attribute(null)
                     ->options(function () {
                         $tenant = \Filament\Facades\Filament::getTenant();
                         return \App\Models\Invoice::query()
                             ->select('budget_year')
                             ->distinct()
-                            ->where('flow', 'out')
+                            // ->where('flow', 'out')
                             ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
                             ->orderByDesc('budget_year')
                             ->pluck('budget_year', 'budget_year')
@@ -1421,7 +1494,7 @@ class NewInvoiceResource extends Resource
                         return \App\Models\Invoice::query()
                             ->select('accrual_year')
                             ->distinct()
-                            ->where('flow', 'out')
+                            // ->where('flow', 'out')
                             ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
                             ->orderByDesc('accrual_year')
                             ->pluck('accrual_year', 'accrual_year')
@@ -1442,7 +1515,7 @@ class NewInvoiceResource extends Resource
                         return \App\Models\Invoice::query()
                             ->select('accrual_year')
                             ->distinct()
-                            ->where('flow', 'out')
+                            // ->where('flow', 'out')
                             ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
                             ->orderByDesc('accrual_year')
                             ->pluck('accrual_year', 'accrual_year')
@@ -1461,6 +1534,33 @@ class NewInvoiceResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('download_pdf')
+                    ->label('')
+                    ->tooltip('Scarica PDF (formato AssoSoftware)')
+                    ->icon('phosphor-file-pdf-duotone')
+                    ->iconSize('lg')
+                    ->url(fn($record): ?string => $record->pdf_path ? Storage::temporaryUrl($record->pdf_path, now()->addMinutes(1)) : null)
+                    ->openUrlInNewTab()
+                    ->visible(function($record) {
+                        // Aggiungi il controllo che pdf_path non sia null/vuoto
+                        return $record &&
+                            !empty($record->pdf_path) &&
+                            Storage::disk(config('filesystems.default'))->exists($record->pdf_path);
+                    }),
+
+                Tables\Actions\Action::make('download_xml')
+                    ->label('')
+                    ->tooltip('Scarica XML')
+                    ->icon('tabler-file-type-xml')
+                    ->iconSize('lg')
+                    ->url(fn($record): ?string => $record->xml_path ? Storage::temporaryUrl($record->xml_path, now()->addMinutes(1)) : null)
+                    ->openUrlInNewTab()
+                    ->visible(function($record) {
+                        // Aggiungi il controllo che xml_path non sia null/vuoto
+                        return $record &&
+                            !empty($record->xml_path) &&
+                            Storage::disk(config('filesystems.default'))->exists($record->xml_path);
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -1640,18 +1740,27 @@ class NewInvoiceResource extends Resource
         return null;
     }
 
-    protected static function updateDescription(Get $get, Set $set): void
+    protected static function updateDescription(Get $get, Set $set, $ref): void
     {
-        $description = 'Corrispettivo per ';
+        if($ref === 'new'){
+            $set('reference_date_from', '');
+            $set('reference_date_to', '');
+            $set('description', '');
+        }
         $accrualType = $get('accrual_type_id') ?? null;
         $accrualType = $accrualType ? AccrualType::find($accrualType)?->name : '';
-        $description .= strtolower($accrualType) . ' ';
         $manageType = $get('manage_type_id') ?? null;
         $manageType = $manageType ? ManageType::find($manageType)?->name : '';
-        $description .= strtolower($manageType) . ' ';
         $taxType = $get('tax_type') ?? null;
         $taxType = $taxType ? TaxType::from($taxType)->getLabel() : '';
-        $description .= strtolower($taxType) . ' ';
+        $year = substr($get('budget_year'), 2);
+
+        $description = '(' . $year .') Gestione ' . strtolower($taxType) . '. ';
+
+        $description .= $accrualType . ' ';
+        // $description .= 'Corrispettivo per ' . strtolower($accrualType) . ' ';
+
+        $description .= strtolower($manageType) . ' ';
 
         $invoiceReference = $get('invoice_reference');
         if ($invoiceReference) {
@@ -1664,7 +1773,7 @@ class NewInvoiceResource extends Resource
             $dateFrom = $get('reference_date_from');
             $dateTo = $get('reference_date_to');
             if ($dateFrom) {
-                $description .= 'dal ' . static::formatDate($dateFrom);
+                $description .= 'per il periodo dal ' . static::formatDate($dateFrom);
 
                 if ($dateTo) {
                     $description .= ' al ' . static::formatDate($dateTo);
@@ -1674,16 +1783,16 @@ class NewInvoiceResource extends Resource
             $numberFrom = $get('reference_number_from');
             $numberTo = $get('reference_number_to');
             if ($numberFrom) {
-                $description .= 'dal numero ' . $numberFrom;
+                $description .= 'dal verbale numero ' . $numberFrom;
 
                 if ($numberTo) {
-                    $description .= ' al numero ' . $numberTo;
+                    $description .= ' al verbale numero ' . $numberTo;
                 }
             }
 
             $total = $get('total_number');
             if ($total) {
-                $description .= ' di ' . $numberFrom . 'verbali';
+                $description .= ' per un totale di ' . $total . ' verbali';
             }
         }
         else {

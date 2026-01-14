@@ -39,7 +39,7 @@ class SupplierResource extends Resource
     {
         return $form
             ->columns(6)
-            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
+            // ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 TextInput::make('denomination')
                     ->label('Denominazione')

@@ -11,6 +11,7 @@ enum InvoiceReference: string implements HasLabel, HasDescription
     case COLLECTION = 'collection';
     case TICKET = 'ticket';
     case NUMBER = 'number';
+    case LEASE = 'lease';
 
     public function getLabel(): string
     {
@@ -19,6 +20,7 @@ enum InvoiceReference: string implements HasLabel, HasDescription
             self::COLLECTION => 'Periodo riscossione',
             self::TICKET => 'Periodo gestione verbali',
             self::NUMBER => 'Numero verbali gestiti',
+            self::LEASE => 'Periodo locazione',
         };
     }
 
@@ -29,6 +31,7 @@ enum InvoiceReference: string implements HasLabel, HasDescription
             self::COLLECTION => 'Corrispettivo per ',
             self::TICKET => 'Corrispettivo per ',
             self::NUMBER => 'Corrispettivo per ',
+            self::LEASE => 'Corrispettivo per ',
         };
     }
 }

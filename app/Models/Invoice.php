@@ -68,7 +68,9 @@ class Invoice extends Model
         'service_code',
         'sdi_status',
         'sdi_code',
-        'sdi_date'
+        'sdi_date',
+        'pdf_path',
+        'xml_path'
     ];
 
     protected $casts = [
@@ -617,9 +619,9 @@ class Invoice extends Model
         $contractExpiredNotified = cache()->has($cacheKey);
 
         if (!$contract) return;
-        else if($contract->end_validity_date < today() && !$contractExpiredNotified) {
+        else if($contract->closed && !$contractExpiredNotified) {
             Notification::make()
-                ->title('La voce è stata inserita in una fattura che fa riferimento ad un contratto scaduto')
+                ->title('La voce è stata inserita in una fattura che fa riferimento ad un contratto chiuso')
                 ->danger()
                 ->duration(6000)
                 ->send();

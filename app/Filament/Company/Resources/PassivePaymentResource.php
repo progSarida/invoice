@@ -37,7 +37,7 @@ class PassivePaymentResource extends Resource
     {
         return $form
             ->columns(12)
-            ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
+            // ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('passive_invoice_id')
                     ->label('Fattura')

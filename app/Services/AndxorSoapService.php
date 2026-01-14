@@ -198,12 +198,18 @@ class AndxorSoapService
 
     private function getDatiOrdineAcquisto(Invoice $invoice): ?array
     {
+        if(strpos($invoice->contract?->cig_code, '#') === false){
+            $cig = $invoice->contract?->cig_code;
+        }
+        else{
+            $cig = '';
+        }
         return $invoice->contract ? array_filter([
             array_filter([
                 'IdDocumento' => $invoice->contract->lastDetail->number && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->contract->lastDetail->number) ? $invoice->contract->lastDetail->number : null,
                 'Data' => $invoice->contract->lastDetail->date ?? null,
-                'CodiceCUP' => $invoice->contract->lastDetail->cup_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract->lastDetail->cup_code) ? $invoice->contract->lastDetail->cup_code : null,
-                'CodiceCIG' => $invoice->contract->lastDetail->cig_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract->lastDetail->cig_code) ? $invoice->contract->lastDetail->cig_code : null,
+                'CodiceCUP' => $invoice->contract?->cup_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract?->cup_code) ? $invoice->contract?->cup_code : null,
+                'CodiceCIG' => $cig && preg_match('/^[A-Za-z0-9]{1,15}$/', $cig) ? $cig : null,
             ], fn($value) => !is_null($value) && $value !== '')
         ], fn($value) => !empty($value)) : [];
     }
@@ -349,147 +355,147 @@ class AndxorSoapService
             $payload['FatturaElettronicaBody']['DatiBeniServizi'] = $this->getDatiBeniServizi($invoice);
             $payload['FatturaElettronicaBody']['DatiPagamento'] = $this->getDatiPagamento($invoice);
 
-            $payload_ = [
-                'Autenticazione' => [
-                    'Cedente' => [
-                        'IdPaese' => $idPaeseCedente,
-                        'IdCodice' => $invoice->company->vat_number ?? $invoice->company->taxnumber,
-                        'IdCodice_' => '01338160995',
-                    ],
-                    'Password' => $password,
-                ],
-                'CodiceDestinatario' => $this->validateCodiceDestinatario($invoice->client->ipa_code ?? $invoice->contract->office_code ?? '0000000'),
-                'PECDestinatario' => $invoice->client->pec,
-                'OverrideCedente' => [
-                    'DatiAnagrafici' => array_filter([
-                        'IdFiscaleIVA' => $this->validateIdFiscaleIVA($invoice->company->vat_number, $invoice->company->tax_number, $idPaeseCedente),
-                        'CodiceFiscale' => $invoice->company->tax_number && preg_match('/^[A-Z0-9]{11,16}$/', $invoice->company->tax_number) ? $invoice->company->tax_number : null,
-                        'Anagrafica' => [
-                            'Denominazione' => $invoice->company->name,
-                        ],
-                        'RegimeFiscale' => $this->validateRegimeFiscale($invoice->company->fiscalProfile->tax_regime->getCode() ?? 'RF01'),
-                    ], fn($value) => !is_null($value) && $value !== ''),
-                    'Sede' => array_filter([
-                        'Indirizzo' => $invoice->company->address ?? '',
-                        'NumeroCivico' => $invoice->company->address_number && preg_match('/^[A-Za-z0-9]{1,8}$/', $invoice->company->address_number) ? $invoice->company->address_number : null,
-                        'CAP' => $invoice->company->city->zip_code ?? '',
-                        'Comune' => $invoice->company->city->name ?? '',
-                        'Provincia' => $invoice->company->city->province->code ?? '',
-                        'Nazione' => $idPaeseCedente,
-                    ], fn($value) => !is_null($value) && $value !== ''),
-                    'Contatti' => array_filter([
-                        'Telefono' => $invoice->company->phone && preg_match('/^[A-Za-z0-9]{5,12}$/', $invoice->company->phone) ? $invoice->company->phone : null,
-                        'Email' => $invoice->company->email && preg_match('/^.+@.+[.]+.+$/', $invoice->company->email) ? $invoice->company->email : null,
-                    ], fn($value) => !is_null($value) && $value !== '') ?: null,
-                ],
-                'CessionarioCommittente' => [
-                    'DatiAnagrafici' => [
-                        'IdFiscaleIVA' => $this->validateIdFiscaleIVA($invoice->client->vat_code, $invoice->client->tax_code, $idPaeseCommittente),
-                        'CodiceFiscale' => $invoice->client->tax_code ?? null,
-                        'Anagrafica' => [
-                            'Denominazione' => $invoice->client->denomination,
-                        ],
-                    ],
-                    'Sede' => array_filter([
-                        'Indirizzo' => $invoice->client->address ?? '',
-                        'NumeroCivico' => $invoice->client->address_number && preg_match('/^[A-Za-z0-9]{1,8}$/', $invoice->client->address_number) ? $invoice->client->address_number : null,
-                        'CAP' => $invoice->client->city->zip_code ?? '',
-                        'Comune' => $invoice->client->city->name ?? '',
-                        'Provincia' => $invoice->client->city->province->code ?? '',
-                        'Nazione' => $idPaeseCommittente,
-                    ], fn($value) => !is_null($value) && $value !== ''),
-                ],
-                'FatturaElettronicaBody' => [
-                    'DatiGenerali' => [
-                        'DatiGeneraliDocumento' => [
-                            'TipoDocumento' => $invoice->docType->name && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->docType->name) ? $invoice->docType->name : 'TD01',
-                            'Divisa' => $invoice->divisa ?? 'EUR',
-                            'Data' => $invoice->invoice_date->format('Y-m-d'),
-                            'Numero' => $invoice->getNewInvoiceNumber(),
-                            'ImportoTotaleDocumento' => sprintf("%.2f", (float) ($invoice->total ?? 0.00)),
-                            'DatiRitenuta' => array_map(function ($withholding) {
-                                return [
-                                    'TipoRitenuta' => $withholding['tipo_ritenuta'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['tipo_ritenuta']) ? $withholding['tipo_ritenuta'] : 'RT01',
-                                    'ImportoRitenuta' => sprintf("%.2f", (float) ($withholding['importo_ritenuta'] ?? 0.00)),
-                                    'AliquotaRitenuta' => sprintf("%.2f", (float) ($withholding['aliquota_ritenuta'] ?? 20.00)),
-                                    'CausalePagamento' => $withholding['causale_pagamento'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['causale_pagamento']) ? $withholding['causale_pagamento'] : 'A',
-                                ];
-                            }, $withholdings),
-                            'DatiBollo' => [
-                                'BolloVirtuale' => $invoice->company->stampDuty->virtual_stamp ? 'SI' : '',
-                                'ImportoBollo' => $invoice->company->stampDuty->virtual_stamp ? sprintf("%.2f", 2.00) : '',
-                            ],
-                            'DatiCassaPrevidenziale' => array_map(function ($fund) {
-                                return array_filter([
-                                    'TipoCassa' => $fund['fund_code'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $fund['fund_code']) ? $fund['fund_code'] : 'TC02',
-                                    'AlCassa' => sprintf("%.2f", (float) ($fund['rate'])),
-                                    'ImportoContributoCassa' => sprintf("%.2f", (float) ($fund['amount'])),
-                                    'ImponibileCassa' => sprintf("%.2f", (float) ($fund['taxable_base'])),
-                                    'AliquotaIVA' => isset($fund['%']) && $fund['%'] !== null ? sprintf("%.2f", (float) $fund['%']) : "0.00",
-                                    'Ritenuta' => !empty($fund['withholding']) ? 'SI' : null,
-                                    'Natura' => $fund['%'] == 'N1' ? 'N1' : null,
-                                ], fn($value) => !is_null($value) && $value !== '');
-                            }, $funds),
-                        ],
-                        'DatiOrdineAcquisto' => $invoice->contract ? array_filter([
-                            array_filter([
-                                'IdDocumento' => $invoice->contract->lastDetail->number && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->contract->lastDetail->number) ? $invoice->contract->lastDetail->number : null,
-                                'Data' => $invoice->contract->lastDetail->date ?? null,
-                                'CodiceCUP' => $invoice->contract->lastDetail->cup_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract->lastDetail->cup_code) ? $invoice->contract->lastDetail->cup_code : null,
-                                'CodiceCIG' => $invoice->contract->lastDetail->cig_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract->lastDetail->cig_code) ? $invoice->contract->lastDetail->cig_code : null,
-                            ], fn($value) => !is_null($value) && $value !== '')
-                        ], fn($value) => !empty($value)) : [],
-                        'DatiDDT' => $invoice->delivery_note ? [
-                            [
-                                'NumeroDDT' => $invoice->delivery_note,
-                                'DataDDT' => $invoice->delivery_date ?? $invoice->invoice_date->format('Y-m-d'),
-                            ],
-                        ] : [],
-                    ],
-                    'DatiBeniServizi' => [
-                        'DettaglioLinee' => $invoice->invoiceItems->where('auto', false)->map(function ($item, $index) {
-                            return [
-                                'NumeroLinea' => $index + 1,
-                                'Descrizione' => $item->description ?? 'Servizio',
-                                'Quantita' => sprintf("%.2f", (float) ($item->quantity ?? 1.00)),
-                                'PrezzoUnitario' => sprintf("%.2f", (float) ($item->unit_price ?? $item->amount)),
-                                'PrezzoTotale' => sprintf("%.2f", (float) $item->amount),
-                                'AliquotaIVA' => is_numeric($item->vat_code_type->getRate()) ? sprintf("%.2f", (float) $item->vat_code_type->getRate()) : "0.00",
-                                'Natura' => $item->vat_code_type->getRate() == '0' ? $item->vat_code_type->getCode() : null,
-                            ];
-                        })->toArray(),
-                        'DatiRiepilogo' => array_values(array_map(function ($vat) {
-                            return [
-                                'AliquotaIVA' => isset($vat['%']) && $vat['%'] !== 'N1' ? sprintf("%.2f", (float) $vat['%']) : "0.00",
-                                'Natura' => $vat['%'] == 'N1' ? 'N1' : null,
-                                'ImponibileImporto' => sprintf("%.2f", (float) $vat['taxable']),
-                                'Imposta' => sprintf("%.2f", (float) $vat['vat']),
-                                'EsigibilitaIVA' => in_array($vat['norm'][0] ?? 'I', ['D', 'I', 'S']) ? $vat['norm'][0] : 'I',
-                                'RiferimentoNormativo' => $vat['free'] ? $vat['norm'] : null,
-                            ];
-                        }, $invoice->updateResume($invoice->vatResume(), $invoice->getFundBreakdown()))),
-                    ],
-                    'DatiPagamento' => [
-                        [
-                            'CondizioniPagamento' => $this->mapPaymentTypeToCondizioniPagamento($invoice->payment_type->value ?? 'TP02'),
-                            'DettaglioPagamento' => [
-                                [
-                                    'ModalitaPagamento' => $invoice->payment_type->getCode() ?? 'MP05',
-                                    'DataScadenzaPagamento' => $invoice->invoice_date->addDays($invoice->payment_days ?? 30)->format('Y-m-d'),
-                                    'ImportoPagamento' => sprintf("%.2f", (float) ($invoice->total ?? 0.00)),
-                                    'IBAN' => $invoice->bankAccount->iban ?? null,
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ];
+            // $payload_ = [
+            //     'Autenticazione' => [
+            //         'Cedente' => [
+            //             'IdPaese' => $idPaeseCedente,
+            //             'IdCodice' => $invoice->company->vat_number ?? $invoice->company->taxnumber,
+            //             'IdCodice_' => '01338160995',
+            //         ],
+            //         'Password' => $password,
+            //     ],
+            //     'CodiceDestinatario' => $this->validateCodiceDestinatario($invoice->client->ipa_code ?? $invoice->contract->office_code ?? '0000000'),
+            //     'PECDestinatario' => $invoice->client->pec,
+            //     'OverrideCedente' => [
+            //         'DatiAnagrafici' => array_filter([
+            //             'IdFiscaleIVA' => $this->validateIdFiscaleIVA($invoice->company->vat_number, $invoice->company->tax_number, $idPaeseCedente),
+            //             'CodiceFiscale' => $invoice->company->tax_number && preg_match('/^[A-Z0-9]{11,16}$/', $invoice->company->tax_number) ? $invoice->company->tax_number : null,
+            //             'Anagrafica' => [
+            //                 'Denominazione' => $invoice->company->name,
+            //             ],
+            //             'RegimeFiscale' => $this->validateRegimeFiscale($invoice->company->fiscalProfile->tax_regime->getCode() ?? 'RF01'),
+            //         ], fn($value) => !is_null($value) && $value !== ''),
+            //         'Sede' => array_filter([
+            //             'Indirizzo' => $invoice->company->address ?? '',
+            //             'NumeroCivico' => $invoice->company->address_number && preg_match('/^[A-Za-z0-9]{1,8}$/', $invoice->company->address_number) ? $invoice->company->address_number : null,
+            //             'CAP' => $invoice->company->city->zip_code ?? '',
+            //             'Comune' => $invoice->company->city->name ?? '',
+            //             'Provincia' => $invoice->company->city->province->code ?? '',
+            //             'Nazione' => $idPaeseCedente,
+            //         ], fn($value) => !is_null($value) && $value !== ''),
+            //         'Contatti' => array_filter([
+            //             'Telefono' => $invoice->company->phone && preg_match('/^[A-Za-z0-9]{5,12}$/', $invoice->company->phone) ? $invoice->company->phone : null,
+            //             'Email' => $invoice->company->email && preg_match('/^.+@.+[.]+.+$/', $invoice->company->email) ? $invoice->company->email : null,
+            //         ], fn($value) => !is_null($value) && $value !== '') ?: null,
+            //     ],
+            //     'CessionarioCommittente' => [
+            //         'DatiAnagrafici' => [
+            //             'IdFiscaleIVA' => $this->validateIdFiscaleIVA($invoice->client->vat_code, $invoice->client->tax_code, $idPaeseCommittente),
+            //             'CodiceFiscale' => $invoice->client->tax_code ?? null,
+            //             'Anagrafica' => [
+            //                 'Denominazione' => $invoice->client->denomination,
+            //             ],
+            //         ],
+            //         'Sede' => array_filter([
+            //             'Indirizzo' => $invoice->client->address ?? '',
+            //             'NumeroCivico' => $invoice->client->address_number && preg_match('/^[A-Za-z0-9]{1,8}$/', $invoice->client->address_number) ? $invoice->client->address_number : null,
+            //             'CAP' => $invoice->client->city->zip_code ?? '',
+            //             'Comune' => $invoice->client->city->name ?? '',
+            //             'Provincia' => $invoice->client->city->province->code ?? '',
+            //             'Nazione' => $idPaeseCommittente,
+            //         ], fn($value) => !is_null($value) && $value !== ''),
+            //     ],
+            //     'FatturaElettronicaBody' => [
+            //         'DatiGenerali' => [
+            //             'DatiGeneraliDocumento' => [
+            //                 'TipoDocumento' => $invoice->docType->name && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->docType->name) ? $invoice->docType->name : 'TD01',
+            //                 'Divisa' => $invoice->divisa ?? 'EUR',
+            //                 'Data' => $invoice->invoice_date->format('Y-m-d'),
+            //                 'Numero' => $invoice->getNewInvoiceNumber(),
+            //                 'ImportoTotaleDocumento' => sprintf("%.2f", (float) ($invoice->total ?? 0.00)),
+            //                 'DatiRitenuta' => array_map(function ($withholding) {
+            //                     return [
+            //                         'TipoRitenuta' => $withholding['tipo_ritenuta'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['tipo_ritenuta']) ? $withholding['tipo_ritenuta'] : 'RT01',
+            //                         'ImportoRitenuta' => sprintf("%.2f", (float) ($withholding['importo_ritenuta'] ?? 0.00)),
+            //                         'AliquotaRitenuta' => sprintf("%.2f", (float) ($withholding['aliquota_ritenuta'] ?? 20.00)),
+            //                         'CausalePagamento' => $withholding['causale_pagamento'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['causale_pagamento']) ? $withholding['causale_pagamento'] : 'A',
+            //                     ];
+            //                 }, $withholdings),
+            //                 'DatiBollo' => [
+            //                     'BolloVirtuale' => $invoice->company->stampDuty->virtual_stamp ? 'SI' : '',
+            //                     'ImportoBollo' => $invoice->company->stampDuty->virtual_stamp ? sprintf("%.2f", 2.00) : '',
+            //                 ],
+            //                 'DatiCassaPrevidenziale' => array_map(function ($fund) {
+            //                     return array_filter([
+            //                         'TipoCassa' => $fund['fund_code'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $fund['fund_code']) ? $fund['fund_code'] : 'TC02',
+            //                         'AlCassa' => sprintf("%.2f", (float) ($fund['rate'])),
+            //                         'ImportoContributoCassa' => sprintf("%.2f", (float) ($fund['amount'])),
+            //                         'ImponibileCassa' => sprintf("%.2f", (float) ($fund['taxable_base'])),
+            //                         'AliquotaIVA' => isset($fund['%']) && $fund['%'] !== null ? sprintf("%.2f", (float) $fund['%']) : "0.00",
+            //                         'Ritenuta' => !empty($fund['withholding']) ? 'SI' : null,
+            //                         'Natura' => $fund['%'] == 'N1' ? 'N1' : null,
+            //                     ], fn($value) => !is_null($value) && $value !== '');
+            //                 }, $funds),
+            //             ],
+            //             'DatiOrdineAcquisto' => $invoice->contract ? array_filter([
+            //                 array_filter([
+            //                     'IdDocumento' => $invoice->contract->lastDetail->number && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->contract->lastDetail->number) ? $invoice->contract->lastDetail->number : null,
+            //                     'Data' => $invoice->contract->lastDetail->date ?? null,
+            //                     'CodiceCUP' => $invoice->contract?->cup_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract?->cup_code) ? $invoice->contract?->cup_code : null,
+            //                     'CodiceCIG' => $invoice->contract?->cig_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract?->cig_code) ? $invoice->contract?->cig_code : null,
+            //                 ], fn($value) => !is_null($value) && $value !== '')
+            //             ], fn($value) => !empty($value)) : [],
+            //             'DatiDDT' => $invoice->delivery_note ? [
+            //                 [
+            //                     'NumeroDDT' => $invoice->delivery_note,
+            //                     'DataDDT' => $invoice->delivery_date ?? $invoice->invoice_date->format('Y-m-d'),
+            //                 ],
+            //             ] : [],
+            //         ],
+            //         'DatiBeniServizi' => [
+            //             'DettaglioLinee' => $invoice->invoiceItems->where('auto', false)->map(function ($item, $index) {
+            //                 return [
+            //                     'NumeroLinea' => $index + 1,
+            //                     'Descrizione' => $item->description ?? 'Servizio',
+            //                     'Quantita' => sprintf("%.2f", (float) ($item->quantity ?? 1.00)),
+            //                     'PrezzoUnitario' => sprintf("%.2f", (float) ($item->unit_price ?? $item->amount)),
+            //                     'PrezzoTotale' => sprintf("%.2f", (float) $item->amount),
+            //                     'AliquotaIVA' => is_numeric($item->vat_code_type->getRate()) ? sprintf("%.2f", (float) $item->vat_code_type->getRate()) : "0.00",
+            //                     'Natura' => $item->vat_code_type->getRate() == '0' ? $item->vat_code_type->getCode() : null,
+            //                 ];
+            //             })->toArray(),
+            //             'DatiRiepilogo' => array_values(array_map(function ($vat) {
+            //                 return [
+            //                     'AliquotaIVA' => isset($vat['%']) && $vat['%'] !== 'N1' ? sprintf("%.2f", (float) $vat['%']) : "0.00",
+            //                     'Natura' => $vat['%'] == 'N1' ? 'N1' : null,
+            //                     'ImponibileImporto' => sprintf("%.2f", (float) $vat['taxable']),
+            //                     'Imposta' => sprintf("%.2f", (float) $vat['vat']),
+            //                     'EsigibilitaIVA' => in_array($vat['norm'][0] ?? 'I', ['D', 'I', 'S']) ? $vat['norm'][0] : 'I',
+            //                     'RiferimentoNormativo' => $vat['free'] ? $vat['norm'] : null,
+            //                 ];
+            //             }, $invoice->updateResume($invoice->vatResume(), $invoice->getFundBreakdown()))),
+            //         ],
+            //         'DatiPagamento' => [
+            //             [
+            //                 'CondizioniPagamento' => $this->mapPaymentTypeToCondizioniPagamento($invoice->payment_type->value ?? 'TP02'),
+            //                 'DettaglioPagamento' => [
+            //                     [
+            //                         'ModalitaPagamento' => $invoice->payment_type->getCode() ?? 'MP05',
+            //                         'DataScadenzaPagamento' => $invoice->invoice_date->addDays($invoice->payment_days ?? 30)->format('Y-m-d'),
+            //                         'ImportoPagamento' => sprintf("%.2f", (float) ($invoice->total ?? 0.00)),
+            //                         'IBAN' => $invoice->bankAccount->iban ?? null,
+            //                     ],
+            //                 ],
+            //             ],
+            //         ],
+            //     ],
+            // ];
 
             // dd(json_encode($payload_, JSON_PRETTY_PRINT));
 
             Log::debug('Payload SOAP: ' . json_encode($payload, JSON_PRETTY_PRINT));
 
-            // Esegui la chiamata SOAP
+            // Esegui la chiamata SOAP per l'invio della fattura
             $response = $this->client->InviaFattura($payload);
 
             // dd($response);
@@ -497,18 +503,33 @@ class AndxorSoapService
             $input['Autenticazione'] = $this->getAutenticazione($invoice, $password);
             $input['ProgressivoInvio'] = $response->ProgressivoInvio ?? null;
 
+            // Esegui la chiamata SOAP per il recupero dei dati di aggiornamento
             $response_s = $this->client->Stato($input);
 
             // dd($response_s);
 
+            // Esegui la chiamata SOAP per il recupero dei file xml e pdf della fattura
+            $responseXML = $this->client->Download($input);
+            $responsePDF = $this->client->DownloadPDF($input);
+
+            // dd($responseXML);
+            // dd($responsePDF);
+
+            // dd('STOP');
+
             $date = explode("T", $response_s->DataOraCreazione);
 
-            // Aggiorna stato, codici e data di invio della fattura
+            $filePathXML = $this->saveActiveXML($responseXML->Nome, $responseXML->Contenuto);               // salvo il file XML
+            $filePathPDF = $this->saveActivePDF($responsePDF->Nome, $responsePDF->Contenuto);               // salvo il file PDF
+
+            // Aggiorna stato, codici, data di invio della fattura e percorsi file XML e PDF
             $invoice->update([
                 'service_code' => $response->ProgressivoInvio ?? null,
                 'sdi_code' => $response_s->IdSdI ?? null,
                 'sdi_status' => $this->translateStatus($response_s->Stato),
-                'sdi_date' => $date[0]
+                'sdi_date' => $date[0],
+                'pdf_path' => $filePathPDF,
+                'xml_path' => $filePathXML
             ]);
 
             SdiNotification::create([
@@ -643,7 +664,39 @@ class AndxorSoapService
         return $result;
     }
 
-    private function saveXML(string $filename, string $content): string
+    private function saveActiveXML(string $filename, string $content): string
+    {
+        // Definisco il percorso relativo per il file XML
+        $relativePath = 'invoices/xml_files/' . $filename;
+
+        $disk = config('filesystems.default');
+
+        // Salvo il file usando il disco 'public'
+        if (Storage::disk($disk)->put($relativePath, $content)) {
+        // if (Storage::disk('public')->put($relativePath, $content)) {
+            return $relativePath; // Restituisco il percorso relativo
+        } else {
+            throw new \Exception("Errore durante il salvataggio del file XML: $filename");
+        }
+    }
+
+    private function saveActivePDF(string $filename, string $content): string
+    {
+        // Definisco il percorso relativo per il file PDF
+        $relativePath = 'invoices/pdf_files/' . $filename;
+
+        $disk = config('filesystems.default');
+
+        // Salvo il file usando il disco 'public'
+        if (Storage::disk($disk)->put($relativePath, $content)) {
+        // if (Storage::disk('public')->put($relativePath, $content)) {
+            return $relativePath; // Restituisco il percorso relativo
+        } else {
+            throw new \Exception("Errore durante il salvataggio del file PDF: $filename");
+        }
+    }
+
+    private function savePassiveXML(string $filename, string $content): string
     {
         // Definisco il percorso relativo per il file XML
         $relativePath = 'passive_invoices/xml_files/' . $filename;
@@ -659,7 +712,7 @@ class AndxorSoapService
         }
     }
 
-    private function savePDF(string $filename, string $content): string
+    private function savePassivePDF(string $filename, string $content): string
     {
         // Definisco il percorso relativo per il file PDF
         $relativePath = 'passive_invoices/pdf_files/' . $filename;
@@ -1255,8 +1308,8 @@ class AndxorSoapService
                         $i_input['Unwrap'] = true;
                         $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
 
-                        $param['filePath_xml'] = $this->saveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
-                        $param['filePath_pdf'] = $this->savePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
+                        $param['filePath_xml'] = $this->savePassiveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
+                        $param['filePath_pdf'] = $this->savePassivePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
 
                         $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
 
@@ -1293,8 +1346,8 @@ class AndxorSoapService
                         $i_input['Unwrap'] = true;
                         $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
 
-                        $param['filePath_xml'] = $this->saveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
-                        $param['filePath_pdf'] = $this->savePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
+                        $param['filePath_xml'] = $this->savePassiveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
+                        $param['filePath_pdf'] = $this->savePassivePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
 
                         $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
 

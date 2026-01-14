@@ -96,7 +96,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::EMESSA => '',
             self::IN_ELABORAZIONE => '',
 
-            self::GENERATA => '',
+            self::GENERATA => 'fluentui-mail-arrow-forward-20-o',
             self::TRASMESSA_SDI => '',
             self::NON_CONSEGNATA => '',
             self::NON_RECAPITABILE => '',

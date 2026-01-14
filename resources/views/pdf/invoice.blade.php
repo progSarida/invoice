@@ -67,8 +67,14 @@
         <tbody>
             <tr>
                 <td class="padding"></td>
+                @php
+                    $cig = '';
+                    if(strpos($invoice->contract?->cig_code, '#') === false){
+                        $cig = ', CIG: ' . $invoice->contract?->cig_code;
+                    }
+                @endphp
                 <td class="padding">
-                    Contratto {{ $invoice->contractDetail?->number }} del {{ $invoice->contractDetail?->date->format('d-m-Y') }}, CIG: {{ $invoice->contract?->cig_code }}
+                    Contratto {{ $invoice->contractDetail?->number }} del {{ $invoice->contractDetail?->date->format('d-m-Y') }}{{ $cig }}
                 </td>
                 <td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td>
             </tr>
