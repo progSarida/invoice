@@ -232,7 +232,9 @@ class NewActivePaymentsResource extends Resource
                     ->required()
                     ->columnSpan(5)
                     ->preload(),
-                Forms\Components\Placeholder::make('')
+                // Forms\Components\Placeholder::make('')
+                //     ->columnSpan(7),
+                Forms\Components\Textarea::make('description')->label('Descrizione')
                     ->columnSpan(7),
                 Section::make('Dati registrazione/validazione')
                         // ->collapsible()

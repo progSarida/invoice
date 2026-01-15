@@ -13,6 +13,7 @@ class ActivePayments extends Model
         'amount',
         'payment_date',
         'bank_account_id',
+        'description',
         'registration_date',
         'registration_user_id',
         'validated',
