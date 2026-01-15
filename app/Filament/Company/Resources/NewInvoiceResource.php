@@ -1291,13 +1291,37 @@ class NewInvoiceResource extends Resource
                         'si' => 'Sì',
                         'no' => 'No',
                     ])
+                    // ->query(function (Builder $query, array $data): Builder {
+                    //     if (!isset($data['value'])) {
+                    //         return $query;
+                    //     }
+                    //     $sql = 'total - (total_payment + total_notes)';
+                    //     return $query->when($data['value'] === 'si', fn ($q) => $q->whereRaw("$sql <= 0"))
+                    //                 ->when($data['value'] === 'no', fn ($q) => $q->whereRaw("$sql > 0"));
+                    // })
                     ->query(function (Builder $query, array $data): Builder {
                         if (!isset($data['value'])) {
                             return $query;
                         }
-                        $sql = 'total - (total_payment + total_notes)';
-                        return $query->when($data['value'] === 'si', fn ($q) => $q->whereRaw("$sql <= 0"))
-                                    ->when($data['value'] === 'no', fn ($q) => $q->whereRaw("$sql > 0"));
+
+                        return $query->where('parent_id', null) // Escludi quelle con parent_id se necessario
+                            ->when($data['value'] === 'si', function ($q) {
+                                return $q->whereRaw("
+                                    CASE
+                                        WHEN (SELECT type FROM clients WHERE clients.id = invoices.client_id) = 'public'
+                                        THEN no_vat_total - (total_payment + total_notes) <= 0
+                                        ELSE total - (total_payment + total_notes) <= 0
+                                    END
+                                ");
+                            })->when($data['value'] === 'no', function ($q) {
+                                return $q->whereRaw("
+                                    CASE
+                                        WHEN (SELECT type FROM clients WHERE clients.id = invoices.client_id) = 'public'
+                                        THEN no_vat_total - (total_payment + total_notes) > 0
+                                        ELSE total - (total_payment + total_notes) > 0
+                                    END
+                                ");
+                            });
                     })
                     ->preload(),
                 SelectFilter::make('client_type')
