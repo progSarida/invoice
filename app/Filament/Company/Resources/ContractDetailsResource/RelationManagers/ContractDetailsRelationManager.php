@@ -183,7 +183,7 @@ class ContractDetailsRelationManager extends RelationManager
             if($get('number')){
                 $contractNumber = $get('number') ? $get('number') : '';
 
-                $description .= ' numero ' . $contractNumber;
+                $description .= ' n.ro ' . $contractNumber;
 
                 if($get('date')){
                     $contractDate = $get('date') ? \Illuminate\Support\Carbon::parse($get('date'))->format('d/m/Y') : '';
