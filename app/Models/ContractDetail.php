@@ -14,6 +14,7 @@ class ContractDetail extends Model
         'contract_type',
         'date',
         'description',
+        'invoice_description',
         'contract_attachment_path',
         'contract_attachment_date',
     ];

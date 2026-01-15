@@ -73,9 +73,18 @@ class DocTypeResource extends Resource
             ->filters([
                 SelectFilter::make('doc_group_id')->label('Gruppo documenti')->relationship('docGroup', 'name'),
             ])
+            ->recordUrl(function ($record) {
+                return null;
+            })
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('info')
+                    ->label('Bloccato')
+                    ->icon('heroicon-o-information-circle')
+                    ->color('gray')
+                    ->tooltip('Impossibile modificare o eliminare. Rivolgersi alla programmazione.')
+                    ->action(fn () => null)
+                // Tables\Actions\EditAction::make(),
+                // Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

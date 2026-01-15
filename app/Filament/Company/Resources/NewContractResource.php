@@ -252,13 +252,13 @@ class NewContractResource extends Resource
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('cig_code')
                     ->label('CIG (Rif. contratto)')
-                    ->hintIcon('heroicon-o-information-circle', tooltip: "Il codice CIG deve essere univoco e di 15 caratteri. In caso di contratto senza CIG (solo con privati o con enti pubblici per il recupero delle spese postali) si deve inserire il dato preceduto da '#' e la procedura elude questo controllo.")
+                    ->hintIcon('heroicon-o-information-circle', tooltip: "Il codice CIG deve essere univoco e di 10 caratteri. In caso di contratto senza CIG (solo con privati o con enti pubblici per il recupero delle spese postali) si deve inserire il dato preceduto da '#' e la procedura elude questo controllo.")
                     ->required()
                     ->live(onBlur: true)
                     ->afterStateUpdated(function ($state){
-                        if (strpos($state, '#') === false && strlen($state) !== 15) {
+                        if (strpos($state, '#') === false && strlen($state) !== 10) {
                                 Notification::make()
-                                    ->title('Errore! Il codice CIG deve essere lungo 15 caratteri')
+                                    ->title('Errore! Il codice CIG deve essere lungo 10 caratteri')
                                     ->danger()
                                     ->persistent()
                                     ->send();
@@ -267,8 +267,8 @@ class NewContractResource extends Resource
                     ->rules([
                         fn (): \Closure => function (string $attribute, $value, \Closure $fail) {
                             // Se non c'è il cancelletto e la lunghezza non è 15
-                            if (strpos($value, '#') === false && strlen($value) !== 15) {
-                                $fail("Il codice CIG deve essere lungo 15 caratteri");
+                            if (strpos($value, '#') === false && strlen($value) !== 10) {
+                                $fail("Il codice CIG deve essere lungo 10 caratteri");
                             }
                         },
                     ])

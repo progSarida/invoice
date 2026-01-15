@@ -23,6 +23,8 @@
         .padding { padding-top: 1mm; padding-bottom: 1mm;}
         .padding_company { padding-left: 5mm;}
 
+        .company_name { font-size: 5mm; }
+
         .description { padding-bottom: 1mm;}
         .free_description { padding-bottom: 10mm;}
 
@@ -68,22 +70,33 @@
     <table>
         {{-- Intestazione --}}
         @php
-            $sedeLegale = $invoice->company->address . ' - ' .
-                        $invoice->company->city->zip_code . ' ' .
+            $sedeLegale1 = $invoice->company->address;
+            $sedeLegale2 = $invoice->company->city->zip_code . ' ' .
                         $invoice->company->city->name .
                         ' (' . $invoice->company->city->province->code . ')';
-            $contatti = '';
-            if($invoice->company->phone) $contatti .= 'Tel. ' .  $invoice->company->phone;
-            if($invoice->company->phone && $invoice->company->fax) $contatti .= ' - ';
-            if($invoice->company->fax) $contatti .= 'Fax ' . $invoice->company->fax;
-            $cf = '';
-            if($invoice->company->register) $cf .= $invoice->company->register;
-            if($invoice->company->register && $invoice->company->registerProvince) $cf .= ' ';
-            if($invoice->company->registerProvince) $cf .= $invoice->company->registerProvince?->name;
-            if($invoice->company->phregisterone || $invoice->company->registerProvince) $cf .= ' - ';
-            if($invoice->company->tax_number) $cf .= 'CF ' . $invoice->company->tax_number;
-            if($invoice->company->tax_number && $invoice->company->vat_number) $cf .= ' - ';
-            if($invoice->company->vat_number) $cf .= 'P.I. ' . $invoice->company->vat_number;
+
+            $contatti1 = '';
+            if($invoice->company->phone) $contatti1 .= 'Tel. ' .  $invoice->company->phone;
+            if($invoice->company->phone && $invoice->company->fax) $contatti1 .= ' - ';
+            if($invoice->company->fax) $contatti1 .= 'Fax: ' . $invoice->company->fax;
+
+            $contatti2 = '';
+            if($invoice->company->email) $contatti2 .= 'Email: ' .  $invoice->company->email;
+
+            $contatti3 = '';
+            if($invoice->company->pec) $contatti3 .= 'Pec: ' . $invoice->company->pec;
+
+            $cf1 = '';
+            if($invoice->company->register) $cf1 .= $invoice->company->register;
+            if($invoice->company->register && $invoice->company->registerProvince) $cf1 .= ' ';
+            if($invoice->company->registerProvince) $cf1 .= $invoice->company->registerProvince?->name;
+            // if($invoice->company->phregisterone || $invoice->company->registerProvince) $cf1 .= ' - ';
+
+            $cf2 = '';
+            if($invoice->company->tax_number) $cf2 .= 'CF ' . $invoice->company->tax_number; else $cf2 .= '';
+            if($invoice->company->tax_number && $invoice->company->vat_number) $cf2 .= ' - ';
+            if($invoice->company->vat_number) $cf2 .= 'P.I. ' . $invoice->company->vat_number; else $cf2 .= '';
+
             $rea = '';
             if($invoice->company->rea_number) $rea .= 'R.E.A. ' . $invoice->company->rea_number;
             if($invoice->company->rea_number && $invoice->company->nominal_capital) $rea .= ' - ';
@@ -103,8 +116,14 @@
         <tr>
             <td colspan="4" class='left padding_company'>Sede Legale: {{ $sedeLegale }}</td>
         </tr>
-        @if($contatti !== '')
-        <tr><td colspan="4" class='left padding_company'>{{ $contatti }}</td></tr>
+        @if($contatti1 !== '')
+        <tr><td colspan="4" class='left padding_company'>{{ $contatti1 }}</td></tr>
+        @endif
+        @if($contatti2 !== '')
+        <tr><td colspan="4" class='left padding_company'>{{ $contatti2 }}</td></tr>
+        @endif
+        @if($contatti3 !== '')
+        <tr><td colspan="4" class='left padding_company'>{{ $contatti3 }}</td></tr>
         @endif
         @if($cf !== '')
         <tr><td colspan="4" class='left padding_company'>{{ $cf }}</td></tr>
@@ -118,19 +137,31 @@
         @else
         {{-- Senza logo --}}
         <tr>
-            <td colspan="4" class='bold center padding_company'>{{ $invoice->company->name }}</td>
+            <td colspan="4" class='bold left padding_company company_name'>{{ $invoice->company->name }}</td>
         </tr>
         <tr>
-            <td colspan="4" class='center padding_company'>Sede Legale: {{ $sedeLegale }}</td>
+            <td colspan="4" class='left padding_company'>Sede Legale: {{ $sedeLegale1 }}</td>
         </tr>
-        @if($contatti !== '')
-        <tr><td colspan="4" class='center padding_company'>{{ $contatti }}</td></tr>
+        <tr>
+            <td colspan="4" class='left padding_company'>{{ $sedeLegale2 }}</td>
+        </tr>
+        @if($contatti1 !== '')
+        <tr><td colspan="4" class='left padding_company'>{{ $contatti1 }}</td></tr>
         @endif
-        @if($cf !== '')
-        <tr><td colspan="4" class='center padding_company'>{{ $cf }}</td></tr>
+        @if($contatti2 !== '')
+        <tr><td colspan="4" class='left padding_company'>{{ $contatti2 }}</td></tr>
+        @endif
+        @if($contatti3 !== '')
+        <tr><td colspan="4" class='left padding_company'>{{ $contatti3 }}</td></tr>
+        @endif
+        @if($cf1 !== '')
+        <tr><td colspan="4" class='left padding_company'>{{ $cf1 }}</td></tr>
+        @endif
+        @if($cf2 !== '')
+        <tr><td colspan="4" class='left padding_company'>{{ $cf2 }}</td></tr>
         @endif
         @if($rea !== '')
-        <tr><td colspan="4" class='center padding_company'>{{ $rea }}</td></tr>
+        <tr><td colspan="4" class='left padding_company'>{{ $rea }}</td></tr>
         @endif
         <tr>
             <td style="padding-top: 5mm; padding-bottom: 5mm;" colspan="4"></td>

@@ -53,8 +53,18 @@ class LimitMotivationTypeResource extends Resource
             ->filters([
                 //
             ])
+            ->recordUrl(function ($record) {
+                return null;
+            })
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('info')
+                    ->label('Bloccato')
+                    ->icon('heroicon-o-information-circle')
+                    ->color('gray')
+                    ->tooltip('Impossibile modificare o eliminare. Rivolgersi alla programmazione.')
+                    ->action(fn () => null)
+                // Tables\Actions\EditAction::make(),
+                // Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -31,25 +31,33 @@ class ContractDetailsRelationManager extends RelationManager
         return $form
             ->columns(6)
             ->schema([
-                Forms\Components\Select::make('contract_type')
-                    ->label('Tipo atto')
-                    ->options(ContractType::class)
+                Forms\Components\Select::make('contract_type')->label('Tipo atto')
                     ->required()
+                    ->live(onBlur: true)
+                    ->options(ContractType::class)
                     ->searchable()
                     ->preload()
+                    ->afterStateUpdated(fn (Get $get, Set $set) => static::updateInvoiceDescription($get, $set))
                     ->columnSpan(2),
-                TextInput::make('number')
-                    ->label('Numero atto')
+                TextInput::make('number')->label('Numero atto')
                     ->required()
+                    ->live(onBlur: true)
                     ->extraInputAttributes(['class' => 'text-right'])
+                    ->afterStateUpdated(fn (Get $get, Set $set) => static::updateInvoiceDescription($get, $set))
                     ->columnSpan(2),
-                DatePicker::make('date')
-                    ->label('Data atto')
-                    ->extraInputAttributes(['class' => 'text-center'])
+                DatePicker::make('date')->label('Data atto')
                     ->required()
+                    ->live(onBlur: true)
+                    ->extraInputAttributes(['class' => 'text-center'])
+                    ->afterStateUpdated(fn (Get $get, Set $set) => static::updateInvoiceDescription($get, $set))
                     ->columnSpan(2),
-                TextInput::make('description')
-                    ->label('Descrizione')
+                TextInput::make('description')->label('Descrizione')
+                    ->required()
+                    ->live(onBlur: true)
+                    ->maxLength(255)
+                    ->afterStateUpdated(fn (Get $get, Set $set) => static::updateInvoiceDescription($get, $set))
+                    ->columnSpan(6),
+                TextInput::make('invoice_description')->label('Descrizione da riportare in fattura')
                     ->required()
                     ->maxLength(255)
                     ->columnSpan(6),
@@ -138,11 +146,15 @@ class ContractDetailsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->icon('heroicon-o-plus-circle'),
+                    // ->icon('heroicon-o-plus-circle')
+                    ->modalHeading('Crea aggiornamento contratto')
+                    ->createAnother(false),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->modalHeading('Visualizza aggiornamento contratto'),
+                Tables\Actions\EditAction::make()
+                    ->modalHeading('Modifica aggiornamento contratto'),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -151,5 +163,49 @@ class ContractDetailsRelationManager extends RelationManager
                 ]),
             ])
             ->defaultSort('date', 'desc');
+    }
+
+    protected static function updateInvoiceDescription(Get $get, Set $set): void
+    {
+        $contractType = $get('contract_type')
+                        ? ContractType::tryFrom($get('contract_type'))?->getLabel()
+                        : '';
+        // $contractType = $contractType ? ContractType::find($contractType)?->name : '';
+        // $manageType = $get('manage_type_id') ?? null;
+        // $manageType = $manageType ? ManageType::find($manageType)?->name : '';
+        // $taxType = $get('tax_type') ?? null;
+        // $taxType = $taxType ? TaxType::from($taxType)->getLabel() : '';
+        // $year = substr($get('budget_year'), 2);
+
+        if($get('contract_type')){
+            $description = $contractType;
+
+            if($get('number')){
+                $contractNumber = $get('number') ? $get('number') : '';
+
+                $description .= ' numero ' . $contractNumber;
+
+                if($get('date')){
+                    $contractDate = $get('date') ? \Illuminate\Support\Carbon::parse($get('date'))->format('d/m/Y') : '';
+
+                    $description .= ' del ' . $contractDate;
+
+                    if($get('description')){
+                        $contractDescription = $get('description') ? $get('description') : '';
+
+                        $description .= ' relativo/a a ' . strtolower($contractDescription);
+                    }
+                }
+            }
+        }
+
+        // $description .= $accrualType . ' ';
+        // $description .= 'Corrispettivo per ' . strtolower($accrualType) . ' ';
+
+        // $description .= strtolower($manageType) . ' ';
+
+        $contractDescription = $get('invoice_reference');
+
+        $set('invoice_description', trim($description));
     }
 }

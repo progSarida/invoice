@@ -269,7 +269,7 @@ class NewInvoiceResource extends Resource
                                 ->optionsLimit(5)
                                 ->columnSpan(4),
 
-                            Forms\Components\Select::make('tax_type')->label('Entrata (1)')
+                            Forms\Components\Select::make('tax_type')->label('Entrata')
                                 ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic())
                                 ->columnSpan(2)
                                 // ->options(TaxType::class)
@@ -505,7 +505,7 @@ class NewInvoiceResource extends Resource
                                     }
                                 )
                                 ->disabled(fn(Get $get): bool => ! filled($get('client_id')) || ! filled($get('tax_type')))
-                                ->afterStateUpdated(function (Set $set, $state) {
+                                ->afterStateUpdated(function (Set $set, Get $get, $state) {
                                     if($state) {
                                         $contract = NewContract::find($state);
                                         $lastDetail = $contract->lastDetail()->first();
@@ -524,8 +524,13 @@ class NewInvoiceResource extends Resource
                                                     ])
                                                 ->send();
                                         }
+                                        else {
+                                            static::updateDescription($get, $set, 'continue');
+                                        }
                                     }
                                 })
+
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'new'))
                                 ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic())
                                 ->searchable()
                                 ->live()
@@ -896,7 +901,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(2),
 
                             Forms\Components\Select::make('accrual_type_id')
-                                ->label('Gestione (2)')
+                                ->label('Gestione')
                                 ->required(fn(callable $get) => $get('client_id') ? Client::find($get('client_id'))->type == ClientType::PUBLIC : true)
                                 ->options(function (callable $get) {
                                     $contractId = $get('contract_id');
@@ -917,7 +922,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(3),
 
                             Forms\Components\Select::make('manage_type_id')
-                                ->label('Servizio (3)')
+                                ->label('Servizio')
                                 ->required(fn(callable $get) => $get('client_id') ? Client::find($get('client_id'))->type == ClientType::PUBLIC : true)
                                 // ->options(function () {
                                 //     return ManageType::orderBy('order')->pluck('name', 'id');
@@ -940,65 +945,84 @@ class NewInvoiceResource extends Resource
                                 })
                                 ->columnSpan(3),
                             Forms\Components\Select::make('invoice_reference')
-                                ->label('Riferimento (4)')
+                                ->label('Riferimento')
                                 // ->required()
                                 ->live()
                                 ->options(InvoiceReference::class)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'new'))
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'new'))
                                 ->preload()
                                 ->columnSpan(2),
 
                             Forms\Components\DatePicker::make('reference_date_from')
-                                ->label('Da data (5)')
+                                ->label('Da data')
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 // ->required()
                                 // ->live()
                                 ->debounce(1000)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'continue'))
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') !== InvoiceReference::NUMBER->value)
                                 ->columnSpan(2),
 
                             Forms\Components\DatePicker::make('reference_date_to')
-                                ->label('A data (6)')
+                                ->label('A data')
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 // ->required()
                                 // ->live()
                                 ->debounce(1000)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'continue'))
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') !== InvoiceReference::NUMBER->value)
                                 ->columnSpan(2),
                             Placeholder::make('')
                                 ->content('')
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->columnSpan(1),
-                            Forms\Components\TextInput::make('reference_number_from')->label('Dal numero (5)')
+                            Forms\Components\TextInput::make('reference_number_from')->label('Dal numero')
                                 // ->required()
                                 ->debounce(500)
                                 ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'continue'))
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
                                 ->columnSpan(1),
-                            Forms\Components\TextInput::make('reference_number_to')->label('Al numero (6)')
+                            Forms\Components\TextInput::make('reference_number_to')->label('Al numero')
                                 // ->required()
                                 ->debounce(500)
                                 ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'continue'))
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
                                 ->columnSpan(1),
-                            Forms\Components\TextInput::make('total_number')->label('Totali (7)')
+                            Forms\Components\TextInput::make('total_number')->label('Totali')
                                 // ->required()
                                 ->debounce(500)
                                 ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
-                                ->afterStateUpdated(fn (Get $get, Set $set, $state) => static::updateDescription($get, $set, 'continue'))
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
                                 ->columnSpan(1),
                         ]),
 
                     Section::make('Descrizioni')
                         ->collapsible()
                         ->schema([
-                            Forms\Components\Textarea::make('description')->label('Descrizione (composizione automatica tramite i campi: 1+2+3+4+5+6+7)')
+                            // Forms\Components\Textarea::make('description')->label("Descrizione (Composizione automatica 'variabile dall'operatore', con inserimento dei campi 'Anno di bilancio', 'Descrizione da riportare in fattura' (presente nel dettaglio del contratto), Riferimento, 'Da data' e 'A data', oppure 'Dal numero', 'Al numero' e 'Totali')")
+                            Forms\Components\Textarea::make('description')->label('Descrizione')
                                 ->required()
+                                ->live()
+                                ->hintIcon('heroicon-o-information-circle', tooltip: "Composizione automatica 'variabile dall'operatore', con inserimento dei campi 'Anno di bilancio', 'Descrizione da riportare in fattura' (presente nel dettaglio del contratto), Riferimento, 'Da data' e 'A data', oppure 'Dal numero', 'Al numero' e 'Totali'")
+                                ->afterStateUpdated(function ($state) {
+                                    if (! preg_match('/\(ab\d{2}\)/', $state)) {
+                                        \Filament\Notifications\Notification::make()
+                                            ->title("Errore! La descrizione deve contenere il riferimento all'anno di bilancio nel formato (ab**)")
+                                            ->danger()
+                                            ->persistent()
+                                            ->send();
+                                    }
+                                })
+                                ->rules([
+                                    fn (): \Closure => function (string $attribute, $value, \Closure $fail) {
+                                        if (! preg_match('/\(ab\d{2}\)/', $value)) {
+                                            $fail("La descrizione deve contenere i riferimenti all'anno di bilancio nel formato (ab**)");
+                                        }
+                                    },
+                                ])
                                 ->columnSpanFull(),
                             Forms\Components\Textarea::make('free_description')->label('Descrizione libera')
                                 // ->required()
@@ -1745,31 +1769,22 @@ class NewInvoiceResource extends Resource
         if($ref === 'new'){
             $set('reference_date_from', '');
             $set('reference_date_to', '');
+            $set('reference_number_from', '');
+            $set('reference_number_to', '');
+            $set('total_number', '');
             $set('description', '');
         }
-        $accrualType = $get('accrual_type_id') ?? null;
-        $accrualType = $accrualType ? AccrualType::find($accrualType)?->name : '';
-        $manageType = $get('manage_type_id') ?? null;
-        $manageType = $manageType ? ManageType::find($manageType)?->name : '';
-        $taxType = $get('tax_type') ?? null;
-        $taxType = $taxType ? TaxType::from($taxType)->getLabel() : '';
+
+        $contractDescription = NewContract::find($get('contract_id'))?->lastDetail->invoice_description;
         $year = substr($get('budget_year'), 2);
 
-        $description = '(' . $year .') Gestione ' . strtolower($taxType) . '. ';
+        $description = '(ab' . $year .') ' . $contractDescription . ' ';
 
-        $description .= $accrualType . ' ';
         // $description .= 'Corrispettivo per ' . strtolower($accrualType) . ' ';
 
-        $description .= strtolower($manageType) . ' ';
 
         $invoiceReference = $get('invoice_reference');
         if ($invoiceReference) {
-            // try {
-            //     $description = InvoiceReference::from($invoiceReference)->getDescription();
-            // } catch (Exception $e) {
-            //     $description = '';
-            // }
-
             $dateFrom = $get('reference_date_from');
             $dateTo = $get('reference_date_to');
             if ($dateFrom) {
@@ -1787,16 +1802,16 @@ class NewInvoiceResource extends Resource
 
                 if ($numberTo) {
                     $description .= ' al verbale numero ' . $numberTo;
+
+                    $total = $get('reference_number_to') - $get('reference_number_from') + 1;
+                    $set('total_number', $total);
+                    if ($total) {
+                        $description .= ' per un totale di ' . $total . ' verbali';
+                    }
                 }
             }
 
-            $total = $get('total_number');
-            if ($total) {
-                $description .= ' per un totale di ' . $total . ' verbali';
-            }
-        }
-        else {
-            $description = '';
+
         }
 
         $set('description', trim($description));

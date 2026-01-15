@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Company\Resources\NewActivePaymentsResource;
 use App\Filament\Resources\AccrualTypeResource\Pages;
 use App\Filament\Resources\AccrualTypeResource\RelationManagers;
 use App\Models\AccrualType;
+use App\Models\NewContract;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -43,6 +45,7 @@ class AccrualTypeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('order')
             ->columns([
                 Tables\Columns\TextColumn::make('order')->label('Posizione')
                     ->sortable(),
@@ -62,9 +65,34 @@ class AccrualTypeResource extends Resource
             ->filters([
                 //
             ])
+            ->recordUrl(function ($record) {
+                $inContracts = NewContract::whereJsonContains('accrual_types', $record->id)->exists();
+                if ($inContracts) { return null; }
+                return static::getUrl('edit', ['record' => $record]);
+            })
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('info')
+                    ->label('Bloccato')
+                    ->icon('heroicon-o-information-circle')
+                    ->color('gray')
+                    ->tooltip('Impossibile modificare o eliminare: gestione in uso nei contratti. Rivolgersi alla programmazione.')
+                    ->visible(function ($record) {
+                        if (!$record) return false;
+                        return NewContract::whereJsonContains('accrual_types', $record->id)->exists();
+                    })
+                    ->action(fn () => null),
+                Tables\Actions\EditAction::make()
+                    ->visible(function ($record) {
+                        if (!$record) return false;
+                        $inContracts = NewContract::whereJsonContains('accrual_types', $record->id)->exists();
+                        return !$inContracts;
+                    }),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(function ($record) {
+                        if (!$record) return false;
+                        $inContracts = NewContract::whereJsonContains('accrual_types', $record->id)->exists();
+                        return !$inContracts;
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
