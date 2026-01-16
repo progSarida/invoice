@@ -371,7 +371,8 @@ class Invoice extends Model
             if (!isset($vats[$rate])) {
                 $vats[$rate] = [
                     'norm' => $item->vat_code_type->getRate() == '0'
-                                ? 'ART. 15 DPR 633/72'
+                                // ? 'ART. 15 DPR 633/72'
+                                ? $item->vat_code_type->getNorm()
                                 : ($this->client?->type?->value == 'public'
                                     ? 'S (scissione dei pagamenti)'
                                     : (($this->company->fiscalProfile->tax_regime->value == 'rf16' || $this->company->fiscalProfile->tax_regime->value == 'rf17')

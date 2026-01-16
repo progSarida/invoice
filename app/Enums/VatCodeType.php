@@ -138,6 +138,40 @@ enum VatCodeType: string implements HasLabel, HasDescription
         };
     }
 
+    public function getNorm(): ?string
+    {
+        return match($this) {
+            self::VC00 => "Art. 26 c. 3 DPR 633/72",
+            self::VC01 => "",
+            self::VC02 => "",
+            self::VC03 => "",
+            self::VC04 => "",
+            self::VC05 => "",
+            self::VC06 => "Art. 15 DPR 633/72",
+            self::VC06A => "Art. 15 DPR 633/72",
+            self::VC07 => "Legge 27 novembre 1989, n. 384",
+            self::VC08 => "Artt. Da 7 a 7-septies del DPR 633/72",
+            self::VC09 => "",
+            self::VC10 => "Art. 8, c. 1, Let. A)DPR 633/72",
+            self::VC11 => "Art. 8-bis DPR 633/72",
+            self::VC12 => "Art. 41 DL 331/93",
+            self::VC13 => "Art. 71 DPR 633/72",
+            self::VC14 => "",
+            self::VC15 => "Art. 8, c. 1, Let C) DPR 633/72",
+            self::VC16 => "",
+            self::VC17 => "Art. 10 DPR 633/72",
+            self::VC18 => "Art. 124 c. 2 DL 34/20 (operazioni contenimento Covid)",
+            self::VC19 => "Art. 74 DPR 633/72",
+            self::VC20 => "Art. 36 41/95",
+            self::VC21 => "Art. 74 vendita rottami e materiali di recupero DPR 633/72",
+            self::VC22 => "Art. 17, c. 5 DPR 633/72",
+            self::VC23 => "Art. 17, c. 6 let. a), DPR 633/72",
+            self::VC24 => "Art. 17, c. 6 lett. a-bis) DPR 633/72",
+            self::VC25 => "Art. 17, c. 6 lett. b) DPR 633/72",
+            self::VC26 => "Art. 17, c. 6 lett. c) DPR 633/72"
+        };
+    }
+
     public function getLabel(): string
     {
         return match($this) {

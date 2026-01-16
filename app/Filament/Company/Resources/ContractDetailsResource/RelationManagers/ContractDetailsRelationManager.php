@@ -193,7 +193,9 @@ class ContractDetailsRelationManager extends RelationManager
                     if($get('description')){
                         $contractDescription = $get('description') ? $get('description') : '';
 
-                        $description .= ' relativo/a a ' . strtolower($contractDescription);
+
+                        // $description .= ' relativo/a a ' . strtolower($contractDescription);
+                        $description .= ' relativo/a a ' . lcfirst($contractDescription);
                     }
                 }
             }

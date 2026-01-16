@@ -93,6 +93,8 @@ class InvoiceItemsRelationManager extends RelationManager
                             ->columnSpan(3),
                         Forms\Components\TextInput::make('quantity')->label('Quantità')
                             ->columnSpan(4)
+                            ->live()
+                            ->required(fn(Get $get) => $get('measure_unit') || $get('unit_price'))
                             ->numeric()
                             // ->live(debounce: 500)
                             ->debounce(1000)
@@ -125,10 +127,19 @@ class InvoiceItemsRelationManager extends RelationManager
                                 }
                             }),
                         Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
+                            ->live()
+                            ->hintIcon('heroicon-o-information-circle', tooltip: 'L\'unità di misura deve essere lunga al massimo 10 caratteri (0-9, a-z, A-Z)')
+                            ->rules([
+                                'nullable',
+                                'max:10',
+                                'regex:/^[a-zA-Z0-9]{1,10}$/',
+                            ])
+                            ->required(fn(Get $get) => $get('quantity') || $get('unit_price'))
                             ->columnSpan(4)
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('unit_price')
-                            ->label('Prezzo unitario')
+                        Forms\Components\TextInput::make('unit_price')->label('Prezzo unitario')
+                            ->live()
+                            ->required(fn(Get $get) => $get('quantity') || $get('measure_unit'))
                             ->columnSpan(4)
                             // ->live(debounce: 500)
                             ->debounce(1000)

@@ -92,13 +92,16 @@
             @foreach ($items as $item)
                 @php
                     if($item->vat_code_type == \App\Enums\VatCodeType::VC06A) $stamp = true;
+                    $quantity = $item->quantity ?? '';
+                    $price = $item->unit_price ?? $item->amount;
+                    $unit = $item->measure_unit ?? '';
                 @endphp
                 <tr>
                     <td class="padding"></td>
                     <td class="padding">{{ $item->description }}</td>
-                    <td class="padding"></td>
-                    <td class="padding right">{{ number_format((float) $item->amount, 2, ',', '.') }}</td>
-                    <td class="padding"></td>
+                    <td class="padding right">{{ $quantity }}</td>
+                    <td class="padding right">{{ number_format((float) $price, 2, ',', '.') }}</td>
+                    <td class="padding">{{ $unit }}</td>
                     <td class="padding"></td>
                     <td class="padding right">
                         {{ $item->vat_code_type->getRate() == '0'

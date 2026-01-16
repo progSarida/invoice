@@ -214,6 +214,24 @@ class AndxorSoapService
         ], fn($value) => !empty($value)) : [];
     }
 
+    private function getDatiContratto(Invoice $invoice): ?array
+    {
+        if(strpos($invoice->contract?->cig_code, '#') === false){
+            $cig = $invoice->contract?->cig_code;
+        }
+        else{
+            $cig = '';
+        }
+        return $invoice->contract ? array_filter([
+            array_filter([
+                'IdDocumento' => $invoice->contract->lastDetail->number && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->contract->lastDetail->number) ? $invoice->contract->lastDetail->number : null,
+                'Data' => $invoice->contract->lastDetail->date ?? null,
+                'CodiceCUP' => $invoice->contract?->cup_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract?->cup_code) ? $invoice->contract?->cup_code : null,
+                'CodiceCIG' => $cig && preg_match('/^[A-Za-z0-9]{1,15}$/', $cig) ? $cig : null,
+            ], fn($value) => !is_null($value) && $value !== '')
+        ], fn($value) => !empty($value)) : [];
+    }
+
     private function getDatiDDT(Invoice $invoice): ?array
     {
         return $invoice->delivery_note ? [
@@ -232,6 +250,7 @@ class AndxorSoapService
                     'NumeroLinea' => $index + 1,
                     'Descrizione' => $item->description ?? 'Servizio',
                     'Quantita' => sprintf("%.2f", (float) ($item->quantity ?? 1.00)),
+                    'UnitaMisura ' => $item->measure_unit ?? null,
                     'PrezzoUnitario' => sprintf("%.2f", (float) ($item->unit_price ?? $item->amount)),
                     'PrezzoTotale' => sprintf("%.2f", (float) $item->amount),
                     'AliquotaIVA' => is_numeric($item->vat_code_type->getRate()) ? sprintf("%.2f", (float) $item->vat_code_type->getRate()) : "0.00",
@@ -244,7 +263,7 @@ class AndxorSoapService
                     'Natura' => $vat['%'] == 'N1' ? 'N1' : null,
                     'ImponibileImporto' => sprintf("%.2f", (float) $vat['taxable']),
                     'Imposta' => sprintf("%.2f", (float) $vat['vat']),
-                    'EsigibilitaIVA' => in_array($vat['norm'][0] ?? 'I', ['D', 'I', 'S']) ? $vat['norm'][0] : 'I',
+                    'EsigibilitaIVA' => in_array($vat['norm'][0], ['D', 'I', 'S']) ? $vat['norm'][0] : null,
                     'RiferimentoNormativo' => $vat['free'] ? $vat['norm'] : null,
                 ];
             }, $invoice->updateResume($invoice->vatResume(), $invoice->getFundBreakdown()))),
@@ -350,7 +369,8 @@ class AndxorSoapService
             $payload['OverrideCedente'] = $this->getOverrideCedente($invoice);
             $payload['CessionarioCommittente'] = $this->getCessionarioCommittente($invoice);
             $payload['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento'] = $this->getDatiGeneraliDocumento($invoice, $withholdings, $funds);
-            $payload['FatturaElettronicaBody']['DatiGenerali']['DatiOrdineAcquisto'] = $this->getDatiOrdineAcquisto($invoice);
+            // $payload['FatturaElettronicaBody']['DatiGenerali']['DatiOrdineAcquisto'] = $this->getDatiOrdineAcquisto($invoice);
+            $payload['FatturaElettronicaBody']['DatiGenerali']['DatiContratto'] = $this->getDatiContratto($invoice);
             $payload['FatturaElettronicaBody']['DatiGenerali']['DatiDDT'] = $this->getDatiDDT($invoice);
             $payload['FatturaElettronicaBody']['DatiBeniServizi'] = $this->getDatiBeniServizi($invoice);
             $payload['FatturaElettronicaBody']['DatiPagamento'] = $this->getDatiPagamento($invoice);

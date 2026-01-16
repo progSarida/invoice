@@ -268,6 +268,7 @@ class EditNewInvoice extends EditRecord
                                 ->title('Errore')
                                 ->body($e->getMessage())
                                 ->danger()
+                                ->duration(10000)
                                 ->send();
                         }
                     }
