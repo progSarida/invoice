@@ -382,72 +382,72 @@ class ListNewInvoices extends ListRecords
                             );
                         }
                 }),
-                Actions\Action::make('emptyFolders')
-                    ->label('Svuota Cartella XML e PDF')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->requiresConfirmation() // Chiede conferma prima di procedere
-                    ->action(function () {
-                        $disk = config('filesystems.default'); // O 'public' a seconda della tua config
-                        $xmlDirectory = 'invoices/xml_files';
-                        $pdfDirectory = 'invoices/pdf_files';
-                        $emptyXml = false;
-                        $emptyPdf = false;
+                // Actions\Action::make('emptyFolders')
+                //     ->label('Svuota Cartella XML e PDF')
+                //     ->icon('heroicon-o-trash')
+                //     ->color('danger')
+                //     ->requiresConfirmation() // Chiede conferma prima di procedere
+                //     ->action(function () {
+                //         $disk = config('filesystems.default'); // O 'public' a seconda della tua config
+                //         $xmlDirectory = 'invoices/xml_files';
+                //         $pdfDirectory = 'invoices/pdf_files';
+                //         $emptyXml = false;
+                //         $emptyPdf = false;
 
-                        // Recupera tutti i file nelle cartelle
-                        $xmlFiles = Storage::disk($disk)->allFiles($xmlDirectory);
-                        $pdfFiles = Storage::disk($disk)->allFiles($pdfDirectory);
+                //         // Recupera tutti i file nelle cartelle
+                //         $xmlFiles = Storage::disk($disk)->allFiles($xmlDirectory);
+                //         $pdfFiles = Storage::disk($disk)->allFiles($pdfDirectory);
 
-                        if (empty($xmlFiles)) {
-                            $emptyXml = true;
-                            Notification::make()
-                                ->title('La cartella degli xml è già vuota')
-                                ->warning()
-                                ->duration(5000)
-                                ->send();
-                        }
-                        if (empty($pdfFiles)) {
-                            $emptyPdf = true;
-                            Notification::make()
-                                ->title('La cartella dei pdf è già vuota')
-                                ->warning()
-                                ->duration(5000)
-                                ->send();
-                        }
+                //         if (empty($xmlFiles)) {
+                //             $emptyXml = true;
+                //             Notification::make()
+                //                 ->title('La cartella degli xml è già vuota')
+                //                 ->warning()
+                //                 ->duration(5000)
+                //                 ->send();
+                //         }
+                //         if (empty($pdfFiles)) {
+                //             $emptyPdf = true;
+                //             Notification::make()
+                //                 ->title('La cartella dei pdf è già vuota')
+                //                 ->warning()
+                //                 ->duration(5000)
+                //                 ->send();
+                //         }
 
-                        // Elimina i file
-                        if (Storage::disk($disk)->delete($xmlFiles)) {
-                            if(!$emptyXml){
-                                Notification::make()
-                                    ->title('Cartella file xml svuotata con successo')
-                                    ->success()
-                                    ->duration(5000)
-                                    ->send();
-                            }
-                        } else {
-                            Notification::make()
-                                ->title('Errore durante lo svuotamento della cartella dei xml ')
-                                ->danger()
-                                ->duration(5000)
-                                ->send();
-                        }
+                //         // Elimina i file
+                //         if (Storage::disk($disk)->delete($xmlFiles)) {
+                //             if(!$emptyXml){
+                //                 Notification::make()
+                //                     ->title('Cartella file xml svuotata con successo')
+                //                     ->success()
+                //                     ->duration(5000)
+                //                     ->send();
+                //             }
+                //         } else {
+                //             Notification::make()
+                //                 ->title('Errore durante lo svuotamento della cartella dei xml ')
+                //                 ->danger()
+                //                 ->duration(5000)
+                //                 ->send();
+                //         }
 
-                        if (Storage::disk($disk)->delete($pdfFiles)) {
-                            if(!$emptyPdf){
-                                Notification::make()
-                                    ->title('Cartella file pdf svuotata con successo')
-                                    ->success()
-                                    ->duration(5000)
-                                    ->send();
-                            }
-                        } else {
-                            Notification::make()
-                                ->title('Errore durante lo svuotamento della cartella dei pdf')
-                                ->danger()
-                                ->duration(5000)
-                                ->send();
-                        }
-                    })
+                //         if (Storage::disk($disk)->delete($pdfFiles)) {
+                //             if(!$emptyPdf){
+                //                 Notification::make()
+                //                     ->title('Cartella file pdf svuotata con successo')
+                //                     ->success()
+                //                     ->duration(5000)
+                //                     ->send();
+                //             }
+                //         } else {
+                //             Notification::make()
+                //                 ->title('Errore durante lo svuotamento della cartella dei pdf')
+                //                 ->danger()
+                //                 ->duration(5000)
+                //                 ->send();
+                //         }
+                //     })
         ];
     }
 
