@@ -398,6 +398,8 @@ class ListNewInvoices extends ListRecords
                         $xmlFiles = Storage::disk($disk)->allFiles($xmlDirectory);
                         $pdfFiles = Storage::disk($disk)->allFiles($pdfDirectory);
 
+                        dd($xmlFiles);
+
                         if (empty($xmlFiles)) {
                             $emptyXml = true;
                             Notification::make()
