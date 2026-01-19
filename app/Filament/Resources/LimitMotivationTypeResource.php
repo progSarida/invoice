@@ -22,7 +22,7 @@ class LimitMotivationTypeResource extends Resource
     public static ?string $pluralModelLabel = 'Motivazioni Art. 26 633/72';
     public static ?string $modelLabel = 'Motivazioni Art. 26 633/72';
     protected static ?string $navigationGroup = 'Tabelle';
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 8;
 
     public static function form(Form $form): Form
     {

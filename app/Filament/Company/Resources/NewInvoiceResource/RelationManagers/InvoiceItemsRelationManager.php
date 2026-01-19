@@ -512,7 +512,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     }),
                 Tables\Actions\DeleteAction::make()
                     // ->visible(fn ($record) => $record->vat_code_type !== VatCodeType::VC06A && $record->auto !== true)
-                    ->visible(fn ($record) => $record->invoice_element_id)
+                    ->visible(fn ($record) => $record->invoice_element_id || $record->postal_expense_id)
                     ->using(function (InvoiceItem $record): InvoiceItem {
                         $invoice = $record->invoice;
 

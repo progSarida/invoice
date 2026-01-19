@@ -29,6 +29,7 @@ use Filament\Tables\Table;
 use App\Models\AccrualType;
 use App\Models\NewContract;
 use App\Enums\PaymentStatus;
+use App\Enums\ReversalGroupType;
 use App\Enums\VatEnforceType;
 use Filament\Facades\Filament;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -53,6 +54,7 @@ use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\CreditNot
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\InvoiceItemsRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\ActivePaymentsRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\SdiNotificationsRelationManager;
+use App\Models\ReversalMotivationType;
 use App\Models\SocialContribution;
 use App\Models\Withholding;
 use Exception;
@@ -524,13 +526,11 @@ class NewInvoiceResource extends Resource
                                                     ])
                                                 ->send();
                                         }
-                                        else {
-                                            static::updateDescription($get, $set, 'continue');
-                                        }
+                                        // else {
+                                        //     static::updateDescription($get, $set, 'continue');
+                                        // }
                                     }
                                 })
-
-                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'new'))
                                 ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic())
                                 ->searchable()
                                 ->live()
@@ -585,6 +585,158 @@ class NewInvoiceResource extends Resource
                                             }
                                         })
                                 ),
+                        ]),
+
+                // ]),
+                // Grid::make('GRID')->columnSpan(3)->schema([
+
+                    Section::make('')
+                        ->columns(6)
+                        ->schema([
+                            Forms\Components\Select::make('timing_type')->label('Modalità di fatturazione')->options(TimingType::class)
+                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
+                                ->placeholder(null)
+                                ->default('contestuale')
+                                ->live()
+                                ->columnSpan(2),
+                            Forms\Components\TextInput::make('delivery_note')->label('Documento di trasporto')
+                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
+                                ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita'),
+                            Forms\Components\DatePicker::make('delivery_date')->label('Data documento')
+                                ->extraInputAttributes(['class' => 'text-center'])
+                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
+                                ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita')
+                                ->native(false)
+                                ->displayFormat('d F Y'),
+                        ]),
+
+                    Section::make('')
+                        ->columns(6)
+                        ->schema([
+
+                            Forms\Components\Select::make('doc_type_id')->label('Tipo documento')
+                                ->required()
+                                ->live()
+                                ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
+                                    $docType = DocType::find($state);
+                                    if($docType?->name === 'TD00'){
+                                        $set('number', 0);
+                                        NewInvoiceResource::invoiceNumber($get, $set);
+                                    }
+                                    // else if (!$docType || $docType->docGroup?->name !== 'Note di variazione') {
+                                    else {
+                                        $set('parent_id', null);
+                                        $set('reversal_group_type', null);
+                                        $set('reversal_motivation_type_id', null);
+                                        $set('accrual_type_id', null);
+                                        $set('manage_type_id', null);
+                                        $set('reference_date_from', '');
+                                        $set('reference_date_to', '');
+                                        $set('reference_number_from', '');
+                                        $set('reference_number_to', '');
+                                        $set('total_number', '');
+                                        if ($docType) {
+                                            $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
+                                            $set('number', $number);
+                                            NewInvoiceResource::invoiceNumber($get, $set);
+                                        }
+                                    }
+                                    static::updateDescription($get, $set, 'new_doc');
+                                })
+                                ->options(function (Get $get) {
+                                    $sectionalId = $get('sectional_id');
+                                    $art73 = $get('art_73');
+                                    if ($art73) {
+                                        // $docs = DocType::get();
+                                        // $docs = \Filament\Facades\Filament::getTenant()->docTypes();
+                                        $docs = \Filament\Facades\Filament::getTenant()
+                                                    ->docTypes()
+                                                    ->select('doc_types.id', 'doc_types.description')
+                                                    ->get();
+                                        return $docs->pluck('description', 'id')->toArray();
+                                    }
+                                    else if (!$sectionalId) {
+                                        return [];
+                                    }
+                                    $sectional = Sectional::with('docTypes')->find($sectionalId);
+                                    return $sectional ? $sectional->docTypes->pluck('description', 'id')->toArray() : [];
+                                })
+                                // ->disabled(fn (Get $get) => !filled($get('sectional_id')))
+                                ->dehydrated()
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(4),
+
+                            Forms\Components\TextInput::make('invoice_uid')->label('Identificativo')
+                                ->disabled()->columnSpan(2),
+
+                            Forms\Components\Select::make('reversal_group_type')->label('Tipo annullamento')
+                                ->visible(
+                                    function (Get $get) {
+                                        $docTypeId = $get('doc_type_id');
+
+                                        if (!filled($docTypeId)) {
+                                            return false;
+                                        }
+
+                                        $docType = DocType::with('docGroup')->find($docTypeId);
+
+                                        return $docType?->docGroup?->name === 'Note di variazione';
+                                    }
+                                )
+                                ->required()
+                                ->live()
+                                ->options(
+                                    collect(ReversalGroupType::cases())
+                                        ->filter(fn (ReversalGroupType $enum) => $enum !== ReversalGroupType::BOTH)
+                                        ->mapWithKeys(fn (ReversalGroupType $enum) => [$enum->value => $enum->getLabel()])
+                                )
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
+                                ->preload()
+                                ->columnSpan(2),
+
+                            Forms\Components\Select::make('reversal_motivation_type_id')->label('Motivazione emissione nota di credito')
+                                ->visible(
+                                    function (Get $get) {
+                                        $docTypeId = $get('doc_type_id');
+
+                                        if (!filled($docTypeId)) {
+                                            return false;
+                                        }
+
+                                        $docType = DocType::with('docGroup')->find($docTypeId);
+
+                                        return $docType?->docGroup?->name === 'Note di variazione';
+                                    }
+                                )
+                                ->required()
+                                ->live()
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
+                                ->options(function (Get $get) {
+                                    $state = $get('reversal_group_type');
+
+                                    if ($state) {
+                                        // Trasforma la stringa nel caso dell'Enum corrispondente
+                                        $reversalGroupType = ReversalGroupType::tryFrom($state);
+
+                                        // Verifica che la trasformazione sia riuscita e che non sia 'both'
+                                        // (visto che getInverse non gestisce 'both' e andrebbe in errore)
+                                        if ($reversalGroupType && $reversalGroupType !== ReversalGroupType::BOTH) {
+
+                                            $options = ReversalMotivationType::where('reversal_group_type', '!=', $reversalGroupType->getInverse())
+                                                        ->orderBy('order')
+                                                        ->get();
+
+                                            return $options->pluck('name', 'id')->toArray();
+                                        }
+                                    }
+
+                                    return [];
+                                })
+                                ->dehydrated()
+                                ->searchable()
+                                ->preload()
+                                ->columnSpan(4),
 
                             Forms\Components\Select::make('parent_id')->label('Fattura da stornare')
                                 ->visible(
@@ -601,7 +753,7 @@ class NewInvoiceResource extends Resource
                                         // return true;
                                     }
                                 )
-                                ->afterStateUpdated( function($state, Get $get){
+                                ->afterStateUpdated( function($state, Get $get, Set $set){
                                     $parent = Invoice::find($state);
                                     $past = $parent && $parent->invoice_date
                                         ? Carbon::parse($parent->invoice_date)->lt(Carbon::now()->subYear())
@@ -633,6 +785,7 @@ class NewInvoiceResource extends Resource
                                         // Interrompi l'esecuzione dell'action
                                         return;
                                     }
+                                    static::updateDescription($get, $set, 'continue');
                                 })
                                 ->required(function (?Model $record, Get $get) {
                                     // $privateR = ($record && $record->client->type->isPrivate() ? true : false);
@@ -674,78 +827,7 @@ class NewInvoiceResource extends Resource
                                 ->preload()
                                 ->columnSpan(6)
                                 // ->optionsLimit(10)
-                                ->searchable()
-                        ]),
-
-                // ]),
-                // Grid::make('GRID')->columnSpan(3)->schema([
-
-                    Section::make('')
-                        ->columns(6)
-                        ->schema([
-                            Forms\Components\Select::make('timing_type')->label('Modalità di fatturazione')->options(TimingType::class)
-                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
-                                ->placeholder(null)
-                                ->default('contestuale')
-                                ->live()
-                                ->columnSpan(2),
-                            Forms\Components\TextInput::make('delivery_note')->label('Documento di trasporto')
-                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
-                                ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita'),
-                            Forms\Components\DatePicker::make('delivery_date')->label('Data documento')
-                                ->extraInputAttributes(['class' => 'text-center'])
-                                ->required(fn (Get $get) => $get('timing_type') == 'differita')
-                                ->columnSpan(2)->disabled(fn (Get $get) => $get('timing_type') != 'differita')
-                                ->native(false)
-                                ->displayFormat('d F Y'),
-                        ]),
-
-                    Section::make('')
-                        ->columns(6)
-                        ->schema([
-
-                            Forms\Components\Select::make('doc_type_id')->label('Tipo documento')
-                                ->required()
-                                ->live()
-                                ->afterStateUpdated(function (Get $get, Set $set, ?int $state) {
-                                    $docType = DocType::find($state);
-                                    if($docType?->name === 'TD00'){
-                                        $set('number', 0);
-                                        NewInvoiceResource::invoiceNumber($get, $set);
-                                    }
-                                    else if (!$docType || $docType->docGroup?->name !== 'Note di variazione') {
-                                        $set('parent_id', null);
-                                        $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
-                                        $set('number', $number);
-                                        NewInvoiceResource::invoiceNumber($get, $set);
-                                    }
-                                })
-                                ->options(function (Get $get) {
-                                    $sectionalId = $get('sectional_id');
-                                    $art73 = $get('art_73');
-                                    if ($art73) {
-                                        // $docs = DocType::get();
-                                        // $docs = \Filament\Facades\Filament::getTenant()->docTypes();
-                                        $docs = \Filament\Facades\Filament::getTenant()
-                                                    ->docTypes()
-                                                    ->select('doc_types.id', 'doc_types.description')
-                                                    ->get();
-                                        return $docs->pluck('description', 'id')->toArray();
-                                    }
-                                    else if (!$sectionalId) {
-                                        return [];
-                                    }
-                                    $sectional = Sectional::with('docTypes')->find($sectionalId);
-                                    return $sectional ? $sectional->docTypes->pluck('description', 'id')->toArray() : [];
-                                })
-                                // ->disabled(fn (Get $get) => !filled($get('sectional_id')))
-                                ->dehydrated()
-                                ->searchable()
-                                ->preload()
-                                ->columnSpan(4),
-
-                            Forms\Components\TextInput::make('invoice_uid')->label('Identificativo')
-                                ->disabled()->columnSpan(2),
+                                ->searchable(),
 
                             // INSERIRE RIGA CON LIMITE TEMPORALE (SI/NO), MOTIVAZIONE (in tabella) (visibile SOLO se 'Nota di credito' e cliente 'Soggetto privato')
                             Forms\Components\Select::make('year_limit')->label('Limite temporale')
@@ -876,6 +958,50 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\DatePicker::make('invoice_date')->label('Data documento')
                                 ->extraInputAttributes(['class' => 'text-center'])
+                                ->live()
+                                ->afterStateUpdated(function (Get $get, Set $set, $state, ?Invoice $record) {
+                                    if (!$state || !$get('number') || !$get('sectional_id') || !$get('year')) return;
+
+                                    if (date('Y', strtotime($state)) != $get('year'))
+                                        \Filament\Notifications\Notification::make()
+                                            ->title('Incongruenza Cronologica')
+                                            ->warning()
+                                            ->persistent()
+                                            ->send();
+
+                                    $currentYear = (int) $get('year');
+                                    $currentNumber = (int) $get('number');
+                                    $sectionalId = $get('sectional_id');
+
+                                    // Creo il "peso" della fattura che sto cercando di inserire
+                                    $currentWeight = ($currentYear * 1000) + $currentNumber;
+
+                                    // Cerco una fattura nello stesso sezionale che abbia:
+                                    // Un peso MINORE (quindi un numero precedente nello stesso anno o un anno precedente)
+                                    // Ma una data MAGGIORE di quella che ho appena scelto
+                                    $inconsistentInvoice = Invoice::where('sectional_id', $sectionalId)
+                                        ->whereRaw('(YEAR(invoice_date) * 1000 + number) < ?', [$currentWeight])
+                                        ->where('invoice_date', '>', $state)
+                                        ->first();
+
+                                    if ($inconsistentInvoice) {
+                                        \Filament\Notifications\Notification::make()
+                                            ->title('Incongruenza Cronologica')
+                                            ->body("La fattura n. {$inconsistentInvoice->number} del " .
+                                                date('d/m/Y', strtotime($inconsistentInvoice->invoice_date)) .
+                                                " ha un numero inferiore ma una data successiva a quella inserita.")
+                                            ->danger()
+                                            ->persistent()
+                                            ->send();
+
+                                        // Ripristino
+                                        if ($record) {
+                                            $set('invoice_date', $record->invoice_date->format('Y-m-d'));
+                                        } else {
+                                            $set('invoice_date', null);
+                                        }
+                                    }
+                                })
                                 ->columnSpan(2)
                                 ->required()
                                 ->default(now()->toDateString()),
@@ -949,7 +1075,7 @@ class NewInvoiceResource extends Resource
                                 // ->required()
                                 ->live()
                                 ->options(InvoiceReference::class)
-                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'new'))
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'new_ref'))
                                 ->preload()
                                 ->columnSpan(2),
 
@@ -1788,54 +1914,101 @@ class NewInvoiceResource extends Resource
         return null;
     }
 
-    protected static function updateDescription(Get $get, Set $set, $ref): void
+    protected static function updateDescription(Get $get, Set $set, $new): void
     {
-        if($ref === 'new'){
-            $set('reference_date_from', '');
-            $set('reference_date_to', '');
-            $set('reference_number_from', '');
-            $set('reference_number_to', '');
-            $set('total_number', '');
-            $set('description', '');
-        }
-
-        $contractDescription = NewContract::find($get('contract_id'))?->lastDetail->invoice_description;
+        $description = '';
+        $docTypeId = $get('doc_type_id');
         $year = substr($get('budget_year'), 2);
 
-        $description = '(ab' . $year .') ' . $contractDescription . ' ';
+        if (filled($docTypeId)) {
 
-        // $description .= 'Corrispettivo per ' . strtolower($accrualType) . ' ';
+            $docType = DocType::with('docGroup')->find($docTypeId);
 
-
-        $invoiceReference = $get('invoice_reference');
-        if ($invoiceReference) {
-            $dateFrom = $get('reference_date_from');
-            $dateTo = $get('reference_date_to');
-            if ($dateFrom) {
-                $description .= 'per il periodo dal ' . static::formatDate($dateFrom);
-
-                if ($dateTo) {
-                    $description .= ' al ' . static::formatDate($dateTo);
+            if ($docType?->docGroup?->name === 'Note di variazione') {
+                if($new === 'new_doc'){
+                    $set('description', '');
                 }
-            }
+                if($new === 'new_ref'){
+                    $set('reference_date_from', '');
+                    $set('reference_date_to', '');
+                    $set('reference_number_from', '');
+                    $set('reference_number_to', '');
+                    $set('total_number', '');
+                }
 
-            $numberFrom = $get('reference_number_from');
-            $numberTo = $get('reference_number_to');
-            if ($numberFrom) {
-                $description .= 'dal verbale numero ' . $numberFrom;
+                $docType = DocType::find($get('doc_type_id'))->description;
+                $description = '(ab' . $year .') ' . $docType;
 
-                if ($numberTo) {
-                    $description .= ' al verbale numero ' . $numberTo;
+                $reversalGroupType = ReversalGroupType::tryFrom($get('reversal_group_type'))?->getLabel();
+                if($reversalGroupType)
+                    $description .= ' a storno ' . lcfirst($reversalGroupType);
 
-                    $total = $get('reference_number_to') - $get('reference_number_from') + 1;
-                    $set('total_number', $total);
-                    if ($total) {
-                        $description .= ' per un totale di ' . $total . ' verbali';
+                $parent = Invoice::find($get('parent_id'));
+                if($parent){
+                    $description .= ' su ' . lcfirst($parent?->docType->description);
+                    $description .= ' n.ro ' . $parent?->getNewInvoiceNumber();
+                    $description .= ' del ' . \Carbon\Carbon::parse($parent?->invoice_date)->format('d/m/Y');
+
+                    $motivation = ReversalMotivationType::find($get('reversal_motivation_type_id'))?->name;
+                    if($motivation)
+                        $description .= ' per ' . lcfirst($motivation) . '.';
+                }
+            } else {
+                if($new === 'new_doc'){
+                    $set('description', '');
+                    $set('reference_date_from', '');
+                    $set('reference_date_to', '');
+                    $set('reference_number_from', '');
+                    $set('reference_number_to', '');
+                    $set('total_number', '');
+                }
+                if($new === 'new_ref'){
+                    $set('reference_date_from', '');
+                    $set('reference_date_to', '');
+                    $set('reference_number_from', '');
+                    $set('reference_number_to', '');
+                    $set('total_number', '');
+                }
+
+                $contractDescription = NewContract::find($get('contract_id'))?->lastDetail->invoice_description;
+
+                $description = '(ab' . $year .') ' . $contractDescription . ' ';
+
+                // $description .= 'Corrispettivo per ' . strtolower($accrualType) . ' ';
+
+                $invoiceReference = $get('invoice_reference');
+                if ($invoiceReference) {
+                    $dateFrom = $get('reference_date_from');
+                    $dateTo = $get('reference_date_to');
+                    if ($dateFrom) {
+                        $description .= 'per il periodo dal ' . static::formatDate($dateFrom);
+
+                        if ($dateTo) {
+                            $description .= ' al ' . static::formatDate($dateTo);
+                        }
                     }
+
+                    $numberFrom = $get('reference_number_from');
+                    $numberTo = $get('reference_number_to');
+                    if ($numberFrom) {
+                        $description .= 'dal verbale numero ' . $numberFrom;
+
+                        if ($numberTo) {
+                            $description .= ' al verbale numero ' . $numberTo;
+
+                            $total = $get('reference_number_to') - $get('reference_number_from') + 1;
+                            $set('total_number', $total);
+                            if ($total) {
+                                $description .= ' per un totale di ' . $total . ' verbali';
+                            }
+                        }
+                    }
+
+
                 }
             }
 
-
+            // $set('description', trim($description));
         }
 
         $set('description', trim($description));

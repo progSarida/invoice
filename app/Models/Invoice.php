@@ -14,6 +14,7 @@ use App\Enums\PaymentType;
 use App\Enums\VatCodeType;
 use App\Models\AccrualType;
 use App\Enums\PaymentStatus;
+use App\Enums\ReversalGroupType;
 use App\Enums\VatEnforceType;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
@@ -29,6 +30,8 @@ class Invoice extends Model
         'container_id',
         'contract_id',
         'parent_id',
+        'reversal_group_type',
+        'reversal_motivation_type_id',
         'tax_type',
         'invoice_type',
         'art_73',
@@ -74,6 +77,7 @@ class Invoice extends Model
     ];
 
     protected $casts = [
+        'reversal_group_type' =>  ReversalGroupType::class,
         'tax_type' =>  TaxType::class,
         'invoice_type' => InvoiceType::class,
         'social_contributions' => 'array',
@@ -294,6 +298,23 @@ class Invoice extends Model
                 foreach($items as $item){
                     $newItem = $item->replicate();
                     $newItem->invoice_id = $invoice->id;
+                    // if($invoice->reversal_group_type && $invoice->reversal_group_type == ReversalGroupType::PARTIAL){
+                    //     $newItem->invoice_element_id = $item->invoice_element_id ?? null;
+                    //     $newItem->description = $item->description ?? null;
+                    //     $newItem->transaction_type = $item->transaction_type ?? null;
+                    //     $newItem->start_date = $item->start_date ?? null;
+                    //     $newItem->end_date = $item->end_date ?? null;
+                    //     $newItem->code = $item->code ?? null;
+                    //     $newItem->quantity = $data['duplicate_amounts'] ? $item->quantity : null;
+                    //     $newItem->measure_unit = $data['duplicate_amounts'] ? $item->measure_unit : null;
+                    //     $newItem->unit_price = $data['duplicate_amounts'] ? $item->unit_price : null;
+                    //     $newItem->amount = $data['duplicate_amounts'] ? $item->amount : 0.00;
+                    //     $newItem->taxable = $data['duplicate_amounts'] ? $item->taxable : 0.00;
+                    //     $newItem->total = $data['duplicate_amounts'] ? $item->total : 0.00;
+                    //     $newItem->vat_code_type = $item->vat_code_type ?? null;
+                    //     $newItem->auto = $item->auto ?? null;
+                    //     $newItem->is_with_vat = $item->is_with_vat ?? null;
+                    // }
                     $newItem->save();
                 }
 
@@ -336,7 +357,7 @@ class Invoice extends Model
 
         static::deleted(function ($invoice) {
             if ($invoice->invoice) {
-                $postalExpenseItems = $invoice->invoiceItems()->whereNotNull('postal_expense_id')->get() ?? [];
+                $postalExpenseItems = $invoice->invoice->invoiceItems()->whereNotNull('postal_expense_id')->get() ?? [];
                 foreach ($postalExpenseItems as $item) {
                     $postalExpense = PostalExpense::find($item->postal_expense_id);
                     $postalExpense->update([

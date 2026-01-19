@@ -125,17 +125,27 @@ class EditNewInvoice extends EditRecord
                     try {
                         $newInvoice = $record->replicate();                                 // creo una nuova istanza della fattura
 
-                        $newInvoice->sdi_status = SdiStatus::DA_INVIARE;                    // resetto i campi che devono essere unici o specifici della nuova fattura
+                        $newInvoice->year = now()->year;                                    // imposto anno corrente
+                        $newInvoice->number = $newInvoice->calculateNextInvoiceNumber();    // genero il numero fattura
+
+                        $newInvoice->invoice_date = now()->format('Y-m-d');                 // imposto la data di oggi
+
+                        $newInvoice->budget_year = now()->year;                             // imposto anno corrente
+                        $newInvoice->accrul_year = now()->year;                             // imposto anno corrente
+
+                        $newInvoice->invoice_reference = null;                              // resetto i campi del riferimento (unici per fattura)
+                        $newInvoice->reference_date_from = null;
+                        $newInvoice->reference_date_to = null;
+                        $newInvoice->reference_number_from = null;
+                        $newInvoice->reference_number_to = null;
+                        $newInvoice->total_number = null;
+
+                        $newInvoice->sdi_status = SdiStatus::DA_INVIARE;                    // resetto i campi dello sdi (unici per fattura)
                         $newInvoice->service_code = null;
                         $newInvoice->sdi_code = null;
                         $newInvoice->sdi_date = null;
                         $newInvoice->pdf_path = null;
                         $newInvoice->xml_path = null;
-
-                        $newInvoice->year = now()->year;                                    // imposto anno corrente
-                        $newInvoice->number = $newInvoice->calculateNextInvoiceNumber();    // genero il numero fattura
-
-                        $newInvoice->invoice_date = now()->format('Y-m-d');                 // imposto la data di oggi
 
                         $newInvoice->save();                                                // salvo la nuova fattura (il boot method genererà automaticamente invoice_uid)
 

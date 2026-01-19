@@ -20,7 +20,7 @@ class ProvinceResource extends Resource
     public static ?string $modelLabel = 'Provincia';
     protected static ?string $navigationIcon = 'phosphor-map-pin-simple-light';
     protected static ?string $navigationGroup = 'Tabelle';
-    protected static ?int $navigationSort = 9;
+    protected static ?int $navigationSort = 10;
 
     // protected static ?string $navigationGroup = 'Gestione città';
 

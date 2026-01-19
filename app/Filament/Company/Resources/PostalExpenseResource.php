@@ -432,8 +432,15 @@ class PostalExpenseResource extends Resource
                             ->multiple()
                             ->required()
                             ->searchable()
-                            ->preload()
-                            ->rules(['array', 'exists:accrual_types,id'])
+                            ->formatStateUsing(function ($record) {
+                                if ($record) {
+                                    return $record->getRawOriginal('send_types')
+                                        ? json_decode($record->getRawOriginal('send_types'), true)
+                                        : [];
+                                }
+                                return [];
+                            })
+                            ->rules(['array', 'exists:send_types,id'])
                             ->columnSpan(4),
 
                         Forms\Components\TextInput::make('recipient')->label('Destinatario notifica/trasgressore')
@@ -965,14 +972,15 @@ class PostalExpenseResource extends Resource
                         Forms\Components\Select::make('reinvoice_id')->label('Fattura emessa per rifatturazione')
                             ->required()
                             // ->relationship('reInvoice', 'description')
-                            ->getSearchResultsUsing(function (string $search) {
+                            ->getSearchResultsUsing(function (string $search, Get $get) {
                                 // Rimuovi spazi multipli e trim
                                 $search = trim(preg_replace('/\s+/', ' ', $search));
 
                                 // Query base con le stesse condizioni del relationship
                                 $query = Invoice::query()
-                                    ->whereNotNull('contract_id')
-                                    ->where('sdi_status', '!=', 'da_inviare')
+                                    // ->whereNotNull('contract_id')
+                                    ->where('contract_id', $get('new_contract_id'))
+                                    ->where('sdi_status', 'da_inviare')
                                     ->whereNull('parent_id');
 
                                 // Cerca separatori (spazio, virgola, slash, trattino)

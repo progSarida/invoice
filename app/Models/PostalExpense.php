@@ -371,7 +371,8 @@ class PostalExpense extends Model
                 if(!$checkInvoiceItems){
                     $invoiceItem = InvoiceItem::create([
                         'invoice_id' => $expense->reinvoice_id,
-                        'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier),
+                        // 'description' => 'Spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier),
+                        'description' => 'Rimborsi escl.Art. 15 ex D.P.R. 633/72',
                         'amount' => $amount,
                         'total' => $amount,
                         'vat_code_type' => VatCodeType::VC06,

@@ -20,7 +20,7 @@ class CityResource extends Resource
     public static ?string $modelLabel = 'Comuni';
     protected static ?string $navigationIcon = 'phosphor-city';
     protected static ?string $navigationGroup = 'Tabelle';
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 9;
 
     // protected static ?string $navigationGroup = 'Gestione città';
 
