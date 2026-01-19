@@ -23,6 +23,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class AndxorSoapService
 {
@@ -585,13 +586,24 @@ class AndxorSoapService
         $input['ProgressivoInvio'] = $invoice->service_code ?? null;
 
         $response = $this->client->Stato($input);
-
         // dd($response);
-
         $date = explode("T", $response->DataOraCreazione);                                              // la data deve essere in base allo stato?
         // $date = explode("T", $this->getDate($response));
-
         $newStatus = $this->translateStatus($response->Stato);
+
+        // $outcomes = ['rifiutata', 'accettata'];
+        // if(1 == 1){
+        // // if (in_array($newStatus, $outcomes)) {
+        //     $responseZIP = $this->client->DownloadZip($input);
+
+        //     if (isset($responseZIP->Contenuto)) {
+        //         $fileName = $responseZIP->Nome ?? "invoice_{$invoice->id}.zip";
+        //         $fileContent = base64_decode($responseZIP->Contenuto);
+
+        //         $filePathZIP = $this->tempFromZip($responseZIP->Nome, $responseZIP->Contenuto);             // salvo temporaneamente il file ZIP
+
+        //     }
+        // }
 
         if($invoice->sdi_status != $newStatus){
             // Aggiorna stato e data modifica stato della fattura
@@ -610,6 +622,13 @@ class AndxorSoapService
         }
 
         return $response;
+    }
+
+    public function updateStatusList($list, string $password)
+    {
+        foreach($list as $el){
+            $response = $this->updateStatus($el, $password);
+        }
     }
 
     private function xmlToArray($xmlString) {
@@ -683,6 +702,46 @@ class AndxorSoapService
 
         return $result;
     }
+
+    // private function tempFromZip(string $filename, string $content): array
+    // {
+    //     $disk = config('filesystems.default');
+    //     $extractedPaths = [];
+
+    //     // 1. Creiamo un file temporaneo fisico per poterlo leggere con ZipArchive
+    //     $tempZipPath = tempnam(sys_get_temp_dir(), 'sdi_');
+    //     file_put_contents($tempZipPath, base64_decode($content));
+
+    //     $zip = new ZipArchive;
+
+    //     if ($zip->open($tempZipPath) === TRUE) {
+    //         // 2. Iteriamo su tutti i file presenti nello ZIP
+    //         for ($i = 0; $i < $zip->numFiles; $i++) {
+    //             $innerFilename = $zip->getNameIndex($i);
+    //             $innerContent = $zip->getFromIndex($i);
+
+    //             // Definiamo dove salvare il file estratto (es. invoices/extracted/nomefile.xml)
+    //             $relativePath = 'invoices/extracted/' . $innerFilename;
+
+    //             if (Storage::disk($disk)->put($relativePath, $innerContent)) {
+    //                 $extractedPaths[] = $relativePath;
+    //             } else {
+    //                 throw new \Exception("Errore durante il salvataggio del file estratto: $innerFilename");
+    //             }
+    //         }
+    //         $zip->close();
+    //     } else {
+    //         throw new \Exception("Impossibile aprire il pacchetto ZIP SDI: $filename");
+    //     }
+
+    //     // 3. Pulizia: eliminiamo lo ZIP temporaneo
+    //     if (file_exists($tempZipPath)) {
+    //         unlink($tempZipPath);
+    //     }
+
+    //     // Ritorna l'elenco dei percorsi dei file salvati
+    //     return $extractedPaths;
+    // }
 
     private function saveActiveXML(string $filename, string $content): string
     {

@@ -315,12 +315,11 @@ class EditNewInvoice extends EditRecord
                 ->requiresConfirmation(),
 
             Actions\Action::make('getStatus')
-                ->label('Aggiorna status SDI')
+                ->label('Aggiorna stato SDI')
                 ->action(function (Invoice $record, array $data) {
                     $soapService = app(AndxorSoapService::class);
                     try {
                         $response = $soapService->updateStatus($record, $data['password']);
-                        // $response = $soapService->sendInvoice($record, 'W3iDWc3Q9w.3AUgd2zpz4');
                         Notification::make()
                             ->title('Stato fattura aggiornato con successo')
                             // ->body('Progressivo: ' . $response->ProgressivoInvio)

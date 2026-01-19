@@ -1228,7 +1228,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(1),
                                 ]),
 
-                        Section::make('Status SDI')->columns(2)
+                        Section::make('Stato SDI')->columns(2)
                             ->collapsed()
                             ->columns(6)
                             ->schema([
@@ -1243,7 +1243,7 @@ class NewInvoiceResource extends Resource
                                     ->displayFormat('d F Y'),
                             ]),
 
-                        Section::make('Status del pagamento')->columns(2)
+                        Section::make('Stato del pagamento')->columns(2)
                             ->collapsed()
                             ->columns(6)
                             ->schema([

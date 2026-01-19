@@ -22,6 +22,7 @@ use App\Filament\Exports\NewInvoiceExporter;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\Client;
 use App\Models\ManageType;
+use App\Services\AndxorSoapService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -382,6 +383,36 @@ class ListNewInvoices extends ListRecords
                             );
                         }
                 }),
+
+                Actions\Action::make('getStatusList')
+                    ->label('Aggiorna stati SDI')
+                    ->action(function (Invoice $record, array $data) {
+                        $soapService = app(AndxorSoapService::class);
+                        $list = Invoice::where('flow', 'out')
+                            ->whereNotNull('sdi_code')
+                            ->whereNotIn('sdi_status', ['rifiutata', 'accettata', 'decorrenza_termini'])
+                            ->get();
+                        try {
+                            $response = $soapService->updateStatusList($list, $data['password']);
+                            Notification::make()
+                                ->title('Stato fatture aggiornato con successo')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->form([
+                        TextInput::make('password')
+                            ->label('Password SOAP')
+                            ->password()
+                            ->required(),
+                    ])
+                    ->requiresConfirmation(),
                 // Actions\Action::make('emptyFolders')
                 //     ->label('Svuota Cartella XML e PDF')
                 //     ->icon('heroicon-o-trash')
