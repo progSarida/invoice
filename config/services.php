@@ -49,7 +49,4 @@ return [
         'userinfo_url'  => env('SSO_USERINFO_URL'),
         'scope'         => env('SSO_SCOPE'),
     ],
-    'andxor' => [
-        'wsdl' => env('WDSL_URL'),
-    ],
 ];
