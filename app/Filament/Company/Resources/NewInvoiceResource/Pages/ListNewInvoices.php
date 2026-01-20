@@ -386,12 +386,20 @@ class ListNewInvoices extends ListRecords
 
                 Actions\Action::make('getStatusList')
                     ->label('Aggiorna stati SDI')
-                    ->action(function (Invoice $record, array $data) {
+                    ->action(function (array $data) {
                         $soapService = app(AndxorSoapService::class);
                         $list = Invoice::where('flow', 'out')
-                            ->whereNotNull('sdi_code')
-                            ->whereNotIn('sdi_status', ['rifiutata', 'accettata', 'decorrenza_termini'])
+                            ->whereNotIn('sdi_status', ['rifiutata', 'accettata', 'decorrenza_termini', 'scartata', 'mancata_consegna'])
+                            ->where(function ($query) {
+                                $query->whereNotNull('sdi_code')
+                                    ->orWhere('sdi_status', 'generata');
+                            })
                             ->get();
+                        if (count($list) === 0)
+                            Notification::make()
+                                ->title('Nessuna fattura da aggiornare')
+                                ->warning()
+                                ->send();
                         try {
                             $response = $soapService->updateStatusList($list, $data['password']);
                             Notification::make()

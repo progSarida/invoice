@@ -12,6 +12,7 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\DocType;
+use App\Models\SdiRequest;
 use App\Services\AndxorSoapService;
 use Carbon\Carbon;
 use Filament\Forms\Components\Checkbox;
@@ -131,7 +132,7 @@ class EditNewInvoice extends EditRecord
                         $newInvoice->invoice_date = now()->format('Y-m-d');                 // imposto la data di oggi
 
                         $newInvoice->budget_year = now()->year;                             // imposto anno corrente
-                        $newInvoice->accrul_year = now()->year;                             // imposto anno corrente
+                        $newInvoice->accrual_year = now()->year;                            // imposto anno corrente
 
                         $newInvoice->invoice_reference = null;                              // resetto i campi del riferimento (unici per fattura)
                         $newInvoice->reference_date_from = null;
@@ -320,6 +321,14 @@ class EditNewInvoice extends EditRecord
                     $soapService = app(AndxorSoapService::class);
                     try {
                         $response = $soapService->updateStatus($record, $data['password']);
+
+                        SdiRequest::create([
+                            'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                            'request_date' => today()->format('Y-m-d'),
+                            'sdi_request_type' => 'single',
+                            'invoice_id' => $record->id
+                        ]);
+
                         Notification::make()
                             ->title('Stato fattura aggiornato con successo')
                             // ->body('Progressivo: ' . $response->ProgressivoInvio)

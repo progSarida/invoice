@@ -17,6 +17,7 @@ use App\Models\PassiveDownload;
 use App\Models\PassiveInvoice;
 use App\Models\PassiveItem;
 use App\Models\SdiNotification;
+use App\Models\SdiRequest;
 use App\Models\Supplier;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
@@ -514,12 +515,15 @@ class AndxorSoapService
 
             // dd(json_encode($payload_, JSON_PRETTY_PRINT));
 
-            Log::debug('Payload SOAP: ' . json_encode($payload, JSON_PRETTY_PRINT));
+            // Log::debug('Payload SOAP: ' . json_encode($payload, JSON_PRETTY_PRINT));
 
             // Esegui la chiamata SOAP per l'invio della fattura
             $response = $this->client->InviaFattura($payload);
 
             // dd($response);
+            // Log::info('Invio-----------------------------------------------------------------------------------------');
+            // Log::info('ProgressivoInvio: ' . ($response?->ProgressivoInvio ?? 'N\D'));
+            // Log::info('DataOraRicezione: ' . ($response?->DataOraRicezione ?? 'N\D'));
 
             $input['Autenticazione'] = $this->getAutenticazione($invoice, $password);
             $input['ProgressivoInvio'] = $response->ProgressivoInvio ?? null;
@@ -528,6 +532,21 @@ class AndxorSoapService
             $response_s = $this->client->Stato($input);
 
             // dd($response_s);
+            // Log::info('Stato-----------------------------------------------------------------------------------------');
+            // Log::info('NomeFile : ' . ($response_s?->NomeFile ?? 'N\D'));
+            // Log::info('Stato : ' . ($response_s?->Stato ?? 'N\D'));
+            // Log::info('Descrizione : ' . ($response_s?->Descrizione ?? 'N\D'));
+            // Log::info('Emessa : ' . ($response_s?->Emessa ?? 'N\D'));
+            // Log::info('Finale : ' . ($response_s?->Finale ?? 'N\D'));
+            // Log::info('DataOraCreazione : ' . ($response_s?->DataOraCreazione ?? 'N\D'));
+            // Log::info('IdSdI : ' . ($response_s?->IdSdI ?? 'N\D'));
+            // Log::info('DataOraRicezione : ' . ($response_s?->DataOraRicezione ?? 'N\D'));
+            // Log::info('DataOraConsegna : ' . ($response_s?->DataOraConsegna ?? 'N\D'));
+            // Log::info('Anomalia : ' . ($response_s?->Anomalia ?? 'N\D'));
+            // Log::info('Notifica-NomeFile : ' . ($response_s?->Notifica?->NomeFile ?? 'N\D'));
+            // Log::info('Notifica-DataOraRicezione : ' . ($response_s?->Notifica?->DataOraRicezione ?? 'N\D'));
+            // Log::info('Notifica-Tipo : ' . ($response_s?->Notifica?->Tipo ?? 'N\D'));
+            // Log::info('Notifica-ProgressivoRicezione : ' . ($response_s?->Notifica?->ProgressivoRicezione ?? 'N\D'));
 
             // Esegui la chiamata SOAP per il recupero dei file xml e pdf della fattura
             $responseXML = $this->client->Download($input);
@@ -535,6 +554,9 @@ class AndxorSoapService
 
             // dd($responseXML);
             // dd($responsePDF);
+            // Log::info('File------------------------------------------------------------------------------------------');
+            // Log::info('NomeFileXML : ' . ($responseXML?->Nome ?? 'N\D'));
+            // Log::info('NomeFilePDF : ' . ($responsePDF?->Nome ?? 'N\D'));
 
             // dd('STOP');
 
@@ -587,6 +609,22 @@ class AndxorSoapService
 
         $response = $this->client->Stato($input);
         // dd($response);
+        // Log::info('Stato-----------------------------------------------------------------------------------------');
+        // Log::info('NomeFile : ' . ($response?->NomeFile ?? 'N\D'));
+        // Log::info('Stato : ' . ($response?->Stato ?? 'N\D'));
+        // Log::info('Descrizione : ' . ($response?->Descrizione ?? 'N\D'));
+        // Log::info('Emessa : ' . ($response?->Emessa ?? 'N\D'));
+        // Log::info('Finale : ' . ($response?->Finale ?? 'N\D'));
+        // Log::info('DataOraCreazione : ' . ($response?->DataOraCreazione ?? 'N\D'));
+        // Log::info('IdSdI : ' . ($response?->IdSdI ?? 'N\D'));
+        // Log::info('DataOraRicezione : ' . ($response?->DataOraRicezione ?? 'N\D'));
+        // Log::info('DataOraConsegna : ' . ($response?->DataOraConsegna ?? 'N\D'));
+        // Log::info('Anomalia : ' . ($response?->Anomalia ?? 'N\D'));
+        // Log::info('Notifica-NomeFile : ' . ($response?->Notifica?->NomeFile ?? 'N\D'));
+        // Log::info('Notifica-DataOraRicezione : ' . ($response?->Notifica?->DataOraRicezione ?? 'N\D'));
+        // Log::info('Notifica-Tipo : ' . ($response?->Notifica?->Tipo ?? 'N\D'));
+        // Log::info('Notifica-ProgressivoRicezione : ' . ($response?->Notifica?->ProgressivoRicezione ?? 'N\D'));
+
         $date = explode("T", $response->DataOraCreazione);                                              // la data deve essere in base allo stato?
         // $date = explode("T", $this->getDate($response));
         $newStatus = $this->translateStatus($response->Stato);
@@ -608,6 +646,7 @@ class AndxorSoapService
         if($invoice->sdi_status != $newStatus){
             // Aggiorna stato e data modifica stato della fattura
             $invoice->update([
+                'sdi_code' => $response?->IdSdI,
                 'sdi_status' => $newStatus,
                 'sdi_date' => $date[0]
             ]);
@@ -627,8 +666,16 @@ class AndxorSoapService
     public function updateStatusList($list, string $password)
     {
         foreach($list as $el){
+            // Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------------------------------------------------------');
             $response = $this->updateStatus($el, $password);
         }
+
+        SdiRequest::create([
+            'company_id' => \Filament\Facades\Filament::getTenant()->id,
+            'request_date' => today()->format('Y-m-d'),
+            'sdi_request_type' => 'mass',
+            'invoice_id' => null
+        ]);
     }
 
     private function xmlToArray($xmlString) {

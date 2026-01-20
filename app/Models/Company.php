@@ -114,6 +114,11 @@ class Company extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    public function passiveInvoices()
+    {
+        return $this->hasMany(PassiveInvoice::class);
+    }
+
     public function activePayments()
     {
         return $this->hasMany(ActivePayments::class);

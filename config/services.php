@@ -38,7 +38,7 @@ return [
         'slo_key'  => env('SSO_SLO_SECRET'),
         'client_id'     => env('SSO_CLIENT_ID'),
         'client_secret' => env('SSO_CLIENT_SECRET'),
-        
+
         // Endpoint del Server IdP
         'redirect_uri'  => env('SSO_REDIRECT_URI'),
 
@@ -49,5 +49,7 @@ return [
         'userinfo_url'  => env('SSO_USERINFO_URL'),
         'scope'         => env('SSO_SCOPE'),
     ],
-
+    'andxor' => [
+        'wsdl' => env('WDSL_URL'),
+    ],
 ];
