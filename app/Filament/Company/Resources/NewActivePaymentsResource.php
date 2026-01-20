@@ -157,15 +157,30 @@ class NewActivePaymentsResource extends Resource
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->disabled(fn ($get) => !$get('invoice_id') || $get('validated'))
                     ->afterStateUpdated(function ($state, Get $get, $component) {
+                        if (!$get('invoice_id')) return;
+
                         $invoice = Invoice::find($get('invoice_id'));
-                        $newTotalPayment = $state + $invoice->total_payment;
-                        $compare = $invoice->client?->type?->value == 'public' ? $invoice->no_vat_total : $invoice->total;
 
                         $clean = preg_replace('/[^\d,\.-]/', '', $state);
                         $number = str_replace(',', '.', $clean);
                         $float = floatval($number);
+
+                        $newTotalPayment = $state + $invoice->total_payment;
+                        $compare = $invoice->client?->type?->value == 'public'
+                            ? $invoice->no_vat_total
+                            : $invoice->total;
+
                         $formatted = number_format($float, 2, ',', '.');
                         $component->state($formatted);
+
+                        if($state != $compare){
+                            Notification::make()
+                                ->title("Attenzione! L'importo del pagamento è diverso dal totale della fattura " . $invoice->getNewInvoiceNumber())
+                                ->danger()
+                                ->duration(5000)
+                                // ->persistent()
+                                ->send();
+                        }
 
                         if($newTotalPayment > ($compare - $invoice->total_notes)){
                             Notification::make()

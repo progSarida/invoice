@@ -40,6 +40,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
     CASE RIFIUTO_EMESSO = "rifiuto_emesso";
     CASE RIFIUTO_ARCHIVIATO = "rifiuto_archiviato";
     CASE SCARTO_VALIDATO = "scarto_validato";
+    CASE MANCATA_CONSEGNA_VALIDATA = "mancata_consegna_validata";
     CASE AUTO_INVIATA = "auto_inviata";
     CASE APERTA = "fattura_aperta";
 
@@ -73,11 +74,13 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::RIFIUTO_EMESSO => 'RN - Rifiuto validato (emettere nota di credito)',
             self::RIFIUTO_ARCHIVIATO => 'RM - Rifiuto validato (mantenere in contabilità)',
             self::SCARTO_VALIDATO => 'SV - Scarto validato (mantenere in contabilità)',
+            self::MANCATA_CONSEGNA_VALIDATA => 'MCV - Mancata consegna validata (mantenere in contabilità)',
             self::AUTO_INVIATA => 'Auto inviata',
             self::APERTA => 'Fattura aperta'
         };
     }
 
+    // Icone stati
     public function getIcon(): string
     {
         return match($this) {
@@ -108,6 +111,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::RIFIUTO_EMESSO => 'fluentui-mail-arrow-forward-20-o',
             self::RIFIUTO_ARCHIVIATO => 'fluentui-mail-prohibited-20-o',
             self::SCARTO_VALIDATO => '',
+            self::MANCATA_CONSEGNA_VALIDATA => '',
             self::AUTO_INVIATA => '',
             self::APERTA => ''
         };
@@ -143,6 +147,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::RIFIUTO_EMESSO => 'RN - Rifiuto validato (emettere nota di credito)',
             self::RIFIUTO_ARCHIVIATO => 'RM - Rifiuto validato (mantenere in contabilità)',
             self::SCARTO_VALIDATO => 'SV - Scarto validato (mantenere in contabilità)',
+            self::MANCATA_CONSEGNA_VALIDATA => 'MCV - Mancata consegna validata (mantenere in contabilità)',
             self::AUTO_INVIATA => 'Auto inviata',
             self::APERTA => 'Fattura aperta'
         };
@@ -178,8 +183,120 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::RIFIUTO_EMESSO => 'gray',
             self::RIFIUTO_ARCHIVIATO => 'gray',
             self::SCARTO_VALIDATO => 'gray',
+            self::MANCATA_CONSEGNA_VALIDATA => 'gray',
             self::AUTO_INVIATA => 'gray',
             self::APERTA => 'gray'
+        };
+    }
+
+    // Blocco modifica stato SDI
+    public function lockChange(): bool
+    {
+        return match($this) {
+            self::EMPTY => true,
+            self::DA_INVIARE => true,
+            self::INVIATA => true,
+            self::SCARTATA => false,
+            self::CONSEGNATA => true,
+            self::MANCATA_CONSEGNA => false,
+            self::ACCETTATA => true,
+            self::RIFIUTATA => false,
+            self::DECORRENZA_TERMINI => true,
+            self::AVVENUTA_TRASMISSIONE => true,
+            self::METADATA => true,
+
+            self::EMESSA => true,
+            self::IN_ELABORAZIONE => true,
+
+            self::GENERATA => true,
+            self::TRASMESSA_SDI => true,
+            self::NON_CONSEGNATA => false,
+            self::NON_RECAPITABILE => false,
+            self::NEL_CASSETTO => true,
+            self::RIELABORATA => true,
+            self::IMPORTATA => true,
+
+            // self::RIFIUTO_VALIDATO => 'gray',
+            self::RIFIUTO_EMESSO => true,
+            self::RIFIUTO_ARCHIVIATO => true,
+            self::SCARTO_VALIDATO => true,
+            self::MANCATA_CONSEGNA_VALIDATA => true,
+            self::AUTO_INVIATA => true,
+            self::APERTA => true
+        };
+    }
+
+    // Blocco invio fatture a SDI
+    public function lockSend(): bool
+    {
+        return match($this) {
+            self::EMPTY => true,
+            self::DA_INVIARE => false,
+            self::INVIATA => true,
+            self::SCARTATA => false,
+            self::CONSEGNATA => true,
+            self::MANCATA_CONSEGNA => true,
+            self::ACCETTATA => true,
+            self::RIFIUTATA => true,
+            self::DECORRENZA_TERMINI => true,
+            self::AVVENUTA_TRASMISSIONE => true,
+            self::METADATA => true,
+
+            self::EMESSA => true,
+            self::IN_ELABORAZIONE => true,
+
+            self::GENERATA => true,
+            self::TRASMESSA_SDI => true,
+            self::NON_CONSEGNATA => true,
+            self::NON_RECAPITABILE => true,
+            self::NEL_CASSETTO => true,
+            self::RIELABORATA => false,
+            self::IMPORTATA => true,
+
+            // self::RIFIUTO_VALIDATO => 'gray',
+            self::RIFIUTO_EMESSO => true,
+            self::RIFIUTO_ARCHIVIATO => true,
+            self::SCARTO_VALIDATO => true,
+            self::MANCATA_CONSEGNA_VALIDATA => true,
+            self::AUTO_INVIATA => true,
+            self::APERTA => true
+        };
+    }
+
+    // Blocco aggiornamento stato da SDI
+    public function lockUpdate(): bool
+    {
+        return match($this) {
+            self::EMPTY => true,
+            self::DA_INVIARE => true,
+            self::INVIATA => false,
+            self::SCARTATA => true,
+            self::CONSEGNATA => true,
+            self::MANCATA_CONSEGNA => true,
+            self::ACCETTATA => true,
+            self::RIFIUTATA => true,
+            self::DECORRENZA_TERMINI => true,
+            self::AVVENUTA_TRASMISSIONE => true,
+            self::METADATA => true,
+
+            self::EMESSA => true,
+            self::IN_ELABORAZIONE => true,
+
+            self::GENERATA => false,
+            self::TRASMESSA_SDI => false,
+            self::NON_CONSEGNATA => true,
+            self::NON_RECAPITABILE => true,
+            self::NEL_CASSETTO => true,
+            self::RIELABORATA => false,
+            self::IMPORTATA => true,
+
+            // self::RIFIUTO_VALIDATO => 'gray',
+            self::RIFIUTO_EMESSO => true,
+            self::RIFIUTO_ARCHIVIATO => true,
+            self::SCARTO_VALIDATO => true,
+            self::MANCATA_CONSEGNA_VALIDATA => true,
+            self::AUTO_INVIATA => true,
+            self::APERTA => true
         };
     }
 }

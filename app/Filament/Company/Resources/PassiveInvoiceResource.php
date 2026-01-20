@@ -5,13 +5,17 @@ namespace App\Filament\Company\Resources;
 use App\Enums\PaymentMode;
 use App\Enums\PaymentType;
 use App\Enums\PiValidationStatus;
+use App\Enums\SdiStatus;
 use App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassiveItemsRelationManager;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassivePaymentsRelationManager;
 use App\Models\DocType;
 use App\Models\PassiveInvoice;
+use App\Models\Supplier;
+use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action as ActionsAction;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
@@ -27,6 +31,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -53,16 +58,17 @@ class PassiveInvoiceResource extends Resource
 
                     Placeholder::make('pi_validation')
                         ->label('')
-                        ->visible(fn($record) => $record && filled($record->pi_validation_id))
+                        // ->visible(fn($record) => $record && filled($record->pi_validation_id))
+                        ->visible(fn($record) => $record )
                         ->content(function ($record) {
-                            if (! $record->pi_validation_id) {
+                            if (!$record->pi_validation_id) {
                                 return 'Nessuna validazione selezionata';
                             }
 
                             return optional($record->piValidation)->name;
                         })
                         ->extraAttributes(function ($record) {
-                            $statusEnum = $record->piValidation->pi_validation_status;
+                            $statusEnum = $record?->piValidation?->pi_validation_status;
 
                             $color = $statusEnum?->getColor() ?? 'gray';
 
@@ -93,8 +99,17 @@ class PassiveInvoiceResource extends Resource
                         ->columns(6)
                         ->schema([
 
-                            Forms\Components\Select::make('supplier_id')
-                                ->label('Fornitore')
+                            Forms\Components\Select::make('supplier_id')->label('Fornitore')
+                                ->hintAction(
+                                    ActionsAction::make('Nuovo')
+                                        ->icon('ri-user-2-line')
+                                        ->form(fn(Form $form) => SupplierResource::modalForm($form))
+                                        ->modalWidth('7xl')
+                                        ->modalHeading('')
+                                        ->action(fn (array $data, Supplier $supplier, Set $set) => PassiveInvoiceResource::saveSupplier($data, $supplier, $set))
+                                        ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Company\Resources\PassiveInvoiceResource\Pages\EditPassiveInvoice)
+                                )
+                                ->required()
                                 ->columnSpan(3)
                                 ->relationship('supplier', 'denomination')
                                 //  ->disabled()
@@ -117,6 +132,7 @@ class PassiveInvoiceResource extends Resource
                         ->schema([
                             Forms\Components\Select::make('doc_type')
                                 ->label('Tipo documento')
+                                ->required()
                                 ->columnSpan(7)
                                 ->options(function (Get $get) {
                                     $docs = DocType::select('doc_types.name', 'doc_types.description')
@@ -127,15 +143,75 @@ class PassiveInvoiceResource extends Resource
                                 ,
                             Forms\Components\TextInput::make('number')
                                 ->label('Numero')
+                                ->required()
                                 ->columnSpan(3)
                                 //  ->disabled()
                                 ,
                             Forms\Components\DatePicker::make('invoice_date')
                                 ->label('Data')
+                                ->required()
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2)
                                 //  ->disabled()
                                 ,
+
+                            Forms\Components\FileUpload::make('pdf_path')->label('File PDF')
+                                ->required()
+                                // ->disk('public')
+                                ->directory('passive_invoices/pdf_files')
+                                // ->visibility('public')
+                                ->acceptedFileTypes(['application/pdf'])
+                                ->maxSize(10240)
+                                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get) {
+                                    $supplierId = $get('supplier_id') ?? 'unknown';
+                                    $number = $get('number') ?? 'unknown';
+                                    $invoiceDate = $get('invoice_date') ?? 'unknown';
+                                    $extension = $file->getClientOriginalExtension();
+                                    return sprintf('PDF_FAT_PASS_%s_%s_%s.%s', $supplierId, $number, $invoiceDate, $extension);
+                                })
+                                ->columnSpan(4),
+                            Forms\Components\Actions::make([
+                                Forms\Components\Actions\Action::make('view_pdf')
+                                    ->label('Visualizza pdf')
+                                    ->icon('heroicon-o-eye')
+                                    // ->url(fn($record): ?string => $record && $record->pdf_path ? Storage::url($record->pdf_path) : null)
+                                    ->url(fn($record): ?string => $record->pdf_path ? Storage::temporaryUrl($record->pdf_path,now()->addMinutes(1)) : null)
+                                    ->openUrlInNewTab()
+                                    ->visible(fn($record): bool => $record && $record->pdf_path)
+                                    ->color('primary'),
+                            ])
+                            ->columnSpan(2),
+
+                            Forms\Components\FileUpload::make('xml_path')->label('File XML')
+                                // ->required()
+                                // ->disk('public')
+                                ->directory('passive_invoices/xml_files')
+                                // ->visibility('public')
+                                ->acceptedFileTypes([
+                                    'application/xml',
+                                    'text/xml',
+                                    'application/x-xml'
+                                ])
+                                ->maxSize(10240)
+                                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get) {
+                                    $supplierId = $get('supplier_id') ?? 'unknown';
+                                    $number = $get('number') ?? 'unknown';
+                                    $invoiceDate = $get('invoice_date') ?? 'unknown';
+                                    $extension = $file->getClientOriginalExtension();
+                                    return sprintf('XML_FAT_PASS_%s_%s_%s.%s', $supplierId, $number, $invoiceDate, $extension);
+                                })
+                                ->columnSpan(4),
+                            Forms\Components\Actions::make([
+                                Forms\Components\Actions\Action::make('view_xml')
+                                    ->label('Visualizza xml')
+                                    ->icon('heroicon-o-eye')
+                                    // ->url(fn($record): ?string => $record && $record->xml_path ? Storage::url($record->xml_path) : null)
+                                    ->url(fn($record): ?string => $record->xml_path ? Storage::temporaryUrl($record->xml_path,now()->addMinutes(1)) : null)
+                                    ->openUrlInNewTab()
+                                    ->visible(fn($record): bool => $record && $record->xml_path)
+                                    ->color('primary'),
+                            ])
+                            ->columnSpan(2),
                         ]),
 
                         Section::make('Dati per il pagamento')
@@ -256,12 +332,15 @@ class PassiveInvoiceResource extends Resource
                 TextColumn::make('supplier.denomination')
                     ->label('Fornitore')
                     ->searchable()
-                    ->numeric()
+                    ->limit(40)
+                    ->tooltip(fn ($record) => $record->supplier->denomination)
                     ->sortable(),
                 TextColumn::make('description')
                     ->label('Descrizione')
                     ->searchable()
                     ->wrap()
+                    ->limit(60)
+                    ->tooltip(fn ($record) => $record->description)
                     ->sortable(),
                 TextColumn::make('total')
                     ->label('Totale a doversi')
@@ -272,9 +351,13 @@ class PassiveInvoiceResource extends Resource
                     ->label('Scadenza')
                     ->date('d/m/Y')
                     ->sortable(),
+                Tables\Columns\IconColumn::make('sdi_status')
+                    ->label('Stato')
+                    // ->tooltip(fn ($state): string => $state)
+                    ->sortable(),
                 Tables\Columns\IconColumn::make('piValidation.pi_validation_status')
-                    ->label('Status')
-                    ->tooltip(fn ($record): string => $record->piValidation ? $record->piValidation->name : '')
+                    ->label('Validazione')
+                    ->tooltip(fn ($record): string => $record->piValidation ? $record->piValidation->name : 'N\D')
                     ->sortable(),
             ])
             ->filters([
@@ -359,5 +442,40 @@ class PassiveInvoiceResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with('supplier');
+    }
+
+    public static function saveSupplier(array $data, Supplier $supplier, Set $set): void
+    {
+        $supplier->company_id = Filament::getTenant()->id;
+
+        $supplier->denomination = $data['denomination'] ?? null;
+        $supplier->tax_code = $data['tax_code'] ?? null;
+        $supplier->vat_code = $data['vat_code'] ?? null;
+
+        $supplier->address = $data['address'] ?? null;
+        $supplier->civic_number = $data['civic_number'] ?? null;
+        $supplier->zip_code = $data['zip_code'] ?? null;
+        $supplier->city = $data['city'] ?? null;
+        $supplier->province = $data['province'] ?? null;
+        $supplier->country = $data['country'] ?? null;
+
+        $supplier->rea_office = $data['rea_office'] ?? null;
+        $supplier->rea_number = $data['rea_number'] ?? null;
+        $supplier->capital = $data['capital'] ?? null;
+        $supplier->sole_share = $data['sole_share'] ?? null;
+        $supplier->liquidation_status = $data['liquidation_status'] ?? null;
+
+        $supplier->phone = $data['phone'] ?? null;
+        $supplier->fax = $data['fax'] ?? null;
+        $supplier->email = $data['email'] ?? null;
+        $supplier->pec = null;
+
+        $supplier->save();
+
+        $set('supplier_id', $supplier->id);
+        Notification::make()
+            ->title('Fornitore salvato con successo')
+            ->success()
+            ->send();
     }
 }

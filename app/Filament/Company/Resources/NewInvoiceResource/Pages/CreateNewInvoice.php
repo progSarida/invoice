@@ -11,6 +11,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\NewContract;
+use Illuminate\Validation\ValidationException;
 
 class CreateNewInvoice extends CreateRecord
 {
@@ -35,6 +36,24 @@ class CreateNewInvoice extends CreateRecord
 
         //     return $data;
         // }
+
+        // Recupero l'anno dalla data fattura
+        $invoiceDate = $data['invoice_date'] instanceof Carbon
+            ? $data['invoice_date']
+            : Carbon::parse($data['invoice_date']);
+
+        $yearFromDate = $invoiceDate->format('Y');
+
+        // Confronto con il campo 'year'
+        if ($data['year'] != $yearFromDate) {
+            Notification::make()
+                    ->body("Attenzione: l'anno indicato ({$data['year']}) non coincide con l'anno della data fattura ({$yearFromDate}).")
+                    ->danger()
+                    ->duration(5000)
+                    ->send();
+
+                $this->halt();
+        }
 
         if ( $data['timing_type'] === 'differita' && !empty($data['delivery_date']) ) {                                     // controllo 15 giorni mese successivo data fattura differita
             $deliveryDate = Carbon::parse($data['delivery_date']);

@@ -24,7 +24,8 @@ class EditPassiveInvoice extends EditRecord
         $doc = DocType::where('name', $this->record->doc_type)->select('description')->first()->description;
         $date = Carbon::parse($this->record->invoice_date)->format('d/m/Y');
 
-        return $doc . " n. " . $number . " del " . $date;
+        // return $doc . " n. " . $number . " del " . $date;
+        return "n.ro " . $number . " del " . $date;
     }
 
     protected function getHeaderActions(): array

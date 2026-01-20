@@ -26,7 +26,8 @@ class ViewNewInvoice extends ViewRecord
         $doc = DocType::find($this->record->doc_type_id)->description;
         $date = Carbon::parse($this->record->invoice_date)->format('d/m/Y');
 
-        return $doc . " n. " . $number . " del " . $date;
+        // return $doc . " n. " . $number . " del " . $date;
+        return "n.ro " . $number . " del " . $date;
     }
 
     protected function getHeaderActions(): array
@@ -93,8 +94,9 @@ class ViewNewInvoice extends ViewRecord
                 ->action(function () use ($nextIDoc) {
                     $this->redirect(NewInvoiceResource::getUrl('view', ['record' => $nextIDoc->id]));
                 }),
-            // Stampa fattura
-            Actions\Action::make('stampa_pdf')
+            Actions\ActionGroup::make([
+                // Stampa fattura
+                Actions\Action::make('stampa_pdf')
                 ->label('Stampa')
                 ->icon('heroicon-o-printer')
                 ->color(Color::rgb('rgb(255, 0, 0)'))
@@ -158,7 +160,12 @@ class ViewNewInvoice extends ViewRecord
                         echo $pdf->output();
                     }, 'fattura-' . $record->printNumber() . '.pdf');
                 }),
-            Actions\EditAction::make(),
+                Actions\EditAction::make(),
+            ])
+            ->label('Operazioni')
+            ->icon('heroicon-m-ellipsis-vertical')
+            ->color('info')
+            ->button(),
         ];
     }
 

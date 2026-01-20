@@ -418,6 +418,7 @@ class ListNewInvoices extends ListRecords
                         TextInput::make('password')
                             ->label('Password SOAP')
                             ->password()
+                            ->revealable()
                             ->required(),
                     ])
                     ->requiresConfirmation(),

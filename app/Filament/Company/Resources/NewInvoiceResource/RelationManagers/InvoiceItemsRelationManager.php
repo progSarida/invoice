@@ -93,11 +93,11 @@ class InvoiceItemsRelationManager extends RelationManager
                             ->columnSpan(3),
                         Forms\Components\TextInput::make('quantity')->label('Quantità')
                             ->columnSpan(4)
-                            ->live()
+                            ->live(onBlur: true)
                             ->required(fn(Get $get) => $get('measure_unit') || $get('unit_price'))
                             ->numeric()
                             // ->live(debounce: 500)
-                            ->debounce(1000)
+                            ->debounce(3000)
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                 $unit_price = $get('unit_price');
                                 if($state && $unit_price){
@@ -127,7 +127,7 @@ class InvoiceItemsRelationManager extends RelationManager
                                 }
                             }),
                         Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
-                            ->live()
+                            ->live(onBlur: true)
                             ->hintIcon('heroicon-o-information-circle', tooltip: 'L\'unità di misura deve essere lunga al massimo 10 caratteri (0-9, a-z, A-Z)')
                             ->rules([
                                 'nullable',
@@ -138,11 +138,11 @@ class InvoiceItemsRelationManager extends RelationManager
                             ->columnSpan(4)
                             ->maxLength(255),
                         Forms\Components\TextInput::make('unit_price')->label('Prezzo unitario')
-                            ->live()
+                            ->live(onBlur: true)
                             ->required(fn(Get $get) => $get('quantity') || $get('measure_unit'))
                             ->columnSpan(4)
                             // ->live(debounce: 500)
-                            ->debounce(1000)
+                            ->debounce(3000)
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                 $quantity = $get('quantity');
                                 if($state && $quantity){
@@ -175,11 +175,12 @@ class InvoiceItemsRelationManager extends RelationManager
 
                 Forms\Components\TextInput::make('amount')->label('Importo')
                     ->required()
+                    ->live(onBlur: true)
                     ->columnSpan(4)
                     ->prefix('€')
                     ->maxLength(255)
                     // ->live(debounce: 500)
-                    ->debounce(1000)
+                    ->debounce(3000)
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
                         if (!is_numeric($state)) return;
                         // Calcolo importo IVA e totale quando amount cambia
@@ -341,7 +342,7 @@ class InvoiceItemsRelationManager extends RelationManager
                                     ->disabled()
                                     ->prefix('€')
                                     // ->live(debounce: 500)
-                                    ->debounce(1000)
+                                    ->debounce(3000)
                                     ->columnSpan(2),
                                 Forms\Components\DatePicker::make('date')
                                     ->label('Data')

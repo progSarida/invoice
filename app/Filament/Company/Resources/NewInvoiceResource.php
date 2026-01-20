@@ -961,20 +961,23 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 ->afterStateUpdated(function (Get $get, Set $set, $state, ?Invoice $record) {
                                     if (!$state || !$get('number') || !$get('sectional_id') || !$get('year')) return;
+                                    $year = $get('year');
+                                    $date = \Illuminate\Support\Carbon::parse($state);
 
-                                    if (date('Y', strtotime($state)) != $get('year'))
+                                    if ($date->format('Y') != $year){
                                         \Filament\Notifications\Notification::make()
                                             ->title('Incongruenza Cronologica')
-                                            ->warning()
+                                            ->body("L'anno di fatturazione ({$year}) non coincide con l'anno della data della fattura ({$date->format('Y')}).")
+                                            ->danger()
                                             ->persistent()
                                             ->send();
+                                    }
 
-                                    $currentYear = (int) $get('year');
                                     $currentNumber = (int) $get('number');
                                     $sectionalId = $get('sectional_id');
 
                                     // Creo il "peso" della fattura che sto cercando di inserire
-                                    $currentWeight = ($currentYear * 1000) + $currentNumber;
+                                    $currentWeight = ($year * 1000) + $currentNumber;
 
                                     // Cerco una fattura nello stesso sezionale che abbia:
                                     // Un peso MINORE (quindi un numero precedente nello stesso anno o un anno precedente)
@@ -1234,7 +1237,8 @@ class NewInvoiceResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
                                     ->default(SdiStatus::DA_INVIARE)
-                                    ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata']))
+                                    // ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata', 'mancata_consegna']))
+                                    ->disabled(fn ($state) => SdiStatus::from($state)->lockChange())
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('sdi_code')->label('Codice SdI')->readOnly()->columnSpan(2)->disabled(),
                                 Forms\Components\DatePicker::make('sdi_date')->label('Data')
@@ -1282,7 +1286,7 @@ class NewInvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('id')->label('Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('docType.description')
-                    ->label('Tipo documento')
+                    ->label('Tipo')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('number')->label('Numero')
@@ -1338,7 +1342,7 @@ class NewInvoiceResource extends Resource
                     ->state(fn (Invoice $invoice) => $invoice->getTaxable())
                     ->alignRight()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('vat')->label('Importo IVA')
+                Tables\Columns\TextColumn::make('vat')->label('IVA')
                     ->money('EUR')
                     // ->state(fn (Invoice $invoice) => $invoice->getVat())
                     ->sortable()
@@ -1360,18 +1364,18 @@ class NewInvoiceResource extends Resource
                     ->sortable()
                     ->alignRight()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('tot_res')->label('Totale a doversi')
+                Tables\Columns\TextColumn::make('tot_res')->label('Dovuto')
                     ->money('EUR')
                     ->state(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getResidue())
                     ->sortable()
                     ->alignRight()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('sdi_status')->label('Status')
-                    ->searchable()
-                    // ->badge()
-                    ->color('black')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('sdi_status')->label('Stato')
+                //     ->searchable()
+                //     // ->badge()
+                //     ->color('black')
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('sdi_status')
                     ->label('Status')
                     ->tooltip(fn (SdiStatus $state): string => $state->getLabel())
