@@ -255,6 +255,7 @@ class PassiveInvoiceResource extends Resource
                     ->sortable(),
                 TextColumn::make('supplier.denomination')
                     ->label('Fornitore')
+                    ->searchable()
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('description')
