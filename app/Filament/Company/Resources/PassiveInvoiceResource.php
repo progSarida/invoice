@@ -341,7 +341,7 @@ class PassiveInvoiceResource extends Resource
                     ->label('Descrizione')
                     ->searchable()
                     ->wrap()
-                    ->limit(50)
+                    ->limit(40)
                     ->tooltip(fn ($record) => $record->description)
                     ->sortable(),
                 TextColumn::make('total')
