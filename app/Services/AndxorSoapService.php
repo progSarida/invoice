@@ -32,8 +32,8 @@ class AndxorSoapService
 
     public function __construct()
     {
-        $wsdl = 'https://tinv-test.andxor.it/userServices?wsdl';                // WSDL di test
-        // $wsdl = 'https://tinv.andxor.it/userServices?wsdl';                     // WSDL di produzione
+        // $wsdl = 'https://tinv-test.andxor.it/userServices?wsdl';                // WSDL di test
+        $wsdl = 'https://tinv.andxor.it/userServices?wsdl';                     // WSDL di produzione
         $options = [
             'trace' => true,
             'exceptions' => true,
