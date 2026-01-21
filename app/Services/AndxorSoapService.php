@@ -962,12 +962,23 @@ class AndxorSoapService
 
         $td = $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['TipoDocumento'] ?? null;
         $rawCausale = $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Causale'] ?? null;
-        $fattColl = $xml['FatturaElettronicaBody']['DatiGenerali']['DatiFattureCollegate']['IdDocumento']  ?? null;
-        $dataTemp = explode('-', $xml['FatturaElettronicaBody']['DatiGenerali']['DatiFattureCollegate']['Data']);
-        $dataFattColl = $dataTemp[2] . '-' . $dataTemp[1] . '-' . $dataTemp[0] ?? null;
-        if(!$rawCausale && ($fattColl && $dataFattColl)){
-            $rawCausale = 'Fatt.Coll. ' . $fattColl .' del ' . $dataFattColl;
+        if (isset($xml['FatturaElettronicaBody']['DatiGenerali']['DatiFattureCollegate'])) {
+            $collegate = $xml['FatturaElettronicaBody']['DatiGenerali']['DatiFattureCollegate'];
+            $fattColl = $collegate['IdDocumento'] ?? null;
+            $dataFattColl = null;
+            if (!empty($collegate['Data'])) {
+                $dataTemp = explode('-', $collegate['Data']);
+
+                // Controlliamo che l'explode abbia prodotto effettivamente 3 parti (Y-m-d)
+                if (count($dataTemp) === 3) {
+                    $dataFattColl = $dataTemp[2] . '-' . $dataTemp[1] . '-' . $dataTemp[0];
+                }
+            }
+            if(!$rawCausale && ($fattColl && $dataFattColl)){
+                $rawCausale = 'Fatt.Coll. ' . $fattColl .' del ' . $dataFattColl;
+            }
         }
+
         $data = [
                 'company_id' => Filament::getTenant()->id,
                 'supplier_id' => $supplier->id,
@@ -1391,10 +1402,13 @@ class AndxorSoapService
             $input = [
                 'Autenticazione' => $this->getAutenticazione(null, $data['password']),
                 'IncludiArchiviate' => false,
-                'DataInizio' => $dataInizio, // Formato: YYYY-MM-DD
-                'DataOraInizio' => $dataInizio . 'T00:00:00', // Formato: YYYY-MM-DDThh:mm:ss
-                'DataFine' => $dataFine, // Formato: YYYY-MM-DD
-                'DataOraFine' => $dataFine . 'T23:59:59', // Formato: YYYY-MM-DDThh:mm:ss
+
+                // filtro ricerca fatture passive con data ultimo scarico
+                // 'DataInizio' => $dataInizio,                                                                    // Formato: YYYY-MM-DD
+                // 'DataOraInizio' => $dataInizio . 'T00:00:00',                                                   // Formato: YYYY-MM-DDThh:mm:ss
+                // 'DataFine' => $dataFine,                                                                        // Formato: YYYY-MM-DD
+                // 'DataOraFine' => $dataFine . 'T23:59:59',                                                       // Formato: YYYY-MM-DDThh:mm:ss
+
                 // 'Limite' => 1, // Opzionale, se vuoi limitare il numero di fatture
                 // 'DataParam' => 'data_fattura', // Opzionale, se vuoi specificare il tipo di data
             ];
@@ -1433,6 +1447,8 @@ class AndxorSoapService
             if(isset($response->Fattura)){
                 if (is_array($response->Fattura)) {                                                                 // se ci sono più fatture passive da scaricare
                     foreach($response->Fattura as $item){
+                        $checkPI = PassiveInvoice::where('sdi_code', $item->IdentificativoSdI)->first();
+                        if($checkPI){ continue; }
                         $param['item'] = $item;
 
                         $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
@@ -1471,41 +1487,44 @@ class AndxorSoapService
                     }
                 } else {                                                                                            // se c'è una sola fattura passiva da scaricare
                     $item = $response->Fattura;
-                    $param['item'] = $item;
+                    $checkPI = PassiveInvoice::where('sdi_code', $item->IdentificativoSdI)->first();
+                    if(!$checkPI){
+                        $param['item'] = $item;
 
-                        $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
-                        $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
-                        // $i_input['IdentificativoSdI'] = '15082389451';
+                            $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
+                            $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+                            // $i_input['IdentificativoSdI'] = '15082389451';
 
-                        $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
+                            $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
 
-                        $i_input['Unwrap'] = true;
-                        $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
+                            $i_input['Unwrap'] = true;
+                            $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
 
-                        $param['filePath_xml'] = $this->savePassiveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
-                        $param['filePath_pdf'] = $this->savePassivePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
+                            $param['filePath_xml'] = $this->savePassiveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
+                            $param['filePath_pdf'] = $this->savePassivePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
 
-                        $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
+                            $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
 
-                        $newSupplier = $this->checkSupplier($param['content']['FatturaElettronicaHeader']);         // controllo e nel caso inserisco un nuovo fornitore, ritorno il fornitore della fattura
-                        if($newSupplier['new']) $supplierNumber++;                                                  // se ho aggiunto il fornitore incremento il contatore dei fornitori
-                        $param['supplier']  = $newSupplier['supplier'];
+                            $newSupplier = $this->checkSupplier($param['content']['FatturaElettronicaHeader']);         // controllo e nel caso inserisco un nuovo fornitore, ritorno il fornitore della fattura
+                            if($newSupplier['new']) $supplierNumber++;                                                  // se ho aggiunto il fornitore incremento il contatore dei fornitori
+                            $param['supplier']  = $newSupplier['supplier'];
 
-                        $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
-                        $param['passive_invoice']  = $passiveInvoice;
+                            $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
+                            $param['passive_invoice']  = $passiveInvoice;
 
-                        $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
+                            $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
 
-                        $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
+                            $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
 
-                        $deadline = Deadline::create([
-                            'company_id' => Filament::getTenant()->id,
-                            'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
-                            'note' => null,
-                            'date' => $passiveInvoice->payment_deadline,
-                            'amount'  => $passiveInvoice->total,
-                            'dispatched' => false
-                        ]);
+                            $deadline = Deadline::create([
+                                'company_id' => Filament::getTenant()->id,
+                                'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
+                                'note' => null,
+                                'date' => $passiveInvoice->payment_deadline,
+                                'amount'  => $passiveInvoice->total,
+                                'dispatched' => false
+                            ]);
+                    }
                 }
             }
 
