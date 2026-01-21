@@ -9,6 +9,7 @@ use Filament\Support\Contracts\HasIcon;
 
 enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, HasIcon
 {
+    case NO_STATUS = 'no_status';
     case OK = 'ok';
     case WAIT = 'wait';
     case BLOCK = 'block';
@@ -16,6 +17,7 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
     public function getDescription(): string
     {
         return match($this) {
+            self::NO_STATUS => '',
             self::OK => '',
             self::WAIT => '',
             self::BLOCK => '',
@@ -25,6 +27,7 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
     public function getLabel(): string
     {
         return match($this) {
+            self::NO_STATUS => 'Non validata',
             self::OK => 'Procedi',
             self::WAIT => 'Aspetta',
             self::BLOCK => 'Blocca',
@@ -34,6 +37,7 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
     public function getIcon(): string
     {
         return match($this) {
+            self::NO_STATUS => 'phosphor-empty',
             self::OK => 'fluentui-checkmark-circle-20-o',
             self::WAIT => 'fluentui-clock-20-o',
             self::BLOCK => 'fluentui-dismiss-circle-20-o',
@@ -43,6 +47,7 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
     public function getColor(): string | array | null
     {
         return match($this) {
+            self::NO_STATUS => 'gray',
             self::OK => 'success',
             self::WAIT => 'warning',
             self::BLOCK => 'danger',

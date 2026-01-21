@@ -351,13 +351,14 @@ class PassiveInvoiceResource extends Resource
                     ->label('Scadenza')
                     ->date('d/m/Y')
                     ->sortable(),
-                Tables\Columns\IconColumn::make('sdi_status')
-                    ->label('Stato')
-                    // ->tooltip(fn ($state): string => $state)
-                    ->sortable(),
+                // Tables\Columns\IconColumn::make('sdi_status')
+                //     ->label('Stato')
+                //     // ->tooltip(fn ($state): string => $state)
+                //     ->sortable(),
                 Tables\Columns\IconColumn::make('piValidation.pi_validation_status')
                     ->label('Validazione')
-                    ->tooltip(fn ($record): string => $record->piValidation ? $record->piValidation->name : 'N\D')
+                    ->default(\App\Enums\PiValidationStatus::NO_STATUS)
+                    ->tooltip(fn ($record): string => $record->piValidation ? $record->piValidation->name : 'Non validata')
                     ->sortable(),
             ])
             ->filters([

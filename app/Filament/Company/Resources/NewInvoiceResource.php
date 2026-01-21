@@ -1235,7 +1235,7 @@ class NewInvoiceResource extends Resource
                             ->collapsed()
                             ->columns(6)
                             ->schema([
-                                Forms\Components\Select::make('sdi_status')->label('Ultimo status')->options(SdiStatus::class)
+                                Forms\Components\Select::make('sdi_status')->label('Ultimo stato')->options(SdiStatus::class)
                                     ->default(SdiStatus::DA_INVIARE)
                                     // ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata', 'mancata_consegna']))
                                     ->disabled(fn ($state) => SdiStatus::from($state)->lockChange())
@@ -1376,8 +1376,7 @@ class NewInvoiceResource extends Resource
                 //     ->color('black')
                 //     ->sortable()
                 //     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\IconColumn::make('sdi_status')
-                    ->label('Status')
+                Tables\Columns\IconColumn::make('sdi_status')->label('Stato')
                     ->tooltip(fn (SdiStatus $state): string => $state->getLabel())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('sdi_date')->label('Data status')
@@ -1538,7 +1537,7 @@ class NewInvoiceResource extends Resource
                     ->searchable()->preload()
                     ->columnSpan(2)
                     ->optionsLimit(5),
-                SelectFilter::make('sdi_status')->label('Status')->options(SdiStatus::class)
+                SelectFilter::make('sdi_status')->label('Stato')->options(SdiStatus::class)
                     ->multiple()->searchable()->preload(),
                 SelectFilter::make('accrual_type_id')
                     ->label('Gestione')
