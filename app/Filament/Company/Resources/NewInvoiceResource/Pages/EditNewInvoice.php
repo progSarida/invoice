@@ -277,7 +277,7 @@ class EditNewInvoice extends EditRecord
 
                 Actions\Action::make('sendInvoice')
                     ->label('Invia a SDI')
-                    ->icon('heroicon-o-paper-airplane')
+                    ->icon('tabler-send')
                     ->action(function (Invoice $record, array $data) {
                         $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
                             ? $record->invoiceItems->where('auto', false)
@@ -323,7 +323,7 @@ class EditNewInvoice extends EditRecord
 
                 Actions\Action::make('getStatus')
                     ->label('Aggiorna stato SDI')
-                    ->icon('carbon-update-now')
+                    ->icon('tabler-refresh')
                     ->action(function (Invoice $record, array $data) {
                         $soapService = app(AndxorSoapService::class);
                         try {
