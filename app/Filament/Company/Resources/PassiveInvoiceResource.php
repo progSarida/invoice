@@ -320,6 +320,8 @@ class PassiveInvoiceResource extends Resource
                 TextColumn::make('docType.description')
                     ->label('Tipo documento')
                     ->searchable()
+                    ->limit(30)
+                    ->tooltip(fn ($record) => $record->docType->description)
                     ->sortable(),
                 TextColumn::make('number')
                     ->label('Numero')
@@ -332,14 +334,14 @@ class PassiveInvoiceResource extends Resource
                 TextColumn::make('supplier.denomination')
                     ->label('Fornitore')
                     ->searchable()
-                    ->limit(40)
+                    ->limit(30)
                     ->tooltip(fn ($record) => $record->supplier->denomination)
                     ->sortable(),
                 TextColumn::make('description')
                     ->label('Descrizione')
                     ->searchable()
                     ->wrap()
-                    ->limit(60)
+                    ->limit(50)
                     ->tooltip(fn ($record) => $record->description)
                     ->sortable(),
                 TextColumn::make('total')
