@@ -88,28 +88,34 @@ class EditPassiveInvoice extends EditRecord
                 ->action(function () use ($nextIDoc) {
                     $this->redirect(PassiveInvoiceResource::getUrl('edit', ['record' => $nextIDoc->id]));
                 }),
-            Actions\Action::make('validate')
-                ->label('Valida pagamento')
-                ->icon('fluentui-checkmark-starburst-20-o')
-                ->requiresConfirmation()
-                ->form([
-                    Select::make('pi_validation_id')
-                        ->label('')
-                        ->options(
-                            PiValidation::orderBy('order', 'asc')
-                                ->pluck('name', 'id')
-                                ->toArray()
-                        )
-                        ->default(fn (PassiveInvoice $record) => $record->pi_validation_id),
-                ])
-                ->action(function (PassiveInvoice $record, $data) {
-                    $record->update([
-                        'pi_validation_id' => $data['pi_validation_id']
-                    ]);
-                })
-                ->color(Color::rgb('rgb(51, 204, 51)')),
-            // Actions\DeleteAction::make()
-            //     ->visible(fn (): bool => Auth::user()->isManager()),
+            Actions\ActionGroup::make([
+                Actions\Action::make('validate')
+                    ->label('Valida pagamento')
+                    ->icon('fluentui-checkmark-starburst-20-o')
+                    ->requiresConfirmation()
+                    ->form([
+                        Select::make('pi_validation_id')
+                            ->label('')
+                            ->options(
+                                PiValidation::orderBy('order', 'asc')
+                                    ->pluck('name', 'id')
+                                    ->toArray()
+                            )
+                            ->default(fn (PassiveInvoice $record) => $record->pi_validation_id),
+                    ])
+                    ->action(function (PassiveInvoice $record, $data) {
+                        $record->update([
+                            'pi_validation_id' => $data['pi_validation_id']
+                        ]);
+                    })
+                    ->color(Color::rgb('rgb(51, 204, 51)')),
+                // Actions\DeleteAction::make()
+                //     ->visible(fn (): bool => Auth::user()->isManager()),
+            ])
+            ->label('Operazioni')
+            ->icon('heroicon-m-ellipsis-vertical')
+            ->color('info')
+            ->button(),
         ];
     }
 
