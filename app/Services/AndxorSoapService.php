@@ -32,8 +32,8 @@ class AndxorSoapService
 
     public function __construct()
     {
-        // $wsdl = 'https://tinv-test.andxor.it/userServices?wsdl';                // WSDL di test
-        $wsdl = 'https://tinv.andxor.it/userServices?wsdl';                     // WSDL di produzione
+        $wsdl = 'https://tinv-test.andxor.it/userServices?wsdl';                // WSDL di test
+        // $wsdl = 'https://tinv.andxor.it/userServices?wsdl';                     // WSDL di produzione
         $options = [
             'trace' => true,
             'exceptions' => true,
@@ -868,40 +868,44 @@ class AndxorSoapService
         // $taxCode1 = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice'); // può essere lo stesso del precedente
         // $taxCode2 = data_get($param, 'CedentePrestatore.DatiAnagrafici.CodiceFiscale');
 
+        $idCountry = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdPaese');
         $temp = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice');
         $taxCode2 = data_get($param, 'CedentePrestatore.DatiAnagrafici.CodiceFiscale');
         $vatCode = '';
         $taxCode1 = '';
 
-        if ($temp) {
-            $lunghezza = strlen($temp);
+        if($idCountry =='IT'){
+            if ($temp) {
+                $lunghezza = strlen($temp);
 
-            if ($lunghezza === 11) {
-                // Formato italiano standard (11 caratteri)
-                $vatCode = $temp;
-            } elseif ($lunghezza === 13) {
-                // Formato estero con prefisso (es: IT12345678901)
-                // Rimuove i primi due caratteri (il codice paese) e assegna il risultato.
-                $vatCode = substr($temp, 2);
-            } else {
-                // Gestisci eventuali lunghezze anomale o lascia stringa vuota
-                $vatCode = '';
+                if ($lunghezza === 11) {
+                    // Formato italiano standard (11 caratteri)
+                    $vatCode = $temp;
+                } elseif ($lunghezza === 13) {
+                    // Formato estero con prefisso (es: IT12345678901)
+                    // Rimuove i primi due caratteri (il codice paese) e assegna il risultato.
+                    $vatCode = substr($temp, 2);
+                } else {
+                    // Gestisci eventuali lunghezze anomale o lascia stringa vuota
+                    $vatCode = '';
+                }
+
+                // Assegna la Partita IVA pulita anche a $taxCode1 (come richiesto nella logica precedente)
+                // Se non vuoi che $taxCode1 sia uguale a $vatCode, puoi rimuovere la riga successiva.
+                $taxCode1 = $vatCode;
             }
 
-            // Assegna la Partita IVA pulita anche a $taxCode1 (come richiesto nella logica precedente)
-            // Se non vuoi che $taxCode1 sia uguale a $vatCode, puoi rimuovere la riga successiva.
-            $taxCode1 = $vatCode;
+            if ($vatCode) {
+                $query->orWhere('vat_code', $vatCode);
+            }
+            if ($taxCode1) {
+                $query->orWhere('tax_code', $taxCode1);
+            }
+            if ($taxCode2) {
+                $query->orWhere('tax_code', $taxCode2);
+            }
         }
 
-        if ($vatCode) {
-            $query->orWhere('vat_code', $vatCode);
-        }
-        if ($taxCode1) {
-            $query->orWhere('tax_code', $taxCode1);
-        }
-        if ($taxCode2) {
-            $query->orWhere('tax_code', $taxCode2);
-        }
         $supplier = $query->first();
 
         // dd($supplier);
@@ -956,8 +960,14 @@ class AndxorSoapService
 
         // dd($xml);
 
+        $td = $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['TipoDocumento'] ?? null;
         $rawCausale = $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Causale'] ?? null;
-
+        $fattColl = $xml['FatturaElettronicaBody']['DatiGenerali']['DatiFattureCollegate']['IdDocumento']  ?? null;
+        $dataTemp = explode('-', $xml['FatturaElettronicaBody']['DatiGenerali']['DatiFattureCollegate']['Data']);
+        $dataFattColl = $dataTemp[2] . '-' . $dataTemp[1] . '-' . $dataTemp[0] ?? null;
+        if(!$rawCausale && ($fattColl && $dataFattColl)){
+            $rawCausale = 'Fatt.Coll. ' . $fattColl .' del ' . $dataFattColl;
+        }
         $data = [
                 'company_id' => Filament::getTenant()->id,
                 'supplier_id' => $supplier->id,
