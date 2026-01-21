@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources;
 
+use App\Enums\PaymentType;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
@@ -49,8 +50,9 @@ class PassivePaymentResource extends Resource
                     })
                     ->afterStateUpdated(function ($state, Set $set) {
                         $passiveInvoice = PassiveInvoice::find($state);
-                        $set('bank', $passiveInvoice->bank);
-                        $set('iban', $passiveInvoice->iban);
+                        $set('bank', $passiveInvoice?->bank ?? null);
+                        $set('iban', $passiveInvoice?->iban ?? null);
+                        $set('payment_type', $passiveInvoice?->payment_type ?? null);
                     })
                     ->required()
                     ->disabled(fn ($get) => $get('validated'))
@@ -80,6 +82,7 @@ class PassivePaymentResource extends Resource
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('payment_date')
                     ->label('Data pagamento')
+                    ->required()
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
                     ->date()
@@ -94,12 +97,12 @@ class PassivePaymentResource extends Resource
                     ->columnSpan(2),
                 //
                 Forms\Components\TextInput::make('bank')
-                    ->label('Banca')
-                    ->columnSpan(3),
+                    ->label('Banca da accreditare')
+                    ->columnSpan(8),
                 Forms\Components\TextInput::make('iban')
-                    ->label('IBAN')
+                    ->label('IBAN da accreditare')
                     ->columnSpan(3),
-                Forms\Components\Select::make('bank_account_id')->label('Conto')
+                Forms\Components\Select::make('bank_account_id')->label('Conto di debito')
                     ->relationship(
                         name: 'bankAccount',
                         modifyQueryUsing: fn (Builder $query) =>
@@ -112,6 +115,17 @@ class PassivePaymentResource extends Resource
                     ->required()
                     ->columnSpan(5)
                     ->preload(),
+                Forms\Components\Select::make('payment_type')
+                    ->label('Metodo di pagamento')
+                    ->columnSpan(5)
+                    ->options(
+                        collect(PaymentType::cases())
+                            ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                            ->mapWithKeys(fn (PaymentType $type) => [
+                                $type->getCode() => $type->getLabel()
+                            ])
+                            ->toArray()
+                    ),
                 Forms\Components\Placeholder::make('')
                     ->columnSpan(1),
                 //

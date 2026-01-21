@@ -68,6 +68,7 @@ class ListPassiveInvoices extends ListRecords
                     TextInput::make('password')
                         ->label('Password SOAP')
                         ->password()
+                        ->revealable()
                         ->required(),
                     // TextInput::make('limit')
                     //     ->label('Numero fatture')

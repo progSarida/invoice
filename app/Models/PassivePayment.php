@@ -16,6 +16,7 @@ class PassivePayment extends Model
         'bank',
         'iban',
         'bank_account_id',
+        'payment_type',
         'registration_date',
         'registration_user_id',
         'validated',
