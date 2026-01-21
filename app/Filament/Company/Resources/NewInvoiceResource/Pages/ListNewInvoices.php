@@ -358,6 +358,7 @@ class ListNewInvoices extends ListRecords
                 Actions\Action::make('checkInvoicing')
                     // ->hidden()
                     ->label('Controllo contratti da fatturare')
+                    ->icon('tabler-file-search')
                     ->action(function () {
                         $activeContracts = $this->getActiveContractsData();
                         $contracts = $this->getInvoicingContracts($activeContracts);
@@ -386,6 +387,7 @@ class ListNewInvoices extends ListRecords
 
                 Actions\Action::make('getStatusList')
                     ->label('Aggiorna stati SDI')
+                    ->icon('tabler-refresh')
                     ->action(function (array $data) {
                         $soapService = app(AndxorSoapService::class);
                         $list = Invoice::where('flow', 'out')
@@ -649,10 +651,11 @@ class ListNewInvoices extends ListRecords
 
         $contracts = NewContract::where('start_validity_date', '<=', $today)                    // seleziono i contratti base
             ->where('company_id', Filament::getTenant()->id)
-            ->where(function ($query) use ($today) {
-                $query->whereNull('end_validity_date')
-                    ->orWhere('end_validity_date', '>=', $today);
-            })
+            ->where('closed', false)
+            // ->where(function ($query) use ($today) {
+            //     $query->whereNull('end_validity_date')
+            //         ->orWhere('end_validity_date', '>=', $today);
+            // })
             ->get();
 
         $activeContracts = collect();
