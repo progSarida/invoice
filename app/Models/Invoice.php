@@ -204,6 +204,18 @@ class Invoice extends Model
             return $total - ($totalPayment + $totalNotes);
     }
 
+    // controlla se la fattura ha la voce dell'imposta di bollo
+    public function virtualStamp(): bool
+    {
+        $stamp = false;
+        $items = InvoiceItem::where('invoice_id', $this->id)->get();
+        foreach($items as $item){
+            if($item->vat_code_type == VatCodeType::VC06A)
+                $stamp = true;
+        }
+        return $stamp;
+    }
+
     // Calcola l'importo IVA da mostrare in tabella
     public function getVat()
     {

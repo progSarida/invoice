@@ -166,25 +166,31 @@ class AndxorSoapService
 
     private function getDatiGeneraliDocumento(Invoice $invoice, array $withholdings, array $funds): ?array
     {
-        return [
-            'TipoDocumento' => $invoice->docType->name && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->docType->name) ? $invoice->docType->name : 'TD01',
-            'Divisa' => $invoice->divisa ?? 'EUR',
-            'Data' => $invoice->invoice_date->format('Y-m-d'),
-            'Numero' => $invoice->getNewInvoiceNumber(),
-            'ImportoTotaleDocumento' => sprintf("%.2f", (float) ($invoice->total ?? 0.00)),
-            'DatiRitenuta' => array_map(function ($withholding) {
-                return [
-                    'TipoRitenuta' => $withholding['tipo_ritenuta'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['tipo_ritenuta']) ? $withholding['tipo_ritenuta'] : 'RT01',
-                    'ImportoRitenuta' => sprintf("%.2f", (float) ($withholding['importo_ritenuta'] ?? 0.00)),
-                    'AliquotaRitenuta' => sprintf("%.2f", (float) ($withholding['aliquota_ritenuta'] ?? 20.00)),
-                    'CausalePagamento' => $withholding['causale_pagamento'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['causale_pagamento']) ? $withholding['causale_pagamento'] : 'A',
-                ];
-            }, $withholdings),
-            'DatiBollo' => [
-                'BolloVirtuale' => $invoice->company->stampDuty->virtual_stamp ? 'SI' : '',
+        $out = [
+                'TipoDocumento' => $invoice->docType->name && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->docType->name) ? $invoice->docType->name : 'TD01',
+                'Divisa' => $invoice->divisa ?? 'EUR',
+                'Data' => $invoice->invoice_date->format('Y-m-d'),
+                'Numero' => $invoice->getNewInvoiceNumber(),
+                'ImportoTotaleDocumento' => sprintf("%.2f", (float) ($invoice->total ?? 0.00)),
+                'DatiRitenuta' => array_map(function ($withholding) {
+                    return [
+                        'TipoRitenuta' => $withholding['tipo_ritenuta'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['tipo_ritenuta']) ? $withholding['tipo_ritenuta'] : 'RT01',
+                        'ImportoRitenuta' => sprintf("%.2f", (float) ($withholding['importo_ritenuta'] ?? 0.00)),
+                        'AliquotaRitenuta' => sprintf("%.2f", (float) ($withholding['aliquota_ritenuta'] ?? 20.00)),
+                        'CausalePagamento' => $withholding['causale_pagamento'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['causale_pagamento']) ? $withholding['causale_pagamento'] : 'A',
+                    ];
+                }, $withholdings)
+            ];
+
+        if ($invoice->virtualStamp()) {
+            $out['DatiBollo'] = [
+                'BolloVirtuale' => 'SI',
                 'ImportoBollo' => $invoice->company->stampDuty->virtual_stamp ? sprintf("%.2f", 2.00) : '',
-            ],
-            'DatiCassaPrevidenziale' => array_map(function ($fund) {
+            ];
+        }
+
+        if (!empty($funds)) {
+            $out['DatiCassaPrevidenziale'] = array_map(function ($fund) {
                 return array_filter([
                     'TipoCassa' => $fund['fund_code'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $fund['fund_code']) ? $fund['fund_code'] : 'TC02',
                     'AlCassa' => sprintf("%.2f", (float) ($fund['rate'])),
@@ -194,8 +200,10 @@ class AndxorSoapService
                     'Ritenuta' => !empty($fund['withholding']) ? 'SI' : null,
                     'Natura' => $fund['%'] == 'N1' ? 'N1' : null,
                 ], fn($value) => !is_null($value) && $value !== '');
-            }, $funds),
-        ];
+            }, $funds);
+        }
+
+        return $out;
     }
 
     private function getDatiOrdineAcquisto(Invoice $invoice): ?array
