@@ -13,6 +13,7 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
     case OK = 'ok';
     case WAIT = 'wait';
     case BLOCK = 'block';
+    case VIEW = 'view';
 
     public function getDescription(): string
     {
@@ -21,6 +22,7 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
             self::OK => '',
             self::WAIT => '',
             self::BLOCK => '',
+            self::VIEW => '',
         };
     }
 
@@ -31,6 +33,7 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
             self::OK => 'Procedi',
             self::WAIT => 'Aspetta',
             self::BLOCK => 'Blocca',
+            self::VIEW => 'Vista',
         };
     }
 
@@ -41,6 +44,7 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
             self::OK => 'fluentui-checkmark-circle-20-o',
             self::WAIT => 'fluentui-clock-20-o',
             self::BLOCK => 'fluentui-dismiss-circle-20-o',
+            self::VIEW => 'fluentui-checkmark-circle-20-o',
         };
     }
 
@@ -51,6 +55,7 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
             self::OK => 'success',
             self::WAIT => 'warning',
             self::BLOCK => 'danger',
+            self::VIEW => 'success',
         };
     }
 }

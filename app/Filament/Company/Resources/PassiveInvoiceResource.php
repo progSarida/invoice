@@ -383,6 +383,7 @@ class PassiveInvoiceResource extends Resource
                             case PiValidationStatus::OK->value:
                             case PiValidationStatus::WAIT->value:
                             case PiValidationStatus::BLOCK->value:
+                            case PiValidationStatus::VIEW->value:
                                 return $query->whereHas('piValidation', function ($q) use ($value) {
                                         $q->where('pi_validation_status', $value);
                                     });
