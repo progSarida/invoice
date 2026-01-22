@@ -370,26 +370,6 @@ class PassiveInvoiceResource extends Resource
                     ->alignRight(),
             ])
             ->filters([
-                SelectFilter::make('paid')
-                    ->label('Pagamento')
-                    ->options([
-                        'si' => 'Totale',
-                        'par' => 'Parziale',
-                        'no' => 'Nessuno',
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (!isset($data['value'])) {
-                            return $query;
-                        }
-                        return $query->when($data['value'] === 'si', function ($q) {
-                                return $q->whereRaw(" total_payment = total ");
-                            })->when($data['value'] === 'par', function ($q) {
-                                return $q->whereRaw(" total_payment < total and total_payment != 0.00 ");
-                            })->when($data['value'] === 'no', function ($q) {
-                                return $q->whereRaw(" total_payment = 0.00 ");
-                            });
-                    })
-                    ->preload(),
                 SelectFilter::make('pi_validation_status')
                     ->label('Validazione')
                     ->options(PiValidationStatus::class)
@@ -413,6 +393,26 @@ class PassiveInvoiceResource extends Resource
                         }
                     })
                     ->searchable()
+                    ->preload(),
+                SelectFilter::make('paid')
+                    ->label('Pagamento')
+                    ->options([
+                        'si' => 'Totale',
+                        'par' => 'Parziale',
+                        'no' => 'Nessuno',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value'])) {
+                            return $query;
+                        }
+                        return $query->when($data['value'] === 'si', function ($q) {
+                                return $q->whereRaw(" total_payment = total ");
+                            })->when($data['value'] === 'par', function ($q) {
+                                return $q->whereRaw(" total_payment < total and total_payment != 0.00 ");
+                            })->when($data['value'] === 'no', function ($q) {
+                                return $q->whereRaw(" total_payment = 0.00 ");
+                            });
+                    })
                     ->preload(),
             ])
             ->actions([
