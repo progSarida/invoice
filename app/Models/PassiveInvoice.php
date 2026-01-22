@@ -60,4 +60,28 @@ class PassiveInvoice extends Model
     public function piValidation(){
         return $this->belongsTo(PiValidation::class);
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($invoice) {
+            $invoice->total_payment = 0.00;
+        });
+
+        static::created(function ($invoice) {
+            //
+        });
+
+        static::updating(function ($invoice) {
+            //
+        });
+
+        static::saved(function ($invoice) {
+            //
+        });
+
+        static::deleting(function ($invoice) {
+            //
+        });
+
+    }
 }
