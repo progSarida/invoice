@@ -27,7 +27,7 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
     public function getLabel(): string
     {
         return match($this) {
-            self::NO_STATUS => 'Non validata',
+            self::NO_STATUS => 'Da validare',
             self::OK => 'Procedi',
             self::WAIT => 'Aspetta',
             self::BLOCK => 'Blocca',

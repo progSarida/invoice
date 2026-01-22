@@ -30,6 +30,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -341,11 +342,11 @@ class PassiveInvoiceResource extends Resource
                     ->label('Descrizione')
                     ->searchable()
                     ->wrap()
-                    ->limit(35)
+                    ->limit(25)
                     ->tooltip(fn ($record) => $record->description)
                     ->sortable(),
                 TextColumn::make('total')
-                    ->label('Totale a doversi')
+                    ->label('Dovuto')
                     ->money('EUR')
                     ->sortable()
                     ->alignRight(),
@@ -362,9 +363,57 @@ class PassiveInvoiceResource extends Resource
                     ->default(\App\Enums\PiValidationStatus::NO_STATUS)
                     ->tooltip(fn ($record): string => $record->piValidation ? $record->piValidation->name : 'Non validata')
                     ->sortable(),
+                TextColumn::make('total_payment')
+                    ->label('Pagato')
+                    ->money('EUR')
+                    ->sortable()
+                    ->alignRight(),
             ])
             ->filters([
-                //
+                SelectFilter::make('paid')
+                    ->label('Pagamento')
+                    ->options([
+                        'si' => 'Totale',
+                        'par' => 'Parziale',
+                        'no' => 'Nessuno',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value'])) {
+                            return $query;
+                        }
+                        return $query->when($data['value'] === 'si', function ($q) {
+                                return $q->whereRaw(" total_payment = total ");
+                            })->when($data['value'] === 'par', function ($q) {
+                                return $q->whereRaw(" total_payment < total and total_payment != 0.00 ");
+                            })->when($data['value'] === 'no', function ($q) {
+                                return $q->whereRaw(" total_payment = 0.00 ");
+                            });
+                    })
+                    ->preload(),
+                SelectFilter::make('pi_validation_status')
+                    ->label('Validazione')
+                    ->options(PiValidationStatus::class)
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+
+                        switch($value){
+                            case PiValidationStatus::NO_STATUS->value:
+                                return $query->whereNull('pi_validation_id');
+                                break;
+                            case PiValidationStatus::OK->value:
+                            case PiValidationStatus::WAIT->value:
+                            case PiValidationStatus::BLOCK->value:
+                                return $query->whereHas('piValidation', function ($q) use ($value) {
+                                        $q->where('pi_validation_status', $value);
+                                    });
+                                break;
+                            default:
+                                return $query;
+                                break;
+                        }
+                    })
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

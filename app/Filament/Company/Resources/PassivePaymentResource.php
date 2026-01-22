@@ -89,7 +89,7 @@ class PassivePaymentResource extends Resource
                     })
                     ->afterStateUpdated(function ($state, Set $set) {
                         $passiveInvoice = PassiveInvoice::find($state);
-                        $set('amount', $passiveInvoice?->total ?? null);
+                        $set('amount', $passiveInvoice?->total ? str_replace('.', ',', $passiveInvoice?->total) : null);
                         $set('bank', $passiveInvoice?->bank ?? null);
                         $set('iban', $passiveInvoice?->iban ?? null);
                         $set('payment_type', $passiveInvoice?->payment_type ?? null);
