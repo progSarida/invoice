@@ -34,6 +34,7 @@ class PiValidationResource extends Resource
                     ->columnspan(2),
                 Forms\Components\TextInput::make('order')->label('Posizione')
                     ->required()
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->columnspan(1),
                 Forms\Components\TextInput::make('description')->label('Descrizione')
                     ->maxLength(255)

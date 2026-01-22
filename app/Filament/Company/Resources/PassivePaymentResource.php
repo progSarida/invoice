@@ -41,7 +41,7 @@ class PassivePaymentResource extends Resource
             // ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('passive_invoice_id')
-                    ->label('Fattura')
+                    ->label('Fattura da pagare')
                     ->placeholder('Seleziona una fattura...')
                     ->relationship(name: 'passiveInvoice', titleAttribute: 'id')
                     ->getSearchResultsUsing(function (string $search) {
@@ -79,17 +79,26 @@ class PassivePaymentResource extends Resource
                                 $total = number_format($record->total, 2, ',', '.') . '€';
                                 $number = $record->number ?? 'S.N.';
 
-                                return [$record->id => "{$supplierName} - FT {$number} del {$date} - Tot: {$total}"];
+                                $residuo = $record->total - $record->total_payment;
+                                $add = '';
+                                if($residuo != 0 && $record->total_payment > 0)
+                                    $add = " [" . number_format($residuo, 2, ",", ".") . "€]";
+
+                                return [$record->id => "{$supplierName} - FT {$number} del {$date} - Tot: {$total}" . $add];
                             })
                             ->toArray();
                     })
-                    ->getOptionLabelFromRecordUsing(function (Model $record) {
-                        $fornitore = $record->supplier?->denomination ?? 'Fornitore sconosciuto';
-                        return "{$fornitore} - {$record->number}/{$record->invoice_date->format('d-m-Y')} - {$record->total}";
-                    })
+                    // ->getOptionLabelFromRecordUsing(function (Model $record) {
+                    //     $fornitore = $record->supplier?->denomination ?? 'Fornitore sconosciuto';
+                    //     $residuo = $record->total - $record->total_payment;
+                    //     $add = '';
+                    //     if($residuo != 0)
+                    //         $add = " (" . str_replace('.', ',', $residuo) . ")";
+                    //     return "{$fornitore} - {$record->number}/{$record->invoice_date->format('d-m-Y')} - {$record->total}" . $add;
+                    // })
                     ->afterStateUpdated(function ($state, Set $set) {
                         $passiveInvoice = PassiveInvoice::find($state);
-                        $set('amount', $passiveInvoice?->total ? str_replace('.', ',', $passiveInvoice?->total) : null);
+                        $set('amount', $passiveInvoice?->total ? number_format($passiveInvoice?->total - $passiveInvoice?->total_payment, 2, ",", ".") : null);
                         $set('bank', $passiveInvoice?->bank ?? null);
                         $set('iban', $passiveInvoice?->iban ?? null);
                         $set('payment_type', $passiveInvoice?->payment_type ?? null);
