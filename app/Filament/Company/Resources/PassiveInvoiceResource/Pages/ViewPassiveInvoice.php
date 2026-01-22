@@ -93,7 +93,7 @@ class ViewPassiveInvoice extends ViewRecord
                 }),
             Actions\ActionGroup::make([
                 Actions\Action::make('validate')
-                    ->label('Valida pagamento')
+                    ->label('Valida fattura')
                     ->icon('fluentui-checkmark-starburst-20-o')
                     ->requiresConfirmation()
                     ->form([
