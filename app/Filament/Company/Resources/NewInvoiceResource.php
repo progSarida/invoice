@@ -1238,11 +1238,11 @@ class NewInvoiceResource extends Resource
                                 Forms\Components\Select::make('sdi_status')->label('Ultimo stato')->options(SdiStatus::class)
                                     ->default(SdiStatus::DA_INVIARE)
                                     // ->disabled(fn ($state) => !in_array($state, ['rifiutata', 'scartata', 'mancata_consegna']))
-                                    // ->disabled(fn ($state) => match(true) {
-                                    //     $state instanceof SdiStatus => $state->lockChange(),
-                                    //     $state !== null => SdiStatus::tryFrom($state)?->lockChange() ?? true,
-                                    //     default => true,
-                                    // })
+                                    ->disabled(fn ($state) => match(true) {
+                                        $state instanceof SdiStatus => $state->lockChange(),
+                                        $state !== null => SdiStatus::tryFrom($state)?->lockChange() ?? true,
+                                        default => true,
+                                    })
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('sdi_code')->label('Codice SdI')->readOnly()->columnSpan(2)->disabled(),
                                 Forms\Components\DatePicker::make('sdi_date')->label('Data')
