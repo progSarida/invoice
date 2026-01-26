@@ -925,7 +925,7 @@ class AndxorSoapService
             $data = [
                 'company_id' => Filament::getTenant()->id,
 
-                'denomination' => $cedente['DatiAnagrafici']['Anagrafica']['Denominazione'] ?? $cedente['DatiAnagrafici']['Anagrafica']['Cognome'] . $cedente['DatiAnagrafici']['Anagrafica']['Nome'],
+                'denomination' => $cedente['DatiAnagrafici']['Anagrafica']['Denominazione'] ?? $cedente['DatiAnagrafici']['Anagrafica']['Cognome'] . ' ' . $cedente['DatiAnagrafici']['Anagrafica']['Nome'],
                 'tax_code' => $cedente['DatiAnagrafici']['CodiceFiscale'] ?? null,
                 'vat_code' => $cedente['DatiAnagrafici']['IdFiscaleIVA']['IdCodice'] ?? null,
 
