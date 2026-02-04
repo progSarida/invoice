@@ -317,6 +317,7 @@ class PassiveInvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('invoice_date', 'desc')
             ->columns([
                 TextColumn::make('docType.description')
                     ->label('Tipo documento')
