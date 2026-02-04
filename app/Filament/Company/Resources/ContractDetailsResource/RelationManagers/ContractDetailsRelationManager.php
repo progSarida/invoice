@@ -139,7 +139,9 @@ class ContractDetailsRelationManager extends RelationManager
                     ->label('Data')
                     ->date('d/m/Y'),
                 Tables\Columns\TextColumn::make('description')
-                    ->label('Descrizione'),
+                    ->label('Descrizione')
+                    ->limit(60)
+                    ->tooltip(fn ($record) => $record->description),
             ])
             ->filters([
                 //
