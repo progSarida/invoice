@@ -682,7 +682,7 @@ class EditCompanyProfile extends EditTenantProfile
                                             ->columnSpan(4),
                                     ])
                                     ->columns(12)
-                                    ->maxItems(10)
+                                    ->maxItems(15)
                                     ->defaultItems(0)
                                     ->addActionLabel('Aggiungi voce')
                                     ->deleteAction(
