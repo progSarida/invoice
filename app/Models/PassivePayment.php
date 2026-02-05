@@ -27,6 +27,7 @@ class PassivePayment extends Model
     protected $casts = [
         'payment_date' => 'date',
         'validated' => 'boolean',
+        'validation_date' => 'date',
     ];
 
     public function company(){
@@ -77,6 +78,11 @@ class PassivePayment extends Model
                 $invoice = $payment->passiveInvoice;
                 $invoice->total_payment = $invoice->total_payment - $originalAmount + $payment->amount;
                 $invoice->save();
+            }
+
+            if(!$payment->validated) {
+                $payment->validation_date = null;
+                $payment->validation_user_id = null;
             }
         });
 

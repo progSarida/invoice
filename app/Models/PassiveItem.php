@@ -7,10 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class PassiveItem extends Model
 {
     protected $fillable = [
-        'company_id',
         'passive_invoice_id',
         'description',
+        'transaction_type',
+        'start_date',
+        'end_date',
+        'code',
         'quantity',
+        'measure_unit',
         'unit_price',
         'total_price',
         'vat_rate'

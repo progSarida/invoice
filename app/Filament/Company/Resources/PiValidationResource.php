@@ -34,7 +34,7 @@ class PiValidationResource extends Resource
                     ->columnspan(2),
                 Forms\Components\TextInput::make('order')->label('Posizione')
                     ->required()
-                    ->extraInputAttributes(['class' => 'text-center'])
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->columnspan(1),
                 Forms\Components\TextInput::make('description')->label('Descrizione')
                     ->maxLength(255)
@@ -49,6 +49,7 @@ class PiValidationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('order', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('order')->label('Posizione')
                     ->sortable(),

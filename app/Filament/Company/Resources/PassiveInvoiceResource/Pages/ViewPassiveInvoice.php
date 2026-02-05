@@ -99,6 +99,7 @@ class ViewPassiveInvoice extends ViewRecord
                     ->form([
                         Select::make('pi_validation_id')
                             ->label('')
+                            ->placeholder('Da validare')
                             ->options(
                                 PiValidation::orderBy('order', 'asc')
                                     ->pluck('name', 'id')

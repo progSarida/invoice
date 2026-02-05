@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Company\Resources\ContractDetailsResource\RelationManagers;
+namespace App\Filament\Company\Resources\NewContractResource\RelationManagers;
 
 use App\Enums\ContractType;
 use App\Enums\TaxType;

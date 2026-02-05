@@ -8,11 +8,13 @@ use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
+use Illuminate\Support\Facades\Auth;
 
 class PassivePaymentsRelationManager extends RelationManager
 {
@@ -70,6 +72,17 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->label('Validato')
                     ->live()
                     ->default(false)
+                    ->visible(fn($record) => $record)
+                    ->afterStateUpdated(function (Set $set, bool $state) {
+                        if ($state) {
+                            $set('validation_date', now()->format('Y-m-d'));
+                            $set('validation_user_id', Auth::id());
+                        } else {
+                            // Per "annullare" la validazione quando il toggle viene disattivato
+                            $set('validation_date', null);
+                            $set('validation_user_id', null);
+                        }
+                    })
                     ->columnSpan(2),
                 Forms\Components\TextInput::make('bank')
                     ->label('Banca')
@@ -95,7 +108,7 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->relationship(
                         name: 'bankAccount',
                         modifyQueryUsing: fn (Builder $query) =>
-                        $query->where('company_id',Filament::getTenant()->id)
+                        $query->where('company_id',Filament::getTenant()->id)->orderBy('position', 'asc')
                     )
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->name} - $record->iban"
@@ -123,7 +136,7 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->disabled()
                     ->visible(fn ($get) => $get('validated'))
                     ->columnSpan(2),
-                Forms\Components\Select::make('validated_by_user_id')
+                Forms\Components\Select::make('validation_user_id')
                     ->label('Validato da')
                     ->relationship('validationUser', 'name')
                     ->disabled()
@@ -151,6 +164,7 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
+                    ->alignRight()
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('payment_date')
@@ -176,17 +190,16 @@ class PassivePaymentsRelationManager extends RelationManager
                 Tables\Columns\ToggleColumn::make('validated')
                     ->label('Validato')
                     ->sortable()
-                    ->afterStateUpdated(function (\App\Models\ActivePayments $record, bool $state) {
+                    ->visible(fn($record) => $record)
+                    ->afterStateUpdated(function (Set $set, bool $state) {
                         if ($state) {
-                            $record->validation_date = now();
-                            $record->validation_user_id = auth()->id();
+                            $set('validation_date', today());
+                            $set('validation_user_id', Auth::id());
                         } else {
-                            // Se vuoi "annullare" la validazione quando il toggle viene disattivato
-                            $record->validation_date = null;
-                            $record->validation_user_id = null;
+                            // Per "annullare" la validazione quando il toggle viene disattivato
+                            $set('validation_date', null);
+                            $set('validation_user_id', null);
                         }
-
-                        $record->save();
                     }),
             ])
             ->filters([

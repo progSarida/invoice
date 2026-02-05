@@ -238,7 +238,7 @@ class NewActivePaymentsResource extends Resource
                     ->relationship(
                         name: 'bankAccount',
                         modifyQueryUsing: fn (Builder $query) =>
-                        $query->where('company_id',Filament::getTenant()->id)
+                        $query->where('company_id',Filament::getTenant()->id)->orderBy('position', 'asc')
                     )
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->name} - $record->iban"

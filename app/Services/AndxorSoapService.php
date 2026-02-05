@@ -1482,6 +1482,10 @@ class AndxorSoapService
 
                         $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
 
+                        if(!$passiveInvoice->total){                                                                // controllo valore totale fattura passiva
+                            $passiveInvoice->update(['total' => $passiveInvoice->passiveItems()->sum('total_price')]);
+                        }
+
                         $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
 
                         $deadline = Deadline::create([

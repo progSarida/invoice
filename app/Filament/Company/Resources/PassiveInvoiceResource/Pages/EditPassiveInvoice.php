@@ -96,6 +96,7 @@ class EditPassiveInvoice extends EditRecord
                     ->form([
                         Select::make('pi_validation_id')
                             ->label('')
+                            ->placeholder('Da validare')
                             ->options(
                                 PiValidation::orderBy('order', 'asc')
                                     ->pluck('name', 'id')

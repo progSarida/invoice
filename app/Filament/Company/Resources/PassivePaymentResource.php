@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\PassivePaymentResource\Pages;
 use App\Filament\Company\Resources\PassivePaymentResource\RelationManagers;
+use App\Models\DocType;
 use App\Models\PassiveInvoice;
 use Filament\Facades\Filament;
 use Filament\Forms\Set;
@@ -42,74 +43,53 @@ class PassivePaymentResource extends Resource
             ->schema([
                 Forms\Components\Select::make('passive_invoice_id')
                     ->label('Fattura da pagare')
-                    ->placeholder('Seleziona una fattura...')
                     ->relationship(name: 'passiveInvoice', titleAttribute: 'id')
-                    ->getSearchResultsUsing(function (string $search) {
+                    ->searchable()
+                    ->getSearchResultsUsing(function (string $search, ?Model $record) {
                         $search = trim(preg_replace('/\s+/', ' ', $search));
-                        if (empty($search)) return [];
-
                         $terms = explode(' ', $search);
 
                         return PassiveInvoice::query()
-                            // Filtri fissi
-                            ->whereColumn('total_payment', '<', 'total')                                        // fattura non saldata completamente
-                            ->whereHas('piValidation', function ($sub) {
-                                $sub->where('pi_validation_status', 'ok');                                      // fattura validata
+                            ->where(function ($query) use ($record) {
+                                // Continua a mostrare le fatture non pagate...
+                                $query->whereColumn('total_payment', '<', 'total')
+                                // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
+                                ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
                             })
-                            // Filtri ricerca
+                            ->whereHas('piValidation', fn($sub) => $sub->where('pi_validation_status', 'ok'))
                             ->where(function ($mainQuery) use ($terms) {
                                 foreach ($terms as $term) {
                                     $mainQuery->where(function ($subQuery) use ($term) {
-                                        $subQuery->whereHas('supplier', function ($s) use ($term) {
-                                            $s->where('denomination', 'like', "%{$term}%");                     // ricerca su nome fornitore
-                                        })
-                                        ->orWhere('number', 'like', "%{$term}%")                                // ricerca su numero fattura
-                                        ->orWhere('total', 'like', "%{$term}%")                                 // ricerca su totale fattura
-                                        ->orWhere('invoice_date', 'like', "%{$term}%");                         // ricerca su data fattura
+                                        $subQuery->whereHas('supplier', fn($s) => $s->where('denomination', 'like', "%{$term}%"))
+                                            ->orWhere('number', 'like', "%{$term}%")
+                                            ->orWhere('total', 'like', "%{$term}%")
+                                            ->orWhere('invoice_date', 'like', "%{$term}%");
                                     });
                                 }
                             })
                             ->with(['supplier'])
-                            ->orderBy('invoice_date', 'asc')
                             ->limit(50)
                             ->get()
-                            ->mapWithKeys(function ($record) {
-                                $supplierName = $record->supplier?->denomination ?? 'Fornitore sconosciuto';
-                                $date = $record->invoice_date ? \Carbon\Carbon::parse($record->invoice_date)->format('d/m/Y') : 'Data N.D.';
-                                $total = number_format($record->total, 2, ',', '.') . '€';
-                                $number = $record->number ?? 'S.N.';
-
-                                $residuo = $record->total - $record->total_payment;
-                                $add = '';
-                                if($residuo != 0 && $record->total_payment > 0)
-                                    $add = " [" . number_format($residuo, 2, ",", ".") . "€]";
-
-                                return [$record->id => "{$supplierName} - FT {$number} del {$date} - Tot: {$total}" . $add];
-                            })
+                            ->mapWithKeys(fn ($i) => [$i->id => static::getPassiveInvoiceLabel($i)]) // Usa una funzione helper
                             ->toArray();
                     })
-                    // ->getOptionLabelFromRecordUsing(function (Model $record) {
-                    //     $fornitore = $record->supplier?->denomination ?? 'Fornitore sconosciuto';
-                    //     $residuo = $record->total - $record->total_payment;
-                    //     $add = '';
-                    //     if($residuo != 0)
-                    //         $add = " (" . str_replace('.', ',', $residuo) . ")";
-                    //     return "{$fornitore} - {$record->number}/{$record->invoice_date->format('d-m-Y')} - {$record->total}" . $add;
-                    // })
+                    // FONDAMENTALE: Questo risolve il problema della label mancante all'avvio
+                    ->getOptionLabelUsing(function ($value) {
+                        $invoice = PassiveInvoice::with('supplier')->find($value);
+                        return $invoice ? static::getPassiveInvoiceLabel($invoice) : null;
+                    })
                     ->afterStateUpdated(function ($state, Set $set) {
                         $passiveInvoice = PassiveInvoice::find($state);
-                        $set('amount', $passiveInvoice?->total ? number_format($passiveInvoice?->total - $passiveInvoice?->total_payment, 2, ",", ".") : null);
-                        $set('bank', $passiveInvoice?->bank ?? null);
-                        $set('iban', $passiveInvoice?->iban ?? null);
-                        $set('payment_type', $passiveInvoice?->payment_type ?? null);
+                        if ($passiveInvoice) {
+                            $set('amount', number_format($passiveInvoice->total - $passiveInvoice->total_payment, 2, ",", "."));
+                            $set('bank', $passiveInvoice->bank);
+                            $set('iban', $passiveInvoice->iban);
+                            $set('payment_type', $passiveInvoice->payment_type);
+                        }
                     })
+                    ->live()
                     ->required()
                     ->disabled(fn ($get) => $get('validated'))
-                    ->searchable()
-                    ->live()
-                    // ->preload()
-                    // ->optionsLimit(20)
-                    // ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
                     ->columnSpan(6),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
@@ -143,6 +123,17 @@ class PassivePaymentResource extends Resource
                     ->label('Validato')
                     ->live()
                     ->default(false)
+                    ->afterStateUpdated(function (Set $set, bool $state) {
+                        if ($state) {
+                            $set('validation_date', now()->format('Y-m-d'));
+                            $set('validation_user_id', Auth::id());
+                        } else {
+                            // Per "annullare" la validazione quando il toggle viene disattivato
+                            $set('validation_date', null);
+                            $set('validation_user_id', null);
+                        }
+                    })
+                    ->visible(fn($record) => $record)
                     ->columnSpan(2),
                 //
                 Forms\Components\TextInput::make('bank')
@@ -155,7 +146,7 @@ class PassivePaymentResource extends Resource
                     ->relationship(
                         name: 'bankAccount',
                         modifyQueryUsing: fn (Builder $query) =>
-                        $query->where('company_id',Filament::getTenant()->id)
+                        $query->where('company_id',Filament::getTenant()->id)->orderBy('position', 'asc')
                     )
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->name} - $record->iban"
@@ -193,12 +184,14 @@ class PassivePaymentResource extends Resource
                     ->label('Data validazione')
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled()
+                    ->dehydrated()
                     ->visible(fn ($get) => $get('validated'))
                     ->columnSpan(2),
-                Forms\Components\Select::make('validated_by_user_id')
+                Forms\Components\Select::make('validation_user_id')
                     ->label('Validato da')
                     ->relationship('validationUser', 'name')
                     ->disabled()
+                    ->dehydrated()
                     ->visible(fn ($get) => $get('validated'))
                     ->columnSpan(3),
             ]);
@@ -207,10 +200,29 @@ class PassivePaymentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('payment_date', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('invoice_formatted')
+                Tables\Columns\TextColumn::make('supplier')
+                    ->label('Fornitore')
+                    ->getStateUsing(function ($record) {
+                        return "{$record->passiveInvoice->supplier->denomination}";
+                    })
+                    ->limit(45)
+                    ->tooltip(fn($record) => $record->passiveInvoice->supplier->denomination)
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('doc')
+                    ->label('Tipo documento')
+                    ->getStateUsing(function ($record) {
+                        return DocType::where('name', $record->passiveInvoice->doc_type)->first()->description;
+                    })
+                    ->limit(45)
+                    ->tooltip(fn($record) => DocType::where('name', $record->passiveInvoice->doc_type)->first()->description)
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('passiveInvoice.number')
                     ->label('Fattura')
                     ->getStateUsing(function ($record) {
                         $invoice = $record->passiveInvoice;
@@ -223,9 +235,10 @@ class PassivePaymentResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
+                    ->alignRight()
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('payment_date')
-                    ->label('Data pagamento')
+                    ->label('Data pag.')
                     ->getStateUsing(function ($record) {
                         return $record->payment_date
                             ? Carbon::parse($record->payment_date)->format('d/m/Y')
@@ -233,21 +246,23 @@ class PassivePaymentResource extends Resource
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('registration_date')
-                    ->label('Data registrazione')
+                    ->label('Data reg.')
                     ->getStateUsing(function ($record) {
                         return $record->registration_date
                             ? Carbon::parse($record->registration_date)->format('d/m/Y')
                             : 'Nessuna data';
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('registrationUser.name')
                     ->label('Registrato da')
                     ->getStateUsing(fn ($record) => optional($record->registrationUser)->name ?? 'Nessun utente')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\ToggleColumn::make('validated')
                     ->label('Validato')
                     ->sortable()
-                    ->afterStateUpdated(function (\App\Models\ActivePayments $record, bool $state) {
+                    ->afterStateUpdated(function (\App\Models\PassivePayment $record, bool $state) {
                         if ($state) {
                             $record->validation_date = now();
                             $record->validation_user_id = Auth::id();
@@ -290,5 +305,37 @@ class PassivePaymentResource extends Resource
             'edit' => Pages\EditPassivePayment::route('/{record}/edit'),
             'view' => Pages\ViewPassivePayment::route('/{record}'),
         ];
+    }
+
+    protected static function getPassiveInvoiceLabel(PassiveInvoice $record): string
+    {
+        $supplierName = $record->supplier?->denomination ?? 'Fornitore sconosciuto';
+        $date = $record->invoice_date ? $record->invoice_date->format('d/m/Y') : 'Data N.D.';
+        $total = number_format($record->total, 2, ',', '.') . '€';
+        $number = $record->number ?? 'S.N.';
+
+        $residuo = $record->total - $record->total_payment;
+        $add = ($residuo > 0 && $record->total_payment > 0)
+            ? " [" . number_format($residuo, 2, ",", ".") . "€]"
+            : '';
+
+        $type = $record->docType->docGroup->name;
+        $label = '';
+        switch($type){
+            case 'Preavvisi di fattura':
+                $label = 'PF';
+                break;
+            case 'Fatture':
+                $label = 'FT';
+                break;
+            case 'Note di variazione':
+                $label = 'NV';
+                break;
+            case 'Autofatture':
+                $label = 'AF';
+                break;
+        }
+
+        return "{$supplierName} - {$label} {$number} del {$date} - Tot: {$total}" . $add;
     }
 }

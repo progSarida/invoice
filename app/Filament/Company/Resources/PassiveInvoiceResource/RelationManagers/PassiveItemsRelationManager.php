@@ -2,8 +2,12 @@
 
 namespace App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
 
+use App\Enums\TransactionType;
+use App\Enums\VatCodeType;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -23,10 +27,70 @@ class PassiveItemsRelationManager extends RelationManager
     public function form(Form $form): Form
     {
         return $form
+            ->columns(12)
             ->schema([
-                Forms\Components\TextInput::make('description')
+                Forms\Components\TextInput::make('description')->label('Descrizione')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->columnSpan('full'),
+                Forms\Components\Section::make('Opzioni')
+                    // ->collapsible()
+                    ->columns(12)
+                    ->collapsed()
+                    ->label('')
+                    ->schema([
+                        Forms\Components\Select::make('transaction_type')
+                            ->label('Tipo di transazione')
+                            ->options(
+                                collect(TransactionType::cases())->mapWithKeys(fn ($case) => [
+                                    $case->value => $case->getLabel(),
+                                ])->toArray()
+                            )
+                            ->columnSpan(4),
+                        Forms\Components\DatePicker::make('start_date')
+                            ->label('Data inizio periodo')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->columnSpan(4),
+                        Forms\Components\DatePicker::make('end_date')
+                            ->label('Data fine periodo')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('quantity')->label('Quantità')
+                            ->columnSpan(4)
+                            ->live(onBlur: true)
+                            ->numeric()
+                            // ->live(debounce: 500)
+                            ->debounce(3000),
+                        Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
+                            ->live(onBlur: true)
+                            ->hintIcon('heroicon-o-information-circle', tooltip: 'L\'unità di misura deve essere lunga al massimo 10 caratteri (0-9, a-z, A-Z)')
+                            ->rules([
+                                'nullable',
+                                'max:10',
+                                'regex:/^[a-zA-Z0-9]{1,10}$/',
+                            ])
+                            ->columnSpan(4)
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('unit_price')->label('Prezzo unitario')
+                            ->live(onBlur: true)
+                            ->columnSpan(4)
+                            // ->live(debounce: 500)
+                            ->debounce(3000),
+                    ]),
+                Forms\Components\TextInput::make('total_price')
+                    ->label('Totale')
+                    ->readOnly()
+                    // ->numeric()
+                    ->prefix('€')
+                    ->columnSpan(4)
+                    ->default(0.00),
+                Forms\Components\TextInput::make('vat_rate')
+                    ->label('Aliquota IVA')
+                    ->readOnly()
+                    // ->numeric()
+                    ->prefix('€')
+                    ->columnSpan(4)
+                    ->default(0.00),
             ]);
     }
 
@@ -49,6 +113,7 @@ class PassiveItemsRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('total_price')
                     ->money('EUR', true, 'it_IT')
+                    ->alignRight()
                     ->summarize([
                         Tables\Columns\Summarizers\Sum::make()
                             ->label('')

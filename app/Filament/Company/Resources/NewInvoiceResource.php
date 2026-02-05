@@ -1166,7 +1166,7 @@ class NewInvoiceResource extends Resource
                                 ->relationship(
                                     name: 'bankAccount',
                                     modifyQueryUsing: fn (Builder $query) =>
-                                    $query->where('company_id',Filament::getTenant()->id)
+                                    $query->where('company_id',Filament::getTenant()->id)->orderBy('position', 'asc')
                                 )
                                 ->getOptionLabelFromRecordUsing(
                                     fn (Model $record) => "{$record->name} $record->iban"
@@ -1419,10 +1419,11 @@ class NewInvoiceResource extends Resource
                         return $query;
                     }),
                 SelectFilter::make('paid')
-                    ->label('Saldate')
+                    ->label('Stato pagamento')
+                    ->placeholder('Tutti gli stati')
                     ->options([
-                        'si' => 'Sì',
-                        'no' => 'No',
+                        'si' => 'Pagate',
+                        'no' => 'Non pagate',
                     ])
                     // ->query(function (Builder $query, array $data): Builder {
                     //     if (!isset($data['value'])) {
@@ -1531,8 +1532,12 @@ class NewInvoiceResource extends Resource
                     // ->preload()
                     ->columnSpan(2)
                     ->optionsLimit(5),
-                SelectFilter::make('tax_type')->label('Entrata')->options(TaxType::class)
-                    ->multiple()->searchable()->preload(),
+                SelectFilter::make('tax_type')->label('Entrata')
+                    ->options(TaxType::class)
+                    ->placeholder('Tutte')
+                    ->searchable()
+                    ->multiple()
+                    ->preload(),
                 SelectFilter::make('contract_id')->label('Contratto')
                     ->relationship('contract','office_name')
                     ->getOptionLabelFromRecordUsing(
@@ -1545,6 +1550,7 @@ class NewInvoiceResource extends Resource
                     ->multiple()->searchable()->preload(),
                 SelectFilter::make('accrual_type_id')
                     ->label('Gestione')
+                    ->placeholder('Tutte')
                     ->options(function () {
                         return AccrualType::pluck('name', 'id')->toArray();
                     })

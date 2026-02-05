@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentStatus;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
@@ -72,7 +73,7 @@ class ActivePayments extends Model
         return $query
                     // ->whereNotNull('registration_user_id')
                     ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
-                    ->orderBy('registration_date', 'desc');
+                    ->orderBy('payment_date', 'desc');
     }
 
     protected static function booted()
@@ -85,12 +86,21 @@ class ActivePayments extends Model
 
         static::created(function ($payment) {
             if ($payment->invoice) {
-                $payment->invoice->total_payment += $payment->amount;
-                // $payment->invoice->last_payment_date = $payment->payment_date;
-                if ( is_null($payment->invoice->last_payment_date) || $payment->invoice->last_payment_date < $payment->payment_date ) {
-                    $payment->invoice->last_payment_date = $payment->payment_date;
+                $invoice = $payment->invoice;
+                $residue = $invoice->getResidue();
+                $invoice->total_payment += $payment->amount;
+                if ( is_null($invoice->last_payment_date) || $invoice->last_payment_date < $payment->payment_date ) {
+                    $invoice->last_payment_date = $payment->payment_date;
                 }
-                $payment->invoice->save();
+                if ($residue == 0){ $invoice->payment_status = PaymentStatus::PAIED; }
+                else if ($invoice->client->type->value == 'public') {
+                    if($residue < $invoice->no_vat_total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
+                }
+                else {
+                    if($residue < $invoice->total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
+                }
+
+                $invoice->save();
             }
         });
 

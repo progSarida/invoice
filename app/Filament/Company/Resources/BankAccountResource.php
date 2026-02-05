@@ -45,50 +45,60 @@ class BankAccountResource extends Resource
         return $form
             ->columns(12)
             ->schema([
+                Forms\Components\TextInput::make('position')
+                    ->label('Posizione')
+                    ->required()
+                    ->maxLength(255)
+                    // ->autofocus()
+                    ->columnspan(2),
                 Forms\Components\TextInput::make('name')
                     ->label('Denominazione')
                     ->required()
                     ->maxLength(255)
                     // ->autofocus()
-                    ->columnspan(4),
+                    ->columnspan(5),
                 Forms\Components\TextInput::make('holder')
                     ->label('Intestatario')
                     ->required()
                     ->maxLength(255)
                     ->default(fn () => filament()->getTenant()?->name)
-                    ->columnspan(4),
+                    ->columnspan(5),
                 Forms\Components\TextInput::make('agency')
                     ->label('Agenzia')
                     ->maxLength(255)
-                    ->columnspan(4),
+                    ->columnspan(6),
                 Forms\Components\TextInput::make('number')
                     ->label('Conto corrente')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(3),
+                    ->columnspan(6),
                 Forms\Components\TextInput::make('iban')
                     ->label('IBAN')
                     ->required()
                     ->maxLength(27)
                     ->hintIcon('heroicon-o-information-circle', tooltip: 'Codice internazionale per identificare il conto bancario')
-                    ->columnSpan(3),
+                    ->columnSpan(4),
                 Forms\Components\TextInput::make('bic')
                     ->label('BIC')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(3),
+                    ->columnspan(4),
                 Forms\Components\TextInput::make('swift')
                     ->label('SWIFT')
                     ->required()
                     ->maxLength(255)
-                    ->columnspan(3),
+                    ->columnspan(4),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('position', 'asc')
             ->columns([
+                Tables\Columns\TextColumn::make('position')
+                    ->label('Posizione')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Denominazione')
                     ->searchable(),

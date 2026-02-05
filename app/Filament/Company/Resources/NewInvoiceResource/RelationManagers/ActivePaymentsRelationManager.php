@@ -22,6 +22,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class ActivePaymentsRelationManager extends RelationManager
 {
@@ -92,6 +93,7 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->label('Conto')
                     ->options(function () {
                         return BankAccount::where('company_id', Filament::getTenant()->id)
+                            ->orderBy('position', 'asc')
                             ->get()
                             ->mapWithKeys(function ($record) {
                                 return [$record->id => "{$record->name} - {$record->iban}"];
@@ -187,7 +189,7 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->sortable()->afterStateUpdated(function (\App\Models\ActivePayments $record, bool $state) {
                         if ($state) {
                             $record->validation_date = now();
-                            $record->validation_user_id = auth()->id();
+                            $record->validation_user_id = Auth::id();
                         } else {
                             // Se vuoi "annullare" la validazione quando il toggle viene disattivato
                             $record->validation_date = null;

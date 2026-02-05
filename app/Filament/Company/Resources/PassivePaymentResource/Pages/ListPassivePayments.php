@@ -8,6 +8,7 @@ use Filament\Actions;
 use Filament\Actions\ExportAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\MaxWidth;
 
 class ListPassivePayments extends ListRecords
 {
@@ -24,5 +25,10 @@ class ListPassivePayments extends ListRecords
                 ->color(Color::rgb('rgb(0,153,0)'))
                 ->exporter(PassivePaymentExporter::class)
         ];
+    }
+
+    public function getMaxContentWidth(): MaxWidth|string|null                                  // allarga la tabella a tutta pagina
+    {
+        return MaxWidth::Full;
     }
 }

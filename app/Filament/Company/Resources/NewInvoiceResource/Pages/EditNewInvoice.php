@@ -2,6 +2,8 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 
+use App\Enums\PaymentStatus;
+use App\Enums\ReversalGroupType;
 use App\Enums\SdiStatus;
 use Filament\Actions;
 use App\Models\Company;
@@ -12,6 +14,7 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\DocType;
+use App\Models\ReversalMotivationType;
 use App\Models\SdiRequest;
 use App\Services\AndxorSoapService;
 use Carbon\Carbon;
@@ -19,6 +22,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -123,39 +127,57 @@ class EditNewInvoice extends EditRecord
                             ->visible(fn (Get $get) => $get('duplicate_items'))
                             ->default(false),
                     ])
-                    ->action(function (Invoice $record, array $data) {
+                    ->action(function (Get $get, Set $set, Invoice $record, array $data) {
                         try {
-                            $newInvoice = $record->replicate();                                 // creo una nuova istanza della fattura
+                            $newInvoice = $record->replicate();                                         // creo una nuova istanza della fattura
 
-                            $newInvoice->year = now()->year;                                    // imposto anno corrente
-                            $newInvoice->number = $newInvoice->calculateNextInvoiceNumber();    // genero il numero fattura
+                            $newInvoice->contract_detail_id = $newInvoice->contract->lastDetail->id;    // metto l'id del dettaglio contratto in vigore
 
-                            $newInvoice->invoice_date = now()->format('Y-m-d');                 // imposto la data di oggi
+                            $newInvoice->parent_id = null;                                              // resetto la fattura stornata (in caso di nota di credito)
 
-                            $newInvoice->budget_year = now()->year;                             // imposto anno corrente
-                            $newInvoice->accrual_year = now()->year;                            // imposto anno corrente
+                            $newInvoice->number = $newInvoice->calculateNextInvoiceNumber();            // genero il numero fattura
+                            $newInvoice->year = now()->year;                                            // imposto anno corrente
 
-                            $newInvoice->invoice_reference = null;                              // resetto i campi del riferimento (unici per fattura)
+                            $newInvoice->invoice_date = now()->format('Y-m-d');                         // imposto la data di oggi
+
+                            $newInvoice->budget_year = now()->year;                                     // imposto anno corrente
+                            $newInvoice->accrual_year = now()->year;                                    // imposto anno corrente
+
+                            $newInvoice->invoice_reference = null;                                      // resetto i campi del riferimento (unici per fattura)
                             $newInvoice->reference_date_from = null;
                             $newInvoice->reference_date_to = null;
                             $newInvoice->reference_number_from = null;
                             $newInvoice->reference_number_to = null;
                             $newInvoice->total_number = null;
 
-                            $newInvoice->sdi_status = SdiStatus::DA_INVIARE;                    // resetto i campi dello sdi (unici per fattura)
+                            $newInvoice->description = static::generateDescriptionFromModel($newInvoice);    // creo la nuova descrizione
+                            $newInvoice->free_description = null;
+
+                            $newInvoice->payment_status = PaymentStatus::WAITING;                       // imposto lo stato pagamento a 'In attesa'
+                            $newInvoice->last_payment_date = null;                                      // resetto la data dell'ultimo pagamento
+
+                            $newInvoice->total_payment = 0.0;                                           // imposto a zero il totale dei pagamenti della fattura
+                            $newInvoice->total_notes = 0.0;                                             // imposto a zero il totale delle note di credito della fattura
+
+                            $newInvoice->sdi_status = SdiStatus::DA_INVIARE;                            // resetto i campi dello sdi (unici per fattura)
                             $newInvoice->service_code = null;
                             $newInvoice->sdi_code = null;
                             $newInvoice->sdi_date = null;
                             $newInvoice->pdf_path = null;
                             $newInvoice->xml_path = null;
 
-                            $newInvoice->save();                                                // salvo la nuova fattura (il boot method genererà automaticamente invoice_uid)
+                            if(!$data['duplicate_amounts']){
+                                $newInvoice->total = 0.0;
+                                $newInvoice->no_vat_total = 0.0;
+                            }
+
+                            $newInvoice->save();                                                        // salvo la nuova fattura (il boot method genererà automaticamente invoice_uid)
 
                             if ($data['duplicate_items']) {
                                 $items = $record->invoiceItems->all();
                                 $lastKey = array_key_last($items);
 
-                                foreach ($items as $key => $item) {                                 // duplico gli InvoiceItem collegati
+                                foreach ($items as $key => $item) {                                     // duplico gli InvoiceItem collegati
                                     if(($item->vat_code_type && $item->vat_code_type !== 'vc06a') && !$item->postal_expense_id){
                                         $newItem = $item->replicate();
                                         $newItem->invoice_id = $newInvoice->id;
@@ -176,14 +198,14 @@ class EditNewInvoice extends EditRecord
                                         $newItem->is_with_vat = $item->is_with_vat ?? null;
                                         $newItem->save();
 
-                                        $newInvoice->invoiceCheckStampDuty();                       // verifico e inserisco eventuale imposta di bollo (non fa nulla)
+                                        $newInvoice->invoiceCheckStampDuty();                               // verifico e inserisco eventuale imposta di bollo (non fa nulla)
 
                                     }
                                     if ($key === $lastKey) {
-                                        $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
-                                        $newInvoice->invoiceCheckStampDuty();                       // verifico e inserisco eventuale imposta di bollo (non fa nulla)
-                                        $newItem->autoInsert();                                     // crea voci fattura di ritenute, riepiloghi e casse previdenziali
-                                        $newInvoice->updateTotal();                                 // aggiorno i totali della nuova fattura
+                                        $newInvoice->updateTotal();                                         // aggiorno i totali della nuova fattura
+                                        $newInvoice->invoiceCheckStampDuty();                               // verifico e inserisco eventuale imposta di bollo (non fa nulla)
+                                        $newItem->autoInsert();                                             // crea voci fattura di ritenute, riepiloghi e casse previdenziali
+                                        $newInvoice->updateTotal();                                         // aggiorno i totali della nuova fattura
                                     }
                                 }
                             } else {
@@ -278,6 +300,14 @@ class EditNewInvoice extends EditRecord
                 Actions\Action::make('sendInvoice')
                     ->label('Invia a SDI')
                     ->icon('tabler-send')
+                    ->visible(function($record) {
+                        $prec = Invoice::where('year', $record->year)
+                                    ->where('sectional_id', $record->sectional_id)
+                                    ->where('number', '<', $record->number)
+                                    ->orderBy('number', 'desc')
+                                    ->first();
+                        return $prec->sdi_status != SdiStatus::DA_INVIARE;
+                    })
                     ->action(function (Invoice $record, array $data) {
                         $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
                             ? $record->invoiceItems->where('auto', false)
@@ -324,6 +354,7 @@ class EditNewInvoice extends EditRecord
                 Actions\Action::make('getStatus')
                     ->label('Aggiorna stato SDI')
                     ->icon('tabler-refresh')
+                    ->visible(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE )
                     ->action(function (Invoice $record, array $data) {
                         $soapService = app(AndxorSoapService::class);
                         try {
@@ -457,5 +488,66 @@ class EditNewInvoice extends EditRecord
                 $this->data = $this->getRecord()->toArray();
                 $this->fillForm();
             });
+    }
+
+    public static function generateDescriptionFromModel(Invoice $invoice): string
+    {
+        $description = '';
+        $year = substr($invoice->budget_year, 2);
+
+        if (filled($invoice->doc_type_id)) {
+            // Carichiamo il tipo documento con la relazione se non è già presente
+            $docType = $invoice->docType ?: DocType::with('docGroup')->find($invoice->doc_type_id);
+
+            if ($docType?->docGroup?->name === 'Note di variazione') {
+
+                $description = '(ab' . $year . ') ' . $docType->description;
+
+                $reversalGroupType = ReversalGroupType::tryFrom($invoice->reversal_group_type)?->getLabel();
+                if ($reversalGroupType) {
+                    $description .= ' a storno ' . lcfirst($reversalGroupType);
+                }
+
+                $parent = $invoice->parent ?: Invoice::find($invoice->parent_id);
+                if ($parent) {
+                    $description .= ' su ' . lcfirst($parent->docType->description);
+                    $description .= ' n.ro ' . $parent->getNewInvoiceNumber();
+                    $description .= ' del ' . \Carbon\Carbon::parse($parent->invoice_date)->format('d/m/Y');
+
+                    $motivation = ReversalMotivationType::find($invoice->reversal_motivation_type_id)?->name;
+                    if ($motivation) {
+                        $description .= ' per ' . lcfirst($motivation) . '.';
+                    }
+                }
+            } else {
+                // Caso fatture normali
+                $contractDetail = $invoice->contract?->lastDetail;
+                $contractDescription = $contractDetail?->invoice_description;
+
+                $description = '(ab' . $year . ') ' . $contractDescription . ' ';
+
+                if ($invoice->invoice_reference) {
+                    if ($invoice->reference_date_from) {
+                        $description .= 'per il periodo dal ' . \Carbon\Carbon::parse($invoice->reference_date_from)->format('d/m/Y');
+                        if ($invoice->reference_date_to) {
+                            $description .= ' al ' . \Carbon\Carbon::parse($invoice->reference_date_to)->format('d/m/Y');
+                        }
+                    }
+
+                    if ($invoice->reference_number_from) {
+                        $description .= ' dal verbale numero ' . $invoice->reference_number_from;
+                        if ($invoice->reference_number_to) {
+                            $description .= ' al verbale numero ' . $invoice->reference_number_to;
+                            $total = $invoice->reference_number_to - $invoice->reference_number_from + 1;
+                            if ($total > 0) {
+                                $description .= ' per un totale di ' . $total . ' verbali';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return trim($description);
     }
 }

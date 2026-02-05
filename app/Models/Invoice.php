@@ -671,7 +671,7 @@ class Invoice extends Model
         $contract = $invoice->contract;
         if (!$contract) return;
 
-        $totalInvoiced = Invoice::where('contract_id', $contract->id)->sum('total');        // totale di tutte le fatture per questo contratto
+        $totalInvoiced = Invoice::where('contract_id', $contract->id)->sum('no_vat_total'); // totale non ivato di tutte le fatture per questo contratto
 
         $limit = $contract->amount;
 
