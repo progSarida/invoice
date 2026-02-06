@@ -79,18 +79,18 @@ class PassiveItemsRelationManager extends RelationManager
                     ]),
                 Forms\Components\TextInput::make('total_price')
                     ->label('Totale')
-                    ->readOnly()
+                    ->required()
                     // ->numeric()
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->prefix('€')
-                    ->columnSpan(4)
-                    ->default(0.00),
+                    ->columnSpan(4),
                 Forms\Components\TextInput::make('vat_rate')
                     ->label('Aliquota IVA')
-                    ->readOnly()
+                    ->required()
                     // ->numeric()
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->prefix('€')
-                    ->columnSpan(4)
-                    ->default(0.00),
+                    ->columnSpan(4),
             ]);
     }
 

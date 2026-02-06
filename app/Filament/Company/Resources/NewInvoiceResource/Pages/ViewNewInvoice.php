@@ -3,6 +3,7 @@
 namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 
 use App\Enums\InvoiceReference;
+use App\Enums\SdiStatus;
 use App\Filament\Company\Resources\InvoiceResource;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\DocType;
@@ -160,7 +161,8 @@ class ViewNewInvoice extends ViewRecord
                         echo $pdf->output();
                     }, 'fattura-' . $record->printNumber() . '.pdf');
                 }),
-                Actions\EditAction::make(),
+                Actions\EditAction::make()
+                    ->hidden(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE),
             ])
             ->label('Operazioni')
             ->icon('heroicon-m-ellipsis-vertical')

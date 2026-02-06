@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class PassiveInvoice extends Model
 {
@@ -83,5 +84,15 @@ class PassiveInvoice extends Model
             //
         });
 
+    }
+
+    // Aggiorna i totali (con e senza IVA della fattura) ad ogni inserimento di una voce
+    public function updateTotal(): void
+    {
+        Log::info('Aggiornamento totali_________________________________________________________________________________________________');
+        $totals = $this->passiveItems()->sum('total_price');
+        Log::info('Totale con IVA: ' . $totals);
+        $this->total = $totals;
+        $this->save();
     }
 }

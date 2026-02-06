@@ -58,4 +58,11 @@ enum PiValidationStatus: string implements HasLabel, HasColor, HasDescription, H
             self::VIEW => 'success',
         };
     }
+
+    public static function toArray(): array
+    {
+        return collect(self::cases())
+            ->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])
+            ->toArray();
+    }
 }

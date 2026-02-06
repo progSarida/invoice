@@ -31,4 +31,32 @@ class PassiveItem extends Model
     public function passiveInvoice(){
         return $this->belongsTo(PassiveInvoice::class, 'passive_invoice_id');
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($item) {
+            //
+        });
+
+        static::created(function ($item) {
+            //
+        });
+
+        static::updating(function ($item) {
+            //
+        });
+
+        static::saved(function ($item) {
+            $item->passiveInvoice?->updateTotal();
+        });
+
+        static::deleting(function ($item) {
+            //
+        });
+
+        static::deleted(function ($item) {
+            $item->passiveInvoice?->updateTotal();
+        });
+
+    }
 }

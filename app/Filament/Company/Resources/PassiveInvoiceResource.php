@@ -13,9 +13,11 @@ use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\Passi
 use App\Models\DocType;
 use App\Models\PassiveInvoice;
 use App\Models\Supplier;
+use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action as ActionsAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
@@ -30,6 +32,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
@@ -373,7 +376,11 @@ class PassiveInvoiceResource extends Resource
             ->filters([
                 SelectFilter::make('pi_validation_status')
                     ->label('Validazione')
-                    ->options(PiValidationStatus::class)
+                    // ->options(PiValidationStatus::class)
+                    ->options(fn () => [
+                            'validati' => 'Tutti validati',   // La tua opzione custom
+                        ] + PiValidationStatus::class::toArray()
+                    )
                     ->query(function (Builder $query, array $data) {
                         $value = $data['value'] ?? null;
 
@@ -388,6 +395,9 @@ class PassiveInvoiceResource extends Resource
                                 return $query->whereHas('piValidation', function ($q) use ($value) {
                                         $q->where('pi_validation_status', $value);
                                     });
+                                break;
+                            case 'validati':
+                                return $query->whereNotNull('pi_validation_id');
                                 break;
                             default:
                                 return $query;
@@ -416,7 +426,80 @@ class PassiveInvoiceResource extends Resource
                             });
                     })
                     ->preload(),
+                Filter::make('invoice_date_range')
+                    ->form([
+                        DatePicker::make('invoice_from_date')
+                            ->label('Data fattura da')
+                            ->columnSpan(1),
+                        DatePicker::make('invoice_to_date')
+                            ->label('Data fattura a')
+                            ->columnSpan(1),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['invoice_from_date'])) {
+                            $query->whereDate('invoice_date', '>=', $data['invoice_from_date']);
+                        }
+                        if (! empty($data['invoice_to_date'])) {
+                            $query->whereDate('invoice_date', '<=', $data['invoice_to_date']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['invoice_from_date'] && $data['invoice_to_date']) {
+                            return "Data fattura dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y') . " Data fattura aal " . Carbon::parse($data['invoice_to_date'])->format('d/m/Y');
+                        }
+                        if ($data['invoice_from_date']) {
+                            return "Data fattura dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y');
+                        }
+                        if ($data['invoice_to_date']) {
+                            return "Data fattura al " . Carbon::parse($data['invoice_to_date'])->format('d/m/Y');
+                        }
+                        return null;
+                    }),
+                SelectFilter::make('notes')
+                    ->label('Note di credito')
+                    ->placeholder('Includi')
+                    ->options([
+                        'no' => 'Escludi',
+                        'si' => 'Seleziona',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value'])) {
+                            return $query;
+                        }
+                        return $query->when($data['value'] === 'si', function ($q) {
+                                return $q->where('doc_type', 'TD04');
+                            })->when($data['value'] === 'no', function ($q) {
+                                return $q->where('doc_type', '!=', 'TD04');
+                            });
+                    })
+                    ->default('no')
+                    ->preload(),
+                SelectFilter::make('autos')
+                    ->label('Autofatture')
+                    ->placeholder('Includi')
+                    ->options([
+                        'no' => 'Escludi',
+                        'si' => 'Seleziona',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        $value = $data['value'] ?? null;
+
+                        if (!$value) return $query;
+
+                        $filterGroup = function ($q) {
+                            $q->whereHas('docGroup', fn ($qGroup) => $qGroup->where('name', 'Autofatture'));
+                        };
+
+                        return $query->when(
+                            $value === 'si',                                                            // Tutte
+                            fn ($q) => $q->whereHas('docType', $filterGroup),                           // Solo autofatture
+                            fn ($q) => $q->whereDoesntHave('docType', $filterGroup)                     // Esclude autofatture
+                        );
+                    })
+                    ->default('no')
+                    ->preload(),
             ])
+            ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),
