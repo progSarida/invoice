@@ -78,12 +78,12 @@ class PassivePayment extends Model
                 $originalAmount = $payment->getOriginal('amount');
                 $invoice = $payment->passiveInvoice;
                 $invoice->total_payment = $invoice->total_payment - $originalAmount + $payment->amount;
-                $updatedInvoice = false;
+                $updatedInvoice = true;
             }
 
             if ($payment->isDirty('payment_date') && $payment->passiveInvoice && $payment->passiveInvoice->last_payment_date < $payment->payment_date) {
                 $payment->passiveInvoice->last_payment_date = $payment->payment_date;
-                $updatedInvoice = false;
+                $updatedInvoice = true;
             }
 
             if($updatedInvoice) { $invoice->save(); }

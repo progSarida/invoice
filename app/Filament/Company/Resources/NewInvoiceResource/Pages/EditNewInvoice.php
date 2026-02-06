@@ -25,6 +25,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\DB;
 
 class EditNewInvoice extends EditRecord
 {
@@ -117,7 +118,7 @@ class EditNewInvoice extends EditRecord
                     ->visible(fn($record) => $record->docType->name != 'TD00')
                     ->requiresConfirmation()
                     ->modalHeading('Duplica Fattura')
-                    ->modalDescription('Vuoi creare una copia di questa fattura? La nuova fattura avrà un nuovo numero, una nuova data e gli importi delle voci a zero.')
+                    ->modalDescription('Vuoi creare una copia di questa fattura? La nuova fattura avrà un nuovo numero e una nuova data.')
                     ->modalSubmitActionLabel('Duplica')->form([
                         Checkbox::make('duplicate_items')
                             ->label('Duplica anche le voci della fattura')
@@ -130,37 +131,39 @@ class EditNewInvoice extends EditRecord
                     ])
                     ->action(function (Get $get, Set $set, Invoice $record, array $data) {
                         try {
-                            $newInvoice = $record->replicate();                                         // creo una nuova istanza della fattura
+                            DB::beginTransaction();
 
-                            $newInvoice->contract_detail_id = $newInvoice->contract->lastDetail->id;    // metto l'id del dettaglio contratto in vigore
+                            $newInvoice = $record->replicate();                                             // creo una nuova istanza della fattura
 
-                            $newInvoice->parent_id = null;                                              // resetto la fattura stornata (in caso di nota di credito)
+                            $newInvoice->contract_detail_id = $newInvoice->contract->lastDetail->id;        // metto l'id del dettaglio contratto in vigore
 
-                            $newInvoice->number = $newInvoice->calculateNextInvoiceNumber();            // genero il numero fattura
-                            $newInvoice->year = now()->year;                                            // imposto anno corrente
+                            $newInvoice->parent_id = null;                                                  // resetto la fattura stornata (in caso di nota di credito)
 
-                            $newInvoice->invoice_date = now()->format('Y-m-d');                         // imposto la data di oggi
+                            $newInvoice->year = now()->year;                                                // imposto anno corrente
+                            $newInvoice->number = $newInvoice->calculateNextInvoiceNumber();                // genero il numero fattura
 
-                            $newInvoice->budget_year = now()->year;                                     // imposto anno corrente
-                            $newInvoice->accrual_year = now()->year;                                    // imposto anno corrente
+                            $newInvoice->invoice_date = now()->format('Y-m-d');                             // imposto la data di oggi
 
-                            $newInvoice->invoice_reference = null;                                      // resetto i campi del riferimento (unici per fattura)
+                            $newInvoice->budget_year = now()->year;                                         // imposto anno corrente
+                            $newInvoice->accrual_year = now()->year;                                        // imposto anno corrente
+
+                            $newInvoice->invoice_reference = null;                                          // resetto i campi del riferimento (unici per fattura)
                             $newInvoice->reference_date_from = null;
                             $newInvoice->reference_date_to = null;
                             $newInvoice->reference_number_from = null;
                             $newInvoice->reference_number_to = null;
                             $newInvoice->total_number = null;
 
-                            $newInvoice->description = static::generateDescriptionFromModel($newInvoice);    // creo la nuova descrizione
+                            $newInvoice->description = static::generateDescriptionFromModel($newInvoice);   // creo la nuova descrizione
                             $newInvoice->free_description = null;
 
-                            $newInvoice->payment_status = PaymentStatus::WAITING;                       // imposto lo stato pagamento a 'In attesa'
-                            $newInvoice->last_payment_date = null;                                      // resetto la data dell'ultimo pagamento
+                            $newInvoice->payment_status = PaymentStatus::WAITING;                           // imposto lo stato pagamento a 'In attesa'
+                            $newInvoice->last_payment_date = null;                                          // resetto la data dell'ultimo pagamento
 
-                            $newInvoice->total_payment = 0.0;                                           // imposto a zero il totale dei pagamenti della fattura
-                            $newInvoice->total_notes = 0.0;                                             // imposto a zero il totale delle note di credito della fattura
+                            $newInvoice->total_payment = 0.0;                                               // imposto a zero il totale dei pagamenti della fattura
+                            $newInvoice->total_notes = 0.0;                                                 // imposto a zero il totale delle note di credito della fattura
 
-                            $newInvoice->sdi_status = SdiStatus::DA_INVIARE;                            // resetto i campi dello sdi (unici per fattura)
+                            $newInvoice->sdi_status = SdiStatus::DA_INVIARE;                                // resetto i campi dello sdi (unici per fattura)
                             $newInvoice->service_code = null;
                             $newInvoice->sdi_code = null;
                             $newInvoice->sdi_date = null;
@@ -172,21 +175,23 @@ class EditNewInvoice extends EditRecord
                                 $newInvoice->no_vat_total = 0.0;
                             }
 
-                            $newInvoice->save();                                                        // salvo la nuova fattura (il boot method genererà automaticamente invoice_uid)
+                            $newInvoice->save();                                                            // salvo la nuova fattura
+                                                                                                            // (il boot method genererà automaticamente invoice_uid)
 
                             if ($data['duplicate_items']) {
                                 $items = $record->invoiceItems->all();
                                 $lastKey = array_key_last($items);
 
-                                foreach ($items as $key => $item) {                                     // duplico gli InvoiceItem collegati
-                                    if(($item->vat_code_type && $item->vat_code_type !== 'vc06a') && !$item->postal_expense_id){
+                                foreach ($items as $key => $item) {                                         // duplico gli InvoiceItem collegati
+                                    // if(($item->vat_code_type && $item->vat_code_type !== 'vc06a') && !$item->postal_expense_id){
+                                    if($item->invoice_element_id){                                          // se non è imposta di bollo, riepilogo, o spesa di notifica
                                         $newItem = $item->replicate();
                                         $newItem->invoice_id = $newInvoice->id;
-                                        $newItem->invoice_element_id = $item->invoice_element_id ?? null;
-                                        $newItem->description = $item->description ?? null;
-                                        $newItem->transaction_type = $item->transaction_type ?? null;
-                                        $newItem->start_date = $item->start_date ?? null;
-                                        $newItem->end_date = $item->end_date ?? null;
+                                        // $newItem->invoice_element_id = $item->invoice_element_id ?? null;   // tolgo perchè replicate copia già i dati
+                                        // $newItem->description = $item->description ?? null;
+                                        // $newItem->transaction_type = $item->transaction_type ?? null;
+                                        $newItem->start_date = null;
+                                        $newItem->end_date = null;
                                         $newItem->code = $item->code ?? null;
                                         $newItem->quantity = $data['duplicate_amounts'] ? $item->quantity : null;
                                         $newItem->measure_unit = $data['duplicate_amounts'] ? $item->measure_unit : null;
@@ -194,26 +199,33 @@ class EditNewInvoice extends EditRecord
                                         $newItem->amount = $data['duplicate_amounts'] ? $item->amount : 0.00;
                                         $newItem->taxable = $data['duplicate_amounts'] ? $item->taxable : 0.00;
                                         $newItem->total = $data['duplicate_amounts'] ? $item->total : 0.00;
-                                        $newItem->vat_code_type = $item->vat_code_type ?? null;
-                                        $newItem->auto = $item->auto ?? null;
-                                        $newItem->is_with_vat = $item->is_with_vat ?? null;
+                                        // $newItem->vat_code_type = $item->vat_code_type ?? null;             // tolgo perchè replicate copia già i dati
+                                        // $newItem->auto = $item->auto ?? null;
+                                        // $newItem->is_with_vat = $item->is_with_vat ?? null;
                                         $newItem->save();
 
-                                        $newInvoice->invoiceCheckStampDuty();                               // verifico e inserisco eventuale imposta di bollo (non fa nulla)
+                                        // $newInvoice->invoiceCheckStampDuty();                               // verifico e inserisco eventuale imposta di bollo (non fa nulla)
+
+                                        $newItem->calculateTotal();
+                                        $newItem->save();
+                                        $newItem->checkStampDuty();                                         // operazioni per inserimenti bollo e riepiloghi
+                                        $newItem->autoInsert();
 
                                     }
-                                    if ($key === $lastKey) {
-                                        $newInvoice->updateTotal();                                         // aggiorno i totali della nuova fattura
-                                        $newInvoice->invoiceCheckStampDuty();                               // verifico e inserisco eventuale imposta di bollo (non fa nulla)
-                                        $newItem->autoInsert();                                             // crea voci fattura di ritenute, riepiloghi e casse previdenziali
-                                        $newInvoice->updateTotal();                                         // aggiorno i totali della nuova fattura
-                                    }
+                                    // if ($key === $lastKey) {
+                                    //     $newInvoice->updateTotal();                                         // aggiorno i totali della nuova fattura
+                                    //     $newInvoice->invoiceCheckStampDuty();                               // verifico e inserisco eventuale imposta di bollo (non fa nulla)
+                                    //     $newItem->autoInsert();                                             // crea voci fattura di ritenute, riepiloghi e casse previdenziali
+                                    //     $newInvoice->updateTotal();                                         // aggiorno i totali della nuova fattura
+                                    // }
                                 }
                             } else {
                                 // Se non si duplicano le voci, aggiorno comunque i totali e verifico l'imposta di bollo
-                                $newInvoice->invoiceCheckStampDuty();
-                                $newInvoice->updateTotal();
+                                // $newInvoice->invoiceCheckStampDuty();
+                                // $newInvoice->updateTotal();
                             }
+
+                            DB::commit();
 
                             Notification::make()
                                 ->title('Fattura duplicata con successo')
@@ -245,10 +257,14 @@ class EditNewInvoice extends EditRecord
                     ->modalSubmitActionLabel('Converti')
                     ->action(function (Invoice $record) {
                         try {
+                            DB::beginTransaction();
+
                             $record->doc_type_id = DocType::where('name', 'TD01')->first()->id;
                             $record->number = $record->calculateNextInvoiceNumber();
                             $record->invoice_date = today()->toDateString();
                             $record->sdi_status = SdiStatus::DA_INVIARE;
+
+                            DB::commit();
 
                             $record->save();                                                        // salvo la fattura (il boot method genererà automaticamente invoice_uid)
 

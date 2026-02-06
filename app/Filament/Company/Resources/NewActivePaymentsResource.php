@@ -234,6 +234,16 @@ class NewActivePaymentsResource extends Resource
                     ->label('Validato')
                     ->live()
                     ->default(false)
+                    ->afterStateUpdated(function (Set $set, bool $state) {
+                        if ($state) {
+                            $set('validation_date', now()->format('Y-m-d'));
+                            $set('validation_user_id', Auth::id());
+                        } else {
+                            // Per "annullare" la validazione quando il toggle viene disattivato
+                            $set('validation_date', null);
+                            $set('validation_user_id', null);
+                        }
+                    })
                     ->columnSpan(2),
                 Forms\Components\Select::make('bank_account_id')->label('Conto')
                     ->relationship(

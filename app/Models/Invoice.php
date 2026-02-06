@@ -20,6 +20,7 @@ use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class Invoice extends Model
 {
@@ -276,8 +277,12 @@ class Invoice extends Model
     // Aggiorna i totali (con e senza IVA della fattura) ad ogni inserimento di una voce
     public function updateTotal(): void
     {
+        // Log::info('Aggiornamento totali_________________________________________________________________________________________________');
         $totals = $this->invoiceItems()->where('auto', false)->sum('total');
+        // Log::info('Totale con IVA: ' . $totals);
         $amounts = $this->invoiceItems()->sum('amount');
+        // Log::info('Totale esente da IVA: ' . $amounts);
+        // Log::info('IVA: ' . ($totals - $amounts));
         // dd($totals, $amounts);
         // $total = $this->invoiceItems()->where('auto', false)->sum('total');
         $no_vat_total = $this->invoiceItems()->where('auto', false)->sum('amount');
@@ -559,6 +564,9 @@ class Invoice extends Model
                 if($key == 'vc06a') $insert = false;
                 if($vat['free']) $free += $vat['taxable'];
             }
+            // Log::info('Controllo imposta di bollo___________________________________________________________________________________________');
+            // Log::info('Importo esente da IVA: ' . $free);
+            // Log::info('Limite bollo: ' . $stampDuty->value);
             if($insert && $free >= $stampDuty->value){
                 $a = [
                     'invoice_id' => $this->id,

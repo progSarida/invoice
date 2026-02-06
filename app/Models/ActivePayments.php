@@ -88,6 +88,7 @@ class ActivePayments extends Model
             if ($payment->invoice) {
                 $invoice = $payment->invoice;
                 $invoice->total_payment += $payment->amount;
+
                 if ( is_null($invoice->last_payment_date) || $invoice->last_payment_date < $payment->payment_date ) {
                     $invoice->last_payment_date = $payment->payment_date;
                 }
@@ -108,6 +109,7 @@ class ActivePayments extends Model
         static::updating(function ($payment) {
             $payment->registration_date = now()->toDateString();
             $payment->registration_user_id = Auth::id();
+            $updatedInvoice = false;
 
             if ($payment->isDirty('amount') && $payment->invoice) {
                 $originalAmount = $payment->getOriginal('amount');
@@ -122,15 +124,39 @@ class ActivePayments extends Model
                 else {
                     if($residue < $invoice->total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
                 }
+                $updatedInvoice = true;
+            }
 
-                $invoice->save();
+            if ($payment->isDirty('payment_date') && $payment->invoice && $payment->invoice->last_payment_date < $payment->payment_date) {
+                $payment->invoice->last_payment_date = $payment->payment_date;
+                $updatedInvoice = true;
+            }
+
+            if($updatedInvoice) { $invoice->save(); }
+
+            if(!$payment->validated) {
+                $payment->validation_date = null;
+                $payment->validation_user_id = null;
             }
         });
 
         static::deleting(function ($payment) {
             if ($payment->invoice) {
-                $payment->invoice->total_payment -= $payment->amount;
-                $payment->invoice->save();
+                $invoice = $payment->invoice;
+                $invoice->total_payment -= $payment->amount;
+                $invoice->save();
+                $residue = $invoice->getResidue();
+                if ($residue == 0){ $invoice->payment_status = PaymentStatus::PAIED; }
+                else if ($invoice->client->type->value == 'public') {
+                    if($residue < $invoice->no_vat_total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
+                    else { $invoice->payment_status = PaymentStatus::WAITING;}
+                }
+                else {
+                    if($residue < $invoice->total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
+                    else { $invoice->payment_status = PaymentStatus::WAITING;}
+                }
+
+                $invoice->save();
             }
         });
 

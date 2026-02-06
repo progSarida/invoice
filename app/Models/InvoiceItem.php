@@ -10,6 +10,7 @@ use App\Enums\WithholdingType;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceItem extends Model
 {
@@ -113,6 +114,9 @@ class InvoiceItem extends Model
                 }
                 if($vat['free']) $free += $vat['taxable'];
             }
+            // Log::info('Controllo imposta di bollo___________________________________________________________________________________________');
+            // Log::info('Importo esente da IVA: ' . $free);
+            // Log::info('Limite bollo: ' . $stampDuty->value);
             // if($insert && $free >= $stampDuty->value){
             if($free >= $stampDuty->value){
                 $a = [
