@@ -252,6 +252,8 @@ class NewActivePaymentsResource extends Resource
                 //     ->columnSpan(7),
                 Forms\Components\Textarea::make('description')->label('Descrizione')
                     ->columnSpan(7),
+                Forms\Components\Textarea::make('note')->label('Note')
+                    ->columnSpanFull(),
                 Section::make('Dati registrazione/validazione')
                         // ->collapsible()
                         ->columns(12)

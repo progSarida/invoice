@@ -72,13 +72,21 @@ class PassivePayment extends Model
         static::updating(function ($payment) {
             $payment->registration_date = now()->toDateString();
             $payment->registration_user_id = Auth::id();
+            $updatedInvoice = false;
 
             if ($payment->isDirty('amount') && $payment->passiveInvoice) {
                 $originalAmount = $payment->getOriginal('amount');
                 $invoice = $payment->passiveInvoice;
                 $invoice->total_payment = $invoice->total_payment - $originalAmount + $payment->amount;
-                $invoice->save();
+                $updatedInvoice = false;
             }
+
+            if ($payment->isDirty('payment_date') && $payment->passiveInvoice && $payment->passiveInvoice->last_payment_date < $payment->payment_date) {
+                $payment->passiveInvoice->last_payment_date = $payment->payment_date;
+                $updatedInvoice = false;
+            }
+
+            if($updatedInvoice) { $invoice->save(); }
 
             if(!$payment->validated) {
                 $payment->validation_date = null;

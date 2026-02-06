@@ -114,6 +114,7 @@ class EditNewInvoice extends EditRecord
                     ->label('Duplica')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
+                    ->visible(fn($record) => $record->docType->name != 'TD00')
                     ->requiresConfirmation()
                     ->modalHeading('Duplica Fattura')
                     ->modalDescription('Vuoi creare una copia di questa fattura? La nuova fattura avrà un nuovo numero, una nuova data e gli importi delle voci a zero.')
@@ -232,6 +233,43 @@ class EditNewInvoice extends EditRecord
                         }
                     }),
 
+                Actions\Action::make('converti_in_fattura')
+                    ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
+                    ->label('Converti in fattura')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('warning')
+                    ->visible(fn($record) => $record->docType->name == 'TD00')
+                    ->requiresConfirmation()
+                    ->modalHeading('Converti in Fattura')
+                    ->modalDescription('Vuoi convertire il preavviso di fattura in una fattura?')
+                    ->modalSubmitActionLabel('Converti')
+                    ->action(function (Invoice $record) {
+                        try {
+                            $record->doc_type_id = DocType::where('name', 'TD01')->first()->id;
+                            $record->number = $record->calculateNextInvoiceNumber();
+                            $record->invoice_date = today()->toDateString();
+                            $record->sdi_status = SdiStatus::DA_INVIARE;
+
+                            $record->save();                                                        // salvo la fattura (il boot method genererà automaticamente invoice_uid)
+
+                            Notification::make()
+                                ->title('Fattura convertita con successo')
+                                ->body('Nuova fattura creata con numero: ' . $record->getNewInvoiceNumber())
+                                ->success()
+                                ->send();
+
+                            // Reindirizza alla nuova fattura
+                            return redirect($this->getResource()::getUrl('edit', ['record' => $record]));
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore nella duplicazione')
+                                ->body('Si è verificato un errore: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+
                 Actions\Action::make('stampa_pdf')
                     ->label('Stampa')
                     ->icon('heroicon-o-printer')
@@ -306,7 +344,9 @@ class EditNewInvoice extends EditRecord
                                     ->where('number', '<', $record->number)
                                     ->orderBy('number', 'desc')
                                     ->first();
-                        return $prec->sdi_status != SdiStatus::DA_INVIARE;
+                        $precOk = $prec ? $prec->sdi_status != SdiStatus::DA_INVIARE : true;
+                        $noForewarning = $record->docType->name != 'TD00';
+                        return $precOk && $noForewarning;
                     })
                     ->action(function (Invoice $record, array $data) {
                         $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
@@ -354,7 +394,7 @@ class EditNewInvoice extends EditRecord
                 Actions\Action::make('getStatus')
                     ->label('Aggiorna stato SDI')
                     ->icon('tabler-refresh')
-                    ->visible(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE )
+                    ->visible(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE && $record->docType->name != 'TD00')
                     ->action(function (Invoice $record, array $data) {
                         $soapService = app(AndxorSoapService::class);
                         try {

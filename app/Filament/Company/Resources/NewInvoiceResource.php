@@ -1716,7 +1716,8 @@ class NewInvoiceResource extends Resource
                         return $query;
                     }),
             // ],layout: FiltersLayout::Modal)->filtersFormColumns(4)
-            ])->filtersFormColumns(4)
+            ])
+            ->filtersFormColumns(4)
             ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\ViewAction::make(),

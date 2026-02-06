@@ -18,7 +18,10 @@ use App\Filament\Company\Resources\PassivePaymentResource\RelationManagers;
 use App\Models\DocType;
 use App\Models\PassiveInvoice;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Set;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Facades\Auth;
 
 class PassivePaymentResource extends Resource
@@ -168,6 +171,8 @@ class PassivePaymentResource extends Resource
                     ),
                 Forms\Components\Placeholder::make('')
                     ->columnSpan(1),
+                Forms\Components\Textarea::make('note')->label('Note')
+                    ->columnSpanFull(),
                 //
                 Forms\Components\DatePicker::make('registration_date')
                     ->label('Data registrazione')
@@ -292,8 +297,118 @@ class PassivePaymentResource extends Resource
                     }),
             ])
             ->filters([
-                //
+                SelectFilter::make('validated')
+                    ->label('Validati')
+                    ->options([
+                        'si' => 'Sì',
+                        'no' => 'No',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value'])) {
+                            return $query;
+                        }
+                        return $query->when($data['value'] === 'si', fn ($q) => $q->where('validated', true))
+                                    ->when($data['value'] === 'no', fn ($q) => $q->where('validated', false));
+                    })
+                    ->preload(),
+                SelectFilter::make('select_doc_type')
+                    ->label('Seleziona tipo documento')
+                    // Definisco le opzioni prendendole da DocType
+                    ->options(function () {
+                        return DocType::orderBy('doc_group_id')->pluck('description', 'name')->toArray();
+                    })
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    // Specifico noi come filtrare la query principale
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['values'])) {
+                            return $query;
+                        }
+                        // Entro nella relazione passiveInvoice e filtro sulla sua colonna doc_type
+                        return $query->whereHas('passiveInvoice', function (Builder $innerQuery) use ($data) {
+                            $innerQuery->whereIn('doc_type', $data['values']);
+                        });
+                    }),
+                SelectFilter::make('exclude_doc_type')
+                    ->label('Escludi tipo documento')
+                    // Definisco le opzioni prendendole da DocType
+                    ->options(function () {
+                        return DocType::orderBy('doc_group_id')->pluck('description', 'name')->toArray();
+                    })
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    // Specifico noi come filtrare la query principale
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['values'])) {
+                            return $query;
+                        }
+                        // Entro nella relazione passiveInvoice e filtro sulla sua colonna doc_type
+                        return $query->whereHas('passiveInvoice', function (Builder $innerQuery) use ($data) {
+                            $innerQuery->whereNotIn('doc_type', $data['values']);
+                        });
+                    }),
+                Filter::make('payment_date_range')
+                    ->form([
+                        DatePicker::make('payment_from_date')
+                            ->label('Pagamento da')
+                            ->columnSpan(1),
+                        DatePicker::make('payment_to_date')
+                            ->label('Pagamento a')
+                            ->columnSpan(1),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['payment_from_date'])) {
+                            $query->whereDate('payment_date', '>=', $data['payment_from_date']);
+                        }
+                        if (! empty($data['payment_to_date'])) {
+                            $query->whereDate('payment_date', '<=', $data['payment_to_date']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['payment_from_date'] && $data['payment_to_date']) {
+                            return "Pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
+                        }
+                        if ($data['payment_from_date']) {
+                            return "Pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y');
+                        }
+                        if ($data['payment_to_date']) {
+                            return "Pagamento al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
+                        }
+                        return null;
+                    }),
+                Filter::make('registration_date_range')
+                    ->form([
+                        DatePicker::make('registration_from_date')
+                            ->label('Registrazione da')
+                            ->columnSpan(1),
+                        DatePicker::make('registration_to_date')
+                            ->label('Registrazione a')
+                            ->columnSpan(1),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['registration_from_date'])) {
+                            $query->whereDate('registration_date', '>=', $data['registration_from_date']);
+                        }
+                        if (! empty($data['payment_to_date'])) {
+                            $query->whereDate('registration_date', '<=', $data['registration_to_date']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['registration_from_date'] && $data['registration_to_date']) {
+                            return "Registrazione dal " . Carbon::parse($data['registration_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['registration_to_date'])->format('d/m/Y');
+                        }
+                        if ($data['registration_from_date']) {
+                            return "Registrazione dal " . Carbon::parse($data['registration_from_date'])->format('d/m/Y');
+                        }
+                        if ($data['registration_to_date']) {
+                            return "Registrazione al " . Carbon::parse($data['registration_to_date'])->format('d/m/Y');
+                        }
+                        return null;
+                    }),
             ])
+            ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),
