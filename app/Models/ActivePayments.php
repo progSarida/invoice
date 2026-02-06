@@ -87,11 +87,12 @@ class ActivePayments extends Model
         static::created(function ($payment) {
             if ($payment->invoice) {
                 $invoice = $payment->invoice;
-                $residue = $invoice->getResidue();
                 $invoice->total_payment += $payment->amount;
                 if ( is_null($invoice->last_payment_date) || $invoice->last_payment_date < $payment->payment_date ) {
                     $invoice->last_payment_date = $payment->payment_date;
                 }
+                $invoice->save();
+                $residue = $invoice->getResidue();
                 if ($residue == 0){ $invoice->payment_status = PaymentStatus::PAIED; }
                 else if ($invoice->client->type->value == 'public') {
                     if($residue < $invoice->no_vat_total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
@@ -112,6 +113,16 @@ class ActivePayments extends Model
                 $originalAmount = $payment->getOriginal('amount');
                 $invoice = $payment->invoice;
                 $invoice->total_payment = $invoice->total_payment - $originalAmount + $payment->amount;
+                $invoice->save();
+                $residue = $invoice->getResidue();
+                if ($residue == 0){ $invoice->payment_status = PaymentStatus::PAIED; }
+                else if ($invoice->client->type->value == 'public') {
+                    if($residue < $invoice->no_vat_total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
+                }
+                else {
+                    if($residue < $invoice->total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
+                }
+
                 $invoice->save();
             }
         });

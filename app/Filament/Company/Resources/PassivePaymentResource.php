@@ -204,20 +204,14 @@ class PassivePaymentResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('supplier')
+                Tables\Columns\TextColumn::make('passiveInvoice.supplier.denomination')
                     ->label('Fornitore')
-                    ->getStateUsing(function ($record) {
-                        return "{$record->passiveInvoice->supplier->denomination}";
-                    })
                     ->limit(45)
                     ->tooltip(fn($record) => $record->passiveInvoice->supplier->denomination)
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('doc')
+                Tables\Columns\TextColumn::make('passiveInvoice.docType.description')
                     ->label('Tipo documento')
-                    ->getStateUsing(function ($record) {
-                        return DocType::where('name', $record->passiveInvoice->doc_type)->first()->description;
-                    })
                     ->limit(45)
                     ->tooltip(fn($record) => DocType::where('name', $record->passiveInvoice->doc_type)->first()->description)
                     ->sortable()
@@ -244,6 +238,17 @@ class PassivePaymentResource extends Resource
                             ? Carbon::parse($record->payment_date)->format('d/m/Y')
                             : 'Nessuna data';
                     })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        // Proviamo a convertire la stringa "15/05/2023" in "2023-05-15"
+                        try {
+                            $date = \Carbon\Carbon::createFromFormat('d/m/Y', $search)->format('Y-m-d');
+                            return $query->whereDate('payment_date', $date);
+                        } catch (\Exception $e) {
+                            // Se l'utente sta ancora scrivendo o il formato non è valido,
+                            // cerchiamo come stringa parziale nel formato DB
+                            return $query->where('payment_date', 'like', "%{$search}%");
+                        }
+                    })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('registration_date')
                     ->label('Data reg.')
@@ -253,7 +258,18 @@ class PassivePaymentResource extends Resource
                             : 'Nessuna data';
                     })
                     ->sortable()
-                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        // Proviamo a convertire la stringa "15/05/2023" in "2023-05-15"
+                        try {
+                            $date = \Carbon\Carbon::createFromFormat('d/m/Y', $search)->format('Y-m-d');
+                            return $query->whereDate('payment_date', $date);
+                        } catch (\Exception $e) {
+                            // Se l'utente sta ancora scrivendo o il formato non è valido,
+                            // cerchiamo come stringa parziale nel formato DB
+                            return $query->where('registration_date', 'like', "%{$search}%");
+                        }
+                    })
+                    ->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('registrationUser.name')
                     ->label('Registrato da')
                     ->getStateUsing(fn ($record) => optional($record->registrationUser)->name ?? 'Nessun utente')
