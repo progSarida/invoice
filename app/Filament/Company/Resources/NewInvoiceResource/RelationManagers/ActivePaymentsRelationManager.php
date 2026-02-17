@@ -148,19 +148,6 @@ class ActivePaymentsRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('invoice_formatted')
-                    ->label('Fattura')
-                    ->getStateUsing(function ($record) {
-                        $invoice = $record->invoice;
-                        if (!$invoice) {
-                            return 'Nessuna fattura';
-                        }
-
-                        $number = str_pad($invoice->number, 3, '0', STR_PAD_LEFT); // es: 007
-                        return "{$number}/{$invoice->section}/{$invoice->year}";
-                    })
-                    ->sortable()
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     ->searchable()->sortable(),
@@ -198,6 +185,20 @@ class ActivePaymentsRelationManager extends RelationManager
 
                         $record->save();
                     }),
+                Tables\Columns\TextColumn::make('validation_date')
+                    ->label('Data validazione')
+                    ->getStateUsing(function ($record) {
+                        return $record->validation_date
+                            ? Carbon::parse($record->validation_date)->format('d/m/Y')
+                            : '';
+                    })
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('validationUser.name')
+                    ->label('Validato da')
+                    ->getStateUsing(fn ($record) => optional($record->validationUser)->name ?? '')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
