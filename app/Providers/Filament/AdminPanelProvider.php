@@ -22,6 +22,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 
@@ -84,6 +85,11 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Passa alle aziende')
                     ->url('/company')
                     ->icon('tabler-briefcase-f'),
+                MenuItem::make()
+                    ->label('Pannello Utente')
+                    ->url(config('services.sso.user_dashboard'))
+                    ->icon('heroicon-o-plus')
+                    ->openUrlInNewTab(),
                 'logout'=>MenuItem::make()
                     ->label('Vai al Portale')
                     ->icon('heroicon-o-arrow-left-start-on-rectangle'),
@@ -94,6 +100,10 @@ class AdminPanelProvider extends PanelProvider
                 ->label('Archivio')
                 ->icon('heroicon-o-cog-6-tooth')
                 ->collapsed()
-            ]);
+            ])
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_START,
+                fn (): string => view('filament.topbar.ticket-button')->render()
+            );
     }
 }

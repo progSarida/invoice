@@ -50,6 +50,7 @@ return [
 
         // UI endpoints
         'dashboard'     => env('SSO_URL') . '/dashboard',
+        'user_dashboard' => env('SSO_URL') . '/user',
         'ticket_create' => env('SSO_URL') . '/user/tickets/create',
     ],
     'andxor' => [

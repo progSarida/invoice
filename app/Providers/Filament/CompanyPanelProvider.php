@@ -88,11 +88,16 @@ class CompanyPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 MenuItem::make()
-                ->label('Passa ad amministratore')
-                // ->visible(fn (): bool => Auth::user()->is_admin)
-                ->visible(fn (): bool => Auth::user()->hasAdminAccess())
-                ->url('/admin')
-                ->icon('ri-admin-fill'),
+                    ->label('Passa ad amministratore')
+                    // ->visible(fn (): bool => Auth::user()->is_admin)
+                    ->visible(fn (): bool => Auth::user()->hasAdminAccess())
+                    ->url('/admin')
+                    ->icon('ri-admin-fill'),
+                MenuItem::make()
+                    ->label('Pannello Utente')
+                    ->url(config('services.sso.user_dashboard'))
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->openUrlInNewTab(),
                 'logout'=>MenuItem::make()
                     ->label('Vai al Portale')
                     ->icon('heroicon-o-arrow-left-start-on-rectangle'),
