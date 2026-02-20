@@ -5,5 +5,5 @@
     icon="heroicon-o-plus"
     outlined
 >
-    Nuovo Ticket
+    Ticket
 </x-filament::button>
