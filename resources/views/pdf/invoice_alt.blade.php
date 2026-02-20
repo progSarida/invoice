@@ -171,28 +171,7 @@
     <table>
         {{-- Destinatario --}}
         @php
-            $cliente = "";
-            switch($invoice->client->subtype->value){
-                case "company":
-                case "man":
-                case "woman":
-                case "professional":
-                    $cliente .= " ";
-                    break;
-                case "city":
-                    $cliente .= " Amministrazione Comunale di ";
-                    break;
-                case "union":
-                    $cliente .= " Unione di comuni ";
-                    break;
-                case "federation":
-                    $cliente .= " Federazione di comuni ";
-                    break;
-                case "province":
-                    $cliente .= " Amministrazione provinciale di ";
-                    break;
-            }
-            $cliente .= $invoice->client->denomination;
+            $cliente = $invoice->client->denomination;
             $indirizzoCliente = $invoice->client->city->zip_code . ' ' .
                         $invoice->client->city->name . ' ' .
                         $invoice->client->city->province->code;

@@ -77,7 +77,8 @@ class InvoiceResource extends Resource
                                 )
                                 ->relationship(name: 'client', titleAttribute: 'denomination')
                                 ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
+                                    // fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
+                                    fn (Model $record) => $record->denomination
                                 )
                                 ->required()
                                 ->afterStateUpdated(function (Get $get, Set $set) {
@@ -484,7 +485,8 @@ class InvoiceResource extends Resource
                 SelectFilter::make('client_id')->label('Cliente')
                     ->relationship(name: 'client', titleAttribute: 'denomination')
                     ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
+                        // fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
+                        fn (Model $record) => $record->denomination
                     )
                     ->searchable()->preload()
                         ->optionsLimit(5),

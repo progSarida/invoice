@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ClientSubType;
 use App\Enums\FundType;
 use Exception;
 use SoapFault;
@@ -12,6 +13,7 @@ use App\Models\Company;
 use App\Models\Invoice;
 use App\Enums\SdiStatus;
 use App\Enums\WithholdingType;
+use App\Models\Client;
 use App\Models\Deadline;
 use App\Models\PassiveDownload;
 use App\Models\PassiveInvoice;
@@ -68,9 +70,24 @@ class AndxorSoapService
         return $mapping[$paymentType] ?? 'TP02';
     }
 
-    private function validateIdFiscaleIVA(?string $vatNumber, ?string $taxNumber, string $idPaese): ?array
+    private function validateIdFiscaleIVACompany(Company $company, string $idPaese): ?array
     {
-        $idCodice = $vatNumber ?? $taxNumber;
+        $idCodice = $company->vat_number ?? $company->tax_number;
+        if ($idCodice && preg_match('/^[A-Za-z0-9]{1,28}$/', $idCodice)) {
+            return [
+                'IdPaese' => $idPaese,
+                'IdCodice' => $idCodice,
+            ];
+        }
+        return null;
+    }
+
+    private function validateIdFiscaleIVAClient(Client $client, string $idPaese): ?array
+    {
+        if($client->subtype == ClientSubType::MAN || $client->subtype == ClientSubType::WOMAN) {
+            return null;
+        }
+        $idCodice = $client->vat_code ?? $client->tax_code;
         if ($idCodice && preg_match('/^[A-Za-z0-9]{1,28}$/', $idCodice)) {
             return [
                 'IdPaese' => $idPaese,
@@ -120,7 +137,7 @@ class AndxorSoapService
         $idPaeseCedente = $invoice->company->state_id && State::find($invoice->company->state_id) && preg_match('/^[A-Z]{2}$/', State::find($invoice->company->state_id)->alpha2) ? State::find($invoice->company->state_id)->alpha2 : 'IT';
         return [
             'DatiAnagrafici' => array_filter([
-                'IdFiscaleIVA' => $this->validateIdFiscaleIVA($invoice->company->vat_number, $invoice->company->tax_number, $idPaeseCedente),
+                'IdFiscaleIVA' => $this->validateIdFiscaleIVACompany($invoice->company, $idPaeseCedente),
                 'CodiceFiscale' => $invoice->company->tax_number && preg_match('/^[A-Z0-9]{11,16}$/', $invoice->company->tax_number) ? $invoice->company->tax_number : null,
                 'Anagrafica' => [
                     'Denominazione' => $invoice->company->name,
@@ -147,7 +164,7 @@ class AndxorSoapService
         $idPaeseCommittente = $invoice->client->state_id && State::find($invoice->client->state_id) && preg_match('/^[A-Z]{2}$/', State::find($invoice->client->state_id)->alpha2) ? State::find($invoice->client->state_id)->alpha2 : 'IT';
         return [
             'DatiAnagrafici' => [
-                'IdFiscaleIVA' => $this->validateIdFiscaleIVA($invoice->client->vat_code, $invoice->client->tax_code, $idPaeseCommittente),
+                'IdFiscaleIVA' => $this->validateIdFiscaleIVAClient($invoice->client, $idPaeseCommittente),
                 'CodiceFiscale' => $invoice->client->tax_code ?? null,
                 'Anagrafica' => [
                     'Denominazione' => $invoice->client->denomination,
@@ -156,7 +173,7 @@ class AndxorSoapService
             'Sede' => array_filter([
                 'Indirizzo' => $invoice->client->address ?? '',
                 'NumeroCivico' => $invoice->client->address_number && preg_match('/^[A-Za-z0-9]{1,8}$/', $invoice->client->address_number) ? $invoice->client->address_number : null,
-                'CAP' => $invoice->client->city->zip_code ?? '',
+                'CAP' => $invoice->client->zip_code ?? '',
                 'Comune' => $invoice->client->city->name ?? '',
                 'Provincia' => $invoice->client->city->province->code ?? '',
                 'Nazione' => $idPaeseCommittente,
@@ -172,6 +189,8 @@ class AndxorSoapService
                 'Data' => $invoice->invoice_date->format('Y-m-d'),
                 'Numero' => $invoice->getNewInvoiceNumber(),
                 'ImportoTotaleDocumento' => sprintf("%.2f", (float) ($invoice->total ?? 0.00)),
+                // 'Causale' => $invoice->description ?? '',
+                'Causale' => substr($invoice->description, 0, 200) ?? '',
                 'DatiRitenuta' => array_map(function ($withholding) {
                     return [
                         'TipoRitenuta' => $withholding['tipo_ritenuta'] && preg_match('/^[A-Za-z0-9]{1,20}$/', $withholding['tipo_ritenuta']) ? $withholding['tipo_ritenuta'] : 'RT01',
@@ -282,6 +301,7 @@ class AndxorSoapService
 
     private function getDatiPagamento(Invoice $invoice): ?array
     {
+        $total = $invoice->client->type->value == 'public' ? $invoice->no_vat_total : $invoice->total ;
         return [
             [
                 'CondizioniPagamento' => $this->mapPaymentTypeToCondizioniPagamento($invoice->payment_type->value ?? 'TP02'),
@@ -289,7 +309,7 @@ class AndxorSoapService
                     [
                         'ModalitaPagamento' => $invoice->payment_type->getCode() ?? 'MP05',
                         'DataScadenzaPagamento' => $invoice->invoice_date->addDays($invoice->payment_days ?? 30)->format('Y-m-d'),
-                        'ImportoPagamento' => sprintf("%.2f", (float) ($invoice->total ?? 0.00)),
+                        'ImportoPagamento' => sprintf("%.2f", (float) ($total ?? 0.00)),
                         'IBAN' => $invoice->bankAccount->iban ?? null,
                     ],
                 ],
@@ -371,11 +391,15 @@ class AndxorSoapService
             // Creazione array di input
             $payload['Autenticazione'] = $this->getAutenticazione($invoice, $password);
             $codiceDestinatario = $invoice->client->ipa_code ?? $invoice->contract->office_code ?? null;
+            if($invoice->client->subtype == ClientSubType::MAN || $invoice->client->subtype == ClientSubType::WOMAN){
+                $codiceDestinatario = '0000000';
+            }
             if (!empty($codiceDestinatario)) {
                 $payload['CodiceDestinatario'] = $this->validateCodiceDestinatario($codiceDestinatario);
             } else {
                 $payload['PECDestinatario'] = $invoice->client->pec;
             }
+// GESTIRE INVIO A PRIVATI SENZA CodiceDestinatario e PECDestinatario
             $payload['OverrideCedente'] = $this->getOverrideCedente($invoice);
             $payload['CessionarioCommittente'] = $this->getCessionarioCommittente($invoice);
             $payload['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento'] = $this->getDatiGeneraliDocumento($invoice, $withholdings, $funds);
@@ -521,7 +545,7 @@ class AndxorSoapService
             //     ],
             // ];
 
-            // dd(json_encode($payload_, JSON_PRETTY_PRINT));
+            // dd(json_encode($payload, JSON_PRETTY_PRINT));
 
             // Log::debug('Payload SOAP: ' . json_encode($payload, JSON_PRETTY_PRINT));
 

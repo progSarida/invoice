@@ -13,6 +13,3 @@ Route::post('/slo-callback', [SsoController::class, 'handleSloCallback'])->name(
 Route::get('/admin/login', fn() => redirect()->route('sso.login'))->name('filament.admin.auth.login');
 
 Route::get('/login', fn() => redirect()->route('sso.login'));
-
-
-

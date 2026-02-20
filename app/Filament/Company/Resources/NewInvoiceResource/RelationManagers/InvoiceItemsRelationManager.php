@@ -328,7 +328,13 @@ class InvoiceItemsRelationManager extends RelationManager
                         return $item;
                     }),
                 Tables\Actions\Action::make('Spese di notifica')
-                    ->hidden(fn() => !is_null($this->getOwnerRecord()->parent_id))
+                    ->hidden(function() {
+                        $pageClass = $this->getPageClass();
+                        if (str_contains($pageClass, 'View')) {
+                            return true;
+                        }
+                        return !is_null($this->getOwnerRecord()->parent_id) ;
+                    })
                     ->form([
                         Forms\Components\Repeater::make('postal_expenses')
                             ->label('Spese postali')
@@ -490,6 +496,10 @@ class InvoiceItemsRelationManager extends RelationManager
                 Tables\Actions\Action::make('create_postal_expense')
                     ->label('Crea spesa di notifica')
                     ->hidden(function () {
+                        $pageClass = $this->getPageClass();
+                        if (str_contains($pageClass, 'View')) {
+                            return true;
+                        }
                         $contractId = $this->getOwnerRecord()->contract_id;
                         return PostalExpense::where('new_contract_id', $contractId)
                             ->where('reinvoice_id', null)

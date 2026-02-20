@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 
+use App\Enums\ClientSubType;
 use App\Enums\PaymentStatus;
 use App\Enums\ReversalGroupType;
 use App\Enums\SdiStatus;
@@ -358,6 +359,10 @@ class EditNewInvoice extends EditRecord
                         $prec = Invoice::where('year', $record->year)
                                     ->where('sectional_id', $record->sectional_id)
                                     ->where('number', '<', $record->number)
+                                    ->with(['client'])
+                                    ->whereHas('client', function ($q) {
+                                        $q->whereNotIn('subtype', [ClientSubType::MAN, ClientSubType::WOMAN]);
+                                    })
                                     ->orderBy('number', 'desc')
                                     ->first();
                         $precOk = $prec ? $prec->sdi_status != SdiStatus::DA_INVIARE : true;

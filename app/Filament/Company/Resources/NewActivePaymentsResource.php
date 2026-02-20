@@ -62,52 +62,67 @@ class NewActivePaymentsResource extends Resource
                 Forms\Components\Select::make('invoice_id')
                     ->label('Fattura')
                     ->placeholder('Seleziona una fattura...')
-                    ->getSearchResultsUsing(function (string $search) {
+                    ->getSearchResultsUsing(function (string $search, $record) {
                         // Rimuovi spazi multipli e trim
                         $search = trim(preg_replace('/\s+/', ' ', $search));
 
+
                         // Query base con le stesse condizioni del relationship
                         $query = Invoice::query()
-                            ->whereNotNull('contract_id')
-                            ->where('sdi_status', '!=', 'da_inviare')
-                            ->whereNull('parent_id');
-
-                        // Cerca separatori (spazio, virgola, slash, trattino)
-                        $parts = preg_split('/[\s,\/\-]+/', $search, -1, PREG_SPLIT_NO_EMPTY);
-
-                        if (count($parts) >= 2) {
-                            // Due o più valori: prendi i primi due e convertili a integer
-                            $value1 = is_numeric($parts[0]) ? (int) $parts[0] : null;
-                            $value2 = is_numeric($parts[1]) ? (int) $parts[1] : null;
-
-                            if ($value1 !== null && $value2 !== null) {
-                                // Prova number/year o year/number (match esatto)
-                                $query->where(function ($q) use ($value1, $value2) {
-                                    // Scenario 1: primo = number, secondo = year
-                                    $q->where(function ($subQ) use ($value1, $value2) {
-                                        $subQ->where('number', $value1)
-                                            ->where('year', $value2);
+                            ->whereNotNull('flow')                                      // solo le fatture nuove
+                            ->where('sdi_status', '!=', 'da_inviare')                   // solo le fatture inviate allo sdi
+                            ->whereNull('parent_id')                                    // escludo le note di credito
+                            ->with(['client', 'sectional'])
+                            ->where(function ($q) {
+                                $q->whereHas('client', function ($clientQuery) {
+                                    $clientQuery->where('type', ClientType::PUBLIC);
+                                })
+                                ->whereColumn('total_payment', '<', 'no_vat_total')     // solo non pagate (verso pubb. amm.)
+                                ->orWhere(function ($q2) {                              // o
+                                    $q2->whereHas('client', function ($clientQuery) {
+                                        $clientQuery->where('type', ClientType::PRIVATE);
                                     })
-                                    // Scenario 2: primo = year, secondo = number
-                                    ->orWhere(function ($subQ) use ($value1, $value2) {
-                                        $subQ->where('year', $value1)
-                                            ->where('number', $value2);
+                                    ->whereColumn('total_payment', '<', 'total');       // solo no pagate (verso privati)
+                                });
+                            });
+
+                        if(!str_contains(strtolower($search), "tutte")){                // filtro con la ricerca
+                            // Cerco separatori (spazio, virgola, slash, trattino)
+                            $parts = preg_split('/[\s,\/\-]+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+
+                            if (count($parts) >= 2) {
+                                // Due o più valori: prendo i primi due e convertili a integer
+                                $value1 = is_numeric($parts[0]) ? (int) $parts[0] : null;
+                                $value2 = is_numeric($parts[1]) ? (int) $parts[1] : null;
+
+                                if ($value1 !== null && $value2 !== null) {
+                                    // Provo number/year o year/number (match esatto)
+                                    $query->where(function ($q) use ($value1, $value2) {
+                                        // Scenario 1: primo = number, secondo = year
+                                        $q->where(function ($subQ) use ($value1, $value2) {
+                                            $subQ->where('number', $value1)
+                                                ->where('year', $value2);
+                                        })
+                                        // Scenario 2: primo = year, secondo = number
+                                        ->orWhere(function ($subQ) use ($value1, $value2) {
+                                            $subQ->where('year', $value1)
+                                                ->where('number', $value2);
+                                        });
                                     });
-                                });
-                            }
-                        } elseif (count($parts) === 1) {
-                            // Un solo valore: cerca SOLO match esatto in number o year
-                            if (is_numeric($parts[0])) {
-                                $value = (int) $parts[0];
-                                $query->where(function ($q) use ($value) {
-                                    $q->where('number', $value)
-                                    ->orWhere('year', $value);
-                                });
+                                }
+                            } elseif (count($parts) === 1) {
+                                // Un solo valore: cerco SOLO match esatto in number o year
+                                if (is_numeric($parts[0])) {
+                                    $value = (int) $parts[0];
+                                    $query->where(function ($q) use ($value) {
+                                        $q->where('number', $value)
+                                        ->orWhere('year', $value);
+                                    });
+                                }
                             }
                         }
 
                         return $query
-                            ->with(['client', 'sectional'])
                             ->orderBy('invoice_date', 'desc')
                             ->limit(50)
                             ->get()
@@ -139,8 +154,12 @@ class NewActivePaymentsResource extends Resource
                     ->afterStateUpdated(function(Set $set, $state) {
                         if ($state) {
                             $invoice = Invoice::find($state);
+                            $amount = $invoice->client->type == ClientType::PUBLIC
+                                        ? $invoice->no_vat_total - ($invoice->total_payment + $invoice->total_notes)
+                                        : $invoice->total - ($invoice->total_payment + $invoice->total_notes);
                             if ($invoice) {
                                 $set('bank_account_id', $invoice->bank_account_id);
+                                $set('amount', number_format($amount, 2, ",", "."));
                             }
                         }
                     })
@@ -392,7 +411,8 @@ class NewActivePaymentsResource extends Resource
                             ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
                             ->get()
                             ->mapWithKeys(function ($client) {
-                                $label = strtoupper($client->subtype->getLabel()) . ' - ' . $client->denomination;
+                                // $label = strtoupper($client->subtype->getLabel()) . ' - ' . $client->denomination;
+                                $label = $client->denomination;
                                 return [$client->id => $label];
                             })
                             ->toArray();

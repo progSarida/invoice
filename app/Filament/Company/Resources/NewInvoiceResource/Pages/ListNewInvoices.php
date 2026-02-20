@@ -21,6 +21,7 @@ use Filament\Resources\Pages\ListRecords;
 use App\Filament\Exports\NewInvoiceExporter;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\Client;
+use App\Models\DocType;
 use App\Models\ManageType;
 use App\Services\AndxorSoapService;
 use Filament\Forms\Components\DatePicker;
@@ -201,7 +202,8 @@ class ListNewInvoices extends ListRecords
                                         ->mapWithKeys(function ($record) {
                                             $subtype = $record->subtype->getLabel() ?? 'Cliente sconosciuto';
                                             $denomination = $record->denomination ?? 'N/A';
-                                            $label = strtoupper("{$subtype}") . " - $denomination";
+                                            // $label = strtoupper("{$subtype}") . " - $denomination";
+                                            $label = $denomination;
 
                                             return [$record->id => $label];
                                         })
@@ -211,10 +213,12 @@ class ListNewInvoices extends ListRecords
                                     if (!$value) { return null; }
                                     $record = Client::find($value);
                                     if (!$record) { return null; }
-                                    return strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination";
+                                    // return strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination";
+                                    return $record->denomination;
                                 })
                                 ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
+                                    // fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
+                                    fn (Model $record) => $record->denomination
                                 )
                                 // ->options(function () {
                                 //     $docs = \Filament\Facades\Filament::getTenant()->clients()->select('clients.id', 'clients.denomination')->get();
@@ -501,8 +505,8 @@ class ListNewInvoices extends ListRecords
     private function refusedHide()                                                              // controllo fatture rifiutate
     {
         $refusedHide = false;
-        $refused = \App\Models\Invoice::where('flow', 'out')->where('sdi_status', 'rifiutata');
-        $refusedE = \App\Models\Invoice::where('flow', 'out')->where('sdi_status', 'rifiuto_emesso');
+        $refused = Invoice::where('flow', 'out')->where('sdi_status', 'rifiutata');
+        $refusedE = Invoice::where('flow', 'out')->where('sdi_status', 'rifiuto_emesso');
 
         if ($refused->count() > 0) {
             Notification::make('refused_status')
@@ -518,7 +522,7 @@ class ListNewInvoices extends ListRecords
             $invoicesR = $refusedE->get();
             $refused = false;
             foreach ($invoicesR as $index => $el) {
-                if (!\App\Models\Invoice::where('parent_id', $el->id)->exists()) {
+                if (!Invoice::where('parent_id', $el->id)->exists()) {
                     Notification::make('refused_credit_note_' . $el->id)
                         ->title('Emettere la nota di credito per la fattura ' . str_pad($el->number, 3, '0', STR_PAD_LEFT) . "/" . $el->sectional->description . "/" . $el->year)
                         ->color('gray')
@@ -542,7 +546,7 @@ class ListNewInvoices extends ListRecords
 
     private function discardedHide()                                                            // controllo fatture scartate
     {
-        $discarded = \App\Models\Invoice::where('flow', 'out')->where('sdi_status', 'scartata');
+        $discarded = Invoice::where('flow', 'out')->where('sdi_status', 'scartata');
 
         if ($discarded->count() > 0) {                                                          // link fatture scartate
             $invoicesD = $discarded->get();
@@ -589,7 +593,11 @@ class ListNewInvoices extends ListRecords
 
     private function lateHide()                                                                 // controllo fatture non inviate da due giorni
     {
-        $late = \App\Models\Invoice::where('flow', 'out')->where('sdi_status', 'da_inviare')->where('invoice_date', '<', Carbon::now()->subDays(2));
+        $forewarningId = DocType::where('description', 'Preavviso di fattura')->first()->id;
+        $late = Invoice::where('doc_type_id', '!=', $forewarningId)
+                    ->where('flow', 'out')
+                    ->where('sdi_status', 'da_inviare')
+                    ->where('invoice_date', '<', Carbon::now()->subDays(2));
 
         if ($late->count() > 0) {                                                                   // blocco per fatture con data vecchia di più di 2 giorni
             Notification::make('late_status')
@@ -606,7 +614,7 @@ class ListNewInvoices extends ListRecords
 
     private function silentHide()                                                               // controllo fatture senza esito inviate da più di 3 giorni
     {
-        $silent = \App\Models\Invoice::where('flow', 'out')->whereIn('sdi_status', ['inviata', 'trasmessa_sdi'])->where('sdi_date', '<', Carbon::now()->subDays(3));
+        $silent = Invoice::where('flow', 'out')->whereIn('sdi_status', ['inviata', 'trasmessa_sdi'])->where('sdi_date', '<', Carbon::now()->subDays(3));
 
         if ($silent->count() > 0) {                                                             // blocco per fatture senza esito inviate da più di 3 giorni
             Notification::make('silent_status')

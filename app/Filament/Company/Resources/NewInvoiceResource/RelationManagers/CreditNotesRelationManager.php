@@ -107,7 +107,8 @@ class CreditNotesRelationManager extends RelationManager
                                         ->mapWithKeys(function ($record) {
                                             $subtype = $record->subtype->getLabel() ?? 'Cliente sconosciuto';
                                             $denomination = $record->denomination ?? 'N/A';
-                                            $label = strtoupper("{$subtype}") . " - $denomination";
+                                            // $label = strtoupper("{$subtype}") . " - $denomination";
+                                            $label = $denomination;
 
                                             return [$record->id => $label];
                                         })
@@ -123,10 +124,12 @@ class CreditNotesRelationManager extends RelationManager
                                         return null;
                                     }
 
-                                    return strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination";
+                                    // return strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination";
+                                    return $record->denomination;
                                 })
                                 ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
+                                    // fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
+                                    fn (Model $record) => $record->denomination
                                 )
                                 ->required()
                                 ->default(function (Get $get, Set $set) {

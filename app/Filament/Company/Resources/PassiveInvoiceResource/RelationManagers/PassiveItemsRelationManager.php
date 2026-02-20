@@ -89,7 +89,7 @@ class PassiveItemsRelationManager extends RelationManager
                     ->required()
                     // ->numeric()
                     ->extraInputAttributes(['class' => 'text-right'])
-                    ->prefix('€')
+                    ->prefix('%')
                     ->columnSpan(4),
             ]);
     }

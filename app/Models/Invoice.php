@@ -295,7 +295,11 @@ class Invoice extends Model
     // Aggiorna il totale della note di credito riferite alla fattura
     public function updateTotalNotes(): void
     {
-        $total = $this->creditNotes()->sum('total');
+        if($this->client->type->value == 'public')
+            $total = $this->creditNotes()->sum('no_vat_total');
+        else
+            $total = $this->creditNotes()->sum('total');
+        // $total = $this->creditNotes()->sum('total');
         $this->total_notes = $total;
         $this->save();
     }

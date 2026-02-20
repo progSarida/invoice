@@ -87,7 +87,8 @@ class TransactionResource extends Resource
                             ->mapWithKeys(function ($record) {
                                 $subtype = $record->subtype->getLabel() ?? 'Cliente sconosciuto';
                                 $denomination = $record->denomination ?? 'N/A';
-                                $label = strtoupper("{$subtype}") . " - $denomination";
+                                // $label = strtoupper("{$subtype}") . " - $denomination";
+                                $label = $denomination;
 
                                 return [$record->id => $label];
                             })
@@ -103,10 +104,12 @@ class TransactionResource extends Resource
                             return null;
                         }
 
-                        return strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination";
+                        // return strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination";
+                        return $record->denomination;
                     })
                     ->getOptionLabelFromRecordUsing(
-                        fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
+                        // fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
+                        fn (Model $record) => $record->denomination
                     )
                     ->searchable()
                     ->live()

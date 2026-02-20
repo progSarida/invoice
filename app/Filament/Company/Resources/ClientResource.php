@@ -143,7 +143,6 @@ class ClientResource extends Resource
                 Forms\Components\TextInput::make('zip_code')->label('Cap')
                     ->required()
                     ->maxLength(5)
-                    ->disabled()
                     ->visible(fn (callable $get) => $get('state_id') == $italyId)
                     ->columnspan(1),
 
@@ -188,6 +187,12 @@ class ClientResource extends Resource
                 Forms\Components\TextInput::make('vat_code')->label('Partita Iva')
                     ->maxLength(255)
                     ->required(fn (callable $get) => ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
+                    ->visible(fn (callable $get) => ($get('subtype') !== 'man' && $get('subtype') !== 'woman'))
+                    ->columnspan(2),
+                Forms\Components\Placeholder::make('man_woman')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => $get('type') === 'private' && ($get('subtype') === 'man' || $get('subtype') === 'woman'))
                     ->columnspan(2),
                 Forms\Components\TextInput::make('ipa_code')
                     ->label('Codice cliente (SDI)')
@@ -240,7 +245,8 @@ class ClientResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('subtype')->label('Sottotipo')
                     // ->badge()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('denomination')->label('Denominazione')
                     ->searchable()
                     ->sortable(),
