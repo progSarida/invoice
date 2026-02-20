@@ -103,7 +103,7 @@ class CompanyPanelProvider extends PanelProvider
                     ->icon('heroicon-o-arrow-left-start-on-rectangle'),
             ])
             ->renderHook(
-                PanelsRenderHook::TOPBAR_START,
+                PanelsRenderHook::TOPBAR_END,
                 fn (): string => view('filament.topbar.ticket-button')->render()
             )
             ->globalSearchKeyBindings(['f9']);
