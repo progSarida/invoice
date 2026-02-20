@@ -98,69 +98,133 @@ class ViewNewInvoice extends ViewRecord
             Actions\ActionGroup::make([
                 // Stampa fattura
                 Actions\Action::make('stampa_pdf')
-                ->label('Stampa')
-                ->icon('heroicon-o-printer')
-                ->color(Color::rgb('rgb(255, 0, 0)'))
-                ->requiresConfirmation()
-                ->modalHeading('Selezione stampa')
-                ->modalDescription('Seleziona il tipo di stampa per la fattura')
-                ->modalSubmitActionLabel('Selezione')
-                ->form([
-                    Select::make('selection')->label('Tipo stampa')
-                        ->options([
-                                "soft" => "Semplice",
-                                "hard" => "Strutturata"
-                            ]
-                        )
-                        ->default('soft'),
-                ])
-                ->action(function (Invoice $record, $data) {
-                    $vats = $record->vatResume();                                           // Creazione array con dati riepiloghi IVA
-                    // dd($vats);
-                    $funds = $record->getFundBreakdown();                                   // Creazione array con dati casse previdenziali
-                    // dd($funds);
-                    if(count($funds) > 0)
-                        $vats = $record->updateResume($vats, $funds);                       // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
-                    // dd($vats);
-                    $grouped = collect($vats)                                               // Raggruppamento dati riepilochi IVA in base a aliquota
-                        ->groupBy('%')
-                        ->where('auto', false)
-                        ->map(function ($items, $percent){
-                            return [
-                                '%' => $percent,
-                                'taxable' => $items->sum('taxable'),
-                                'vat' => $items->sum('vat'),
-                                'total' => $items->sum('total'),
-                                'norm' => $items->first()['norm'],
-                                'free' => $items->first()['free'],
-                            ];
-                        })
-                        ->values()
-                        ->toArray();
+                    ->label('Stampa')
+                    ->icon('heroicon-o-printer')
+                    ->color(Color::rgb('rgb(255, 0, 0)'))
+                    ->requiresConfirmation()
+                    ->modalHeading('Selezione stampa')
+                    ->modalDescription('Seleziona il tipo di stampa per la fattura')
+                    ->modalSubmitActionLabel('Selezione')
+                    ->form([
+                        Select::make('selection')->label('Tipo stampa')
+                            ->options([
+                                    "soft" => "Semplice",
+                                    "hard" => "Strutturata"
+                                ]
+                            )
+                            ->default('soft'),
+                    ])
+                    ->action(function (Invoice $record, $data) {
+                        $vats = $record->vatResume();                                           // Creazione array con dati riepiloghi IVA
+                        // dd($vats);
+                        $funds = $record->getFundBreakdown();                                   // Creazione array con dati casse previdenziali
+                        // dd($funds);
+                        if(count($funds) > 0)
+                            $vats = $record->updateResume($vats, $funds);                       // Aggiorna l'array con dati riepiloghi IVA con i dati delle casse previdenziali
+                        // dd($vats);
+                        $grouped = collect($vats)                                               // Raggruppamento dati riepilochi IVA in base a aliquota
+                            ->groupBy('%')
+                            ->where('auto', false)
+                            ->map(function ($items, $percent){
+                                return [
+                                    '%' => $percent,
+                                    'taxable' => $items->sum('taxable'),
+                                    'vat' => $items->sum('vat'),
+                                    'total' => $items->sum('total'),
+                                    'norm' => $items->first()['norm'],
+                                    'free' => $items->first()['free'],
+                                ];
+                            })
+                            ->values()
+                            ->toArray();
 
-                    if($data['selection'] == "hard"){
-                        $pdf = Pdf::loadView('pdf.invoice', [
-                            'invoice' => $record,
-                            'vats' => $grouped,
-                            'funds' => $funds,
+                        if($data['selection'] == "hard"){
+                            $pdf = Pdf::loadView('pdf.invoice', [
+                                'invoice' => $record,
+                                'vats' => $grouped,
+                                'funds' => $funds,
+                            ]);
+                        }
+                        else{
+                            $pdf = Pdf::loadView('pdf.invoice_alt', [
+                                'invoice' => $record,
+                                'vats' => $grouped,
+                                'funds' => $funds,
+                            ]);
+                        }
+
+                        $pdf->setPaper('A4', 'portrait');
+
+                        $pdf->setOptions(['margin-top' => 0]);
+
+                        return response()->streamDownload(function () use ($pdf, $record) {
+                            echo $pdf->output();
+                        }, 'fattura-' . $record->printNumber() . '.pdf');
+                    }),
+                Actions\Action::make('manage_reject')
+                    ->label('Gestisci rifiuto')
+                    ->icon('hugeicons-file-management')
+                    ->color(Color::rgb('rgb(255, 0, 0)'))
+                    ->visible(fn ($record) => $record->sdi_status == SdiStatus::RIFIUTATA)
+                    ->requiresConfirmation()
+                    ->modalHeading('Selezione tipo rifiuto')
+                    ->modalDescription('Seleziona il tipo di rifiuto per il documento')
+                    ->modalSubmitActionLabel('Conferma')
+                    ->form([
+                        Select::make('selection')
+                            ->label('')
+                            ->options(
+                                collect(SdiStatus::cases())
+                                    ->filter(fn (SdiStatus $status) => $status->showReject())
+                                    ->mapWithKeys(fn ($status) => [
+                                        $status->value => $status->getLabel() ?? $status->name
+                                    ])
+                            ),
+                    ])
+                    ->action(function (Invoice $record, $data) {
+                        $record->update([
+                            'sdi_status' => $data['selection'],
                         ]);
-                    }
-                    else{
-                        $pdf = Pdf::loadView('pdf.invoice_alt', [
-                            'invoice' => $record,
-                            'vats' => $grouped,
-                            'funds' => $funds,
+
+                        Notification::make()
+                            ->title('Stato SDI aggiornato')
+                            ->body('Lo stato SDI del documento ' . $record->getNewInvoiceNumber() . ' è stato aggiornato a ' . $record->sdi_status->getLabel())
+                            ->icon('heroicon-o-check-circle')
+                            ->success()
+                            ->send();
+                    }),
+                Actions\Action::make('manage_discard')
+                    ->label('Gestisci scarto')
+                    ->icon('hugeicons-file-management')
+                    ->color(Color::rgb('rgb(255, 0, 0)'))
+                    ->visible(fn ($record) => $record->sdi_status == SdiStatus::SCARTATA)
+                    ->requiresConfirmation()
+                    ->modalHeading('Selezione tipo scarto')
+                    ->modalDescription('Seleziona il tipo di scarto per il documento')
+                    ->modalSubmitActionLabel('Conferma')
+                    ->form([
+                        Select::make('selection')
+                            ->label('')
+                            ->options(
+                                collect(SdiStatus::cases())
+                                    ->filter(fn (SdiStatus $status) => $status->showDiscard())
+                                    ->mapWithKeys(fn ($status) => [
+                                        $status->value => $status->getLabel() ?? $status->name
+                                    ])
+                            ),
+                    ])
+                    ->action(function (Invoice $record, $data) {
+                        $record->update([
+                            'sdi_status' => $data['selection'],
                         ]);
-                    }
 
-                    $pdf->setPaper('A4', 'portrait');
-
-                    $pdf->setOptions(['margin-top' => 0]);
-
-                    return response()->streamDownload(function () use ($pdf, $record) {
-                        echo $pdf->output();
-                    }, 'fattura-' . $record->printNumber() . '.pdf');
-                }),
+                        Notification::make()
+                            ->title('Stato SDI aggiornato')
+                            ->body('Lo stato SDI del documento ' . $record->getNewInvoiceNumber() . ' è stato aggiornato a ' . $record->sdi_status->getLabel())
+                            ->icon('heroicon-o-check-circle')
+                            ->success()
+                            ->send();
+                    }),
                 Actions\EditAction::make()
                     ->hidden(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE),
             ])

@@ -290,13 +290,87 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::RIELABORATA => false,
             self::IMPORTATA => true,
 
-            // self::RIFIUTO_VALIDATO => 'gray',
+            // self::RIFIUTO_VALIDATO => true,
             self::RIFIUTO_EMESSO => true,
             self::RIFIUTO_ARCHIVIATO => true,
             self::SCARTO_VALIDATO => true,
             self::MANCATA_CONSEGNA_VALIDATA => true,
             self::AUTO_INVIATA => true,
             self::APERTA => true
+        };
+    }
+
+    // Blocco aggiornamento stato da SDI
+    public function showReject(): bool
+    {
+        return match($this) {
+            self::EMPTY => false,
+            self::DA_INVIARE => false,
+            self::INVIATA => false,
+            self::SCARTATA => false,
+            self::CONSEGNATA => false,
+            self::MANCATA_CONSEGNA => false,
+            self::ACCETTATA => false,
+            self::RIFIUTATA => false,
+            self::DECORRENZA_TERMINI => false,
+            self::AVVENUTA_TRASMISSIONE => false,
+            self::METADATA => false,
+
+            self::EMESSA => false,
+            self::IN_ELABORAZIONE => false,
+
+            self::GENERATA => false,
+            self::TRASMESSA_SDI => false,
+            self::NON_CONSEGNATA => false,
+            self::NON_RECAPITABILE => false,
+            self::NEL_CASSETTO => false,
+            self::RIELABORATA => false,
+            self::IMPORTATA => false,
+
+            // self::RIFIUTO_VALIDATO => false,
+            self::RIFIUTO_EMESSO => true,
+            self::RIFIUTO_ARCHIVIATO => true,
+            self::SCARTO_VALIDATO => false,
+            self::MANCATA_CONSEGNA_VALIDATA => false,
+            self::AUTO_INVIATA => false,
+            self::APERTA => false
+        };
+    }
+
+    // Blocco aggiornamento stato da SDI
+    public function showDiscard(): bool
+    {
+        return match($this) {
+            self::EMPTY => false,
+            self::DA_INVIARE => false,
+            self::INVIATA => false,
+            self::SCARTATA => false,
+            self::CONSEGNATA => false,
+            self::MANCATA_CONSEGNA => false,
+            self::ACCETTATA => false,
+            self::RIFIUTATA => false,
+            self::DECORRENZA_TERMINI => false,
+            self::AVVENUTA_TRASMISSIONE => false,
+            self::METADATA => false,
+
+            self::EMESSA => false,
+            self::IN_ELABORAZIONE => false,
+
+            self::GENERATA => false,
+            self::TRASMESSA_SDI => false,
+            self::NON_CONSEGNATA => false,
+            self::NON_RECAPITABILE => false,
+            self::NEL_CASSETTO => false,
+            self::RIELABORATA => false,
+            self::IMPORTATA => false,
+
+            // self::RIFIUTO_VALIDATO => false,
+            self::RIFIUTO_EMESSO => false,
+            self::RIFIUTO_ARCHIVIATO => false,
+            self::SCARTO_VALIDATO => true,
+            self::MANCATA_CONSEGNA_VALIDATA => false,
+            self::AUTO_INVIATA => false,
+            self::APERTA => false
         };
     }
 }
