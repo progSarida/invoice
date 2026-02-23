@@ -535,7 +535,7 @@ class ListNewInvoices extends ListRecords
                                 ->color('warning'),
                         ])
                         ->send();
-                    $refused = true;
+                    // $refused = true;
                 }
             }
             if ($refused) return $refused;
