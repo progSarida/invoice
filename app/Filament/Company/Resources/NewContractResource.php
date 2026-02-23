@@ -241,7 +241,7 @@ class NewContractResource extends Resource
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('office_name')
                     ->label('Denominazione UO')
-                    ->required()
+                    ->required(fn (Get $get) => Client::find($get('client_id'))?->subtype->isPublic())
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('office_code')
                     ->label('Codice Univoco')

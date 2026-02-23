@@ -98,7 +98,7 @@ enum ClientSubType: string implements HasLabel
         return $this === self::PROFESSIONAL;
     }
 
-    public function isContractable(){
+    public function isPublic(){
         return $this === self::CITY || $this === self::UNION || $this === self::FEDERATION || $this === self::PROVINCE;
     }
 }
