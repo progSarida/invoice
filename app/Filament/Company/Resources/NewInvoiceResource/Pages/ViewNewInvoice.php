@@ -163,7 +163,7 @@ class ViewNewInvoice extends ViewRecord
                     }),
                 Actions\Action::make('manage_reject')
                     ->label('Gestisci rifiuto')
-                    ->icon('hugeicons-file-management')
+                    ->icon('fluentui-mail-dismiss-20-o')
                     ->color(Color::rgb('rgb(255, 0, 0)'))
                     ->visible(fn ($record) => $record->sdi_status == SdiStatus::RIFIUTATA)
                     ->requiresConfirmation()
@@ -195,7 +195,7 @@ class ViewNewInvoice extends ViewRecord
                     }),
                 Actions\Action::make('manage_discard')
                     ->label('Gestisci scarto')
-                    ->icon('hugeicons-file-management')
+                    ->icon('fluentui-mail-error-20-o')
                     ->color(Color::rgb('rgb(255, 0, 0)'))
                     ->visible(fn ($record) => $record->sdi_status == SdiStatus::SCARTATA)
                     ->requiresConfirmation()
@@ -226,7 +226,9 @@ class ViewNewInvoice extends ViewRecord
                             ->send();
                     }),
                 Actions\EditAction::make()
-                    ->hidden(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE),
+                    ->hidden(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE                                // posso modificare se non è stata inviata
+                                            && $record->sdi_status != SdiStatus::RIFIUTATA                              // posso modificare se è stata rifiutata
+                                            && $record->sdi_status != SdiStatus::SCARTATA),                             // posso modificare se è stata scartata
             ])
             ->label('Operazioni')
             ->icon('heroicon-m-ellipsis-vertical')
