@@ -9,6 +9,7 @@ class BankAccount extends Model
     //
 
     protected $fillable = [
+        'position',
         'name',
         'holder',
         'number',
