@@ -27,6 +27,7 @@ use Filament\Forms\Set;
 use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EditNewInvoice extends EditRecord
 {
@@ -111,12 +112,15 @@ class EditNewInvoice extends EditRecord
                     $this->redirect(NewInvoiceResource::getUrl('edit', ['record' => $nextIDoc->id]));
                 }),
             Actions\ActionGroup::make([
+
+
                 Actions\Action::make('duplica_fattura')
-                    ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
+                    ->authorize('create')
+                    // ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
                     ->label('Duplica')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
-                    ->visible(fn($record) => $record->docType->name != 'TD00')
+                    // ->visible(fn($record) => $record->docType->name != 'TD00')
                     ->requiresConfirmation()
                     ->modalHeading('Duplica Fattura')
                     ->modalDescription('Vuoi creare una copia di questa fattura? La nuova fattura avrà un nuovo numero e una nuova data.')
@@ -135,54 +139,54 @@ class EditNewInvoice extends EditRecord
                             DB::beginTransaction();
 
                             $newInvoice = $record->replicate();                                             // creo una nuova istanza della fattura
-
-                            $newInvoice->contract_detail_id = $newInvoice->contract->lastDetail->id;        // metto l'id del dettaglio contratto in vigore
-
+Log::info('Fattura replicata');
+                            $newInvoice->contract_detail_id = $newInvoice->contract?->lastDetail?->id;      // metto l'id del dettaglio contratto in vigore
+Log::info('ID dettaglio contratto');
                             $newInvoice->parent_id = null;                                                  // resetto la fattura stornata (in caso di nota di credito)
-
+Log::info('Resetto parent_id');
                             $newInvoice->year = now()->year;                                                // imposto anno corrente
                             $newInvoice->number = $newInvoice->calculateNextInvoiceNumber();                // genero il numero fattura
 
                             $newInvoice->invoice_date = now()->format('Y-m-d');                             // imposto la data di oggi
-
+Log::info('Aggiornati numero, anno e data fattura');
                             $newInvoice->budget_year = now()->year;                                         // imposto anno corrente
                             $newInvoice->accrual_year = now()->year;                                        // imposto anno corrente
-
+Log::info('Reset anni bilancio e gestione');
                             $newInvoice->invoice_reference = null;                                          // resetto i campi del riferimento (unici per fattura)
                             $newInvoice->reference_date_from = null;
                             $newInvoice->reference_date_to = null;
                             $newInvoice->reference_number_from = null;
                             $newInvoice->reference_number_to = null;
                             $newInvoice->total_number = null;
-
+Log::info('Reset riferimenti');
                             $newInvoice->description = static::generateDescriptionFromModel($newInvoice);   // creo la nuova descrizione
                             $newInvoice->free_description = null;
-
+Log::info('Reset descrizione');
                             $newInvoice->payment_status = PaymentStatus::WAITING;                           // imposto lo stato pagamento a 'In attesa'
                             $newInvoice->last_payment_date = null;                                          // resetto la data dell'ultimo pagamento
-
+Log::info('Reset dati pagamento');
                             $newInvoice->total_payment = 0.0;                                               // imposto a zero il totale dei pagamenti della fattura
                             $newInvoice->total_notes = 0.0;                                                 // imposto a zero il totale delle note di credito della fattura
-
+Log::info('Reset totali associati');
                             $newInvoice->sdi_status = SdiStatus::DA_INVIARE;                                // resetto i campi dello sdi (unici per fattura)
                             $newInvoice->service_code = null;
                             $newInvoice->sdi_code = null;
                             $newInvoice->sdi_date = null;
                             $newInvoice->pdf_path = null;
                             $newInvoice->xml_path = null;
-
+Log::info('Reset dati SDI');
                             if(!$data['duplicate_amounts']){
                                 $newInvoice->total = 0.0;
                                 $newInvoice->no_vat_total = 0.0;
                             }
-
+Log::info('Reset totali');
                             $newInvoice->save();                                                            // salvo la nuova fattura
                                                                                                             // (il boot method genererà automaticamente invoice_uid)
-
+Log::info('Salvataggio');
                             if ($data['duplicate_items']) {
                                 $items = $record->invoiceItems->all();
                                 $lastKey = array_key_last($items);
-
+Log::info('Inizio copia voci');
                                 foreach ($items as $key => $item) {                                         // duplico gli InvoiceItem collegati
                                     // if(($item->vat_code_type && $item->vat_code_type !== 'vc06a') && !$item->postal_expense_id){
                                     if($item->invoice_element_id){                                          // se non è imposta di bollo, riepilogo, o spesa di notifica
@@ -225,7 +229,7 @@ class EditNewInvoice extends EditRecord
                                 // $newInvoice->invoiceCheckStampDuty();
                                 // $newInvoice->updateTotal();
                             }
-
+Log::info('Commit');
                             DB::commit();
 
                             Notification::make()

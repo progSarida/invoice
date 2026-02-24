@@ -3,14 +3,17 @@
 namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 
 use App\Enums\PaymentStatus;
+use App\Enums\ReversalGroupType;
 use App\Enums\SdiStatus;
 use App\Filament\Company\Resources\InvoiceResource;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\DocType;
 use App\Models\Invoice;
+use App\Models\ReversalMotivationType;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -19,6 +22,7 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ViewNewInvoice extends ViewRecord
 {
@@ -235,66 +239,73 @@ class ViewNewInvoice extends ViewRecord
                     ->label('Duplica')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
-                    ->visible(fn($record) => $record->docType->name != 'TD00')
+                    // ->visible(fn($record) => $record->docType->name != 'TD00')
                     ->requiresConfirmation()
                     ->modalHeading('Duplica Fattura')
                     ->modalDescription('Vuoi creare una copia di questa fattura? La nuova fattura avrà un nuovo numero e una nuova data.')
                     ->modalSubmitActionLabel('Duplica')->form([
-
+                        Checkbox::make('duplicate_items')
+                            ->label('Duplica anche le voci della fattura')
+                            ->live()
+                            ->default(true),
+                        Checkbox::make('duplicate_amounts')
+                            ->label('Duplica anche gli importi')
+                            ->visible(fn (Get $get) => $get('duplicate_items'))
+                            ->default(false),
                     ])
                     ->action(function (Get $get, Set $set, Invoice $record, array $data) {
                         try {
                             DB::beginTransaction();
 
                             $newInvoice = $record->replicate();                                             // creo una nuova istanza della fattura
-
-                            $newInvoice->contract_detail_id = $newInvoice->contract->lastDetail->id;        // metto l'id del dettaglio contratto in vigore
-
+Log::info('Fattura replicata');
+                            $newInvoice->contract_detail_id = $newInvoice->contract?->lastDetail?->id;      // metto l'id del dettaglio contratto in vigore
+Log::info('ID dettaglio contratto');
                             $newInvoice->parent_id = null;                                                  // resetto la fattura stornata (in caso di nota di credito)
-
+Log::info('Resetto parent_id');
                             $newInvoice->year = now()->year;                                                // imposto anno corrente
                             $newInvoice->number = $newInvoice->calculateNextInvoiceNumber();                // genero il numero fattura
 
                             $newInvoice->invoice_date = now()->format('Y-m-d');                             // imposto la data di oggi
-
+Log::info('Aggiornati numero, anno e data fattura');
                             $newInvoice->budget_year = now()->year;                                         // imposto anno corrente
                             $newInvoice->accrual_year = now()->year;                                        // imposto anno corrente
-
+Log::info('Reset anni bilancio e gestione');
                             $newInvoice->invoice_reference = null;                                          // resetto i campi del riferimento (unici per fattura)
                             $newInvoice->reference_date_from = null;
                             $newInvoice->reference_date_to = null;
                             $newInvoice->reference_number_from = null;
                             $newInvoice->reference_number_to = null;
                             $newInvoice->total_number = null;
-
+Log::info('Reset riferimenti');
                             $newInvoice->description = static::generateDescriptionFromModel($newInvoice);   // creo la nuova descrizione
                             $newInvoice->free_description = null;
-
+Log::info('Reset descrizione');
                             $newInvoice->payment_status = PaymentStatus::WAITING;                           // imposto lo stato pagamento a 'In attesa'
                             $newInvoice->last_payment_date = null;                                          // resetto la data dell'ultimo pagamento
-
+Log::info('Reset dati pagamento');
                             $newInvoice->total_payment = 0.0;                                               // imposto a zero il totale dei pagamenti della fattura
                             $newInvoice->total_notes = 0.0;                                                 // imposto a zero il totale delle note di credito della fattura
-
+Log::info('Reset totali associati');
                             $newInvoice->sdi_status = SdiStatus::DA_INVIARE;                                // resetto i campi dello sdi (unici per fattura)
                             $newInvoice->service_code = null;
                             $newInvoice->sdi_code = null;
                             $newInvoice->sdi_date = null;
                             $newInvoice->pdf_path = null;
                             $newInvoice->xml_path = null;
-
+Log::info('Reset dati SDI');
                             if(!$data['duplicate_amounts']){
                                 $newInvoice->total = 0.0;
                                 $newInvoice->no_vat_total = 0.0;
                             }
-
+Log::info('Reset totali');
                             $newInvoice->save();                                                            // salvo la nuova fattura
                                                                                                             // (il boot method genererà automaticamente invoice_uid)
-
+Log::info('Salvataggio');
                             if ($data['duplicate_items']) {
                                 $items = $record->invoiceItems->all();
                                 $lastKey = array_key_last($items);
-
+Log::info('Inizio copia voci');
                                 foreach ($items as $key => $item) {                                         // duplico gli InvoiceItem collegati
                                     // if(($item->vat_code_type && $item->vat_code_type !== 'vc06a') && !$item->postal_expense_id){
                                     if($item->invoice_element_id){                                          // se non è imposta di bollo, riepilogo, o spesa di notifica
@@ -337,7 +348,7 @@ class ViewNewInvoice extends ViewRecord
                                 // $newInvoice->invoiceCheckStampDuty();
                                 // $newInvoice->updateTotal();
                             }
-
+Log::info('Commit');
                             DB::commit();
 
                             Notification::make()
@@ -372,5 +383,67 @@ class ViewNewInvoice extends ViewRecord
     public function hasCombinedRelationManagerTabsWithContent(): bool
     {
         return true;
+    }
+
+    public static function generateDescriptionFromModel(Invoice $invoice): string
+    {
+        $description = '';
+        $year = substr($invoice->budget_year, 2);
+
+        if (filled($invoice->doc_type_id)) {
+            // Carichiamo il tipo documento con la relazione se non è già presente
+            $docType = $invoice->docType ?: DocType::with('docGroup')->find($invoice->doc_type_id);
+
+            if ($docType?->docGroup?->name === 'Note di variazione') {
+
+                $description = '(ab' . $year . ') ' . $docType->description;
+
+                // $reversalGroupType = ReversalGroupType::tryFrom($invoice->reversal_group_type)?->getLabel();
+                $reversalGroupType = $invoice->reversal_group_type?->getLabel();
+                if ($reversalGroupType) {
+                    $description .= ' a storno ' . lcfirst($reversalGroupType);
+                }
+
+                $parent = $invoice->parent ?: Invoice::find($invoice->parent_id);
+                if ($parent) {
+                    $description .= ' su ' . lcfirst($parent->docType->description);
+                    $description .= ' n.ro ' . $parent->getNewInvoiceNumber();
+                    $description .= ' del ' . \Carbon\Carbon::parse($parent->invoice_date)->format('d/m/Y');
+
+                    $motivation = ReversalMotivationType::find($invoice->reversal_motivation_type_id)?->name;
+                    if ($motivation) {
+                        $description .= ' per ' . lcfirst($motivation) . '.';
+                    }
+                }
+            } else {
+                // Caso fatture normali
+                $contractDetail = $invoice->contract?->lastDetail;
+                $contractDescription = $contractDetail?->invoice_description;
+
+                $description = '(ab' . $year . ') ' . $contractDescription . ' ';
+
+                if ($invoice->invoice_reference) {
+                    if ($invoice->reference_date_from) {
+                        $description .= 'per il periodo dal ' . \Carbon\Carbon::parse($invoice->reference_date_from)->format('d/m/Y');
+                        if ($invoice->reference_date_to) {
+                            $description .= ' al ' . \Carbon\Carbon::parse($invoice->reference_date_to)->format('d/m/Y');
+                        }
+                    }
+
+                    if ($invoice->reference_number_from) {
+                        $description .= ' dal verbale numero ' . $invoice->reference_number_from;
+                        if ($invoice->reference_number_to) {
+                            $description .= ' al verbale numero ' . $invoice->reference_number_to;
+                            $total = $invoice->reference_number_to - $invoice->reference_number_from + 1;
+                            if ($total > 0) {
+                                $description .= ' per un totale di ' . $total . ' verbali';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return trim($description);
     }
 }
