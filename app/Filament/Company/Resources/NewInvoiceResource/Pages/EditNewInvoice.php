@@ -116,7 +116,7 @@ class EditNewInvoice extends EditRecord
 
                 Actions\Action::make('duplica_fattura')
                     ->authorize('create')
-                    // ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
+                    ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
                     ->label('Duplica')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
