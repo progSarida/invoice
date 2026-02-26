@@ -108,9 +108,9 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::IMPORTATA => '',
 
             // self::RIFIUTO_VALIDATO => 'fluentui-presence-blocked-20-o',
-            self::RIFIUTO_EMESSO => 'fluentui-mail-arrow-forward-20-o',
-            self::RIFIUTO_ARCHIVIATO => 'fluentui-mail-prohibited-20-o',
-            self::SCARTO_VALIDATO => '',
+            self::RIFIUTO_EMESSO => 'fluentui-document-dismiss-20-o',
+            self::RIFIUTO_ARCHIVIATO => 'fluentui-drawer-dismiss-20-o',
+            self::SCARTO_VALIDATO => 'fluentui-drawer-dismiss-20',
             self::MANCATA_CONSEGNA_VALIDATA => '',
             self::AUTO_INVIATA => '',
             self::APERTA => ''
@@ -368,6 +368,41 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::RIFIUTO_EMESSO => false,
             self::RIFIUTO_ARCHIVIATO => false,
             self::SCARTO_VALIDATO => true,
+            self::MANCATA_CONSEGNA_VALIDATA => false,
+            self::AUTO_INVIATA => false,
+            self::APERTA => false
+        };
+    }// Blocco modifica stato SDI
+    public function updateStatus(): bool
+    {
+        return match($this) {
+            self::EMPTY => true,
+            self::DA_INVIARE => true,
+            self::INVIATA => true,
+            self::SCARTATA => true,
+            self::CONSEGNATA => true,
+            self::MANCATA_CONSEGNA => true,
+            self::ACCETTATA => true,
+            self::RIFIUTATA => true,
+            self::DECORRENZA_TERMINI => true,
+            self::AVVENUTA_TRASMISSIONE => true,
+            self::METADATA => true,
+
+            self::EMESSA => true,
+            self::IN_ELABORAZIONE => true,
+
+            self::GENERATA => true,
+            self::TRASMESSA_SDI => true,
+            self::NON_CONSEGNATA => true,
+            self::NON_RECAPITABILE => true,
+            self::NEL_CASSETTO => true,
+            self::RIELABORATA => true,
+            self::IMPORTATA => true,
+
+            // self::RIFIUTO_VALIDATO => 'gray',
+            self::RIFIUTO_EMESSO => false,
+            self::RIFIUTO_ARCHIVIATO => false,
+            self::SCARTO_VALIDATO => false,
             self::MANCATA_CONSEGNA_VALIDATA => false,
             self::AUTO_INVIATA => false,
             self::APERTA => false

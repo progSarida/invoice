@@ -985,17 +985,43 @@ class NewInvoiceResource extends Resource
                                     // Cerco una fattura nello stesso sezionale che abbia:
                                     // Un peso MINORE (quindi un numero precedente nello stesso anno o un anno precedente)
                                     // Ma una data MAGGIORE di quella che ho appena scelto
-                                    $inconsistentInvoice = Invoice::where('sectional_id', $sectionalId)
+                                    $inconsistentInvoicePrec = Invoice::where('sectional_id', $sectionalId)
                                         ->whereRaw('(YEAR(invoice_date) * 1000 + number) < ?', [$currentWeight])
                                         ->where('invoice_date', '>', $state)
                                         ->first();
 
-                                    if ($inconsistentInvoice) {
+                                    if ($inconsistentInvoicePrec) {
                                         \Filament\Notifications\Notification::make()
                                             ->title('Incongruenza Cronologica')
-                                            ->body("La fattura n. {$inconsistentInvoice->number} del " .
-                                                date('d/m/Y', strtotime($inconsistentInvoice->invoice_date)) .
+                                            ->body("La fattura n. {$inconsistentInvoicePrec->number} del " .
+                                                date('d/m/Y', strtotime($inconsistentInvoicePrec->invoice_date)) .
                                                 " ha un numero inferiore ma una data successiva a quella inserita.")
+                                            ->danger()
+                                            ->persistent()
+                                            ->send();
+
+                                        // Ripristino
+                                        if ($record) {
+                                            $set('invoice_date', $record->invoice_date->format('Y-m-d'));
+                                        } else {
+                                            $set('invoice_date', null);
+                                        }
+                                    }
+
+                                    // Cerco una fattura nello stesso sezionale che abbia:
+                                    // Un peso MAGGIORE (quindi un numero successivo nello stesso anno o un anno successivo)
+                                    // Ma una data MINORE di quella che ho appena scelto
+                                    $inconsistentInvoiceSucc = Invoice::where('sectional_id', $sectionalId)
+                                        ->whereRaw('(YEAR(invoice_date) * 1000 + number) > ?', [$currentWeight])
+                                        ->where('invoice_date', '<', $state)
+                                        ->first();
+
+                                    if ($inconsistentInvoiceSucc) {
+                                        \Filament\Notifications\Notification::make()
+                                            ->title('Incongruenza Cronologica')
+                                            ->body("La fattura n. {$inconsistentInvoiceSucc->number} del " .
+                                                date('d/m/Y', strtotime($inconsistentInvoiceSucc->invoice_date)) .
+                                                " ha un numero maggiore ma una data precedente a quella inserita.")
                                             ->danger()
                                             ->persistent()
                                             ->send();
@@ -1078,7 +1104,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(3),
                             Forms\Components\Select::make('invoice_reference')
                                 ->label('Riferimento')
-                                // ->required()
+                                ->required()
                                 ->live()
                                 ->options(InvoiceReference::class)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'new_ref'))
@@ -1088,7 +1114,7 @@ class NewInvoiceResource extends Resource
                             Forms\Components\DatePicker::make('reference_date_from')
                                 ->label('Da data')
                                 ->extraInputAttributes(['class' => 'text-center'])
-                                // ->required()
+                                ->required()
                                 // ->live()
                                 ->debounce(1000)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
@@ -1098,7 +1124,7 @@ class NewInvoiceResource extends Resource
                             Forms\Components\DatePicker::make('reference_date_to')
                                 ->label('A data')
                                 ->extraInputAttributes(['class' => 'text-center'])
-                                // ->required()
+                                ->required()
                                 // ->live()
                                 ->debounce(1000)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
@@ -1109,21 +1135,21 @@ class NewInvoiceResource extends Resource
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->columnSpan(1),
                             Forms\Components\TextInput::make('reference_number_from')->label('Dal numero')
-                                // ->required()
+                                ->required()
                                 ->debounce(500)
                                 ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
                                 ->columnSpan(1),
                             Forms\Components\TextInput::make('reference_number_to')->label('Al numero')
-                                // ->required()
+                                ->required()
                                 ->debounce(500)
                                 ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
                                 ->columnSpan(1),
                             Forms\Components\TextInput::make('total_number')->label('Totali')
-                                // ->required()
+                                ->required()
                                 ->debounce(500)
                                 ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)

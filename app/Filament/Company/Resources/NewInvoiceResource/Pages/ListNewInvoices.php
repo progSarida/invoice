@@ -531,7 +531,7 @@ class ListNewInvoices extends ListRecords
                         ->actions([
                             \Filament\Notifications\Actions\Action::make('edit')
                                 ->label('Vai alla fattura')
-                                ->url(NewInvoiceResource::getUrl('edit', ['record' => $el->id]))
+                                ->url(NewInvoiceResource::getUrl('view', ['record' => $el->id]))
                                 ->color('warning'),
                         ])
                         ->send();

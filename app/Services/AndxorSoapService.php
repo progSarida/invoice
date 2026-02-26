@@ -675,8 +675,9 @@ class AndxorSoapService
         //     }
         // }
 
-        if($invoice->sdi_status != $newStatus){
-            // Aggiorna stato e data modifica stato della fattura
+        if($invoice->sdi_status != $newStatus && $invoice->sdi_status->updateStatus()){                     // modifico se è diverso da quello esistente
+            // Aggiorna stato e data modifica stato della fattura                                           // e questo non è RIFIUTO_EMESSO, RIFIUTO_ARCHIVIATO, SCARTO_VALIDATO,
+                                                                                                            // MANCATA_CONSEGNA_VALIDATA, AUTO_INVIATA, APERTA
             $invoice->update([
                 'sdi_code' => $response?->IdSdI,
                 'sdi_status' => $newStatus,
