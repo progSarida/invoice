@@ -66,6 +66,7 @@ class PassiveInvoice extends Model
     {
         static::creating(function ($invoice) {
             $invoice->total_payment = 0.00;
+            $invoice->total_note = 0.00;
         });
 
         static::created(function ($invoice) {
@@ -77,7 +78,9 @@ class PassiveInvoice extends Model
         });
 
         static::saved(function ($invoice) {
-            //
+            if($invoice->parent){
+                $invoice->updateParentNotes();
+            }
         });
 
         static::deleting(function ($invoice) {
@@ -86,13 +89,26 @@ class PassiveInvoice extends Model
 
     }
 
-    // Aggiorna i totali (con e senza IVA della fattura) ad ogni inserimento di una voce
+    // Aggiorna il totale della fattura poassiva
     public function updateTotal(): void
     {
-        Log::info('Aggiornamento totali_________________________________________________________________________________________________');
+        Log::info('Aggiornamento totale dovuto__________________________________________________________________________________________');
         $totals = $this->passiveItems()->sum('total_price');
-        Log::info('Totale con IVA: ' . $totals);
+        Log::info('Totale dovuto con IVA: ' . $totals);
         $this->total = $totals;
+        $this->save();
+    }
+
+    // Aggiorna il totale delle note di credito della fattura parent
+    public function updateParentNotes(): void
+    {
+        Log::info('Aggiornamento totale note di credito parent___________________________________________________________________________');
+        $totalNote = $this->total;
+        Log::info('Totale nota: ' . $totalNote);
+        if($this->parent->total_note)
+            $this->parent->total_note += $totalNote;
+        else
+            $this->parent->total_note = $totalNote;
         $this->save();
     }
 }

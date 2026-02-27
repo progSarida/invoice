@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('invoice_date')->nullable();                                           // data fattura
             $table->string('number')->nullable();                                               // numero fattura
             $table->string('description')->nullable();                                          // descrizione
-            $table->decimal('total',10,2)->nullable();                                          // totale fattura
+            $table->decimal('total',10,2)->nullable();                                          // totale dovuto fattura
             $table->decimal('total_payment',10,2)->nullable();                                  // totale pagamenti
             $table->string('sdi_code')->nullable();                                             // identificativo sdi
             $table->string('sdi_status')->nullable();                                           // status sdi

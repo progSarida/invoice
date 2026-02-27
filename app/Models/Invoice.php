@@ -340,6 +340,13 @@ class Invoice extends Model
                 }
 
                 $invoice->invoice->updateTotalNotes();                      // Tiene aggiornato il totale delle note di credito della fattura parent (nel caso di nota di credito) se creata una nuova
+
+                if($invoice->invoice->sdi_status === SdiStatus::RIFIUTO_EMESSO) {       // Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"
+                    $invoice->invoice->update([
+                        'sdi_status' => SdiStatus::RIFIUTO_NOTA,
+                    ]);
+Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"');
+                }
             }
         });
 

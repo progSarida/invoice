@@ -990,6 +990,7 @@ class AndxorSoapService
         $supplier = $param['supplier'];                                                                                 // fornitore
         $xml = $param['content'];                                                                                       // array xml
         $item = $param['item'];
+        $parentPassiveInvoice = null;
 
         // dd($xml);
 
@@ -1010,16 +1011,19 @@ class AndxorSoapService
             if(!$rawCausale && ($fattColl && $dataFattColl)){
                 $rawCausale = 'Fatt.Coll. ' . $fattColl .' del ' . $dataFattColl;
             }
+            $parentPassiveInvoice = $this->getParentPassiveInvoice($collegate, $supplier->id);
         }
 
         $data = [
                 'company_id' => Filament::getTenant()->id,
                 'supplier_id' => $supplier->id,
+                'parent_id' => $parentPassiveInvoice?->id,
                 'doc_type' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['TipoDocumento'] ?? null,
                 'invoice_date' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Data'] ?? null,
                 'number' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Numero'] ?? null,
                 'description' => is_array($rawCausale) ? implode('; ', $rawCausale) : $rawCausale,
-                'total' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['ImportoTotaleDocumento'] ?? null,
+                'total_doc' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['ImportoTotaleDocumento'] ?? null,
+                'total' => null,
                 'sdi_code' => $item->IdentificativoSdI,
                 'sdi_status' => $item->Stato,
                 'payment_mode' => $xml['FatturaElettronicaBody']['DatiPagamento']['CondizioniPagamento'] ?? null,
@@ -1039,6 +1043,11 @@ class AndxorSoapService
         // dd($passiveInvoice);
 
         return $passiveInvoice;
+    }
+
+    private function getParentPassiveInvoice(array $collegate, $supplierId): PassiveInvoice
+    {
+        return PassiveInvoice::where('supplier_id', $supplierId)->where('number', $collegate['IdDocumento'])->where('invoice_date', $collegate['Data'])->first();
     }
 
     private function createDetailItems(array $param): int
@@ -1291,7 +1300,7 @@ class AndxorSoapService
                         'description' => $description . ' - ' . $reason,
                         'quantity' => null,
                         'unit_price' => null,
-                        'total_price' => $withholding['ImportoRitenuta'] ?? null,
+                        'total_price' => isset($withholding['ImportoRitenuta']) ? $withholding['ImportoRitenuta'] * -1 : null,
                         'vat_rate' => $withholding['AliquotaRitenuta'] ?? null
                     ];
 
@@ -1513,46 +1522,7 @@ class AndxorSoapService
 
                         $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
 
-                        $deadline = Deadline::create([
-                            'company_id' => Filament::getTenant()->id,
-                            'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
-                            'note' => null,
-                            'date' => $passiveInvoice->payment_deadline,
-                            'amount'  => $passiveInvoice->total,
-                            'dispatched' => false
-                        ]);
-                    }
-                } else {                                                                                            // se c'è una sola fattura passiva da scaricare
-                    $item = $response->Fattura;
-                    $checkPI = PassiveInvoice::where('sdi_code', $item->IdentificativoSdI)->first();
-                    if(!$checkPI){
-                        $param['item'] = $item;
-
-                            $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
-                            $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
-                            // $i_input['IdentificativoSdI'] = '15082389451';
-
-                            $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
-
-                            $i_input['Unwrap'] = true;
-                            $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
-
-                            $param['filePath_xml'] = $this->savePassiveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
-                            $param['filePath_pdf'] = $this->savePassivePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
-
-                            $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
-
-                            $newSupplier = $this->checkSupplier($param['content']['FatturaElettronicaHeader']);         // controllo e nel caso inserisco un nuovo fornitore, ritorno il fornitore della fattura
-                            if($newSupplier['new']) $supplierNumber++;                                                  // se ho aggiunto il fornitore incremento il contatore dei fornitori
-                            $param['supplier']  = $newSupplier['supplier'];
-
-                            $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
-                            $param['passive_invoice']  = $passiveInvoice;
-
-                            $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
-
-                            $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
-
+                        if(!$passiveInvoice->parent_id){                                                            // se non è una nota di credito creo la scadenza
                             $deadline = Deadline::create([
                                 'company_id' => Filament::getTenant()->id,
                                 'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
@@ -1561,6 +1531,53 @@ class AndxorSoapService
                                 'amount'  => $passiveInvoice->total,
                                 'dispatched' => false
                             ]);
+                        }
+                    }
+                } else {                                                                                            // se c'è una sola fattura passiva da scaricare
+                    $item = $response->Fattura;
+                    $checkPI = PassiveInvoice::where('sdi_code', $item->IdentificativoSdI)->first();
+                    if(!$checkPI){
+                        $param['item'] = $item;
+
+                        $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
+                        $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+                        // $i_input['IdentificativoSdI'] = '15082389451';
+
+                        $i_response_pdf = $this->client->PasvDownloadPDF($i_input);                                 // recupero file PDF della fattura
+
+                        $i_input['Unwrap'] = true;
+                        $i_response_xml = $this->client->PasvDownload($i_input);                                    // recupero file XML della fattura
+
+                        $param['filePath_xml'] = $this->savePassiveXML($i_response_xml->Nome, $i_response_xml->Contenuto); // salvo il file XML
+                        $param['filePath_pdf'] = $this->savePassivePDF($i_response_pdf->Nome, $i_response_pdf->Contenuto); // salvo il file PDF
+
+                        $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                         // creo l'array con i dati dell'xml della fattura
+
+                        $newSupplier = $this->checkSupplier($param['content']['FatturaElettronicaHeader']);         // controllo e nel caso inserisco un nuovo fornitore, ritorno il fornitore della fattura
+                        if($newSupplier['new']) $supplierNumber++;                                                  // se ho aggiunto il fornitore incremento il contatore dei fornitori
+                        $param['supplier']  = $newSupplier['supplier'];
+
+                        $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
+                        $param['passive_invoice']  = $passiveInvoice;
+
+                        $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
+
+                        if(!$passiveInvoice->total){                                                                // controllo valore totale fattura passiva
+                            $passiveInvoice->update(['total' => $passiveInvoice->passiveItems()->sum('total_price')]);
+                        }
+
+                        $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
+
+                        if(!$passiveInvoice->parent_id){                                                            // se non è una nota di credito creo la scadenza
+                            $deadline = Deadline::create([
+                                'company_id' => Filament::getTenant()->id,
+                                'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
+                                'note' => null,
+                                'date' => $passiveInvoice->payment_deadline,
+                                'amount'  => $passiveInvoice->total,
+                                'dispatched' => false
+                            ]);
+                        }
                     }
                 }
             }

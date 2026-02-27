@@ -159,8 +159,45 @@ class PassiveInvoiceResource extends Resource
                                 //  ->disabled()
                                 ,
 
+                            Forms\Components\Select::make('parent_id')
+                                ->label('Fattura stornata')
+                                ->visible(
+                                    function (Get $get, $record) {
+                                        $doc_type = $get('doc_type');
+// dd($record, $docTypeId);
+                                        if (!filled($doc_type)) {
+                                            return false;
+                                        }
+
+                                        $docType = DocType::with('docGroup')->where('name', $doc_type)->first();
+
+                                        return $docType?->docGroup?->name === 'Note di variazione' || $record?->parent_id;
+                                        // return true;
+                                    }
+                                )
+                                ->live()
+                                ->relationship(
+                                    name: 'parent',
+                                    modifyQueryUsing:
+                                        function (Builder $query, Get $get){
+                                            $query->whereHas('docType.docGroup', function ($query) {
+                                                    $query->whereIn('name', ['Fatture', 'Autofatture']);
+                                                })
+                                                ->where('supplier_id',$get('supplier_id'))
+                                                ->orderBy('number','desc');
+                                        }
+                                )
+                                ->getOptionLabelFromRecordUsing(
+                                    function (Model $record) {
+                                        $return = "Fattura n. {$record->number} del {$record->invoice_date} ";
+                                        return $return;
+                                    }
+                                )
+                                ->columnSpan(12),
+
                             Forms\Components\FileUpload::make('pdf_path')->label('File PDF')
-                                ->required()
+                                ->required(fn ($record) => !$record?->pdf_path)
+                                ->dehydrated(fn ($record) => !$record?->pdf_path)
                                 // ->disk('public')
                                 ->directory('passive_invoices/pdf_files')
                                 // ->visibility('public')
@@ -187,7 +224,8 @@ class PassiveInvoiceResource extends Resource
                             ->columnSpan(2),
 
                             Forms\Components\FileUpload::make('xml_path')->label('File XML')
-                                // ->required()
+                                ->required(fn ($record) => !$record?->xml_path)
+                                ->dehydrated(fn ($record) => !$record?->xml_path)
                                 // ->disk('public')
                                 ->directory('passive_invoices/xml_files')
                                 // ->visibility('public')

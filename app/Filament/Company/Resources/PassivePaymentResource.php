@@ -48,6 +48,7 @@ class PassivePaymentResource extends Resource
                     ->label('Fattura da pagare')
                     ->relationship(name: 'passiveInvoice', titleAttribute: 'id')
                     ->searchable()
+                    ->hintIcon('heroicon-o-information-circle', tooltip: "Digitare 'Tutte' nella ricerca per mostrare tutte fatture non pagate")
                     ->getSearchResultsUsing(function (string $search, ?Model $record) {
                         $search = trim(preg_replace('/\s+/', ' ', $search));
                         $terms = explode(' ', $search);

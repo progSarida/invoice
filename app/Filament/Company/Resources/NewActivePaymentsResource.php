@@ -62,6 +62,7 @@ class NewActivePaymentsResource extends Resource
                 Forms\Components\Select::make('invoice_id')
                     ->label('Fattura')
                     ->placeholder('Seleziona una fattura...')
+                    ->hintIcon('heroicon-o-information-circle', tooltip: "Digitare 'Tutte' nella ricerca per mostrare tutte fatture non pagate")
                     ->getSearchResultsUsing(function (string $search, $record) {
                         // Rimuovi spazi multipli e trim
                         $search = trim(preg_replace('/\s+/', ' ', $search));

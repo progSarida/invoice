@@ -38,6 +38,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
     //AGGIUNTI DA RICCARDO, NON SONO STATUS UFFICIALI DEL SISTEMA DI INTERSCAMBIO
     // CASE RIFIUTO_VALIDATO = "rifiuto_validato";
     CASE RIFIUTO_EMESSO = "rifiuto_emesso";
+    CASE RIFIUTO_NOTA = "rifiuto_nota";
     CASE RIFIUTO_ARCHIVIATO = "rifiuto_archiviato";
     CASE SCARTO_VALIDATO = "scarto_validato";
     CASE MANCATA_CONSEGNA_VALIDATA = "mancata_consegna_validata";
@@ -72,6 +73,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => 'Rifiuto validato',
             self::RIFIUTO_EMESSO => 'RN - Rifiuto validato (emettere nota di credito)',
+            self::RIFIUTO_NOTA => 'RN - Rifiuto validato (emessa nota di credito)',
             self::RIFIUTO_ARCHIVIATO => 'RM - Rifiuto validato (mantenere in contabilità)',
             self::SCARTO_VALIDATO => 'SV - Scarto validato (mantenere in contabilità)',
             self::MANCATA_CONSEGNA_VALIDATA => 'MCV - Mancata consegna validata (mantenere in contabilità)',
@@ -145,6 +147,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => 'Rifiuto validato',
             self::RIFIUTO_EMESSO => 'RN - Rifiuto validato (emettere nota di credito)',
+            self::RIFIUTO_NOTA => 'RN - Rifiuto validato (emessa nota di credito)',
             self::RIFIUTO_ARCHIVIATO => 'RM - Rifiuto validato (mantenere in contabilità)',
             self::SCARTO_VALIDATO => 'SV - Scarto validato (mantenere in contabilità)',
             self::MANCATA_CONSEGNA_VALIDATA => 'MCV - Mancata consegna validata (mantenere in contabilità)',
@@ -181,6 +184,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => 'gray',
             self::RIFIUTO_EMESSO => 'gray',
+            self::RIFIUTO_NOTA => 'success',
             self::RIFIUTO_ARCHIVIATO => 'gray',
             self::SCARTO_VALIDATO => 'gray',
             self::MANCATA_CONSEGNA_VALIDATA => 'gray',
@@ -218,6 +222,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => 'gray',
             self::RIFIUTO_EMESSO => true,
+            self::RIFIUTO_NOTA => true,
             self::RIFIUTO_ARCHIVIATO => true,
             self::SCARTO_VALIDATO => true,
             self::MANCATA_CONSEGNA_VALIDATA => true,
@@ -255,6 +260,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => 'gray',
             self::RIFIUTO_EMESSO => true,
+            self::RIFIUTO_NOTA => true,
             self::RIFIUTO_ARCHIVIATO => true,
             self::SCARTO_VALIDATO => true,
             self::MANCATA_CONSEGNA_VALIDATA => true,
@@ -292,6 +298,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => true,
             self::RIFIUTO_EMESSO => true,
+            self::RIFIUTO_NOTA => true,
             self::RIFIUTO_ARCHIVIATO => true,
             self::SCARTO_VALIDATO => true,
             self::MANCATA_CONSEGNA_VALIDATA => true,
@@ -300,7 +307,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
         };
     }
 
-    // Blocco aggiornamento stato da SDI
+    // Mostra come opzione in gestione rifiuto
     public function showReject(): bool
     {
         return match($this) {
@@ -329,6 +336,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => false,
             self::RIFIUTO_EMESSO => true,
+            self::RIFIUTO_NOTA => false,
             self::RIFIUTO_ARCHIVIATO => true,
             self::SCARTO_VALIDATO => false,
             self::MANCATA_CONSEGNA_VALIDATA => false,
@@ -337,7 +345,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
         };
     }
 
-    // Blocco aggiornamento stato da SDI
+    // Mostra come opzione in gestione scarto
     public function showDiscard(): bool
     {
         return match($this) {
@@ -366,13 +374,16 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => false,
             self::RIFIUTO_EMESSO => false,
+            self::RIFIUTO_NOTA => false,
             self::RIFIUTO_ARCHIVIATO => false,
             self::SCARTO_VALIDATO => true,
             self::MANCATA_CONSEGNA_VALIDATA => false,
             self::AUTO_INVIATA => false,
             self::APERTA => false
         };
-    }// Blocco modifica stato SDI
+    }
+
+    // Blocco modifica stato SDI
     public function updateStatus(): bool
     {
         return match($this) {
@@ -401,6 +412,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => 'gray',
             self::RIFIUTO_EMESSO => false,
+            self::RIFIUTO_NOTA => false,
             self::RIFIUTO_ARCHIVIATO => false,
             self::SCARTO_VALIDATO => false,
             self::MANCATA_CONSEGNA_VALIDATA => false,

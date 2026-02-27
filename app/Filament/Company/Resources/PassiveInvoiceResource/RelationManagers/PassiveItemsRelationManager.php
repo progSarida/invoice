@@ -5,6 +5,7 @@ namespace App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers
 use App\Enums\TransactionType;
 use App\Enums\VatCodeType;
 use Filament\Forms;
+use Filament\Forms\Components\View;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -91,6 +92,8 @@ class PassiveItemsRelationManager extends RelationManager
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->prefix('%')
                     ->columnSpan(4),
+                View::make('links.exchange-link')
+                    ->columnSpan(3),
             ]);
     }
 
