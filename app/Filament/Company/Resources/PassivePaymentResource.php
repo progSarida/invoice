@@ -61,7 +61,7 @@ class PassivePaymentResource extends Resource
                             return PassiveInvoice::query()
                             ->where(function ($query) use ($record) {
                                 // Continua a mostrare le fatture non pagate...
-                                $query->whereColumn('total_payment', '<', DB::raw('total + total_note'))
+                                $query->whereRaw('total_payment + total_note < total')
                                 // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
                                 ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
                             })
