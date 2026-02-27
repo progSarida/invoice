@@ -23,6 +23,7 @@ use Filament\Forms\Set;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PassivePaymentResource extends Resource
 {
@@ -60,7 +61,7 @@ class PassivePaymentResource extends Resource
                             return PassiveInvoice::query()
                             ->where(function ($query) use ($record) {
                                 // Continua a mostrare le fatture non pagate...
-                                $query->whereColumn('total_payment', '<', 'total')
+                                $query->whereColumn('total_payment', '<', DB::raw('total + total_note'))
                                 // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
                                 ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
                             })
