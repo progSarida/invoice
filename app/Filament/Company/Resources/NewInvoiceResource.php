@@ -1747,6 +1747,36 @@ class NewInvoiceResource extends Resource
                         }
                         return $query;
                     }),
+                Filter::make('total_range')
+                    ->columns(2)
+                    ->form([
+                        TextInput::make('total_from')
+                            ->label('Totale da')
+                            ->columnSpan(1),
+                        TextInput::make('total_to')
+                            ->label('Totale a')
+                            ->columnSpan(1),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['total_from'])) {
+                            $query->where('total', '>=', $data['total_from']);
+                        }
+                        if (! empty($data['total_to'])) {
+                            $query->where('total', '<=', $data['total_to']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['total_from'] && $data['total_to']) {
+                            return "Importo da " . number_format($data['total_from'], 2, ',', '.') . " fino a " . number_format($data['total_to'], 2, ',', '.');
+                        }
+                        if ($data['total_from']) {
+                            return "Importo da " . number_format($data['total_from'], 2, ',', '.');
+                        }
+                        if ($data['total_to']) {
+                            return "Importo fino a " . number_format($data['total_to'], 2, ',', '.');
+                        }
+                        return null;
+                    }),
             // ],layout: FiltersLayout::Modal)->filtersFormColumns(4)
             ])
             ->filtersFormColumns(4)

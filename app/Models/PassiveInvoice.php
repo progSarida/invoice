@@ -10,6 +10,7 @@ class PassiveInvoice extends Model
     protected $fillable = [
         'company_id',
         'supplier_id',
+        'parent_id',
         'doc_type',
         'invoice_date',
         'number',
@@ -78,9 +79,7 @@ class PassiveInvoice extends Model
         });
 
         static::saved(function ($invoice) {
-            if($invoice->parent){
-                $invoice->updateParentNotes();
-            }
+            //
         });
 
         static::deleting(function ($invoice) {

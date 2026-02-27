@@ -58,48 +58,50 @@ class PassivePaymentResource extends Resource
                         };
 
                         if(str_contains(strtolower($search), "tutte")){
-                            return PassiveInvoice::query()
-                            ->where(function ($query) use ($record) {
-                                // Continua a mostrare le fatture non pagate...
-                                $query->whereRaw('total_payment + total_note < total')
-                                // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
-                                ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
-                            })
-                            ->where('doc_type', '!=', 'TD04')
-                            ->whereDoesntHave('docType', $filterGroup)
-                            ->whereHas('piValidation', fn($sub) => $sub->where('pi_validation_status', 'ok'))
-                            ->with(['supplier'])
-                            ->limit(50)
-                            ->get()
-                            ->mapWithKeys(fn ($i) => [$i->id => static::getPassiveInvoiceLabel($i)]) // Usa una funzione helper
-                            ->toArray();
+                            $list = PassiveInvoice::query()
+                                ->where(function ($query) use ($record) {
+                                    // Continua a mostrare le fatture non pagate...
+                                    $query->whereRaw('(total_payment + total_note) < total')
+                                    // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
+                                    ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
+                                })
+                                ->where('doc_type', '!=', 'TD04')
+                                ->whereDoesntHave('docType', $filterGroup)
+                                ->whereHas('piValidation', fn($sub) => $sub->where('pi_validation_status', 'ok'))
+                                ->with(['supplier'])
+                                ->limit(50)
+                                // ->toSql();dd($list);
+                                ->get()
+                                ->mapWithKeys(fn ($i) => [$i->id => static::getPassiveInvoiceLabel($i)]) // Usa una funzione helper
+                                ->toArray();
                         } else {
-                            return PassiveInvoice::query()
-                            ->where(function ($query) use ($record) {
-                                // Continua a mostrare le fatture non pagate...
-                                $query->whereColumn('total_payment', '<', 'total')
-                                // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
-                                ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
-                            })
-                            ->where('doc_type', '!=', 'TD04')
-                            ->whereDoesntHave('docType', $filterGroup)
-                            ->whereHas('piValidation', fn($sub) => $sub->where('pi_validation_status', 'ok'))
-                            ->where(function ($mainQuery) use ($terms) {
-                                foreach ($terms as $term) {
-                                    $mainQuery->where(function ($subQuery) use ($term) {
-                                        $subQuery->whereHas('supplier', fn($s) => $s->where('denomination', 'like', "%{$term}%"))
-                                            ->orWhere('number', 'like', "%{$term}%")
-                                            ->orWhere('total', 'like', "%{$term}%")
-                                            ->orWhere('invoice_date', 'like', "%{$term}%");
-                                    });
-                                }
-                            })
-                            ->with(['supplier'])
-                            ->limit(50)
-                            ->get()
-                            ->mapWithKeys(fn ($i) => [$i->id => static::getPassiveInvoiceLabel($i)]) // Usa una funzione helper
-                            ->toArray();
+                            $list = PassiveInvoice::query()
+                                ->where(function ($query) use ($record) {
+                                    // Continua a mostrare le fatture non pagate...
+                                    $query->whereRaw('(total_payment + total_note) < total')
+                                    // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
+                                    ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
+                                })
+                                ->where('doc_type', '!=', 'TD04')
+                                ->whereDoesntHave('docType', $filterGroup)
+                                ->whereHas('piValidation', fn($sub) => $sub->where('pi_validation_status', 'ok'))
+                                ->where(function ($mainQuery) use ($terms) {
+                                    foreach ($terms as $term) {
+                                        $mainQuery->where(function ($subQuery) use ($term) {
+                                            $subQuery->whereHas('supplier', fn($s) => $s->where('denomination', 'like', "%{$term}%"))
+                                                ->orWhere('number', 'like', "%{$term}%")
+                                                ->orWhere('total', 'like', "%{$term}%")
+                                                ->orWhere('invoice_date', 'like', "%{$term}%");
+                                        });
+                                    }
+                                })
+                                ->with(['supplier'])
+                                ->limit(50)
+                                ->get()
+                                ->mapWithKeys(fn ($i) => [$i->id => static::getPassiveInvoiceLabel($i)]) // Usa una funzione helper
+                                ->toArray();
                         }
+                        return $list;
                     })
                     // FONDAMENTALE: Questo risolve il problema della label mancante all'avvio
                     ->getOptionLabelUsing(function ($value) {
@@ -109,7 +111,7 @@ class PassivePaymentResource extends Resource
                     ->afterStateUpdated(function ($state, Set $set) {
                         $passiveInvoice = PassiveInvoice::find($state);
                         if ($passiveInvoice) {
-                            $set('amount', number_format($passiveInvoice->total - $passiveInvoice->total_payment, 2, ",", "."));
+                            $set('amount', number_format($passiveInvoice->total - ($passiveInvoice->total_payment + $passiveInvoice->total_note), 2, ",", "."));
                             $set('bank', $passiveInvoice->bank);
                             $set('iban', $passiveInvoice->iban);
                             $set('payment_type', $passiveInvoice->payment_type);
@@ -470,8 +472,8 @@ class PassivePaymentResource extends Resource
         $total = number_format($record->total, 2, ',', '.') . '€';
         $number = $record->number ?? 'S.N.';
 
-        $residuo = $record->total - $record->total_payment;
-        $add = ($residuo > 0 && $record->total_payment > 0)
+        $residuo = $record->total - ($record->total_payment + $record->total_note);
+        $add = ($residuo > 0 && ($record->total_payment > 0 || $record->total_note > 0))
             ? " [" . number_format($residuo, 2, ",", ".") . "€]"
             : '';
 

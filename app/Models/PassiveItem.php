@@ -48,6 +48,9 @@ class PassiveItem extends Model
 
         static::saved(function ($item) {
             $item->passiveInvoice?->updateTotal();
+            if($item->passiveInvoice->parent){
+                $item->passiveInvoice->parent->updateParentNotes();
+            }
         });
 
         static::deleting(function ($item) {
@@ -56,6 +59,9 @@ class PassiveItem extends Model
 
         static::deleted(function ($item) {
             $item->passiveInvoice?->updateTotal();
+            if($item->passiveInvoice->parent){
+                $item->passiveInvoice->parent->updateParentNotes();
+            }
         });
 
     }

@@ -21,6 +21,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -148,6 +149,7 @@ class PassiveInvoiceResource extends Resource
                             Forms\Components\TextInput::make('number')
                                 ->label('Numero')
                                 ->required()
+                                ->extraInputAttributes(['class' => 'text-right'])
                                 ->columnSpan(3)
                                 //  ->disabled()
                                 ,
@@ -189,7 +191,7 @@ class PassiveInvoiceResource extends Resource
                                 )
                                 ->getOptionLabelFromRecordUsing(
                                     function (Model $record) {
-                                        $return = "Fattura n. {$record->number} del {$record->invoice_date} ";
+                                        $return = "Fattura n. {$record->number} del {$record->invoice_date->format('d/m/Y')} ";
                                         return $return;
                                     }
                                 )
@@ -411,9 +413,12 @@ class PassiveInvoiceResource extends Resource
                     ->sortable()
                     ->alignRight(),
             ])
+            ->filtersFormWidth('2xl')
+            ->filtersFormColumns(2)
             ->filters([
                 SelectFilter::make('pi_validation_status')
                     ->label('Validazione')
+                    ->columnSpan(1)
                     // ->options(PiValidationStatus::class)
                     ->options(fn () => [
                             'validati' => 'Tutti validati',   // La tua opzione custom
@@ -446,6 +451,7 @@ class PassiveInvoiceResource extends Resource
                     ->preload(),
                 SelectFilter::make('paid')
                     ->label('Pagamento')
+                    ->columnSpan(1)
                     ->options([
                         'si' => 'Totale',
                         'par' => 'Parziale',
@@ -465,11 +471,15 @@ class PassiveInvoiceResource extends Resource
                     })
                     ->preload(),
                 Filter::make('invoice_date_range')
+                    ->columnSpan(2)
+                    ->columns(2)
                     ->form([
                         DatePicker::make('invoice_from_date')
                             ->label('Data fattura da')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->columnSpan(1),
                         DatePicker::make('invoice_to_date')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->label('Data fattura a')
                             ->columnSpan(1),
                     ])
@@ -483,7 +493,7 @@ class PassiveInvoiceResource extends Resource
                     })
                     ->indicateUsing(function (array $data): ?string {
                         if ($data['invoice_from_date'] && $data['invoice_to_date']) {
-                            return "Data fattura dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y') . " Data fattura aal " . Carbon::parse($data['invoice_to_date'])->format('d/m/Y');
+                            return "Data fattura dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['invoice_to_date'])->format('d/m/Y');
                         }
                         if ($data['invoice_from_date']) {
                             return "Data fattura dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y');
@@ -495,6 +505,7 @@ class PassiveInvoiceResource extends Resource
                     }),
                 SelectFilter::make('notes')
                     ->label('Note di credito')
+                    ->columnSpan(1)
                     ->placeholder('Includi')
                     ->options([
                         'no' => 'Escludi',
@@ -514,6 +525,7 @@ class PassiveInvoiceResource extends Resource
                     ->preload(),
                 SelectFilter::make('autos')
                     ->label('Autofatture')
+                    ->columnSpan(1)
                     ->placeholder('Includi')
                     ->options([
                         'no' => 'Escludi',
@@ -536,6 +548,39 @@ class PassiveInvoiceResource extends Resource
                     })
                     ->default('no')
                     ->preload(),
+                Filter::make('total_range')
+                    ->columnSpan(2)
+                    ->columns(2)
+                    ->form([
+                        TextInput::make('total_from')
+                            ->label('Totale da')
+                            ->extraInputAttributes(['class' => 'text-right'])
+                            ->columnSpan(1),
+                        TextInput::make('total_to')
+                            ->label('Totale a')
+                            ->extraInputAttributes(['class' => 'text-right'])
+                            ->columnSpan(1),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['total_from'])) {
+                            $query->where('total_doc', '>=', $data['total_from']);
+                        }
+                        if (! empty($data['total_to'])) {
+                            $query->where('total_doc', '<=', $data['total_to']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['total_from'] && $data['total_to']) {
+                            return "Importo da " . number_format($data['total_from'], 2, ',', '.') . " fino a " . number_format($data['total_to'], 2, ',', '.');
+                        }
+                        if ($data['total_from']) {
+                            return "Importo da " . number_format($data['total_from'], 2, ',', '.');
+                        }
+                        if ($data['total_to']) {
+                            return "Importo fino a " . number_format($data['total_to'], 2, ',', '.');
+                        }
+                        return null;
+                    }),
             ])
             ->persistFiltersInSession()
             ->actions([

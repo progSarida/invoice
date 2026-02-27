@@ -1045,7 +1045,7 @@ class AndxorSoapService
         return $passiveInvoice;
     }
 
-    private function getParentPassiveInvoice(array $collegate, $supplierId): PassiveInvoice
+    private function getParentPassiveInvoice(array $collegate, $supplierId): PassiveInvoice | null
     {
         return PassiveInvoice::where('supplier_id', $supplierId)->where('number', $collegate['IdDocumento'])->where('invoice_date', $collegate['Data'])->first();
     }
