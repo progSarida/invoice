@@ -224,7 +224,7 @@ class PassiveInvoiceResource extends Resource
                             ->columnSpan(2),
 
                             Forms\Components\FileUpload::make('xml_path')->label('File XML')
-                                ->required(fn ($record) => !$record?->xml_path)
+                                // ->required(fn ($record) => !$record?->xml_path)
                                 ->dehydrated(fn ($record) => !$record?->xml_path)
                                 // ->disk('public')
                                 ->directory('passive_invoices/xml_files')
