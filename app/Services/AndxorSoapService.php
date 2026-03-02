@@ -638,7 +638,7 @@ class AndxorSoapService
     {
         $input['Autenticazione'] = $this->getAutenticazione($invoice, $password);
         $input['ProgressivoInvio'] = $invoice->service_code ?? null;
-
+Log::info("Recupero stato sdi");
         $response = $this->client->Stato($input);
         // dd($response);
         // Log::info('Stato-----------------------------------------------------------------------------------------');
@@ -674,7 +674,7 @@ class AndxorSoapService
 
         //     }
         // }
-
+Log::info("Aggiornamento stato sdi");
         if($invoice->sdi_status != $newStatus && $invoice->sdi_status->updateStatus()){                     // modifico se è diverso da quello esistente
             // Aggiorna stato e data modifica stato della fattura                                           // e questo non è RIFIUTO_EMESSO, RIFIUTO_ARCHIVIATO, SCARTO_VALIDATO,
                                                                                                             // MANCATA_CONSEGNA_VALIDATA, AUTO_INVIATA, APERTA
@@ -683,7 +683,7 @@ class AndxorSoapService
                 'sdi_status' => $newStatus,
                 'sdi_date' => $date[0]
             ]);
-
+Log::info("Creaziione notitifca sdi");
             SdiNotification::create([
                     'invoice_id' => $invoice->id,
                     'code' => $invoice->sdi_code ?? null,
@@ -698,8 +698,9 @@ class AndxorSoapService
 
     public function updateStatusList($list, string $password)
     {
+Log::info('Inizio ciclo ' . '--------------------------------------------------------------------');
         foreach($list as $el){
-            // Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------------------------------------------------------');
+Log::info('Update fattura ' . $el->getNewInvoiceNumber());
             $response = $this->updateStatus($el, $password);
         }
 
