@@ -112,8 +112,6 @@ class EditNewInvoice extends EditRecord
                     $this->redirect(NewInvoiceResource::getUrl('edit', ['record' => $nextIDoc->id]));
                 }),
             Actions\ActionGroup::make([
-
-
                 Actions\Action::make('duplica_fattura')
                     ->authorize('create')
                     ->hidden(fn(Invoice $record) => !is_null($record->parent_id))

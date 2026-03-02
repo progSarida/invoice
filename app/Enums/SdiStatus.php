@@ -387,8 +387,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
     public function updateStatus(): bool
     {
         return match($this) {
-            self::EMPTY => true,
-            self::DA_INVIARE => true,
+            self::EMPTY => false,
+            self::DA_INVIARE => false,
             self::INVIATA => true,
             self::SCARTATA => true,
             self::CONSEGNATA => true,

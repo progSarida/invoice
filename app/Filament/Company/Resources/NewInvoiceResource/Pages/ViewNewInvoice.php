@@ -10,11 +10,14 @@ use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\DocType;
 use App\Models\Invoice;
 use App\Models\ReversalMotivationType;
+use App\Models\SdiRequest;
+use App\Services\AndxorSoapService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
@@ -168,6 +171,47 @@ class ViewNewInvoice extends ViewRecord
                             echo $pdf->output();
                         }, 'fattura-' . $record->printNumber() . '.pdf');
                     }),
+                Actions\Action::make('getStatus')
+                    ->label('Aggiorna stato SDI')
+                    ->icon('tabler-refresh')
+                    ->visible(fn($record) => $record->sdi_status->updateStatus() && $record->docType->name != 'TD00')
+                    ->action(function (Invoice $record, array $data) {
+                        $soapService = app(AndxorSoapService::class);
+                        try {
+                            $response = $soapService->updateStatus($record, $data['password']);
+
+                            SdiRequest::create([
+                                'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                                'request_date' => today()->format('Y-m-d'),
+                                'sdi_request_type' => 'single',
+                                'invoice_id' => $record->id
+                            ]);
+
+                            Notification::make()
+                                ->title('Stato fattura aggiornato con successo')
+                                // ->body('Progressivo: ' . $response->ProgressivoInvio)
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->disabled(function (Invoice $record) {
+                        // return $record->service_code != null;
+                        return $record->sdi_status->lockUpdate();
+                    })
+                    ->form([
+                        TextInput::make('password')
+                            ->label('Password SOAP')
+                            ->password()
+                            ->revealable()
+                            ->required(),
+                    ])
+                    ->requiresConfirmation(),
                 Actions\Action::make('manage_reject')
                     ->label('Gestisci rifiuto')
                     ->icon('fluentui-mail-dismiss-20-o')

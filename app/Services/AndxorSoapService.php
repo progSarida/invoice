@@ -637,10 +637,13 @@ class AndxorSoapService
     public function updateStatus(Invoice $invoice, string $password)
     {
         $input['Autenticazione'] = $this->getAutenticazione($invoice, $password);
-        $input['ProgressivoInvio'] = $invoice->service_code ?? null;
+        if($invoice->service_code)
+            $input['ProgressivoInvio'] = $invoice->service_code ?? null;
+        else
+            return null;
 Log::info("Recupero stato sdi");
         $response = $this->client->Stato($input);
-        // dd($response);
+Log::info("Risposta"); Log::info("Risposta ", (array) $response);        // dd($response);
         // Log::info('Stato-----------------------------------------------------------------------------------------');
         // Log::info('NomeFile : ' . ($response?->NomeFile ?? 'N\D'));
         // Log::info('Stato : ' . ($response?->Stato ?? 'N\D'));
@@ -660,7 +663,7 @@ Log::info("Recupero stato sdi");
         $date = explode("T", $response->DataOraCreazione);                                              // la data deve essere in base allo stato?
         // $date = explode("T", $this->getDate($response));
         $newStatus = $this->translateStatus($response->Stato);
-
+Log::info("Stato sdi: " . $newStatus);
         // $outcomes = ['rifiutata', 'accettata'];
         // if(1 == 1){
         // // if (in_array($newStatus, $outcomes)) {
@@ -674,16 +677,17 @@ Log::info("Recupero stato sdi");
 
         //     }
         // }
-Log::info("Aggiornamento stato sdi");
+
         if($invoice->sdi_status != $newStatus && $invoice->sdi_status->updateStatus()){                     // modifico se è diverso da quello esistente
             // Aggiorna stato e data modifica stato della fattura                                           // e questo non è RIFIUTO_EMESSO, RIFIUTO_ARCHIVIATO, SCARTO_VALIDATO,
                                                                                                             // MANCATA_CONSEGNA_VALIDATA, AUTO_INVIATA, APERTA
+Log::info("Aggiornamento stato sdi");
             $invoice->update([
                 'sdi_code' => $response?->IdSdI,
                 'sdi_status' => $newStatus,
                 'sdi_date' => $date[0]
             ]);
-Log::info("Creaziione notitifca sdi");
+Log::info("Creazione notitifca sdi");
             SdiNotification::create([
                     'invoice_id' => $invoice->id,
                     'code' => $invoice->sdi_code ?? null,
@@ -698,9 +702,9 @@ Log::info("Creaziione notitifca sdi");
 
     public function updateStatusList($list, string $password)
     {
-Log::info('Inizio ciclo ' . '--------------------------------------------------------------------');
+Log::info('Inizio ciclo ' . '====================================================================');
         foreach($list as $el){
-Log::info('Update fattura ' . $el->getNewInvoiceNumber());
+Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '-------------------------------------');
             $response = $this->updateStatus($el, $password);
         }
 
