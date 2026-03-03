@@ -78,7 +78,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::SCARTO_VALIDATO => 'SV - Scarto validato (mantenere in contabilità)',
             self::MANCATA_CONSEGNA_VALIDATA => 'MCV - Mancata consegna validata (mantenere in contabilità)',
             self::AUTO_INVIATA => 'Auto inviata',
-            self::APERTA => 'Fattura aperta'
+            self::APERTA => 'Fattura aperta',
+            default => ''
         };
     }
 
@@ -115,7 +116,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::SCARTO_VALIDATO => 'fluentui-drawer-dismiss-20',
             self::MANCATA_CONSEGNA_VALIDATA => '',
             self::AUTO_INVIATA => '',
-            self::APERTA => ''
+            self::APERTA => '',
+            default => ''
         };
     }
 
@@ -152,7 +154,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::SCARTO_VALIDATO => 'SV - Scarto validato (mantenere in contabilità)',
             self::MANCATA_CONSEGNA_VALIDATA => 'MCV - Mancata consegna validata (mantenere in contabilità)',
             self::AUTO_INVIATA => 'Auto inviata',
-            self::APERTA => 'Fattura aperta'
+            self::APERTA => 'Fattura aperta',
+            default => ''
         };
     }
 
@@ -189,7 +192,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::SCARTO_VALIDATO => 'gray',
             self::MANCATA_CONSEGNA_VALIDATA => 'gray',
             self::AUTO_INVIATA => 'gray',
-            self::APERTA => 'gray'
+            self::APERTA => 'gray',
+            default => ''
         };
     }
 
@@ -227,7 +231,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::SCARTO_VALIDATO => true,
             self::MANCATA_CONSEGNA_VALIDATA => true,
             self::AUTO_INVIATA => true,
-            self::APERTA => true
+            self::APERTA => true,
+            default => true
         };
     }
 
@@ -265,7 +270,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::SCARTO_VALIDATO => true,
             self::MANCATA_CONSEGNA_VALIDATA => true,
             self::AUTO_INVIATA => true,
-            self::APERTA => true
+            self::APERTA => true,
+            default => true
         };
     }
 
@@ -303,7 +309,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::SCARTO_VALIDATO => true,
             self::MANCATA_CONSEGNA_VALIDATA => true,
             self::AUTO_INVIATA => true,
-            self::APERTA => true
+            self::APERTA => true,
+            default => true
         };
     }
 
@@ -341,7 +348,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::SCARTO_VALIDATO => false,
             self::MANCATA_CONSEGNA_VALIDATA => false,
             self::AUTO_INVIATA => false,
-            self::APERTA => false
+            self::APERTA => false,
+            default => false
         };
     }
 
@@ -379,7 +387,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::SCARTO_VALIDATO => true,
             self::MANCATA_CONSEGNA_VALIDATA => false,
             self::AUTO_INVIATA => false,
-            self::APERTA => false
+            self::APERTA => false,
+            default => false
         };
     }
 
@@ -417,7 +426,8 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             self::SCARTO_VALIDATO => false,
             self::MANCATA_CONSEGNA_VALIDATA => false,
             self::AUTO_INVIATA => false,
-            self::APERTA => false
+            self::APERTA => false,
+            default => false
         };
     }
 }
