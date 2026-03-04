@@ -1339,7 +1339,7 @@ class NewInvoiceResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('client.denomination')->label('Cliente')
-                    ->numeric()
+                    // ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('invoice.id')->label('Fattura stornata')

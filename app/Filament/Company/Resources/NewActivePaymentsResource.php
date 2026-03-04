@@ -349,6 +349,14 @@ class NewActivePaymentsResource extends Resource
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('client')->label('Cliente')
+                    // ->numeric()
+                    ->sortable()
+                    ->getStateUsing(function ($record) {
+                        $client = $record->invoice->client;
+                        return $client->denomination;
+                    })
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('payment_date')
                     ->label('Data pagamento')
                     ->getStateUsing(function ($record) {
