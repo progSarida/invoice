@@ -1336,7 +1336,7 @@ class NewInvoiceResource extends Resource
                     ->limit(30)
                     ->tooltip(fn ($record) => $record->description)
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('invoice_date')->label('Data')
                     ->date('d/m/Y')
                     ->sortable()
