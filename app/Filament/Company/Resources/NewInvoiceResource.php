@@ -820,7 +820,7 @@ class NewInvoiceResource extends Resource
                                 )
                                 ->getOptionLabelFromRecordUsing(
                                     function (Model $record) {
-                                        $return = "Fattura n. {$record->getNewInvoiceNumber()}";
+                                        $return = "Fattura n. {$record->getNewInvoiceNumber()} del {$record->invoice_date->format('d/m/Y')}";
                                         if($record->client->type->isPublic())
                                             $return.= " - {$record->tax_type->getLabel()} {$record->contract->office_name} ({$record->contract->office_code}) - CIG: {$record->contract->cig_code}";
                                         $return.= "\nDestinatario: {$record->client->denomination}";
@@ -833,7 +833,7 @@ class NewInvoiceResource extends Resource
                                 ->searchable(),
 
                             // INSERIRE RIGA CON LIMITE TEMPORALE (SI/NO), MOTIVAZIONE (in tabella) (visibile SOLO se 'Nota di credito' e cliente 'Soggetto privato')
-                            Forms\Components\Select::make('year_limit')->label('Limite temporale')
+                            Forms\Components\Select::make('year_limit')->label('Limite temporale (1 anno)')
                                 ->required()
                                 ->visible(function (?Model $record, Get $get) {
                                     $parent = Invoice::find($get('parent_id'));
@@ -847,8 +847,8 @@ class NewInvoiceResource extends Resource
                                     return ($past && $note);
                                 })
                                 ->options([
-                                    'si' => 'Si',
-                                    'no' => 'No'
+                                    'si' => 'Soggetto',
+                                    'no' => 'Non soggetto'
                                 ])
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     $number = NewInvoiceResource::calculateNextInvoiceNumber($get);
