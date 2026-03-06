@@ -858,9 +858,9 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 ->searchable()
                                 ->preload()
-                                ->disabled(function (?Model $record) {
-                                    return $record && $record->client->type->isPublic() ? true : false;
-                                })
+                                // ->disabled(function (?Model $record) {
+                                //     return $record && $record->client->type->isPublic() ? true : false;
+                                // })
                                 ->columnSpan(function (?Model $record, $state) {
                                     return $state && $state == 'no' ? 2 : 6;
                                 }),
