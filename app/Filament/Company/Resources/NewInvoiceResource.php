@@ -1333,7 +1333,10 @@ class NewInvoiceResource extends Resource
                             ->orderBy('number', $direction);
                     }),
                 Tables\Columns\TextColumn::make('description')->label('Descrizione')
-                    ->searchable()->toggleable(isToggledHiddenByDefault: true),
+                    ->limit(30)
+                    ->tooltip(fn ($record) => $record->description)
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_date')->label('Data')
                     ->date('d/m/Y')
                     ->sortable()
