@@ -823,7 +823,7 @@ class NewInvoiceResource extends Resource
                                         $return = "Fattura n. {$record->getNewInvoiceNumber()} del {$record->invoice_date->format('d/m/Y')}";
                                         if($record->client->type->isPublic())
                                             $return.= " - {$record->tax_type->getLabel()} {$record->contract->office_name} ({$record->contract->office_code}) - CIG: {$record->contract->cig_code}";
-                                        $return.= "\nDestinatario: {$record->client->denomination}";
+                                        // $return.= "\nDestinatario: {$record->client->denomination}";
                                         return $return;
                                     }
                                 )
