@@ -112,6 +112,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => 'fluentui-presence-blocked-20-o',
             self::RIFIUTO_EMESSO => 'fluentui-document-dismiss-20-o',
+            self::RIFIUTO_NOTA => 'fluentui-mail-checkmark-20-o',
             self::RIFIUTO_ARCHIVIATO => 'fluentui-drawer-dismiss-20-o',
             self::SCARTO_VALIDATO => 'fluentui-drawer-dismiss-20',
             self::MANCATA_CONSEGNA_VALIDATA => '',
@@ -187,7 +188,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
             // self::RIFIUTO_VALIDATO => 'gray',
             self::RIFIUTO_EMESSO => 'gray',
-            self::RIFIUTO_NOTA => 'success',
+            self::RIFIUTO_NOTA => 'gray',
             self::RIFIUTO_ARCHIVIATO => 'gray',
             self::SCARTO_VALIDATO => 'gray',
             self::MANCATA_CONSEGNA_VALIDATA => 'gray',
