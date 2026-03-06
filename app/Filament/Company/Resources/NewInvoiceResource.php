@@ -1332,14 +1332,14 @@ class NewInvoiceResource extends Resource
                             ->orderBy('sectional_id', $direction)
                             ->orderBy('number', $direction);
                     }),
+                Tables\Columns\TextColumn::make('invoice_date')->label('Data')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('description')->label('Descrizione')
                     ->limit(30)
                     ->tooltip(fn ($record) => $record->description)
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('invoice_date')->label('Data')
-                    ->date('d/m/Y')
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('client.denomination')->label('Cliente')
                     // ->numeric()
