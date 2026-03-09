@@ -614,7 +614,7 @@ class ListNewInvoices extends ListRecords
 
     private function silentHide()                                                               // controllo fatture senza esito inviate da più di 3 giorni
     {
-        $silent = Invoice::where('flow', 'out')->whereIn('sdi_status', ['inviata', 'trasmessa_sdi'])->where('sdi_date', '<', Carbon::now()->subDays(3));
+        $silent = Invoice::where('flow', 'out')->whereIn('sdi_status', ['inviata', 'trasmessa_sdi', 'generata'])->where('sdi_date', '<', Carbon::now()->subDays(3));
 
         if ($silent->count() > 0) {                                                             // blocco per fatture senza esito inviate da più di 3 giorni
             Notification::make('silent_status')

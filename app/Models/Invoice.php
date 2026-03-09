@@ -264,14 +264,19 @@ class Invoice extends Model
     public function scopeNewInvoices($query)
     {
         $tenant = Filament::getTenant();
+        // Recuperiamo l'ID del tipo documento TD00
+        $td00Id = \Illuminate\Support\Facades\Cache::remember('doc_type_td00_id', 3600, function () {
+            return \App\Models\DocType::where('name', 'TD00')->first()?->id;
+        });
         return $query->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
-                    //  ->where('flow', 'out')
-                    //  ->whereNotNull('contract_id')
-                     ->orderByRaw("FIELD(sdi_status, 'rifiutata', 'scartata') DESC")
-                     ->orderBy('invoice_date', 'desc')
-                     ->orderBy('year', 'desc')
-                     ->orderBy('sectional_id', 'asc')
-                     ->orderBy('number', 'desc');
+                    ->orderByRaw("FIELD(sdi_status, 'scartata', 'rifiutata') DESC")                                 // mostro per prime le fatture rifiutate, poi quelle scartate
+                    ->when($td00Id, function ($query) use ($td00Id) {                                        //
+                        return $query->orderByRaw("doc_type_id = ? DESC", [$td00Id]);                               // poi mostro i preavvisi di fattura
+                    })                                                                                              //
+                    ->orderBy('invoice_date', 'desc')                                                               // poi ordino in base alla data
+                    ->orderBy('year', 'desc')                                                                       // all'anno
+                    ->orderBy('sectional_id', 'asc')                                                                // al sezionario
+                    ->orderBy('number', 'desc');                                                                    // al numero
     }
 
     // Aggiorna i totali (con e senza IVA della fattura) ad ogni inserimento di una voce

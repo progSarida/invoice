@@ -11,6 +11,7 @@ use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Sectional;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
 use App\Filament\Company\Resources\NewInvoiceResource;
@@ -512,7 +513,25 @@ Log::info('Commit');
             $this->getCancelFormAction(),
             $this->getResetFormAction(),
             $this->getDeleteFormAction()
-                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
+                // ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
+                ->visible(function (Invoice $record) {
+                    $toSend = $record->sdi_status == SdiStatus::DA_INVIARE;
+                    if ($record->art73) {
+                        $maxNumber = Invoice::where('invoice_date', $record->invoice_date)
+                            ->where('art_73', true)
+                            ->where('company_id', Filament::getTenant()->id)
+                            ->max('number');
+                        $last = $maxNumber == $record->number;
+                    }
+                    else if ($record->year && $record->sectional_id) {
+                        $maxNumber = Invoice::where('year', $record->year)
+                            ->where('sectional_id', $record->sectional_id)
+                            ->where('company_id', Filament::getTenant()->id)
+                            ->max('number');
+                        $last = $maxNumber == $record->number;
+                    }
+                    return $toSend && $last;
+                })
                 ->extraAttributes([
                     'class' => ' md:ml-auto md:w-auto ',
                 ]),
