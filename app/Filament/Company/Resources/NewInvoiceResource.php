@@ -1467,14 +1467,14 @@ class NewInvoiceResource extends Resource
                             $data['values'],
                             fn (Builder $query, $values): Builder => $query->whereNotIn('doc_type_id', $values)
                         );
-                    })
-                    // 3. Impostiamo il default (es: TD00)
-                    ->default(function () {
-                        $td00 = \App\Models\DocType::where('name', 'TD00')->first();
-
-                        // Per i filtri multipli, il default DEVE essere un array semplice di ID (stringhe)
-                        return $td00 ? [(string) $td00->id] : [];
                     }),
+                    // 3. Impostiamo il default (es: TD00)
+                    // ->default(function () {
+                    //     $td00 = \App\Models\DocType::where('name', 'TD00')->first();
+
+                    //     // Per i filtri multipli, il default DEVE essere un array semplice di ID (stringhe)
+                    //     return $td00 ? [(string) $td00->id] : [];
+                    // }),
                 Filter::make('number')
                     ->form([
                         TextInput::make('number')
@@ -2060,7 +2060,7 @@ class NewInvoiceResource extends Resource
 
                 $parent = Invoice::find($get('parent_id'));
                 if($parent){
-                    $description .= ' su ' . lcfirst($parent?->docType->description);
+                    $description .= ' di ' . lcfirst($parent?->docType->description);
                     $description .= ' n.ro ' . $parent?->getNewInvoiceNumber();
                     $description .= ' del ' . \Carbon\Carbon::parse($parent?->invoice_date)->format('d/m/Y');
 
