@@ -1461,20 +1461,20 @@ class NewInvoiceResource extends Resource
                             ->pluck('description', 'doc_types.id')
                             ->toArray();
                     })
-                    // 2. Modifichiamo la query per ESCLUDERE i selezionati
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                            $data['values'],
-                            fn (Builder $query, $values): Builder => $query->whereNotIn('doc_type_id', $values)
-                        );
-                    }),
-                    // 3. Impostiamo il default (es: TD00)
+                    // 2. Impostiamo il default (es: TD00)
                     // ->default(function () {
                     //     $td00 = \App\Models\DocType::where('name', 'TD00')->first();
 
                     //     // Per i filtri multipli, il default DEVE essere un array semplice di ID (stringhe)
                     //     return $td00 ? [(string) $td00->id] : [];
                     // }),
+                    // 3. Modifichiamo la query per ESCLUDERE i selezionati
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['values'],
+                            fn (Builder $query, $values): Builder => $query->whereNotIn('doc_type_id', $values)
+                        );
+                    }),
                 Filter::make('number')
                     ->form([
                         TextInput::make('number')
