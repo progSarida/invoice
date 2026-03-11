@@ -353,6 +353,12 @@ class Invoice extends Model
 Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"');
                 }
             }
+
+            if($invoice->number == 0){                                         // Se è preavviso
+                $invoice->update([
+                    'sdi_status' => SdiStatus::PREAVVISO,
+                ]);
+            }
         });
 
         static::updating(function ($invoice) {

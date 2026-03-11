@@ -524,6 +524,47 @@ Log::info('===== FINE AZIONE NOTA CREDITO =====');
                                 ->send();
                         }
                     }),
+
+                Actions\Action::make('converti_in_fattura')
+                    ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
+                    ->label('Converti in fattura')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('warning')
+                    ->visible(fn($record) => $record->docType->name == 'TD00')
+                    ->requiresConfirmation()
+                    ->modalHeading('Converti in Fattura')
+                    ->modalDescription('Vuoi convertire il preavviso di fattura in una fattura?')
+                    ->modalSubmitActionLabel('Converti')
+                    ->action(function (Invoice $record) {
+                        try {
+                            DB::beginTransaction();
+
+                            $record->doc_type_id = DocType::where('name', 'TD01')->first()->id;
+                            $record->number = $record->calculateNextInvoiceNumber();
+                            $record->invoice_date = today()->toDateString();
+                            $record->sdi_status = SdiStatus::DA_INVIARE;
+
+                            DB::commit();
+
+                            $record->save();                                                        // salvo la fattura (il boot method genererà automaticamente invoice_uid)
+
+                            Notification::make()
+                                ->title('Fattura convertita con successo')
+                                ->body('Nuova fattura creata con numero: ' . $record->getNewInvoiceNumber())
+                                ->success()
+                                ->send();
+
+                            // Reindirizza alla nuova fattura
+                            return redirect($this->getResource()::getUrl('edit', ['record' => $record]));
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore nella duplicazione')
+                                ->body('Si è verificato un errore: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
                 Actions\EditAction::make()
                     ->hidden(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE                                // posso modificare se non è stata inviata
                                             && $record->sdi_status != SdiStatus::RIFIUTATA                              // posso modificare se è stata rifiutata

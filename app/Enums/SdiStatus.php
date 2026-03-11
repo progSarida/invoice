@@ -45,6 +45,9 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
     CASE AUTO_INVIATA = "auto_inviata";
     CASE APERTA = "fattura_aperta";
 
+    // casi custom
+    CASE PREAVVISO = "preavviso";
+
     public function getLabel(): string
     {
         return match($this) {
