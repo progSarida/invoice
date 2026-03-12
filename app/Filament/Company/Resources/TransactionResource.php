@@ -24,7 +24,7 @@ class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
 
-    protected static ?string $navigationIcon = 'tabler-moneybag';
+    protected static ?string $navigationIcon = 'hugeicons-book-02';
 
     public static ?string $pluralModelLabel = 'Prima nota';
 
