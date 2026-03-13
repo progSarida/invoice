@@ -555,29 +555,81 @@ class PassiveInvoiceResource extends Resource
                         TextInput::make('total_from')
                             ->label('Totale da')
                             ->extraInputAttributes(['class' => 'text-right'])
+                            ->debounce(1000)
+                            ->afterStateUpdated(function ($state, $component) {
+                                if(str_contains($state, ',')){                                  // Se contiene una virgola
+                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                                }
+                                else {
+                                    $amount = $state ?? 0;
+                                }
+                                $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                                $number = str_replace(',', '.', $clean);
+                                $float = floatval($number);
+                                $formatted = number_format($float, 2, ',', '.');
+                                $component->state($formatted);
+                            })
                             ->columnSpan(1),
                         TextInput::make('total_to')
                             ->label('Totale a')
                             ->extraInputAttributes(['class' => 'text-right'])
+                            ->debounce(1000)
+                            ->afterStateUpdated(function ($state, $component) {
+                                if(str_contains($state, ',')){                                  // Se contiene una virgola
+                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                                }
+                                else {
+                                    $amount = $state ?? 0;
+                                }
+                                $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                                $number = str_replace(',', '.', $clean);
+                                $float = floatval($number);
+                                $formatted = number_format($float, 2, ',', '.');
+                                $component->state($formatted);
+                            })
                             ->columnSpan(1),
                     ])
                     ->query(function (Builder $query, array $data) {
+                        if(str_contains($data['total_from'], ',')){                                  // Se contiene una virgola
+                            $amount_from = str_replace(',', '.', str_replace('.', '', $data['total_from']));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount_from = $data['total_from'] ?? 0;
+                        }
+                        if(str_contains($data['total_to'], ',')){                                  // Se contiene una virgola
+                            $amount_to = str_replace(',', '.', str_replace('.', '', $data['total_to']));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount_to = $data['total_to'] ?? 0;
+                        }
                         if (! empty($data['total_from'])) {
-                            $query->where('total_doc', '>=', $data['total_from']);
+                            $query->where('total_doc', '>=', $amount_from);
                         }
                         if (! empty($data['total_to'])) {
-                            $query->where('total_doc', '<=', $data['total_to']);
+                            $query->where('total_doc', '<=', $amount_to);
                         }
                     })
                     ->indicateUsing(function (array $data): ?string {
+                        if(str_contains($data['total_from'], ',')){                                  // Se contiene una virgola
+                            $amount_from = str_replace(',', '.', str_replace('.', '', $data['total_from']));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount_from = $data['total_from'] ?? 0;
+                        }
+                        if(str_contains($data['total_to'], ',')){                                  // Se contiene una virgola
+                            $amount_to = str_replace(',', '.', str_replace('.', '', $data['total_to']));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount_to = $data['total_to'] ?? 0;
+                        }
                         if ($data['total_from'] && $data['total_to']) {
-                            return "Importo da " . number_format($data['total_from'], 2, ',', '.') . " fino a " . number_format($data['total_to'], 2, ',', '.');
+                            return "Importo da " . number_format($amount_from, 2, ',', '.') . " fino a " . number_format($amount_to, 2, ',', '.');
                         }
                         if ($data['total_from']) {
-                            return "Importo da " . number_format($data['total_from'], 2, ',', '.');
+                            return "Importo da " . number_format($amount_from, 2, ',', '.');
                         }
                         if ($data['total_to']) {
-                            return "Importo fino a " . number_format($data['total_to'], 2, ',', '.');
+                            return "Importo fino a " . number_format($amount_to, 2, ',', '.');
                         }
                         return null;
                     }),

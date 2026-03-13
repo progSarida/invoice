@@ -218,9 +218,16 @@ class NewContractResource extends Resource
                     ->columnSpan(3)
                     ->inputMode('decimal')
                     ->live(onBlur: true)
+                    ->debounce(2000)
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->afterStateUpdated(function ($state, $component) {
-                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                         if(str_contains($state, ',')){                                  // Se contiene una virgola, assumiamo che sia un separatore decimale e rimuoviamo eventuali punti usati come separatori delle migliaia
+                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount = $state ?? 0;
+                        }
+                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
                         $number = str_replace(',', '.', $clean);
                         $float = floatval($number);
                         $formatted = number_format($float, 2, ',', '.');
@@ -373,7 +380,7 @@ class NewContractResource extends Resource
                     ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->label('Importo')
+                    ->label('Capienza')
                     ->sortable()
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . " €"),
             ])
@@ -493,9 +500,23 @@ class NewContractResource extends Resource
     {
         return $form
             ->columns(12)
+            // ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('client_id')->label('Cliente')
-                    // ->relationship(name: 'client', titleAttribute: 'denomination')
+                    ->hintAction(
+                        Action::make('Nuovo')
+                            ->icon('ri-user-2-line')
+                            ->form(fn(Form $form) => ClientResource::modalForm($form))
+                            ->modalWidth('7xl')
+                            ->modalHeading('')
+                            ->action(fn (array $data, Client $client, Set $set) => NewContractResource::saveClient($data, $client, $set))
+                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Company\Resources\NewContractResource\Pages\EditNewContract)
+                    )
+                    ->relationship(
+                        name: 'client',
+                        titleAttribute: 'denomination',
+                        modifyQueryUsing: function (Builder $query, Forms\Components\Select $component) { $query->whereRaw('1 = 0'); }
+                    )
                     ->getSearchResultsUsing(function (string $search) {
                         // Rimuovi spazi multipli e trim
                         $search = trim(preg_replace('/\s+/', ' ', $search));
@@ -549,24 +570,16 @@ class NewContractResource extends Resource
                         return $record->denomination;
                     })
                     ->getOptionLabelFromRecordUsing(
-                        // fn (Model $record) => strtoupper("{$record->subtype->getLabel()}")." - $record->denomination"
+                        // fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
                         fn (Model $record) => $record->denomination
                     )
                     ->required()
                     ->searchable('denomination')
                     ->live()
-                    ->preload()
+                    // ->preload()
                     ->optionsLimit(5)
+                    // ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
                     ->columnSpan(5),
-                Forms\Components\Select::make('tax_types')
-                    ->label('Entrate')
-                    ->options(TaxType::class)
-                    ->multiple()
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    ->rules(['array', 'in:'.implode(',', collect(TaxType::cases())->pluck('value')->toArray())])
-                    ->columnSpan(3),
                 DatePicker::make('start_validity_date')
                     ->label('Inizio Validità')
                     ->extraInputAttributes(['class' => 'text-center'])
@@ -578,15 +591,76 @@ class NewContractResource extends Resource
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->date()
                     ->columnSpan(2),
-                Forms\Components\Select::make('accrual_types')
-                    ->label('Gestioni')
-                    ->options(AccrualType::pluck('name', 'id')->toArray())
+                Placeholder::make('second')
+                    ->label('')
+                    ->columnSpan(1),
+                Forms\Components\Toggle::make('closed')
+                    ->label('Contratto chiuso')
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->columnSpan(2),
+                Forms\Components\Select::make('tax_types')
+                    ->label('Entrate')
+                    ->options(TaxType::class)
                     ->multiple()
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->rules(['array', 'exists:accrual_types,id'])
-                    ->columnSpan(3),
+                    // ->rules(['array', 'in:'.implode(',', collect(TaxType::cases())->pluck('value')->toArray())])
+                    ->columnSpan(4),
+                Forms\Components\Select::make('accrual_types')
+                    ->label('Gestioni')
+                    ->multiple()
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->options(\App\Models\AccrualType::pluck('name', 'id'))
+                    ->formatStateUsing(function ($record) {
+                        if (!$record) return [];
+
+                        $raw = $record->getRawOriginal('accrual_types');                                        // bypasso il getter
+
+                        if (is_string($raw)) {
+                            $raw = json_decode($raw, true) ?: [];
+                        }
+
+                        return is_array($raw) ? array_map('intval', $raw) : [];
+                    })
+                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_map('intval', $state) : [])
+                    ->rules([
+                        'required',
+                        'array',
+                        'array.*' => Rule::in(
+                            \App\Models\AccrualType::pluck('id')->map('strval')->toArray()
+                        ),
+                    ])
+                    ->columnSpan(4),
+                Forms\Components\Select::make('manage_types')
+                    ->label('Servizi')
+                    ->multiple()
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->options(\App\Models\ManageType::pluck('name', 'id'))
+                    ->formatStateUsing(function ($record) {
+                        if (!$record) return [];
+
+                        $raw = $record->getRawOriginal('manage_types');                                        // bypasso il getter
+
+                        if (is_string($raw)) {
+                            $raw = json_decode($raw, true) ?: [];
+                        }
+
+                        return is_array($raw) ? array_map('intval', $raw) : [];
+                    })
+                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_map('intval', $state) : [])
+                    ->rules([
+                        'required',
+                        'array',
+                        'array.*' => Rule::in(
+                            \App\Models\ManageType::pluck('id')->map('strval')->toArray()
+                        ),
+                    ])
+                    ->columnSpan(4),
                 Forms\Components\Select::make('payment_type')
                     ->label('Remunerazione')
                     ->options(TenderPaymentType::class)
@@ -595,40 +669,76 @@ class NewContractResource extends Resource
                     ->preload()
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('amount')
+                    ->label('Capienza (iva esclusa)')
                     ->required()
-                    ->label('Importo')
                     ->columnSpan(3)
                     ->inputMode('decimal')
+                    ->live(onBlur: true)
+                    ->debounce(2000)
+                    ->extraInputAttributes(['class' => 'text-right'])
+                    ->afterStateUpdated(function ($state, $component) {
+                        if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount = $state ?? 0;
+                        }
+                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->suffix('€'),
-                Placeholder::make('')
-                    ->content('')
+                Forms\Components\Toggle::make('reinvoice')
+                    ->label('Rifatturazione spese postali')
+                    ->dehydrated(fn ($state) => filled($state))
                     ->columnSpan(3),
-                Forms\Components\TextInput::make('office_name')
-                    ->label('Nome ufficio')
-                    ->required()
-                    ->columnSpan(3),
-                Forms\Components\TextInput::make('office_code')
-                    ->label('Codice ufficio')
-                    ->required()
-                    ->columnSpan(3),
-                View::make('links.ipa-link')
-                    ->columnSpan(2),
-                Forms\Components\TextInput::make('cig_code')
-                    ->label('CIG')
-                    ->required()
-                    ->columnSpan(2),
-                Forms\Components\TextInput::make('cup_code')
-                    ->label('CUP')
-                    ->required()
-                    ->columnSpan(2),
                 Forms\Components\Select::make('invoicing_cycle')
                     ->label('Periodicità fatturazione')
                     ->options(InvoicingCicle::class)
                     ->required()
                     ->preload()
                     ->columnSpan(3),
+                Forms\Components\TextInput::make('office_name')
+                    ->label('Denominazione UO')
+                    ->required(fn (Get $get) => Client::find($get('client_id'))?->subtype->isPublic())
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('office_code')
+                    ->label('Codice Univoco')
+                    ->required()
+                    ->columnSpan(3),
+                View::make('links.ipa-link')
+                    ->columnSpan(2),
+                Forms\Components\TextInput::make('cig_code')
+                    ->label('CIG (Rif. contratto)')
+                    ->hintIcon('heroicon-o-information-circle', tooltip: "Il codice CIG deve essere univoco e di 10 caratteri. In caso di contratto senza CIG (solo con privati o con enti pubblici per il recupero delle spese postali) si deve inserire il dato preceduto da '#' e la procedura elude questo controllo.")
+                    ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function ($state){
+                        if (strpos($state, '#') === false && strlen($state) !== 10) {
+                                Notification::make()
+                                    ->title('Errore! Il codice CIG deve essere lungo 10 caratteri')
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+                            }
+                    })
+                    ->rules([
+                        fn (): \Closure => function (string $attribute, $value, \Closure $fail) {
+                            // Se non c'è il cancelletto e la lunghezza non è 15
+                            if (strpos($value, '#') === false && strlen($value) !== 10) {
+                                $fail("Il codice CIG deve essere lungo 10 caratteri");
+                            }
+                        },
+                    ])
+                    ->columnSpan(2),
+                Forms\Components\TextInput::make('cup_code')
+                    ->label('CUP')
+                    // ->required()
+                    ->columnSpan(2),
                 // Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
                 //     ->live()
                 //     ->disk('public')
@@ -652,7 +762,7 @@ class NewContractResource extends Resource
                 //     ->columnSpan(5),
                 Placeholder::make('')
                     ->content('')
-                    ->columnSpan(5),
+                    ->columnSpan(10),
                 Forms\Components\Actions::make([
                     Forms\Components\Actions\Action::make('view_new_contract_copy')
                         ->label('Contratto in vigore')

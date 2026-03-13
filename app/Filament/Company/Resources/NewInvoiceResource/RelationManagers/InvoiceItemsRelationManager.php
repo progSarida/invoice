@@ -100,6 +100,12 @@ class InvoiceItemsRelationManager extends RelationManager
                             ->debounce(3000)
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                 $unit_price = $get('unit_price');
+                                if(str_contains($unit_price, ',')){                                  // Se contiene una virgola
+                                    $unit_price = str_replace(',', '.', str_replace('.', '', $unit_price));                                          // rimuovo i punti e sostituisco la virgola
+                                }
+                                else {
+                                    $unit_price = $unit_price ?? 0;
+                                }
                                 if($state && $unit_price){
                                     if (!is_numeric($state) || !is_numeric($unit_price)) return;
                                     // Calcolo importo in base a quantità e prezzo unitario
@@ -125,7 +131,9 @@ class InvoiceItemsRelationManager extends RelationManager
                                     $set('vat_amount', 0);
                                     $set('total', 0);
                                 }
-                            }),
+                            })
+                            ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
                         Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
                             ->live(onBlur: true)
                             ->hintIcon('heroicon-o-information-circle', tooltip: 'L\'unità di misura deve essere lunga al massimo 10 caratteri (0-9, a-z, A-Z)')
@@ -145,10 +153,16 @@ class InvoiceItemsRelationManager extends RelationManager
                             ->debounce(3000)
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                 $quantity = $get('quantity');
-                                if($state && $quantity){
-                                    if (!is_numeric($state) || !is_numeric($quantity)) return;
+                                if(str_contains($state, ',')){                                  // Se contiene una virgola
+                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                                }
+                                else {
+                                    $amount = $state ?? 0;
+                                }
+                                if($amount && $quantity){
+                                    if (!is_numeric($amount) || !is_numeric($quantity)) return;
                                     // Calcolo importo in base a quantità e prezzo unitario
-                                    $unit_price = $state ?? 0;
+                                    $unit_price = $amount ?? 0;
                                     $amount = $quantity * $unit_price;
                                     $set('amount', $amount);
                                     // Calcolo importo IVA e totale quando amount cambia
@@ -170,7 +184,9 @@ class InvoiceItemsRelationManager extends RelationManager
                                     $set('vat_amount', 0);
                                     $set('total', 0);
                                 }
-                            }),
+                            })
+                            ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
                     ]),
 
                 Forms\Components\TextInput::make('amount')->label('Importo')
@@ -191,13 +207,20 @@ class InvoiceItemsRelationManager extends RelationManager
                             $vatCode = \App\Enums\VatCodeType::tryFrom($vatCode);
                         }
                         $rate = $vatCode?->getRate() / 100 ?? 0;
-                        $amount = $state ?? 0;
+                        if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount = $state ?? 0;
+                        }
                         $vatAmount = $amount * $rate;
                         $total = $amount + $vatAmount;
 
                         $set('vat_amount', number_format($vatAmount, 2, '.', ''));
                         $set('total', number_format($total, 2, '.', ''));
-                    }),
+                    })
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
                 Forms\Components\Select::make('vat_code_type')
                     ->label('Aliquota IVA')
                     ->required()
@@ -239,7 +262,9 @@ class InvoiceItemsRelationManager extends RelationManager
                     // ->numeric()
                     ->prefix('€')
                     ->columnSpan(8)
-                    ->default(0.00),
+                    ->default(0.00)
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
                 // Forms\Components\Toggle::make('is_with_vat')->label('Iva')
                 //     ->required(),
 

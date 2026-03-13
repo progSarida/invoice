@@ -60,6 +60,25 @@ class PassiveItemsRelationManager extends RelationManager
                             ->columnSpan(4)
                             ->live(onBlur: true)
                             ->numeric()
+                            ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                $amount = $get('unit_price');
+                                if(str_contains($state, ',')){                                  // Se contiene una virgola
+                                    $amount = str_replace(',', '.', str_replace('.', '', $amount));                                          // rimuovo i punti e sostituisco la virgola
+                                }
+                                else {
+                                    $amount = $state ?? 0;
+                                }
+                                if($amount && $state){
+                                    if (!is_numeric($amount) || !is_numeric($state)) return;
+                                    // Calcolo importo in base a quantità e prezzo unitario
+                                    $unit_price = $amount ?? 0;
+                                    $amount = $state * $unit_price;
+                                    $set('total_price', $amount);
+                                }
+                                else {
+                                    $set('total_price', 0);
+                                }
+                            })
                             // ->live(debounce: 500)
                             ->debounce(3000),
                         Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
@@ -76,13 +95,49 @@ class PassiveItemsRelationManager extends RelationManager
                             ->live(onBlur: true)
                             ->columnSpan(4)
                             // ->live(debounce: 500)
-                            ->debounce(3000),
+                            ->debounce(3000)
+                            ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                $quantity = $get('quantity');
+                                if(str_contains($state, ',')){                                  // Se contiene una virgola
+                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                                }
+                                else {
+                                    $amount = $state ?? 0;
+                                }
+                                if($amount && $quantity){
+                                    if (!is_numeric($amount) || !is_numeric($quantity)) return;
+                                    // Calcolo importo in base a quantità e prezzo unitario
+                                    $unit_price = $amount ?? 0;
+                                    $amount = $quantity * $unit_price;
+                                    $set('total_price', $amount);
+                                }
+                                else {
+                                    $set('total_price', 0);
+                                }
+                            })
+                            ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
                     ]),
                 Forms\Components\TextInput::make('total_price')
                     ->label('Totale')
                     ->required()
                     // ->numeric()
                     ->extraInputAttributes(['class' => 'text-right'])
+                    ->afterStateUpdated(function ($state, $component) {
+                        if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount = $state ?? 0;
+                        }
+                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->prefix('€')
                     ->columnSpan(4),
                 Forms\Components\TextInput::make('vat_rate')

@@ -174,6 +174,7 @@ class NewActivePaymentsResource extends Resource
                     ->label('Importo')
                     ->required()
                     ->live(onBlur: true)
+                    ->debounce(2000)
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->disabled(fn ($get) => !$get('invoice_id') || $get('validated'))
                     ->afterStateUpdated(function ($state, Get $get, $component) {
@@ -181,13 +182,20 @@ class NewActivePaymentsResource extends Resource
 
                         $invoice = Invoice::find($get('invoice_id'));
 
-                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
-                        $number = str_replace(',', '.', $clean);
-                        $float = floatval($number);
+                        if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount = $state ?? 0;
+                        }
 
-                        $newTotalPayment = $state + $invoice->total_payment;
-                        $compare = $invoice->client?->type?->value == 'public'
-                            ? $invoice->no_vat_total
+                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                            $number = str_replace(',', '.', $clean);
+                            $float = floatval($number);
+
+                            $newTotalPayment = $amount + $invoice->total_payment;
+                            $compare = $invoice->client?->type?->value == 'public'
+                                ? $invoice->no_vat_total
                             : $invoice->total;
 
                         $formatted = number_format($float, 2, ',', '.');

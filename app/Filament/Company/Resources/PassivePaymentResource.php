@@ -126,9 +126,16 @@ class PassivePaymentResource extends Resource
                     ->required()
                     ->disabled(fn ($get) => !$get('passive_invoice_id') || $get('validated'))
                     ->live(onBlur: true)
+                    ->debounce(2000)
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->afterStateUpdated(function ($state, $component) {
-                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount = $state ?? 0;
+                        }
+                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
                         $number = str_replace(',', '.', $clean);
                         $float = floatval($number);
                         $formatted = number_format($float, 2, ',', '.');

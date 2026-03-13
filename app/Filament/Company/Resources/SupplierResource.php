@@ -102,7 +102,21 @@ class SupplierResource extends Resource
                 TextInput::make('capital')
                     ->label('Capitale sociale')
                     ->visible(fn (Get $get) => !is_null($get('capital')))
+                    ->afterStateUpdated(function ($state, $component) {
+                        if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount = $state ?? 0;
+                        }
+                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->suffix('€')
                     ->columnSpan(1),
                 Placeholder::make('')
@@ -300,7 +314,21 @@ class SupplierResource extends Resource
                 TextInput::make('capital')
                     ->label('Capitale sociale')
                     ->visible(fn (Get $get) => !is_null($get('capital')))
+                    ->afterStateUpdated(function ($state, $component) {
+                        if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount = $state ?? 0;
+                        }
+                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->suffix('€')
                     ->columnSpan(1),
                 Placeholder::make('')

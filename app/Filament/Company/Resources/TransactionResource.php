@@ -134,8 +134,14 @@ class TransactionResource extends Resource
                     ->afterStateUpdated(function(callable $set, $state, $component){
                         $lastTransaction =Transaction::where('company_id', Filament::getTenant()->id)->orderBy('date', 'desc')->first();
                         $lastBalance = $lastTransaction ? $lastTransaction->progressive_balance : 0;
-                        $newBalance = $lastBalance + $state;
-                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount = $state ?? 0;
+                        }
+                        $newBalance = $lastBalance + $amount;
+                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
                         $number = str_replace(',', '.', $clean);
                         $float = floatval($number);
                         $formatted = number_format($float, 2, ',', '.');
@@ -155,8 +161,14 @@ class TransactionResource extends Resource
                     ->afterStateUpdated(function(callable $set, $state, $component){
                         $lastTransaction =Transaction::where('company_id', Filament::getTenant()->id)->orderBy('date', 'desc')->first();
                         $lastBalance = $lastTransaction ? $lastTransaction->progressive_balance : 0;
-                        $newBalance = $lastBalance - $state;
-                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        }
+                        else {
+                            $amount = $state ?? 0;
+                        }
+                        $newBalance = $lastBalance - $amount;
+                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
                         $number = str_replace(',', '.', $clean);
                         $float = floatval($number);
                         $formatted = number_format($float, 2, ',', '.');
