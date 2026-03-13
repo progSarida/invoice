@@ -30,6 +30,7 @@ class Invoice extends Model
         'client_id',
         'container_id',
         'contract_id',
+        'contract_detail_id',
         'parent_id',
         'reversal_group_type',
         'reversal_motivation_type_id',
@@ -312,7 +313,7 @@ class Invoice extends Model
     protected static function booted()
     {
         static::creating(function ($invoice) {
-            $invoice->contract_detail_id = $invoice->updatedContract()?->id; // Cristallizza nella fattura lo stato dei dettagli del contratto
+            // $invoice->contract_detail_id = $invoice->updatedContract()?->id; // Cristallizza nella fattura lo stato dei dettagli del contratto
             $invoice->flow = 'out';                                         // Indica che la fattura è in uscita (attiva)
             // $invoice->user_id = Auth::id();                                 // Registro l'utente che crea la fattura
         });

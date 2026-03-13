@@ -539,7 +539,7 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 ->preload()
                                 ->optionsLimit(5)
-                                ->columnSpan(6)
+                                ->columnSpan(4)
                                 ->visible(fn(Get $get): bool => filled($get('client_id')))
                                 ->hidden(function (?Model $record = null) {
                                     // In edit, usa il record
@@ -588,6 +588,41 @@ class NewInvoiceResource extends Resource
                                             }
                                         })
                                 ),
+
+                            Forms\Components\Select::make('contract_detail_id')
+                                ->label('Dettaglio Contratto')
+                                ->required()
+                                ->placeholder('Seleziona prima un contratto')
+                                // 1. Rende il campo dinamico in base allo stato del form
+                                ->options(function (Get $get) {
+                                    $contractId = $get('contract_id');
+
+                                    // Se non c'è un contratto selezionato, restituiamo un array vuoto
+                                    if (! $contractId) {
+                                        return [];
+                                    }
+
+                                    // Recuperiamo i dettagli associati al contratto selezionato
+                                    return \App\Models\ContractDetail::where('contract_id', $contractId)
+                                        ->orderBy('date', 'desc')
+                                        ->get()
+                                        ->mapWithKeys(function ($detail) {
+                                            // Definiamo l'etichetta (es: "Num. 123 del 01/01/2024 - Descrizione")
+                                            $date = $detail->date ? $detail->date->format('d/m/Y') : 'Data N/D';
+                                            $label = "{$detail->contract_type?->getLabel()} n. {$detail->number} del {$date}";
+
+                                            return [$detail->id => $label];
+                                        })
+                                        ->toArray();
+                                })
+                                // 2. Importante: permette al campo di ricaricarsi quando contract_id cambia
+                                ->live()
+                                // 3. Opzionale: disabilita il campo se il contratto non è ancora scelto
+                                ->disabled(fn (Get $get) => ! filled($get('contract_id')))
+                                // 4. Opzionale: se cambia il contratto padre, resettiamo questo campo
+                                ->afterStateUpdated(fn (Set $set) => $set('contract_detail_id', null))
+                                ->required()
+                                ->columnSpan(2),
                         ]),
 
                 // ]),
