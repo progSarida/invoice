@@ -253,8 +253,8 @@ class AndxorSoapService
         }
         return $invoice->contract ? array_filter([
             array_filter([
-                'IdDocumento' => $invoice->contract->lastDetail->number && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->contract->lastDetail->number) ? $invoice->contract->lastDetail->number : null,
-                'Data' => $invoice->contract->lastDetail->date ?? null,
+                'IdDocumento' => $invoice->contract?->lastDetail?->number && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->contract?->lastDetail?->number) ? $invoice->contract?->lastDetail?->number : null,
+                'Data' => $invoice->contract?->lastDetail?->date ?? null,
                 'CodiceCUP' => $invoice->contract?->cup_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract?->cup_code) ? $invoice->contract?->cup_code : null,
                 'CodiceCIG' => $cig && preg_match('/^[A-Za-z0-9]{1,15}$/', $cig) ? $cig : null,
             ], fn($value) => !is_null($value) && $value !== '')
@@ -404,7 +404,7 @@ class AndxorSoapService
             $payload['CessionarioCommittente'] = $this->getCessionarioCommittente($invoice);
             $payload['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento'] = $this->getDatiGeneraliDocumento($invoice, $withholdings, $funds);
             // $payload['FatturaElettronicaBody']['DatiGenerali']['DatiOrdineAcquisto'] = $this->getDatiOrdineAcquisto($invoice);
-            $payload['FatturaElettronicaBody']['DatiGenerali']['DatiContratto'] = $this->getDatiContratto($invoice);
+            $payload['FatturaElettronicaBody']['DatiGenerali']['DatiContratto'] = $this->getDatiContratto($invoice) == [] ? null : $this->getDatiContratto($invoice);
             $payload['FatturaElettronicaBody']['DatiGenerali']['DatiDDT'] = $this->getDatiDDT($invoice);
             $payload['FatturaElettronicaBody']['DatiBeniServizi'] = $this->getDatiBeniServizi($invoice);
             $payload['FatturaElettronicaBody']['DatiPagamento'] = $this->getDatiPagamento($invoice);
@@ -677,7 +677,13 @@ Log::info("Stato sdi: " . $newStatus);
 
         //     }
         // }
-
+//         $responseZIP = $this->client->DownloadZip($input);
+//         $reason = $this->getReason($responseZIP);
+// Log::info("Motivo: " . $reason);
+//         if($newStatus == 'rifiutata'){
+//             //
+//         }
+// dd('STOP');
         if($invoice->sdi_status != $newStatus && $invoice->sdi_status->updateStatus()){                     // modifico se è diverso da quello esistente
             // Aggiorna stato e data modifica stato della fattura                                           // e questo non è RIFIUTO_EMESSO, RIFIUTO_ARCHIVIATO, SCARTO_VALIDATO,
                                                                                                             // MANCATA_CONSEGNA_VALIDATA, AUTO_INVIATA, APERTA
@@ -698,6 +704,52 @@ Log::info("Creazione notitifca sdi");
         }
 
         return $response;
+    }
+
+    private function getReason($response): string
+    {
+        $zipContent = $response->Contenuto;
+        $zipName = $response->Nome;
+
+        // Salvo lo ZIP
+        $livewireDisk = config('livewire.temporary_file_upload.disk', 'local');
+        Storage::put('temp/' . $zipName, $zipContent);
+
+        // Estraggo i file dello ZIP
+        $zip = new ZipArchive;
+        $zipPath = Storage::path('temp/' . $zipName);
+
+        if ($zip->open($zipPath) === true) {
+            $extractPath = Storage::path('extracted/' . pathinfo($zipName, PATHINFO_FILENAME));
+
+            $zip->extractTo($extractPath);
+            $zip->close();
+
+            // Leggo i file estratti
+            $files = Storage::files('extracted/' . pathinfo($zipName, PATHINFO_FILENAME));
+
+            $done = false;
+            foreach ($files as $file) {
+                if(!$done && str_contains($file, 'NE')) {
+
+                    $content = Storage::get($file);
+                    // Processa il contenuto...
+                    $done = true;
+                    $xmlArray = $this->xmlToArray($content);
+dd($xmlArray, 'STOP');
+                    $outcome = $xmlArray['EsitoCommittente']['Esito'] ?? '';
+                    $reason = $xmlArray['EsitoCommittente']['Descrizione'] ?? '';
+dd($outcome, $reason, 'STOP');
+                    // Cleanup dei file estratti                    Storage::delete($files);
+                    return $reason;
+                }
+            }
+
+            // Cleanup
+            Storage::delete('temp/' . $zipName);
+        }
+
+        return 'Nessuna descrizione';
     }
 
     public function updateStatusList($list, string $password)

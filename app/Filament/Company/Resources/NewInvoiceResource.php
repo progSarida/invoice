@@ -589,8 +589,15 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\Select::make('contract_detail_id')
                                 ->label('Dettaglio Contratto')
-                                ->required()
+                                // ->required()
                                 ->placeholder('Seleziona prima un contratto')
+                                ->visible(fn(Get $get): bool => filled($get('client_id')))
+                                ->hidden(function (?Model $record = null) {
+                                    // In edit, usa il record
+                                    if ($record) { return !$record->contract_id; }
+                                    // In create, usa il valore del form
+                                    return false;
+                                })
                                 // 1. Rende il campo dinamico in base allo stato del form
                                 ->options(function (Get $get) {
                                     $contractId = $get('contract_id');
@@ -617,7 +624,6 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 // Opzionale: disabilita il campo se il contratto non è ancora scelto
                                 ->disabled(fn (Get $get) => ! filled($get('contract_id')))
-                                ->required()
                                 ->columnSpan(2),
                         ]),
 
@@ -1091,7 +1097,7 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\Select::make('accrual_type_id')
                                 ->label('Gestione')
-                                ->required(fn(callable $get) => $get('client_id') ? Client::find($get('client_id'))->type == ClientType::PUBLIC : true)
+                                // ->required(fn(callable $get) => $get('client_id') ? Client::find($get('client_id'))->type == ClientType::PUBLIC : true)
                                 ->options(function (callable $get) {
                                     $contractId = $get('contract_id');
                                     if (!$contractId) {
@@ -1112,7 +1118,7 @@ class NewInvoiceResource extends Resource
 
                             Forms\Components\Select::make('manage_type_id')
                                 ->label('Servizio')
-                                ->required(fn(callable $get) => $get('client_id') ? Client::find($get('client_id'))->type == ClientType::PUBLIC : true)
+                                // ->required(fn(callable $get) => $get('client_id') ? Client::find($get('client_id'))->type == ClientType::PUBLIC : true)
                                 // ->options(function () {
                                 //     return ManageType::orderBy('order')->pluck('name', 'id');
                                 // })

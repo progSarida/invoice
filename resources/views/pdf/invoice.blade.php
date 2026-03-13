@@ -65,6 +65,7 @@
             </tr>
         </thead>
         <tbody>
+            @if($invoice->contractDetail)
             <tr>
                 <td class="padding"></td>
                 @php
@@ -83,6 +84,7 @@
                 <td class="padding">---------------</td>
                 <td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td>
             </tr>
+            @endif
             @php
                 $items = $invoice->invoiceItems instanceof \Illuminate\Support\Collection
                     ? $invoice->invoiceItems->where('auto', false)
