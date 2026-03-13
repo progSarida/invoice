@@ -529,9 +529,7 @@ class NewInvoiceResource extends Resource
                                                     ])
                                                 ->send();
                                         }
-                                        // else {
-                                        //     static::updateDescription($get, $set, 'continue');
-                                        // }
+                                        $set('contract_detail_id', null);
                                     }
                                 })
                                 ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic())
@@ -615,12 +613,10 @@ class NewInvoiceResource extends Resource
                                         })
                                         ->toArray();
                                 })
-                                // 2. Importante: permette al campo di ricaricarsi quando contract_id cambia
+                                // Importante: permette al campo di ricaricarsi quando contract_id cambia
                                 ->live()
-                                // 3. Opzionale: disabilita il campo se il contratto non è ancora scelto
+                                // Opzionale: disabilita il campo se il contratto non è ancora scelto
                                 ->disabled(fn (Get $get) => ! filled($get('contract_id')))
-                                // 4. Opzionale: se cambia il contratto padre, resettiamo questo campo
-                                ->afterStateUpdated(fn (Set $set) => $set('contract_detail_id', null))
                                 ->required()
                                 ->columnSpan(2),
                         ]),
