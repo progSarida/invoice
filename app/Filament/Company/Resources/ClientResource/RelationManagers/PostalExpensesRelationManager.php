@@ -625,7 +625,7 @@ class PostalExpensesRelationManager extends RelationManager
     //         ]);
     // }
 
-    public static function form(Form $form): Form
+    public function form(Form $form): Form
     {
         // 1. Definiamo la subquery per trovare l'ultima data di dettaglio per ogni contratto
         // Lo facciamo fuori dalle closure principali per riutilizzarlo e per chiarezza
