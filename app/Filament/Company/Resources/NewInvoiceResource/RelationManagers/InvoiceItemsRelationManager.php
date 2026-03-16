@@ -3,7 +3,7 @@
 namespace App\Filament\Company\Resources\NewInvoiceResource\RelationManagers;
 
 use App\Enums\TransactionType;
-use App\Traits\HasNumberParsing;
+use App\Services\CurrencyService;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Get;
@@ -23,8 +23,6 @@ use Illuminate\Support\Facades\Auth;
 
 class InvoiceItemsRelationManager extends RelationManager
 {
-    use HasNumberParsing;
-
     protected static string $relationship = 'invoiceItems';
 
     protected static ?string $pluralModelLabel = 'Voci in fattura';
@@ -109,7 +107,7 @@ class InvoiceItemsRelationManager extends RelationManager
                                 // else {
                                 //     $unit_price = $unit_price ?? 0;
                                 // }
-                                $unit_price = static::parseNumber($get('unit_price'));
+                                $unit_price = CurrencyService::parseNumber($get('unit_price'));
                                 if($state && $unit_price){
                                     if (!is_numeric($state) || !is_numeric($unit_price)) return;
                                     // Calcolo importo in base a quantità e prezzo unitario
@@ -163,7 +161,7 @@ class InvoiceItemsRelationManager extends RelationManager
                                 // else {
                                 //     $amount = $state ?? 0;
                                 // }
-                                $amount = static::parseNumber($state);
+                                $amount = CurrencyService::parseNumber($state);
                                 if($amount && $quantity){
                                     if (!is_numeric($amount) || !is_numeric($quantity)) return;
                                     // Calcolo importo in base a quantità e prezzo unitario
@@ -190,8 +188,10 @@ class InvoiceItemsRelationManager extends RelationManager
                                     $set('total', number_format(0, 2, ',', '.'));
                                 }
                             })
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state)),
                     ]),
 
                 Forms\Components\TextInput::make('amount')->label('Importo')
@@ -219,15 +219,17 @@ class InvoiceItemsRelationManager extends RelationManager
                         // else {
                         //     $amount = $state ?? 0;
                         // }
-                        $amount = static::parseNumber($state);
+                        $amount = CurrencyService::parseNumber($state);
                         $vatAmount = $amount * $rate;
                         $total = $amount + $vatAmount;
 
                         $set('vat_amount', number_format($vatAmount, 2, ',', '.'));
                         $set('total', number_format($total, 2, ',', '.'));
                     })
+                    // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
+                    ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state)),
                 Forms\Components\Select::make('vat_code_type')
                     ->label('Aliquota IVA')
                     ->required()
@@ -249,7 +251,7 @@ class InvoiceItemsRelationManager extends RelationManager
                         $rate = $vatCode?->getRate() / 100 ?? 0;
                         // $rate = $state instanceof VatCodeType ?( $state->getRate() / 100) : (VatCodeType::tryFrom($state)?->getRate() / 100);
                         // $amount = $get('amount') ?? 0;
-                        $amount = static::parseNumber($get('amount'));
+                        $amount = CurrencyService::parseNumber($get('amount'));
                         $vatAmount = $amount * $rate;
                         $total = $amount + $vatAmount;
 
@@ -265,7 +267,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->columnSpan(4)
                     ->formatStateUsing(function (Get $get, Set $set) {
                         $rate = VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
-                        $amount = static::parseNumber($get('amount')) * $rate;
+                        $amount = CurrencyService::parseNumber($get('amount')) * $rate;
                         return number_format($amount, 2, ',', '.');
                     })
                     ->default(0.00),

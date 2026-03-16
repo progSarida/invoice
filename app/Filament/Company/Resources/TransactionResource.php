@@ -6,6 +6,7 @@ use App\Filament\Company\Resources\TransactionResource\Pages;
 use App\Filament\Company\Resources\TransactionResource\RelationManagers;
 use App\Models\Client;
 use App\Models\Transaction;
+use App\Services\CurrencyService;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -129,26 +130,41 @@ class TransactionResource extends Resource
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->disabled(fn(callable $get) => !$get('client_id'))
                     ->inputMode('decimal')
-                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->debounce('500ms')
+                    // ->afterStateUpdated(function(callable $set, $state, $component){
+                    //     $lastTransaction =Transaction::where('company_id', Filament::getTenant()->id)->orderBy('date', 'desc')->first();
+                    //     $lastBalance = $lastTransaction ? $lastTransaction->progressive_balance : 0;
+                    //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                    //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                    //     }
+                    //     else {
+                    //         $amount = $state ?? 0;
+                    //     }
+                    //     $newBalance = $lastBalance + $amount;
+                    //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                    //     $number = str_replace(',', '.', $clean);
+                    //     $float = floatval($number);
+                    //     $formatted = number_format($float, 2, ',', '.');
+                    //     $component->state($formatted);
+                    //     $set('progressive_balance', number_format($newBalance, 2, ',', '.'));
+                    // })
+                    // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->afterStateUpdated(function(callable $set, $state, $component){
-                        $lastTransaction =Transaction::where('company_id', Filament::getTenant()->id)->orderBy('date', 'desc')->first();
+                        $lastTransaction = Transaction::where('company_id', Filament::getTenant()->id)
+                            ->orderBy('date', 'desc')
+                            ->first();
                         $lastBalance = $lastTransaction ? $lastTransaction->progressive_balance : 0;
-                        if(str_contains($state, ',')){                                  // Se contiene una virgola
-                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                        }
-                        else {
-                            $amount = $state ?? 0;
-                        }
+                        
+                        $amount = CurrencyService::parseNumber($state);
                         $newBalance = $lastBalance + $amount;
-                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                        $number = str_replace(',', '.', $clean);
-                        $float = floatval($number);
-                        $formatted = number_format($float, 2, ',', '.');
+                        
+                        $formatted = number_format($amount, 2, ',', '.');
                         $component->state($formatted);
                         $set('progressive_balance', number_format($newBalance, 2, ',', '.'));
                     })
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                     ->suffix('€'),
                 TextInput::make('out_amount')->label('Uscita')
                     ->columnSpan(4)
@@ -156,26 +172,41 @@ class TransactionResource extends Resource
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->disabled(fn(callable $get) => !$get('supplier_id'))
                     ->inputMode('decimal')
-                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->debounce('500ms')
+                    // ->afterStateUpdated(function(callable $set, $state, $component){
+                    //     $lastTransaction =Transaction::where('company_id', Filament::getTenant()->id)->orderBy('date', 'desc')->first();
+                    //     $lastBalance = $lastTransaction ? $lastTransaction->progressive_balance : 0;
+                    //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                    //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                    //     }
+                    //     else {
+                    //         $amount = $state ?? 0;
+                    //     }
+                    //     $newBalance = $lastBalance - $amount;
+                    //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                    //     $number = str_replace(',', '.', $clean);
+                    //     $float = floatval($number);
+                    //     $formatted = number_format($float, 2, ',', '.');
+                    //     $component->state($formatted);
+                    //     $set('progressive_balance', number_format($newBalance, 2, ',', '.'));
+                    // })
+                    // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->afterStateUpdated(function(callable $set, $state, $component){
-                        $lastTransaction =Transaction::where('company_id', Filament::getTenant()->id)->orderBy('date', 'desc')->first();
+                        $lastTransaction = Transaction::where('company_id', Filament::getTenant()->id)
+                            ->orderBy('date', 'desc')
+                            ->first();
                         $lastBalance = $lastTransaction ? $lastTransaction->progressive_balance : 0;
-                        if(str_contains($state, ',')){                                  // Se contiene una virgola
-                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                        }
-                        else {
-                            $amount = $state ?? 0;
-                        }
-                        $newBalance = $lastBalance - $amount;
-                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                        $number = str_replace(',', '.', $clean);
-                        $float = floatval($number);
-                        $formatted = number_format($float, 2, ',', '.');
+                        
+                        $amount = CurrencyService::parseNumber($state);
+                        $newBalance = $lastBalance - $amount;  // sottrazione invece di addizione
+                        
+                        $formatted = number_format($amount, 2, ',', '.');
                         $component->state($formatted);
                         $set('progressive_balance', number_format($newBalance, 2, ',', '.'));
                     })
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                     ->suffix('€'),
                 TextInput::make('progressive_balance')->label('Saldo progressivo')
                     ->required()

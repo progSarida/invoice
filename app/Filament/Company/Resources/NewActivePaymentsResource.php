@@ -11,6 +11,7 @@ use App\Models\ActivePayments;
 use App\Models\Invoice;
 use App\Models\NewActivePayments;
 use App\Models\Sectional;
+use App\Services\CurrencyService;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Forms;
@@ -174,48 +175,67 @@ class NewActivePaymentsResource extends Resource
                     ->label('Importo')
                     ->required()
                     ->live(onBlur: true)
-                    ->debounce(2000)
+                    // ->debounce(2000)
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->disabled(fn ($get) => !$get('invoice_id') || $get('validated'))
+                    // ->afterStateUpdated(function ($state, Get $get, $component) {
+                    //     if (!$get('invoice_id')) return;
+                    //     $invoice = Invoice::find($get('invoice_id'));
+                    //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                    //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                    //     }
+                    //     else {
+                    //         $amount = $state ?? 0;
+                    //     }
+                    //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                    //     $number = str_replace(',', '.', $clean);
+                    //     $float = floatval($number);
+
+                    //     $newTotalPayment = $amount + $invoice->total_payment;
+                    //     $compare = $invoice->client?->type?->value == 'public'
+                    //                 ? $invoice->no_vat_total
+                    //                 : $invoice->total;
+                    //     $formatted = number_format($float, 2, ',', '.');
+                    //     $component->state($formatted);
+                    //     if($state != $compare){
+                    //         Notification::make()
+                    //             ->title("Attenzione! L'importo del pagamento è diverso dal totale della fattura " . $invoice->getNewInvoiceNumber())
+                    //             ->danger()
+                    //             ->duration(5000)
+                    //             // ->persistent()
+                    //             ->send();
+                    //     }
+                    //     if($newTotalPayment > ($compare - $invoice->total_notes)){
+                    //         Notification::make()
+                    //             ->title('Attenzione! Con questo inserimento il totale dei pagamenti della fattura ' . $invoice->getNewInvoiceNumber() . ' eccederebbe il dovuto.')
+                    //             ->danger()
+                    //             ->duration(6000)
+                    //             // ->persistent()
+                    //             ->send();
+                    //     }
+                    // })
                     ->afterStateUpdated(function ($state, Get $get, $component) {
                         if (!$get('invoice_id')) return;
-
                         $invoice = Invoice::find($get('invoice_id'));
-
-                        if(str_contains($state, ',')){                                  // Se contiene una virgola
-                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                        }
-                        else {
-                            $amount = $state ?? 0;
-                        }
-
-                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                            $number = str_replace(',', '.', $clean);
-                            $float = floatval($number);
-
-                            $newTotalPayment = $amount + $invoice->total_payment;
-                            $compare = $invoice->client?->type?->value == 'public'
-                                ? $invoice->no_vat_total
-                            : $invoice->total;
-
-                        $formatted = number_format($float, 2, ',', '.');
+                        $amount = CurrencyService::parseNumber($state);
+                        $formatted = number_format($amount, 2, ',', '.');
                         $component->state($formatted);
-
-                        if($state != $compare){
+                        $newTotalPayment = $amount + $invoice->total_payment;
+                        $compare = $invoice->client?->type?->value == 'public'
+                            ? $invoice->no_vat_total
+                            : $invoice->total;
+                        if($amount != $compare){
                             Notification::make()
                                 ->title("Attenzione! L'importo del pagamento è diverso dal totale della fattura " . $invoice->getNewInvoiceNumber())
                                 ->danger()
                                 ->duration(5000)
-                                // ->persistent()
                                 ->send();
                         }
-
                         if($newTotalPayment > ($compare - $invoice->total_notes)){
                             Notification::make()
                                 ->title('Attenzione! Con questo inserimento il totale dei pagamenti della fattura ' . $invoice->getNewInvoiceNumber() . ' eccederebbe il dovuto.')
                                 ->danger()
                                 ->duration(6000)
-                                // ->persistent()
                                 ->send();
                         }
                     })

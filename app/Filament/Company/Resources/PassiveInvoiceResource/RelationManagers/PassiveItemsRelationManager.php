@@ -4,6 +4,7 @@ namespace App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers
 
 use App\Enums\TransactionType;
 use App\Enums\VatCodeType;
+use App\Services\CurrencyService;
 use Filament\Forms;
 use Filament\Forms\Components\View;
 use Filament\Forms\Form;
@@ -60,19 +61,32 @@ class PassiveItemsRelationManager extends RelationManager
                             ->columnSpan(4)
                             ->live(onBlur: true)
                             ->numeric()
+                            // ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                            //     $amount = $get('unit_price');
+                            //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            //         $amount = str_replace(',', '.', str_replace('.', '', $amount));                                          // rimuovo i punti e sostituisco la virgola
+                            //     }
+                            //     else {
+                            //         $amount = $state ?? 0;
+                            //     }
+                            //     if($amount && $state){
+                            //         if (!is_numeric($amount) || !is_numeric($state)) return;
+                            //         // Calcolo importo in base a quantità e prezzo unitario
+                            //         $unit_price = $amount ?? 0;
+                            //         $amount = $state * $unit_price;
+                            //         $set('total_price', $amount);
+                            //     }
+                            //     else {
+                            //         $set('total_price', 0);
+                            //     }
+                            // })
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                                $amount = $get('unit_price');
-                                if(str_contains($state, ',')){                                  // Se contiene una virgola
-                                    $amount = str_replace(',', '.', str_replace('.', '', $amount));                                          // rimuovo i punti e sostituisco la virgola
-                                }
-                                else {
-                                    $amount = $state ?? 0;
-                                }
-                                if($amount && $state){
-                                    if (!is_numeric($amount) || !is_numeric($state)) return;
-                                    // Calcolo importo in base a quantità e prezzo unitario
-                                    $unit_price = $amount ?? 0;
-                                    $amount = $state * $unit_price;
+                                $unit_price = CurrencyService::parseNumber($get('unit_price'));
+                                $quantity = $state;
+                                
+                                if($unit_price && $quantity){
+                                    if (!is_numeric($quantity)) return;
+                                    $amount = $quantity * $unit_price;
                                     $set('total_price', $amount);
                                 }
                                 else {
@@ -80,7 +94,9 @@ class PassiveItemsRelationManager extends RelationManager
                                 }
                             })
                             // ->live(debounce: 500)
-                            ->debounce(3000),
+                            // ->debounce(3000),
+                            ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state)),
                         Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
                             ->live(onBlur: true)
                             ->hintIcon('heroicon-o-information-circle', tooltip: 'L\'unità di misura deve essere lunga al massimo 10 caratteri (0-9, a-z, A-Z)')
@@ -96,18 +112,33 @@ class PassiveItemsRelationManager extends RelationManager
                             ->columnSpan(4)
                             // ->live(debounce: 500)
                             ->debounce(3000)
+                            // ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                            //     $quantity = $get('quantity');
+                            //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                            //     }
+                            //     else {
+                            //         $amount = $state ?? 0;
+                            //     }
+                            //     if($amount && $quantity){
+                            //         if (!is_numeric($amount) || !is_numeric($quantity)) return;
+                            //         // Calcolo importo in base a quantità e prezzo unitario
+                            //         $unit_price = $amount ?? 0;
+                            //         $amount = $quantity * $unit_price;
+                            //         $set('total_price', $amount);
+                            //     }
+                            //     else {
+                            //         $set('total_price', 0);
+                            //     }
+                            // })
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                 $quantity = $get('quantity');
-                                if(str_contains($state, ',')){                                  // Se contiene una virgola
-                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                                }
-                                else {
-                                    $amount = $state ?? 0;
-                                }
-                                if($amount && $quantity){
-                                    if (!is_numeric($amount) || !is_numeric($quantity)) return;
-                                    // Calcolo importo in base a quantità e prezzo unitario
-                                    $unit_price = $amount ?? 0;
+                                $unit_price = CurrencyService::parseNumber($state);
+                                
+                                if($unit_price && $quantity){
+                                    if (!is_numeric($quantity)) return;
                                     $amount = $quantity * $unit_price;
                                     $set('total_price', $amount);
                                 }
@@ -116,7 +147,7 @@ class PassiveItemsRelationManager extends RelationManager
                                 }
                             })
                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                     ]),
                 Forms\Components\TextInput::make('total_price')
                     ->label('Totale')
@@ -124,20 +155,14 @@ class PassiveItemsRelationManager extends RelationManager
                     // ->numeric()
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->afterStateUpdated(function ($state, $component) {
-                        if(str_contains($state, ',')){                                  // Se contiene una virgola
-                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                        }
-                        else {
-                            $amount = $state ?? 0;
-                        }
-                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                        $number = str_replace(',', '.', $clean);
-                        $float = floatval($number);
+                        $float = CurrencyService::parseNumber($state);
                         $formatted = number_format($float, 2, ',', '.');
                         $component->state($formatted);
                     })
+                    // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                     ->prefix('€')
                     ->columnSpan(4),
                 Forms\Components\TextInput::make('vat_rate')

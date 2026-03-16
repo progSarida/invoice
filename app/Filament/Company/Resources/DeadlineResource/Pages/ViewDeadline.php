@@ -19,23 +19,63 @@ class ViewDeadline extends ViewRecord
         // Successivo per ID: semplicemente ID maggiore
         $nextIDeadline = Deadline::where('id', '>', $currentDeadline->id)->orderBy('id', 'asc')->first();
         // Precedente per date: data precedente O stessa data con ID minore
+        // $previousDDeadline = Deadline::where(function ($query) use ($currentDeadline) {
+        //         $query->where('date', '<', $currentDeadline->date)
+        //             ->orWhere(function ($q) use ($currentDeadline) {
+        //                 $q->where('date', '=', $currentDeadline->date)
+        //                 ->where('id', '<', $currentDeadline->id);
+        //             });
+        //     })
+        //     ->orderBy('date', 'desc')->orderBy('id', 'desc')->first();
         $previousDDeadline = Deadline::where(function ($query) use ($currentDeadline) {
+            if (is_null($currentDeadline->date)) {
+                // Se la data corrente è NULL, cerchiamo solo per ID tra gli altri NULL
+                $query->whereNull('date')
+                    ->where('id', '<', $currentDeadline->id);
+            } else {
+                // Data minore OPPURE è NULL (i null vengono prima delle date) 
+                // OPPURE stessa data con ID minore
                 $query->where('date', '<', $currentDeadline->date)
+                    ->orWhereNull('date')
                     ->orWhere(function ($q) use ($currentDeadline) {
                         $q->where('date', '=', $currentDeadline->date)
                         ->where('id', '<', $currentDeadline->id);
                     });
-            })
-            ->orderBy('date', 'desc')->orderBy('id', 'desc')->first();
+            }
+        })
+        ->orderBy('date', 'desc')
+        ->orderBy('id', 'desc')
+        ->first();
         // Successivo per date: data successiva O stessa data con ID maggiore
+        // $nextDDeadline = Deadline::where(function ($query) use ($currentDeadline) {
+        //         $query->where('date', '>', $currentDeadline->date)
+        //             ->orWhere(function ($q) use ($currentDeadline) {
+        //                 $q->where('date', '=', $currentDeadline->date)
+        //                 ->where('id', '>', $currentDeadline->id);
+        //             });
+        //     })
+        //     ->orderBy('date', 'asc')->orderBy('id', 'asc')->first();
         $nextDDeadline = Deadline::where(function ($query) use ($currentDeadline) {
+            if (is_null($currentDeadline->date)) {
+                // Se la data corrente è NULL, il successivo è o una data non null 
+                // o un null con ID maggiore
+                $query->whereNotNull('date')
+                    ->orWhere(function ($q) use ($currentDeadline) {
+                        $q->whereNull('date')
+                        ->where('id', '>', $currentDeadline->id);
+                    });
+            } else {
+                // Data maggiore OPPURE stessa data con ID maggiore
                 $query->where('date', '>', $currentDeadline->date)
                     ->orWhere(function ($q) use ($currentDeadline) {
                         $q->where('date', '=', $currentDeadline->date)
                         ->where('id', '>', $currentDeadline->id);
                     });
-            })
-            ->orderBy('date', 'asc')->orderBy('id', 'asc')->first();
+            }
+        })
+        ->orderBy('date', 'asc')
+        ->orderBy('id', 'asc')
+        ->first();
 
         return [
             Actions\Action::make('back')

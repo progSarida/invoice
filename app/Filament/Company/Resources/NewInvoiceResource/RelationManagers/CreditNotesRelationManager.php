@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\RelationManagers;
 
+use App\Services\CurrencyService;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
@@ -414,21 +415,28 @@ class CreditNotesRelationManager extends RelationManager
                                     ->displayFormat('d F Y')->columnSpan(1)->disabled(),
                                 Forms\Components\TextInput::make('total_payment')->label('Totale pagamenti')
                                     ->extraInputAttributes(['style' => 'text-align: right;'])
+                                    // ->afterStateUpdated(function ($state, $component) {
+                                    //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                                    //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                                    //     }
+                                    //     else {
+                                    //         $amount = $state ?? 0;
+                                    //     }
+                                    //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                                    //     $number = str_replace(',', '.', $clean);
+                                    //     $float = floatval($number);
+                                    //     $formatted = number_format($float, 2, ',', '.');
+                                    //     $component->state($formatted);
+                                    // })
+                                    // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                                    // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                                     ->afterStateUpdated(function ($state, $component) {
-                                        if(str_contains($state, ',')){                                  // Se contiene una virgola
-                                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                                        }
-                                        else {
-                                            $amount = $state ?? 0;
-                                        }
-                                        $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                                        $number = str_replace(',', '.', $clean);
-                                        $float = floatval($number);
+                                        $float = CurrencyService::parseNumber($state);
                                         $formatted = number_format($float, 2, ',', '.');
                                         $component->state($formatted);
                                     })
                                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                                    ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                                     ->numeric()->suffix('€')->columnSpan(1)->disabled(),
 
                             ])

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\State;
 use App\Enums\FundType;
 use App\Models\DocType;
+use App\Services\CurrencyService;
 use Filament\Forms\Form;
 use App\Enums\VatCodeType;
 use App\Enums\TaxRegimeType;
@@ -435,21 +436,28 @@ class EditCompanyProfile extends EditTenantProfile
                                             ->label('')
                                             ->suffix('€')
                                             ->disabled(fn ($get) => !$get('active'))
+                                            // ->afterStateUpdated(function ($state, $component) {
+                                            //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                                            //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                                            //     }
+                                            //     else {
+                                            //         $amount = $state ?? 0;
+                                            //     }
+                                            //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                                            //     $number = str_replace(',', '.', $clean);
+                                            //     $float = floatval($number);
+                                            //     $formatted = number_format($float, 2, ',', '.');
+                                            //     $component->state($formatted);
+                                            // })
+                                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                                            // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                                             ->afterStateUpdated(function ($state, $component) {
-                                                if(str_contains($state, ',')){                                  // Se contiene una virgola
-                                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                                                }
-                                                else {
-                                                    $amount = $state ?? 0;
-                                                }
-                                                $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                                                $number = str_replace(',', '.', $clean);
-                                                $float = floatval($number);
+                                                $float = CurrencyService::parseNumber($state);
                                                 $formatted = number_format($float, 2, ',', '.');
                                                 $component->state($formatted);
                                             })
                                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                                             ->dehydrated(true)
                                             ->default('77.47')
                                             ->columnSpan(3),
@@ -463,21 +471,28 @@ class EditCompanyProfile extends EditTenantProfile
                                             ->label('')
                                             ->suffix('€')
                                             ->disabled(fn ($get) => !$get('virtual_stamp'))
+                                            // ->afterStateUpdated(function ($state, $component) {
+                                            //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                                            //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                                            //     }
+                                            //     else {
+                                            //         $amount = $state ?? 0;
+                                            //     }
+                                            //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                                            //     $number = str_replace(',', '.', $clean);
+                                            //     $float = floatval($number);
+                                            //     $formatted = number_format($float, 2, ',', '.');
+                                            //     $component->state($formatted);
+                                            // })
+                                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                                            // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                                             ->afterStateUpdated(function ($state, $component) {
-                                                if(str_contains($state, ',')){                                  // Se contiene una virgola
-                                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                                                }
-                                                else {
-                                                    $amount = $state ?? 0;
-                                                }
-                                                $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                                                $number = str_replace(',', '.', $clean);
-                                                $float = floatval($number);
+                                                $float = CurrencyService::parseNumber($state);
                                                 $formatted = number_format($float, 2, ',', '.');
                                                 $component->state($formatted);
                                             })
                                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                                             ->dehydrated(true)
                                             ->default('2.00')
                                             ->columnSpan(3),

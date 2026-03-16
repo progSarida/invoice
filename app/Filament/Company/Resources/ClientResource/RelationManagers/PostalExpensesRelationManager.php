@@ -14,6 +14,7 @@ use App\Models\PassiveInvoice;
 use App\Models\PostalExpense;
 use App\Models\ShipmentType;
 use App\Models\Supplier;
+use App\Services\CurrencyService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -1183,24 +1184,34 @@ class PostalExpensesRelationManager extends RelationManager
                             ->suffix('€')
                             ->live(onBlur: true)
                             ->extraInputAttributes(['class' => 'text-right'])
+                            // ->afterStateUpdated(function (Set $set, $state, $component) {
+                            //     if ($state) {
+                            //         $set('amount_registration_date', now()->toDateString());
+                            //     }
+                            //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                            //     }
+                            //     else {
+                            //         $amount = $state ?? 0;
+                            //     }
+                            //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                            //     $number = str_replace(',', '.', $clean);
+                            //     $float = floatval($number);
+                            //     $formatted = number_format($float, 2, ',', '.');
+                            //     $component->state($formatted);
+                            // })
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                             ->afterStateUpdated(function (Set $set, $state, $component) {
                                 if ($state) {
                                     $set('amount_registration_date', now()->toDateString());
                                 }
-                                if(str_contains($state, ',')){                                  // Se contiene una virgola
-                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                                }
-                                else {
-                                    $amount = $state ?? 0;
-                                }
-                                $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                                $number = str_replace(',', '.', $clean);
-                                $float = floatval($number);
+                                $float = CurrencyService::parseNumber($state);
                                 $formatted = number_format($float, 2, ',', '.');
                                 $component->state($formatted);
                             })
                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state)),
 
                         Forms\Components\DatePicker::make('amount_registration_date')->label('Data registrazione importo')
                             ->extraInputAttributes(['class' => 'text-center'])
@@ -1429,21 +1440,28 @@ class PostalExpensesRelationManager extends RelationManager
                             // ->numeric()
                             ->live(onBlur: true)
                             ->extraInputAttributes(['class' => 'text-right'])
+                            // ->afterStateUpdated(function ($state, $component) {
+                            //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                            //     }
+                            //     else {
+                            //         $amount = $state ?? 0;
+                            //     }
+                            //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                            //     $number = str_replace(',', '.', $clean);
+                            //     $float = floatval($number);
+                            //     $formatted = number_format($float, 2, ',', '.');
+                            //     $component->state($formatted);
+                            // })
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                             ->afterStateUpdated(function ($state, $component) {
-                                if(str_contains($state, ',')){                                  // Se contiene una virgola
-                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                                }
-                                else {
-                                    $amount = $state ?? 0;
-                                }
-                                $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                                $number = str_replace(',', '.', $clean);
-                                $float = floatval($number);
+                                $float = CurrencyService::parseNumber($state);
                                 $formatted = number_format($float, 2, ',', '.');
                                 $component->state($formatted);
                             })
                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                             ->inputMode('decimal')
                             ->step(0.01)
                             ->suffix('€'),
@@ -1453,21 +1471,28 @@ class PostalExpensesRelationManager extends RelationManager
                             // ->numeric()
                             ->live(onBlur: true)
                             ->extraInputAttributes(['class' => 'text-right'])
+                            // ->afterStateUpdated(function ($state, $component) {
+                            //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                            //     }
+                            //     else {
+                            //         $amount = $state ?? 0;
+                            //     }
+                            //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                            //     $number = str_replace(',', '.', $clean);
+                            //     $float = floatval($number);
+                            //     $formatted = number_format($float, 2, ',', '.');
+                            //     $component->state($formatted);
+                            // })
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                             ->afterStateUpdated(function ($state, $component) {
-                                if(str_contains($state, ',')){                                  // Se contiene una virgola
-                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                                }
-                                else {
-                                    $amount = $state ?? 0;
-                                }
-                                $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                                $number = str_replace(',', '.', $clean);
-                                $float = floatval($number);
+                                $float = CurrencyService::parseNumber($state);
                                 $formatted = number_format($float, 2, ',', '.');
                                 $component->state($formatted);
                             })
                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                             ->inputMode('decimal')
                             ->step(0.01)
                             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
@@ -1527,21 +1552,28 @@ class PostalExpensesRelationManager extends RelationManager
                             // ->numeric()
                             ->live(onBlur: true)
                             ->extraInputAttributes(['class' => 'text-right'])
+                            // ->afterStateUpdated(function ($state, $component) {
+                            //     if(str_contains($state, ',')){                                  // Se contiene una virgola
+                            //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                            //     }
+                            //     else {
+                            //         $amount = $state ?? 0;
+                            //     }
+                            //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
+                            //     $number = str_replace(',', '.', $clean);
+                            //     $float = floatval($number);
+                            //     $formatted = number_format($float, 2, ',', '.');
+                            //     $component->state($formatted);
+                            // })
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                             ->afterStateUpdated(function ($state, $component) {
-                                if(str_contains($state, ',')){                                  // Se contiene una virgola
-                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                                }
-                                else {
-                                    $amount = $state ?? 0;
-                                }
-                                $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                                $number = str_replace(',', '.', $clean);
-                                $float = floatval($number);
+                                $float = CurrencyService::parseNumber($state);
                                 $formatted = number_format($float, 2, ',', '.');
                                 $component->state($formatted);
                             })
                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                            ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                             ->inputMode('decimal')
                             ->step(0.01)
                             ->suffix('€'),
