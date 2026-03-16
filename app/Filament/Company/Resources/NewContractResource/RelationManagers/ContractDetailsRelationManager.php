@@ -24,7 +24,7 @@ class ContractDetailsRelationManager extends RelationManager
 {
     protected static string $relationship = 'contractDetails';
 
-    protected static ?string $title = 'Storico contratto';
+    protected static ?string $title = 'Dettagli/storico contratto';
 
     public function form(Form $form): Form
     {

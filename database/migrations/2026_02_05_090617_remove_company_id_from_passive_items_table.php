@@ -28,10 +28,10 @@ return new class extends Migration
     {
         Schema::table('passive_items', function (Blueprint $blueprint) {
             // In caso di rollback, riaggiungiamo la colonna e la relazione
-            $blueprint->foreignId('company_id')
-                ->constrained('companies')
-                ->onUpdate('cascade')
-                ->onDelete('cascade'); // o 'restrict' a seconda della tua logica originale
+            // $blueprint->foreignId('company_id')
+            //     ->constrained('companies')
+            //     ->onUpdate('cascade')
+            //     ->onDelete('cascade'); // o 'restrict' a seconda della tua logica originale
         });
     }
 };

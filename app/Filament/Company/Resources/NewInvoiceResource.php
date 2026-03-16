@@ -1079,7 +1079,7 @@ class NewInvoiceResource extends Resource
                                 ->numeric()
                                 ->required()
                                 ->extraInputAttributes(['class' => 'text-right'])
-                                ->minValue(now()->subYears(10)->year)
+                                ->minValue(now()->subYears(11)->year)
                                 ->maxValue(now()->year)
                                 ->default(now()->year)
                                 ->rules(['digits:4'])
@@ -1089,7 +1089,7 @@ class NewInvoiceResource extends Resource
                                 ->numeric()
                                 ->required()
                                 ->extraInputAttributes(['class' => 'text-right'])
-                                ->minValue(now()->subYears(10)->year)
+                                ->minValue(now()->subYears(11)->year)
                                 ->maxValue(now()->year)
                                 ->default(now()->year)
                                 ->rules(['digits:4'])
@@ -2122,7 +2122,7 @@ class NewInvoiceResource extends Resource
                     $set('total_number', '');
                 }
 
-                $contractDescription = NewContract::find($get('contract_id'))?->lastDetail->invoice_description;
+                $contractDescription = NewContract::find($get('contract_id'))?->lastDetail?->invoice_description ?? '';
 
                 $description = '(ab' . $year .') ' . $contractDescription . ' ';
 
