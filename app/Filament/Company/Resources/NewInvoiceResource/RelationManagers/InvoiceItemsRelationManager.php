@@ -3,6 +3,7 @@
 namespace App\Filament\Company\Resources\NewInvoiceResource\RelationManagers;
 
 use App\Enums\TransactionType;
+use App\Traits\HasNumberParsing;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Get;
@@ -22,6 +23,8 @@ use Illuminate\Support\Facades\Auth;
 
 class InvoiceItemsRelationManager extends RelationManager
 {
+    use HasNumberParsing;
+
     protected static string $relationship = 'invoiceItems';
 
     protected static ?string $pluralModelLabel = 'Voci in fattura';
@@ -97,15 +100,16 @@ class InvoiceItemsRelationManager extends RelationManager
                             ->required(fn(Get $get) => $get('measure_unit') || $get('unit_price'))
                             ->numeric()
                             // ->live(debounce: 500)
-                            ->debounce(3000)
+                            // ->debounce(3000)
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                                $unit_price = $get('unit_price');
-                                if(str_contains($unit_price, ',')){                                  // Se contiene una virgola
-                                    $unit_price = str_replace(',', '.', str_replace('.', '', $unit_price));                                          // rimuovo i punti e sostituisco la virgola
-                                }
-                                else {
-                                    $unit_price = $unit_price ?? 0;
-                                }
+                                // $unit_price = $get('unit_price');
+                                // if(str_contains($unit_price, ',')){                                  // Se contiene una virgola
+                                //     $unit_price = str_replace(',', '.', str_replace('.', '', $unit_price));                                          // rimuovo i punti e sostituisco la virgola
+                                // }
+                                // else {
+                                //     $unit_price = $unit_price ?? 0;
+                                // }
+                                $unit_price = static::parseNumber($get('unit_price'));
                                 if($state && $unit_price){
                                     if (!is_numeric($state) || !is_numeric($unit_price)) return;
                                     // Calcolo importo in base a quantità e prezzo unitario
@@ -123,13 +127,13 @@ class InvoiceItemsRelationManager extends RelationManager
                                     $vatAmount = $amount * $rate;
                                     $total = $amount + $vatAmount;
 
-                                    $set('vat_amount', number_format($vatAmount, 2, '.', ''));
-                                    $set('total', number_format($total, 2, '.', ''));
+                                    $set('vat_amount', number_format($vatAmount, 2, ',', '.'));
+                                    $set('total', number_format($total, 2, ',', '.'));
                                 }
                                 else {
-                                    $set('amount', 0);
-                                    $set('vat_amount', 0);
-                                    $set('total', 0);
+                                    $set('amount', number_format(0, 2, ',', '.'));
+                                    $set('vat_amount', number_format(0, 2, ',', '.'));
+                                    $set('total', number_format(0, 2, ',', '.'));
                                 }
                             })
                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
@@ -150,15 +154,16 @@ class InvoiceItemsRelationManager extends RelationManager
                             ->required(fn(Get $get) => $get('quantity') || $get('measure_unit'))
                             ->columnSpan(4)
                             // ->live(debounce: 500)
-                            ->debounce(3000)
+                            // ->debounce(3000)
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                 $quantity = $get('quantity');
-                                if(str_contains($state, ',')){                                  // Se contiene una virgola
-                                    $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                                }
-                                else {
-                                    $amount = $state ?? 0;
-                                }
+                                // if(str_contains($state, ',')){                                  // Se contiene una virgola
+                                //     $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                                // }
+                                // else {
+                                //     $amount = $state ?? 0;
+                                // }
+                                $amount = static::parseNumber($state);
                                 if($amount && $quantity){
                                     if (!is_numeric($amount) || !is_numeric($quantity)) return;
                                     // Calcolo importo in base a quantità e prezzo unitario
@@ -176,13 +181,13 @@ class InvoiceItemsRelationManager extends RelationManager
                                     $vatAmount = $amount * $rate;
                                     $total = $amount + $vatAmount;
 
-                                    $set('vat_amount', number_format($vatAmount, 2, '.', ''));
-                                    $set('total', number_format($total, 2, '.', ''));
+                                    $set('vat_amount', number_format($vatAmount, 2, ',', '.'));
+                                    $set('total', number_format($total, 2, ',', '.'));
                                 }
                                 else {
-                                    $set('amount', 0);
-                                    $set('vat_amount', 0);
-                                    $set('total', 0);
+                                     $set('amount', number_format(0, 2, ',', '.'));
+                                    $set('vat_amount', number_format(0, 2, ',', '.'));
+                                    $set('total', number_format(0, 2, ',', '.'));
                                 }
                             })
                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
@@ -196,28 +201,30 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->prefix('€')
                     ->maxLength(255)
                     // ->live(debounce: 500)
-                    ->debounce(3000)
+                    // ->debounce(3000)
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        if (!is_numeric($state)) return;
+                        // if (!is_numeric($state)) return;
                         // Calcolo importo IVA e totale quando amount cambia
                         // $rate = $get('vat_code_type')?->getRate() / 100 ?? 0;
                         // $rate = \App\Enums\VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
+
                         $vatCode = $get('vat_code_type');
                         if (!$vatCode instanceof \App\Enums\VatCodeType) {
                             $vatCode = \App\Enums\VatCodeType::tryFrom($vatCode);
                         }
                         $rate = $vatCode?->getRate() / 100 ?? 0;
-                        if(str_contains($state, ',')){                                  // Se contiene una virgola
-                            $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                        }
-                        else {
-                            $amount = $state ?? 0;
-                        }
+                        // if(str_contains($state, ',')){                                  // Se contiene una virgola
+                        //     $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
+                        // }
+                        // else {
+                        //     $amount = $state ?? 0;
+                        // }
+                        $amount = static::parseNumber($state);
                         $vatAmount = $amount * $rate;
                         $total = $amount + $vatAmount;
 
-                        $set('vat_amount', number_format($vatAmount, 2, '.', ''));
-                        $set('total', number_format($total, 2, '.', ''));
+                        $set('vat_amount', number_format($vatAmount, 2, ',', '.'));
+                        $set('total', number_format($total, 2, ',', '.'));
                     })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
@@ -235,13 +242,19 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->searchable()->live()
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
                         // $rate = $state ? VatCodeType::tryFrom($state)?->getRate() / 100 : 0;
-                        $rate = $state instanceof VatCodeType ? $state->getRate() / 100 : 0;
-                        $amount = $get('amount') ?? 0;
+                        $vatCode = $state;
+                        if (!$vatCode instanceof \App\Enums\VatCodeType) {
+                            $vatCode = \App\Enums\VatCodeType::tryFrom($vatCode);
+                        }
+                        $rate = $vatCode?->getRate() / 100 ?? 0;
+                        // $rate = $state instanceof VatCodeType ?( $state->getRate() / 100) : (VatCodeType::tryFrom($state)?->getRate() / 100);
+                        // $amount = $get('amount') ?? 0;
+                        $amount = static::parseNumber($get('amount'));
                         $vatAmount = $amount * $rate;
                         $total = $amount + $vatAmount;
 
-                        $set('vat_amount', number_format($vatAmount, 2, '.', ''));
-                        $set('total', number_format($total, 2, '.', ''));
+                        $set('vat_amount', number_format($vatAmount, 2, ',', '.'));
+                        $set('total', number_format($total, 2, ',', '.'));
                     })
                     ->preload(),
                 Forms\Components\TextInput::make('vat_amount')
@@ -252,8 +265,8 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->columnSpan(4)
                     ->formatStateUsing(function (Get $get, Set $set) {
                         $rate = VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
-                        $amount = $get('amount') * $rate;
-                        return number_format($amount, 2, '.', '');
+                        $amount = static::parseNumber($get('amount')) * $rate;
+                        return number_format($amount, 2, ',', '.');
                     })
                     ->default(0.00),
                 Forms\Components\TextInput::make('total')
@@ -373,7 +386,7 @@ class InvoiceItemsRelationManager extends RelationManager
                                     ->disabled()
                                     ->prefix('€')
                                     // ->live(debounce: 500)
-                                    ->debounce(3000)
+                                    // ->debounce(3000)
                                     ->columnSpan(2),
                                 Forms\Components\DatePicker::make('date')
                                     ->label('Data')
