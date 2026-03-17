@@ -434,4 +434,43 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
             default => false
         };
     }
+
+    // Codice in nome file ricevuta SDI
+    public function sdiReceiptCode(): string
+    {
+        return match($this) {
+            self::EMPTY => '',
+            self::DA_INVIARE => '',
+            self::INVIATA => '',
+            self::SCARTATA => '_NS_',
+            self::CONSEGNATA => '_RC_',
+            self::MANCATA_CONSEGNA => '_MC_',
+            self::ACCETTATA => '_NE_',
+            self::RIFIUTATA => '_NE_',
+            self::DECORRENZA_TERMINI => '_DT_',
+            self::AVVENUTA_TRASMISSIONE => '',
+            self::METADATA => '',
+
+            self::EMESSA => '',
+            self::IN_ELABORAZIONE => '',
+
+            self::GENERATA => '',
+            self::TRASMESSA_SDI => '',
+            self::NON_CONSEGNATA => '_MC_',
+            self::NON_RECAPITABILE => '_AT_',
+            self::NEL_CASSETTO => '',
+            self::RIELABORATA => '',
+            self::IMPORTATA => '_NE_',                                              // per test, da riportare a '' in produzione
+
+            // self::RIFIUTO_VALIDATO => 'gray',
+            self::RIFIUTO_EMESSO => '',
+            self::RIFIUTO_NOTA => '',
+            self::RIFIUTO_ARCHIVIATO => '',
+            self::SCARTO_VALIDATO => '',
+            self::MANCATA_CONSEGNA_VALIDATA => '',
+            self::AUTO_INVIATA => '',
+            self::APERTA => '',
+            default => ''
+        };
+    }
 }

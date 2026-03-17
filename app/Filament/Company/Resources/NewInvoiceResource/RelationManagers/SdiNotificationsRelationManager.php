@@ -49,6 +49,9 @@ class SdiNotificationsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('code')->label('Codice'),
                 Tables\Columns\TextColumn::make('date')->label('Data')
                     ->date('d F Y'),
+                Tables\Columns\TextColumn::make('description')->label('Info')
+                    ->limit(50)
+                    ->tooltip(fn ($record): string => $record->description ? $record->description : ''),
             ])
             ->defaultSort('id', 'desc')
             ->filters([

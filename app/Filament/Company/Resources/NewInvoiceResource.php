@@ -112,9 +112,9 @@ class NewInvoiceResource extends Resource
                                 else{
                                     $clientId = $get('client_id');
                                     if ($clientId) {
-                                        $client = \App\Models\Client::find($clientId);
+                                        $client = Client::find($clientId);
                                         if ($client && $client->type) {
-                                            $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
+                                            $sectional = Sectional::where('company_id', Filament::getTenant()->id)
                                                 ->where('client_type', $client->type->value)
                                                 ->first();
                                             if ($sectional) {
@@ -246,9 +246,9 @@ class NewInvoiceResource extends Resource
                                     $clientId = $get('client_id');
                                     $art73 = $get('art_73');
                                     if ($clientId && !$art73) {
-                                        $client = \App\Models\Client::find($clientId);
+                                        $client = Client::find($clientId);
                                         if ($client && $client->type) {
-                                            $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
+                                            $sectional = Sectional::where('company_id', Filament::getTenant()->id)
                                                 ->where('client_type', $client->type->value)
                                                 ->first();
                                             if ($sectional) {
@@ -285,7 +285,7 @@ class NewInvoiceResource extends Resource
                                     }
 
                                     // Recupera i contratti del cliente
-                                    $contracts = \App\Models\NewContract::where('client_id', $clientId)
+                                    $contracts = NewContract::where('client_id', $clientId)
                                                     ->where('closed', false)->get();
 
                                     if(count($contracts) == 0) return [];
@@ -405,7 +405,7 @@ class NewInvoiceResource extends Resource
                                     $search = trim(preg_replace('/\s+/', ' ', $search));
 
                                     // 2. Query di base e JOIN (Replicata da modifyQueryUsing)
-                                    $query = \App\Models\NewContract::query();
+                                    $query = NewContract::query();
 
                                     // *** MODIFICA CHIAVE ***: Usiamo la subquery per ottenere SOLO l'ultima data
                                     $query->leftJoinSub($latestDetailSubquery, 'latest_details', function (JoinClause $join) {
@@ -496,7 +496,7 @@ class NewInvoiceResource extends Resource
 
                                             if (is_array($manageIds) && count($manageIds) > 0) {
                                                 $manages = collect($manageIds)
-                                                    ->map(fn($id) => \App\Models\ManageType::find($id)?->name ?? "ID: {$id}")
+                                                    ->map(fn($id) => ManageType::find($id)?->name ?? "ID: {$id}")
                                                     ->filter()
                                                     ->implode(', ');
                                             }
@@ -547,7 +547,7 @@ class NewInvoiceResource extends Resource
                                 })
                                 ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                     if ($state) {
-                                        $contract = \App\Models\NewContract::find($state);
+                                        $contract = NewContract::find($state);
                                         // $set('accrual_type_id', $contract ? $contract->accrual_type_id : null);
                                     } else {
                                         $set('accrual_type_id', null);
@@ -689,7 +689,7 @@ class NewInvoiceResource extends Resource
                                     if ($art73) {
                                         // $docs = DocType::get();
                                         // $docs = \Filament\Facades\Filament::getTenant()->docTypes();
-                                        $docs = \Filament\Facades\Filament::getTenant()
+                                        $docs = Filament::getTenant()
                                                     ->docTypes()
                                                     ->select('doc_types.id', 'doc_types.description')
                                                     ->get();
@@ -799,7 +799,7 @@ class NewInvoiceResource extends Resource
                                         ? Carbon::parse($parent->invoice_date)->lt(Carbon::now()->subYear())
                                         : false;
                                     if($past)
-                                        \Filament\Notifications\Notification::make()
+                                        Notification::make()
                                             ->title('')
                                             ->body('E\' passato più di un anno dall\'emissione della fattura da stornare<br>Gestire limite temporale ed eventuale motivazione per emettere la nota di credito')
                                             ->warning()
@@ -808,7 +808,7 @@ class NewInvoiceResource extends Resource
                                     $accepted = $parent->sdi_status == SdiStatus::ACCETTATA->value;
                                     $note = DocType::find($get('doc_type_id'))->description == 'Nota di credito';
                                     if($accepted && $note )
-                                        \Filament\Notifications\Notification::make()
+                                        Notification::make()
                                             ->title('')
                                             ->body('Attenzione! Stai creando una nota di credito su una fattura accettata.')
                                             ->warning()
@@ -931,10 +931,10 @@ class NewInvoiceResource extends Resource
                             Forms\Components\Select::make('sectional_id')->label('Sezionario')
                                 ->required(fn (Get $get) => !$get('art_73'))
                                 ->options(function (Get $get) {
-                                    $query = \App\Models\Sectional::where('company_id', Filament::getTenant()->id);
+                                    $query = Sectional::where('company_id', Filament::getTenant()->id);
                                     $clientId = $get('client_id');
                                     if ($clientId) {
-                                        $client = \App\Models\Client::find($clientId);
+                                        $client = Client::find($clientId);
                                         if ($client && $client->type) {
                                             $query->where('client_type', $client->type->value);
                                         }
@@ -1005,7 +1005,7 @@ class NewInvoiceResource extends Resource
                                     $date = \Illuminate\Support\Carbon::parse($state);
 
                                     if ($date->format('Y') != $year){
-                                        \Filament\Notifications\Notification::make()
+                                        Notification::make()
                                             ->title('Incongruenza Cronologica')
                                             ->body("L'anno di fatturazione ({$year}) non coincide con l'anno della data della fattura ({$date->format('Y')}).")
                                             ->danger()
@@ -1028,7 +1028,7 @@ class NewInvoiceResource extends Resource
                                         ->first();
 
                                     if ($inconsistentInvoicePrec) {
-                                        \Filament\Notifications\Notification::make()
+                                        Notification::make()
                                             ->title('Incongruenza Cronologica')
                                             ->body("La fattura n. {$inconsistentInvoicePrec->number} del " .
                                                 date('d/m/Y', strtotime($inconsistentInvoicePrec->invoice_date)) .
@@ -1054,7 +1054,7 @@ class NewInvoiceResource extends Resource
                                         ->first();
 
                                     if ($inconsistentInvoiceSucc) {
-                                        \Filament\Notifications\Notification::make()
+                                        Notification::make()
                                             ->title('Incongruenza Cronologica')
                                             ->body("La fattura n. {$inconsistentInvoiceSucc->number} del " .
                                                 date('d/m/Y', strtotime($inconsistentInvoiceSucc->invoice_date)) .
@@ -1204,7 +1204,7 @@ class NewInvoiceResource extends Resource
                                 ->hintIcon('heroicon-o-information-circle', tooltip: "Composizione automatica 'variabile dall'operatore', con inserimento dei campi 'Anno di bilancio', 'Descrizione da riportare in fattura' (presente nel dettaglio del contratto), Riferimento, 'Da data' e 'A data', oppure 'Dal numero', 'Al numero' e 'Totali'")
                                 ->afterStateUpdated(function ($state) {
                                     if (! preg_match('/\(ab\d{2}\)/', $state)) {
-                                        \Filament\Notifications\Notification::make()
+                                        Notification::make()
                                             ->title("Errore! La descrizione deve contenere il riferimento all'anno di bilancio nel formato (ab**)")
                                             ->danger()
                                             ->persistent()
@@ -1315,6 +1315,10 @@ class NewInvoiceResource extends Resource
                                     ->extraInputAttributes(['class' => 'text-center'])->readOnly()->columnSpan(2)->disabled()
                                     ->native(false)
                                     ->displayFormat('d F Y'),
+                                Forms\Components\TextArea::make('sdi_info')->label('Info')
+                                    ->readOnly()
+                                    ->columnSpan(6)
+                                    ->disabled()
                             ]),
 
                         Section::make('Stato del pagamento')->columns(2)
@@ -1473,7 +1477,7 @@ class NewInvoiceResource extends Resource
                     //     return DocType::orderBy('doc_group_id')->pluck('description', 'id')->toArray();
                     // })
                     ->options(function (Get $record) {
-                        $docs = \Filament\Facades\Filament::getTenant()
+                        $docs = Filament::getTenant()
                                     ->docTypes()
                                     ->select('doc_types.id', 'doc_types.description')
                                     ->get();
@@ -1491,7 +1495,7 @@ class NewInvoiceResource extends Resource
                     ->columnSpan(2)
                     // 1. Carichiamo le opzioni dal Tenant
                     ->options(function () {
-                        $tenant = \Filament\Facades\Filament::getTenant();
+                        $tenant = Filament::getTenant();
                         if (!$tenant) return [];
 
                         return $tenant->docTypes()
@@ -1607,7 +1611,7 @@ class NewInvoiceResource extends Resource
 
                         return $query
                             ->orderBy('denomination', 'asc')
-                            ->limit(50)
+                            ->limit(70)
                             ->get()
                             ->mapWithKeys(function ($record) {
                                 $subtype = $record->subtype->getLabel() ?? 'Cliente sconosciuto';
@@ -1677,15 +1681,15 @@ class NewInvoiceResource extends Resource
                     ->attribute(null)
                     ->selectablePlaceholder(false)
                     ->options(function () {
-                        $tenant = \Filament\Facades\Filament::getTenant();
+                        $tenant = Filament::getTenant();
 
                         // 1. Recuperiamo l'anno meno recente
-                        $minYear = \App\Models\Invoice::query()
+                        $minYear = Invoice::query()
                             ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
                             ->min('year') ?? now()->year;
 
                         // 2. Recuperiamo la lista degli anni per il menu
-                        $years = \App\Models\Invoice::query()
+                        $years = Invoice::query()
                             ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
                             ->orderByDesc('year')
                             ->distinct()
@@ -1721,8 +1725,8 @@ class NewInvoiceResource extends Resource
                     ->label('Anno fattura a')
                     ->attribute(null)
                     ->options(function () {
-                        $tenant = \Filament\Facades\Filament::getTenant();
-                        return \App\Models\Invoice::query()
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
                             ->select('year')
                             ->distinct()
                             // ->where('flow', 'out')
@@ -1743,8 +1747,8 @@ class NewInvoiceResource extends Resource
                     ->label('Anno bilancio da')
                     ->attribute(null)
                     ->options(function () {
-                        $tenant = \Filament\Facades\Filament::getTenant();
-                        return \App\Models\Invoice::query()
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
                             ->select('budget_year')
                             ->distinct()
                             // ->where('flow', 'out')
@@ -1764,8 +1768,8 @@ class NewInvoiceResource extends Resource
                     ->label('Anno bilancio a')
                     ->attribute(null)
                     ->options(function () {
-                        $tenant = \Filament\Facades\Filament::getTenant();
-                        return \App\Models\Invoice::query()
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
                             ->select('budget_year')
                             ->distinct()
                             // ->where('flow', 'out')
@@ -1785,8 +1789,8 @@ class NewInvoiceResource extends Resource
                     ->label('Anno competenza da')
                     ->attribute(null)
                     ->options(function () {
-                        $tenant = \Filament\Facades\Filament::getTenant();
-                        return \App\Models\Invoice::query()
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
                             ->select('accrual_year')
                             ->distinct()
                             // ->where('flow', 'out')
@@ -1806,8 +1810,8 @@ class NewInvoiceResource extends Resource
                     ->label('Anno competenza da')
                     ->attribute(null)
                     ->options(function () {
-                        $tenant = \Filament\Facades\Filament::getTenant();
-                        return \App\Models\Invoice::query()
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
                             ->select('accrual_year')
                             ->distinct()
                             // ->where('flow', 'out')
@@ -1955,7 +1959,7 @@ class NewInvoiceResource extends Resource
         $set('client_id', $client->id);
 
         if ($client && $client->type) {
-            $sectional = \App\Models\Sectional::where('company_id', Filament::getTenant()->id)
+            $sectional = Sectional::where('company_id', Filament::getTenant()->id)
                 ->where('client_type', $client->type->value)
                 ->first();
             if ($sectional) {
@@ -2038,7 +2042,7 @@ class NewInvoiceResource extends Resource
         $invoiceDate = $get('invoice_date');
 
         if ($art73) {
-            $maxNumber = \App\Models\Invoice::where('invoice_date', $invoiceDate)
+            $maxNumber = Invoice::where('invoice_date', $invoiceDate)
                 ->where('art_73', true)
                 ->where('company_id', Filament::getTenant()->id)
                 ->max('number');
@@ -2050,7 +2054,7 @@ class NewInvoiceResource extends Resource
             return 1;
         }
         else if ($year && $sectionalId) {
-            $maxNumber = \App\Models\Invoice::where('year', $year)
+            $maxNumber = Invoice::where('year', $year)
                 ->where('sectional_id', $sectionalId)
                 ->where('company_id', Filament::getTenant()->id)
                 ->max('number');
@@ -2059,7 +2063,7 @@ class NewInvoiceResource extends Resource
                 return $maxNumber + 1;
             }
 
-            $sectional = \App\Models\Sectional::find($sectionalId);
+            $sectional = Sectional::find($sectionalId);
             return $sectional?->progressive;
         }
 
@@ -2099,7 +2103,7 @@ class NewInvoiceResource extends Resource
                 if($parent){
                     $description .= ' di ' . lcfirst($parent?->docType->description);
                     $description .= ' n.ro ' . $parent?->getNewInvoiceNumber();
-                    $description .= ' del ' . \Carbon\Carbon::parse($parent?->invoice_date)->format('d/m/Y');
+                    $description .= ' del ' . Carbon::parse($parent?->invoice_date)->format('d/m/Y');
 
                     $motivation = ReversalMotivationType::find($get('reversal_motivation_type_id'))?->name;
                     if($motivation)
@@ -2169,10 +2173,10 @@ class NewInvoiceResource extends Resource
     protected static function formatDate($date): string
     {
         if (is_string($date)) {
-            return \Carbon\Carbon::parse($date)->format('d/m/Y');
+            return Carbon::parse($date)->format('d/m/Y');
         }
 
-        if ($date instanceof \Carbon\Carbon || $date instanceof \DateTime) {
+        if ($date instanceof Carbon || $date instanceof \DateTime) {
             return $date->format('d/m/Y');
         }
 

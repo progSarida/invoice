@@ -74,6 +74,7 @@ class Invoice extends Model
         'sdi_status',
         'sdi_code',
         'sdi_date',
+        'sdi_info',
         'pdf_path',
         'xml_path'
     ];

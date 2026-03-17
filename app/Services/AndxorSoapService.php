@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\ClientSubType;
 use App\Enums\FundType;
+use DateTime;
 use Exception;
 use SoapFault;
 use SoapClient;
@@ -663,6 +664,8 @@ Log::info("Risposta"); Log::info("Risposta ", (array) $response);        // dd($
         $date = explode("T", $response->DataOraCreazione);                                              // la data deve essere in base allo stato?
         // $date = explode("T", $this->getDate($response));
         $newStatus = $this->translateStatus($response->Stato);
+// dd($newStatus, 'STOP');
+        $sdiStatus = SdiStatus::tryFrom($newStatus);
 Log::info("Stato sdi: " . $newStatus);
         // $outcomes = ['rifiutata', 'accettata'];
         // if(1 == 1){
@@ -677,20 +680,23 @@ Log::info("Stato sdi: " . $newStatus);
 
         //     }
         // }
-//         $responseZIP = $this->client->DownloadZip($input);
-//         $reason = $this->getReason($responseZIP);
-// Log::info("Motivo: " . $reason);
-//         if($newStatus == 'rifiutata'){
-//             //
-//         }
+        if($sdiStatus->sdiReceiptCode() == ''){
+            $info = null;
+        }
+        else{
+            $responseZIP = $this->client->DownloadZip($input);
+            $info = $this->processResponse($sdiStatus, $responseZIP);
+        }
 // dd('STOP');
         if($invoice->sdi_status != $newStatus && $invoice->sdi_status->updateStatus()){                     // modifico se è diverso da quello esistente
-            // Aggiorna stato e data modifica stato della fattura                                           // e questo non è RIFIUTO_EMESSO, RIFIUTO_ARCHIVIATO, SCARTO_VALIDATO,
+                                                                                                            // e questo non è RIFIUTO_EMESSO, RIFIUTO_ARCHIVIATO, SCARTO_VALIDATO,
                                                                                                             // MANCATA_CONSEGNA_VALIDATA, AUTO_INVIATA, APERTA
+        // Aggiorno stato e data modifica stato della fattura
 Log::info("Aggiornamento stato sdi");
             $invoice->update([
                 'sdi_code' => $response?->IdSdI,
                 'sdi_status' => $newStatus,
+                'sdi_info' => $info,
                 'sdi_date' => $date[0]
             ]);
 Log::info("Creazione notitifca sdi");
@@ -699,57 +705,165 @@ Log::info("Creazione notitifca sdi");
                     'code' => $invoice->sdi_code ?? null,
                     'status' => $newStatus,
                     'date' => $date[0],
-                    'description' => ''
+                    'description' => $info
                 ]);
         }
 
         return $response;
     }
 
-    private function getReason($response): string
+    private function processResponse($sdiStatus, $responseZIP): ?string
     {
-        $zipContent = $response->Contenuto;
-        $zipName = $response->Nome;
+        $zipContent = $responseZIP->Contenuto;
+        $zipName = $responseZIP->Nome;
+        $receiptCode = $sdiStatus->sdiReceiptCode();
+// dd($sdiStatus, 'STOP');
+        try{
+            // Salvo lo ZIP
+            $livewireDisk = config('livewire.temporary_file_upload.disk', 'local');
+            Storage::put('temp/' . $zipName, $zipContent);
 
-        // Salvo lo ZIP
-        $livewireDisk = config('livewire.temporary_file_upload.disk', 'local');
-        Storage::put('temp/' . $zipName, $zipContent);
+            // Estraggo i file dello ZIP
+            $zip = new ZipArchive;
+            $zipPath = Storage::path('temp/' . $zipName);
 
-        // Estraggo i file dello ZIP
-        $zip = new ZipArchive;
-        $zipPath = Storage::path('temp/' . $zipName);
+            if ($zip->open($zipPath) !== true) {
+                throw new \RuntimeException("Impossibile aprire il file ZIP: {$zipName}");
+            }
 
-        if ($zip->open($zipPath) === true) {
+
             $extractPath = Storage::path('extracted/' . pathinfo($zipName, PATHINFO_FILENAME));
-
             $zip->extractTo($extractPath);
             $zip->close();
 
             // Leggo i file estratti
             $files = Storage::files('extracted/' . pathinfo($zipName, PATHINFO_FILENAME));
 
-            $done = false;
-            foreach ($files as $file) {
-                if(!$done && str_contains($file, 'NE')) {
+            // Trovo il file con il codice ricevuta
+            $file = collect($files)->first(fn($file) => str_contains($file, $receiptCode));
 
-                    $content = Storage::get($file);
-                    // Processa il contenuto...
-                    $done = true;
-                    $xmlArray = $this->xmlToArray($content);
-dd($xmlArray, 'STOP');
-                    $outcome = $xmlArray['EsitoCommittente']['Esito'] ?? '';
-                    $reason = $xmlArray['EsitoCommittente']['Descrizione'] ?? '';
-dd($outcome, $reason, 'STOP');
-                    // Cleanup dei file estratti                    Storage::delete($files);
-                    return $reason;
-                }
+            if (!$file) {
+                \Log::warning("File con codice {$receiptCode} non trovato nello ZIP", [
+                    'zip' => $zipName,
+                    'files' => $files
+                ]);
+                return null;
             }
 
+            $content = Storage::get($file);
+            $xmlArray = $this->xmlToArray($content);
+// dd($xmlArray, 'STOP');
+            $output = $this->parseReceiptData($receiptCode, $xmlArray);
+// dd($output, 'STOP');
+            $info = $this->createInfo($receiptCode, $output);
+// dd($info, 'STOP');
             // Cleanup
+            Storage::delete($files);
             Storage::delete('temp/' . $zipName);
+
+            return $info;
+        } catch (Exception $e) {
+            \Log::error("Errore nel processare la risposta SDI", [
+                'zip' => $zipName,
+                'receiptCode' => $receiptCode,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        } finally {
+            // Cleanup sempre eseguito
+            $this->cleanupFiles($zipName);
+        }
+    }
+
+    private function parseReceiptData(string $receiptCode, array $xmlArray): ?array
+    {
+        $output = [];
+
+        switch ($receiptCode) {
+            case '_NS_':                                                                                        // notifica di scarto
+                $output[$receiptCode]['ListaErrori'] = $xmlArray['ListaErrori'] ?? '';                          // array di elementi composti da ['Codice'] e ['Descrizione']
+                break;
+            case '_RC_':                                                                                        // ricevuta di consegna
+                $output[$receiptCode]['DataOraConsegna'] = $xmlArray['DataOraConsegna'] ?? '';                  // stringa in formato ISO 8601:2004 (2026-01-01T12:00:00)
+                break;
+            case '_MC_':                                                                                        // mancato recapito
+                $output[$receiptCode]['Descrizione'] = $xmlArray['Descrizione'] ?? '';                          // stringa
+                $output[$receiptCode]['Note'] = $xmlArray['Note'] ?? '';                                        // stringa
+                break;
+            case '_NE_':                                                                                        // notifica di esito
+                $output[$receiptCode]['Esito'] = $xmlArray['EsitoCommittente']['Esito'] ?? '';                  // EC01/EC02
+                $output[$receiptCode]['Descrizione'] = $xmlArray['EsitoCommittente']['Descrizione'] ?? '';      // stringa
+                break;
+            case '_DT_':                                                                                        // decorsi i termini
+                $output[$receiptCode]['Descrizione'] = $xmlArray['Descrizione'] ?? '';                          // stringa
+                $output[$receiptCode]['Note'] = $xmlArray['Note'] ?? '';                                        // stringa
+                break;
+            case '_AT_':                                                                                        // impossibilità di recapito
+                $output[$receiptCode]['Note'] = $xmlArray['Note'] ?? '';                                        // stringa
+                break;
+            default:
+                \Log::warning("Codice ricevuta SDI sconosciuto: {$receiptCode}");
+                return null;
         }
 
-        return 'Nessuna descrizione';
+        return $output;
+    }
+
+    private function createInfo(string $receiptCode, array $output): string                                     // creazione stringa informativa della notifica SDI
+    {
+        $info = '';
+
+        switch ($receiptCode) {
+            case '_NS_':                                                                                        // notifica di scarto
+                foreach($output[$receiptCode]['ListaErrori'] as $errore){
+                    $info .= "Codice errore: {$errore['Codice']} - Descrizione: {$errore['Descrizione']}\n";
+                }
+                break;
+            case '_RC_':                                                                                        // ricevuta di consegna
+                $dt = new DateTime($output[$receiptCode]['DataOraConsegna']);
+                $date = $dt->format('d/m/Y');
+                $time = $dt->format('H:i');
+                $info .= "Consegnato il {$date} alle {$time}";
+                break;
+            case '_MC_':                                                                                        // mancato recapito
+                $info .= "{$output[$receiptCode]['Descrizione']}\n{$output[$receiptCode]['Note']}";
+                break;
+            case '_NE_':                                                                                        // notifica di esito
+                $info .= "{$output[$receiptCode]['Esito']} - {$output[$receiptCode]['Descrizione']}";
+                break;
+            case '_DT_':                                                                                        // decorsi i termini
+                $info .= "{$output[$receiptCode]['Descrizione']}\n{$output[$receiptCode]['Note']}";
+                break;
+            case '_AT_':                                                                                        // impossibilità di recapito
+                $info .= "{$output[$receiptCode]['Note']}";
+                break;
+            default:
+                \Log::warning("Codice ricevuta SDI sconosciuto: {$receiptCode}");
+        }
+
+        return $info;
+    }
+
+    private function cleanupFiles(string $zipName): void                                                        // pulizia cartelle temporanee
+    {
+        try {
+            $extractFolder = 'extracted/' . pathinfo($zipName, PATHINFO_FILENAME);
+
+            // Elimina i file estratti
+            if (Storage::exists($extractFolder)) {
+                Storage::deleteDirectory($extractFolder);
+            }
+
+            // Elimina lo ZIP temporaneo
+            if (Storage::exists('temp/' . $zipName)) {
+                Storage::delete('temp/' . $zipName);
+            }
+        } catch (\Exception $e) {
+            \Log::error("Errore durante il cleanup dei file SDI", [
+                'zip' => $zipName,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function updateStatusList($list, string $password)
