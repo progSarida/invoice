@@ -39,6 +39,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class PassiveInvoiceResource extends Resource
@@ -417,6 +418,72 @@ class PassiveInvoiceResource extends Resource
             ->filtersFormWidth('2xl')
             ->filtersFormColumns(2)
             ->filters([
+                SelectFilter::make('supplier_id')
+                    ->label('Fornitore')
+                    // ->multiple()
+                    ->searchable()
+                    // ->preload()
+                    ->columnSpanFull()
+                    ->options(function () {
+                        $suppliers = Supplier::select('suppliers.id', 'suppliers.denomination')
+                            ->join('passive_invoices', 'suppliers.id', '=', 'passive_invoices.supplier_id')
+                            ->distinct()
+                            ->get()
+                            ->pluck('denomination', 'id')
+                            ->toArray();
+                        return $suppliers;
+                    })
+                    ->getOptionLabelUsing(fn ($record) => $record->description),
+                SelectFilter::make('doc_type')
+                    ->label('Seleziona tipo documento')
+                    ->options(function () {
+                        $actualTypes = PassiveInvoice::select('passive_invoices.doc_type', 'doc_types.description')
+                            ->leftJoin('doc_types', 'passive_invoices.doc_type', '=', 'doc_types.name')
+                            ->distinct()
+                            ->get()
+                            ->pluck('description', 'doc_type')
+                            ->toArray();
+                        return $actualTypes;
+                    })
+                    ->multiple()
+                    ->searchable()
+                    ->columnSpanFull()
+                    ->preload(),
+                SelectFilter::make('exclude_doc_types')
+                    ->label('Escludi tipo documento')
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->columnSpanFull()
+                    ->options(function () {
+                        $actualTypes = PassiveInvoice::select('passive_invoices.doc_type', 'doc_types.description')
+                            ->leftJoin('doc_types', 'passive_invoices.doc_type', '=', 'doc_types.name')
+                            ->distinct()
+                            ->get()
+                            ->pluck('description', 'doc_type')
+                            ->toArray();
+                        return $actualTypes;
+                    })
+                    ->getOptionLabelUsing(fn ($record) => $record->description)
+                    ->default(function() {
+                        // $excludedGroups = ['Note di variazione', 'Autofatture'];
+                        $excludedGroups = ['Autofatture'];
+                        $docTypes = PassiveInvoice::select('passive_invoices.doc_type')
+                            ->join('doc_types', 'passive_invoices.doc_type', '=', 'doc_types.name')
+                            ->join('doc_groups', 'doc_types.doc_group_id', '=', 'doc_groups.id')
+                            ->whereIn('doc_groups.name', $excludedGroups)
+                            ->distinct()
+                            ->pluck('doc_type')
+                            ->toArray();
+                        return $docTypes;
+                    })
+                    ->query(function (Builder $query, array $data): Builder {
+                        // dd($data);
+                        return $query->when(
+                            $data['values'],
+                            fn (Builder $query, $values): Builder => $query->whereNotIn('doc_type', $values)
+                        );
+                    }),
                 SelectFilter::make('pi_validation_status')
                     ->label('Validazione')
                     ->columnSpan(1)
@@ -504,51 +571,84 @@ class PassiveInvoiceResource extends Resource
                         }
                         return null;
                     }),
-                SelectFilter::make('notes')
-                    ->label('Note di credito')
-                    ->columnSpan(1)
-                    ->placeholder('Includi')
-                    ->options([
-                        'no' => 'Escludi',
-                        'si' => 'Seleziona',
+                Filter::make('payment_date_range')
+                    ->columnSpan(2)
+                    ->columns(2)
+                    ->form([
+                        DatePicker::make('payment_from_date')
+                            ->label('Data ultimo pagamento da')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->columnSpan(1),
+                        DatePicker::make('payment_to_date')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->label('Data ultimo pagamento a')
+                            ->columnSpan(1),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (!isset($data['value'])) {
-                            return $query;
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['payment_from_date'])) {
+                            $query->whereDate('last_payment_date', '>=', $data['payment_from_date']);
                         }
-                        return $query->when($data['value'] === 'si', function ($q) {
-                                return $q->where('doc_type', 'TD04');
-                            })->when($data['value'] === 'no', function ($q) {
-                                return $q->where('doc_type', '!=', 'TD04');
-                            });
+                        if (! empty($data['payment_to_date'])) {
+                            $query->whereDate('last_payment_date', '<=', $data['payment_to_date']);
+                        }
                     })
-                    ->default('no')
-                    ->preload(),
-                SelectFilter::make('autos')
-                    ->label('Autofatture')
-                    ->columnSpan(1)
-                    ->placeholder('Includi')
-                    ->options([
-                        'no' => 'Escludi',
-                        'si' => 'Seleziona',
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        $value = $data['value'] ?? null;
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['payment_from_date'] && $data['payment_to_date']) {
+                            return "Data ultimo pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
+                        }
+                        if ($data['payment_from_date']) {
+                            return "Data ultimo pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y');
+                        }
+                        if ($data['payment_to_date']) {
+                            return "Data ultimo pagamento al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
+                        }
+                        return null;
+                    }),
+                // SelectFilter::make('notes')
+                //     ->label('Note di credito')
+                //     ->columnSpan(1)
+                //     ->placeholder('Includi')
+                //     ->options([
+                //         'no' => 'Escludi',
+                //         'si' => 'Seleziona',
+                //     ])
+                //     ->query(function (Builder $query, array $data): Builder {
+                //         if (!isset($data['value'])) {
+                //             return $query;
+                //         }
+                //         return $query->when($data['value'] === 'si', function ($q) {
+                //                 return $q->where('doc_type', 'TD04');
+                //             })->when($data['value'] === 'no', function ($q) {
+                //                 return $q->where('doc_type', '!=', 'TD04');
+                //             });
+                //     })
+                //     ->default('no')
+                //     ->preload(),
+                // SelectFilter::make('autos')
+                //     ->label('Autofatture')
+                //     ->columnSpan(1)
+                //     ->placeholder('Includi')
+                //     ->options([
+                //         'no' => 'Escludi',
+                //         'si' => 'Seleziona',
+                //     ])
+                //     ->query(function (Builder $query, array $data): Builder {
+                //         $value = $data['value'] ?? null;
 
-                        if (!$value) return $query;
+                //         if (!$value) return $query;
 
-                        $filterGroup = function ($q) {
-                            $q->whereHas('docGroup', fn ($qGroup) => $qGroup->where('name', 'Autofatture'));
-                        };
+                //         $filterGroup = function ($q) {
+                //             $q->whereHas('docGroup', fn ($qGroup) => $qGroup->where('name', 'Autofatture'));
+                //         };
 
-                        return $query->when(
-                            $value === 'si',                                                            // Tutte
-                            fn ($q) => $q->whereHas('docType', $filterGroup),                           // Solo autofatture
-                            fn ($q) => $q->whereDoesntHave('docType', $filterGroup)                     // Esclude autofatture
-                        );
-                    })
-                    ->default('no')
-                    ->preload(),
+                //         return $query->when(
+                //             $value === 'si',                                                            // Tutte
+                //             fn ($q) => $q->whereHas('docType', $filterGroup),                           // Solo autofatture
+                //             fn ($q) => $q->whereDoesntHave('docType', $filterGroup)                     // Esclude autofatture
+                //         );
+                //     })
+                //     ->default('no')
+                //     ->preload(),
                 Filter::make('total_range')
                     ->columnSpan(2)
                     ->columns(2)
@@ -556,7 +656,7 @@ class PassiveInvoiceResource extends Resource
                         TextInput::make('total_from')
                             ->label('Totale da')
                             ->extraInputAttributes(['class' => 'text-right'])
-                            ->debounce(1000)
+                            ->live(onBlur: true)
                             // ->afterStateUpdated(function ($state, $component) {
                             //     if(str_contains($state, ',')){                                  // Se contiene una virgola
                             //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
@@ -571,17 +671,31 @@ class PassiveInvoiceResource extends Resource
                             //     $component->state($formatted);
                             // })
                             ->afterStateUpdated(function ($state, $component) {
+                                if($state === null) {
+                                    $component->state(null);
+                                    return;
+                                }
                                 $float = CurrencyService::parseNumber($state);
                                 $formatted = number_format($float, 2, ',', '.');
                                 $component->state($formatted);
                             })
-                            ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            ->formatStateUsing(function ($state) {
+                                if (blank($state)) return null;
+
+                                // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
+                                $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
+                                // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
+                                $floatValue = floatval($state);
+
+                                return number_format($floatValue, 2, ',', '.');
+                            })
                             ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                             ->columnSpan(1),
                         TextInput::make('total_to')
                             ->label('Totale a')
                             ->extraInputAttributes(['class' => 'text-right'])
-                            ->debounce(1000)
+                            ->live(onBlur: true)
                             // ->afterStateUpdated(function ($state, $component) {
                             //     if(str_contains($state, ',')){                                  // Se contiene una virgola
                             //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
@@ -596,55 +710,95 @@ class PassiveInvoiceResource extends Resource
                             //     $component->state($formatted);
                             // })
                             ->afterStateUpdated(function ($state, $component) {
+                                if($state === null) {
+                                    $component->state(null);
+                                    return;
+                                }
                                 $float = CurrencyService::parseNumber($state);
                                 $formatted = number_format($float, 2, ',', '.');
                                 $component->state($formatted);
                             })
-                            ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            ->formatStateUsing(function ($state) {
+                                if (blank($state)) return null;
+
+                                // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
+                                $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
+                                // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
+                                $floatValue = floatval($state);
+
+                                return number_format($floatValue, 2, ',', '.');
+                            })
                             ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                             ->columnSpan(1),
                     ])
-                    ->query(function (Builder $query, array $data) {
-                        if(str_contains($data['total_from'], ',')){                                  // Se contiene una virgola
-                            $amount_from = str_replace(',', '.', str_replace('.', '', $data['total_from']));                                          // rimuovo i punti e sostituisco la virgola
-                        }
-                        else {
-                            $amount_from = $data['total_from'] ?? 0;
-                        }
-                        if(str_contains($data['total_to'], ',')){                                  // Se contiene una virgola
-                            $amount_to = str_replace(',', '.', str_replace('.', '', $data['total_to']));                                          // rimuovo i punti e sostituisco la virgola
-                        }
-                        else {
-                            $amount_to = $data['total_to'] ?? 0;
-                        }
-                        if (! empty($data['total_from'])) {
-                            $query->where('total_doc', '>=', $amount_from);
-                        }
-                        if (! empty($data['total_to'])) {
-                            $query->where('total_doc', '<=', $amount_to);
-                        }
+                    // ->query(function (Builder $query, array $data) {
+                    //     if(str_contains($data['total_from'], ',')){                                  // Se contiene una virgola
+                    //         $amount_from = str_replace(',', '.', str_replace('.', '', $data['total_from']));                                          // rimuovo i punti e sostituisco la virgola
+                    //     }
+                    //     else {
+                    //         $amount_from = $data['total_from'] ?? 0;
+                    //     }
+                    //     if(str_contains($data['total_to'], ',')){                                  // Se contiene una virgola
+                    //         $amount_to = str_replace(',', '.', str_replace('.', '', $data['total_to']));                                          // rimuovo i punti e sostituisco la virgola
+                    //     }
+                    //     else {
+                    //         $amount_to = $data['total_to'] ?? 0;
+                    //     }
+                    //     if (! empty($data['total_from'])) {
+                    //         $query->where('total_doc', '>=', $amount_from);
+                    //     }
+                    //     if (! empty($data['total_to'])) {
+                    //         $query->where('total_doc', '<=', $amount_to);
+                    //     }
+                    // })
+                    ->query(function (Builder $query, array $data): Builder {
+Log::info("Valore: " . CurrencyService::parseNumber($data['total_from']));
+                        return $query
+                            // Applica il filtro "Da" se presente
+                            ->when(
+                                $data['total_from'],
+                                fn (Builder $query, $value): Builder => $query->where('total_doc', '>=', CurrencyService::parseNumber($value)),
+                            )
+                            // Applica il filtro "A" se presente
+                            ->when(
+                                $data['total_to'],
+                                fn (Builder $query, $value): Builder => $query->where('total_doc', '<=', CurrencyService::parseNumber($value)),
+                            );
                     })
+                    // ->indicateUsing(function (array $data): ?string {
+                    //     if(str_contains($data['total_from'], ',')){                                  // Se contiene una virgola
+                    //         $amount_from = str_replace(',', '.', str_replace('.', '', $data['total_from']));                                          // rimuovo i punti e sostituisco la virgola
+                    //     }
+                    //     else {
+                    //         $amount_from = $data['total_from'] ?? 0;
+                    //     }
+                    //     if(str_contains($data['total_to'], ',')){                                  // Se contiene una virgola
+                    //         $amount_to = str_replace(',', '.', str_replace('.', '', $data['total_to']));                                          // rimuovo i punti e sostituisco la virgola
+                    //     }
+                    //     else {
+                    //         $amount_to = $data['total_to'] ?? 0;
+                    //     }
+                    //     if ($data['total_from'] && $data['total_to']) {
+                    //         return "Importo da " . number_format($amount_from, 2, ',', '.') . " fino a " . number_format($amount_to, 2, ',', '.');
+                    //     }
+                    //     if ($data['total_from']) {
+                    //         return "Importo da " . number_format($amount_from, 2, ',', '.');
+                    //     }
+                    //     if ($data['total_to']) {
+                    //         return "Importo fino a " . number_format($amount_to, 2, ',', '.');
+                    //     }
+                    //     return null;
+                    // })
                     ->indicateUsing(function (array $data): ?string {
-                        if(str_contains($data['total_from'], ',')){                                  // Se contiene una virgola
-                            $amount_from = str_replace(',', '.', str_replace('.', '', $data['total_from']));                                          // rimuovo i punti e sostituisco la virgola
-                        }
-                        else {
-                            $amount_from = $data['total_from'] ?? 0;
-                        }
-                        if(str_contains($data['total_to'], ',')){                                  // Se contiene una virgola
-                            $amount_to = str_replace(',', '.', str_replace('.', '', $data['total_to']));                                          // rimuovo i punti e sostituisco la virgola
-                        }
-                        else {
-                            $amount_to = $data['total_to'] ?? 0;
-                        }
                         if ($data['total_from'] && $data['total_to']) {
-                            return "Importo da " . number_format($amount_from, 2, ',', '.') . " fino a " . number_format($amount_to, 2, ',', '.');
+                            return "Totale da " . $data['total_from'] . "€ a " . $data['total_to'] . "€";
                         }
                         if ($data['total_from']) {
-                            return "Importo da " . number_format($amount_from, 2, ',', '.');
+                            return "Totale da " . $data['total_from'] . "€";
                         }
                         if ($data['total_to']) {
-                            return "Importo fino a " . number_format($amount_to, 2, ',', '.');
+                            return "Totale a " . $data['total_to'] . "€";
                         }
                         return null;
                     }),
