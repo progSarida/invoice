@@ -3,6 +3,7 @@
 namespace App\Filament\Company\Resources;
 
 use App\Enums\ClientSubType;
+use App\Models\ContractDetail;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
@@ -173,14 +174,6 @@ class NewInvoiceResource extends Resource
                         ->columns(6)
                         ->schema([
                             Forms\Components\Select::make('client_id')->label('Cliente')
-                                ->hintAction(
-                                    Action::make('Nuovo')
-                                        ->icon('ri-user-2-line')
-                                        ->form(fn (Form $form) => ClientResource::modalForm($form))
-                                        ->modalHeading('')
-                                        ->modalWidth('7xl')
-                                        ->action(fn (array $data, Client $client, Get $get, Set $set) => NewInvoiceResource::saveClient($data, $client, $get, $set))
-                                )
                                 // ->relationship(name: 'client', titleAttribute: 'denomination')
                                 ->getSearchResultsUsing(function (string $search) {
                                     // Rimuovi spazi multipli e trim
@@ -272,7 +265,15 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 ->preload()
                                 ->optionsLimit(5)
-                                ->columnSpan(4),
+                                ->columnSpan(4)
+                                ->hintAction(
+                                    Action::make('Nuovo')
+                                        ->icon('ri-user-2-line')
+                                        ->form(fn (Form $form) => ClientResource::modalForm($form))
+                                        ->modalHeading('')
+                                        ->modalWidth('7xl')
+                                        ->action(fn (array $data, Client $client, Get $get, Set $set) => NewInvoiceResource::saveClient($data, $client, $get, $set))
+                                ),
 
                             Forms\Components\Select::make('tax_type')->label('Entrata')
                                 ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic())
@@ -608,7 +609,7 @@ class NewInvoiceResource extends Resource
                                     }
 
                                     // Recuperiamo i dettagli associati al contratto selezionato
-                                    return \App\Models\ContractDetail::where('contract_id', $contractId)
+                                    return ContractDetail::where('contract_id', $contractId)
                                         ->orderBy('date', 'desc')
                                         ->get()
                                         ->mapWithKeys(function ($detail) {
@@ -624,7 +625,19 @@ class NewInvoiceResource extends Resource
                                 ->live()
                                 // Opzionale: disabilita il campo se il contratto non è ancora scelto
                                 ->disabled(fn (Get $get) => ! filled($get('contract_id')))
-                                ->columnSpan(2),
+                                ->columnSpan(2)
+                                ->hintAction(
+                                    Action::make('Nuovo')
+                                        ->icon('tabler-contract')
+                                        ->visible(fn (Get $get) => filled($get('contract_id')))
+                                        ->fillForm(fn (Get $get): array => [
+                                            'contract_id' => $get('contract_id'),
+                                        ])
+                                        ->form(fn (Form $form) => ContractDetailResource::modalForm($form))
+                                        ->modalHeading('')
+                                        ->modalWidth('4xl')
+                                        ->action(fn (array $data, ContractDetail $detail, Get $get, Set $set) => NewInvoiceResource::saveDetail($data, $detail, $get('contract_id')))
+                                ),
                         ]),
 
                 // ]),
@@ -2003,6 +2016,25 @@ class NewInvoiceResource extends Resource
         $contract->save();
         Notification::make()
             ->title('Contratto salvato con successo')
+            ->success()
+            ->send();
+    }
+
+    public static function saveDetail(array $data, ContractDetail $detail, $contract_id): void
+    {
+        $detail->contract_id = $contract_id;
+        $detail->number = $data['number'];
+        $detail->contract_type = $data['contract_type'];
+        $detail->date = $data['date'];
+        $detail->description = $data['description'];
+        $detail->invoice_description = $data['invoice_description'];
+        $detail->contract_attachment_path = $data['contract_attachment_path'];
+        $detail->contract_attachment_date = $data['contract_attachment_date'];
+
+        $detail->save();
+
+        Notification::make()
+            ->title('Dettaglio contratto salvato con successo')
             ->success()
             ->send();
     }

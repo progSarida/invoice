@@ -48,15 +48,6 @@ class NewContractResource extends Resource
             // ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('client_id')->label('Cliente')
-                    ->hintAction(
-                        Action::make('Nuovo')
-                            ->icon('ri-user-2-line')
-                            ->form(fn(Form $form) => ClientResource::modalForm($form))
-                            ->modalWidth('7xl')
-                            ->modalHeading('')
-                            ->action(fn (array $data, Client $client, Set $set) => NewContractResource::saveClient($data, $client, $set))
-                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Company\Resources\NewContractResource\Pages\EditNewContract)
-                    )
                     ->relationship(
                         name: 'client',
                         titleAttribute: 'denomination',
@@ -124,7 +115,16 @@ class NewContractResource extends Resource
                     // ->preload()
                     ->optionsLimit(5)
                     // ->autofocus(function ($record): bool { return $record !== null && Auth::user()->isManager(); })
-                    ->columnSpan(5),
+                    ->columnSpan(5)
+                    ->hintAction(
+                        Action::make('Nuovo')
+                            ->icon('ri-user-2-line')
+                            ->form(fn(Form $form) => ClientResource::modalForm($form))
+                            ->modalWidth('7xl')
+                            ->modalHeading('')
+                            ->action(fn (array $data, Client $client, Set $set) => NewContractResource::saveClient($data, $client, $set))
+                            ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Company\Resources\NewContractResource\Pages\EditNewContract)
+                    ),
                 DatePicker::make('start_validity_date')
                     ->label('Inizio Validità')
                     ->extraInputAttributes(['class' => 'text-center'])
