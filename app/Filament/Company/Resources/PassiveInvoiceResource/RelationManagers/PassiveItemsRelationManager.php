@@ -61,6 +61,8 @@ class PassiveItemsRelationManager extends RelationManager
                             ->columnSpan(4)
                             ->live(onBlur: true)
                             ->numeric()
+                            ->nullable()
+                            ->extraInputAttributes(['class' => 'text-right'])
                             // ->afterStateUpdated(function (Get $get, Set $set, $state) {
                             //     $amount = $get('unit_price');
                             //     if(str_contains($state, ',')){                                  // Se contiene una virgola
@@ -83,7 +85,7 @@ class PassiveItemsRelationManager extends RelationManager
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                 $unit_price = CurrencyService::parseNumber($get('unit_price'));
                                 $quantity = $state;
-                                
+
                                 if($unit_price && $quantity){
                                     if (!is_numeric($quantity)) return;
                                     $amount = $quantity * $unit_price;
@@ -92,11 +94,11 @@ class PassiveItemsRelationManager extends RelationManager
                                 else {
                                     $set('total_price', 0);
                                 }
-                            })
+                            }),
                             // ->live(debounce: 500)
                             // ->debounce(3000),
-                            ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state)),
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            // ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state)),
                         Forms\Components\TextInput::make('measure_unit')->label('Unità di misura')
                             ->live(onBlur: true)
                             ->hintIcon('heroicon-o-information-circle', tooltip: 'L\'unità di misura deve essere lunga al massimo 10 caratteri (0-9, a-z, A-Z)')
@@ -136,7 +138,7 @@ class PassiveItemsRelationManager extends RelationManager
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
                                 $quantity = $get('quantity');
                                 $unit_price = CurrencyService::parseNumber($state);
-                                
+
                                 if($unit_price && $quantity){
                                     if (!is_numeric($quantity)) return;
                                     $amount = $quantity * $unit_price;

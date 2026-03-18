@@ -6,6 +6,7 @@ use App\Enums\ClientSubType;
 use App\Enums\FundType;
 use DateTime;
 use Exception;
+use Illuminate\Support\Str;
 use SoapFault;
 use SoapClient;
 use Carbon\Carbon;
@@ -1073,12 +1074,13 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
         // $taxCode2 = data_get($param, 'CedentePrestatore.DatiAnagrafici.CodiceFiscale');
 
         $idCountry = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdPaese');
+        $denomination = data_get($param, 'CedentePrestatore.DatiAnagrafici.Anagrafica.Denominazione');
         $temp = data_get($param, 'CedentePrestatore.DatiAnagrafici.IdFiscaleIVA.IdCodice');
         $taxCode2 = data_get($param, 'CedentePrestatore.DatiAnagrafici.CodiceFiscale');
         $vatCode = '';
         $taxCode1 = '';
 
-        if($idCountry =='IT'){
+        if ($idCountry =='IT'){                                                                                 // il fornitore è italiano
             if ($temp) {
                 $lunghezza = strlen($temp);
 
@@ -1099,52 +1101,37 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                 $taxCode1 = $vatCode;
             }
 
-            if ($vatCode) {
-                $query->orWhere('vat_code', $vatCode);
-            }
-            if ($taxCode1) {
-                $query->orWhere('tax_code', $taxCode1);
-            }
-            if ($taxCode2) {
-                $query->orWhere('tax_code', $taxCode2);
-            }
+            // if ($vatCode) {
+            //     $query->orWhere('vat_code', $vatCode);
+            // }
+            // if ($taxCode1) {
+            //     $query->orWhere('tax_code', $taxCode1);
+            // }
+            // if ($taxCode2) {
+            //     $query->orWhere('tax_code', $taxCode2);
+            // }
+
+            $query->where(function ($q) use ($vatCode, $taxCode1, $taxCode2) {
+                if ($vatCode)  $q->orWhere('vat_code', $vatCode);
+                if ($taxCode1) $q->orWhere('tax_code', $taxCode1);
+                if ($taxCode2) $q->orWhere('tax_code', $taxCode2);
+            });
+        }
+        else {                                                                                                  // il fornitore è estero
+            $query->where('country', $idCountry)
+                    ->where('denomination', $denomination);
         }
 
         $supplier = $query->first();
 
         // dd($supplier);
 
-        $cedente = $param['CedentePrestatore'];
+        if(!$supplier){ $supplier = $this->createNewSupplier($output, $param['CedentePrestatore']); }
 
-        if(!$supplier){
-            $output['new'] = true;
-            $data = [
-                'company_id' => Filament::getTenant()->id,
-
-                'denomination' => $cedente['DatiAnagrafici']['Anagrafica']['Denominazione'] ?? $cedente['DatiAnagrafici']['Anagrafica']['Cognome'] . ' ' . $cedente['DatiAnagrafici']['Anagrafica']['Nome'],
-                'tax_code' => $cedente['DatiAnagrafici']['CodiceFiscale'] ?? null,
-                'vat_code' => $cedente['DatiAnagrafici']['IdFiscaleIVA']['IdCodice'] ?? null,
-
-                'address' => $cedente['Sede']['Indirizzo'] ?? null,
-                'civic_number' => $cedente['Sede']['NumeroCivico'] ?? null,
-                'zip_code' => $cedente['Sede']['CAP'] ?? null,
-                'city' => $cedente['Sede']['Comune'] ?? null,
-                'province' => $cedente['Sede']['Provincia'] ?? null,
-                'country' => $cedente['Sede']['Nazione'] ?? null,
-
-                'rea_office' => $cedente['IscrizioneREA']['Ufficio'] ?? null,
-                'rea_number' => $cedente['IscrizioneREA']['NumeroREA'] ?? null,
-                'capital' => $cedente['IscrizioneREA']['CapitaleSociale'] ?? null,
-                'sole_share' => $cedente['IscrizioneREA']['SocioUnico'] ?? null,
-                'liquidation_status' => $cedente['IscrizioneREA']['StatoLiquidazione'] ?? null,
-
-                'phone' => $cedente['Contatti']['Telefono'] ?? null,
-                'fax' => $cedente['Contatti']['Fax'] ?? null,
-                'email' => $cedente['Contatti']['Email'] ?? null,
-                'pec' => null
-            ];
-
-            $supplier = Supplier::create($data);
+        if (!$supplier) {
+            $supplier = Supplier::where('denomination', 'LIKE', '%Estero%')
+                ->orderBy('id', 'asc')
+                ->first();
         }
 
         // dd($supplier);
@@ -1154,6 +1141,50 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
         // dd($output);
 
         return $output;
+    }
+
+    private function createNewSupplier(array &$output, array $cedente): ?Supplier
+    {
+        try {
+            $data = [
+                'company_id'            => Filament::getTenant()->id,
+
+                'denomination'          => Str::limit($cedente['DatiAnagrafici']['Anagrafica']['Denominazione'] ??
+                                            trim(($cedente['DatiAnagrafici']['Anagrafica']['Cognome'] ?? '') . ' ' . ($cedente['DatiAnagrafici']['Anagrafica']['Nome'] ?? '')), 255),
+                'tax_code'              => Str::limit($cedente['DatiAnagrafici']['CodiceFiscale'] ?? null, 255),
+                'vat_code'              => Str::limit($cedente['DatiAnagrafici']['IdFiscaleIVA']['IdCodice'] ?? null, 255),
+
+                'address'               => Str::limit($cedente['Sede']['Indirizzo'] ?? null, 255),
+                'civic_number'          => Str::limit($cedente['Sede']['NumeroCivico'] ?? null, 255),
+                'zip_code'              => Str::limit($cedente['Sede']['CAP'] ?? null, 255),
+                'city'                  => Str::limit($cedente['Sede']['Comune'] ?? null, 255),
+                'province'              => Str::limit($cedente['Sede']['Provincia'] ?? null, 255),
+                'country'               => Str::limit($cedente['Sede']['Nazione'] ?? null, 255),
+
+                'rea_office'            => Str::limit($cedente['IscrizioneREA']['Ufficio'] ?? null, 255),
+                'rea_number'            => Str::limit($cedente['IscrizioneREA']['NumeroREA'] ?? null, 255),
+                'capital'               => Str::limit($cedente['IscrizioneREA']['CapitaleSociale'] ?? null, 255),
+                'sole_share'            => Str::limit($cedente['IscrizioneREA']['SocioUnico'] ?? null, 255),
+                'liquidation_status'    => $cedente['IscrizioneREA']['StatoLiquidazione'] ?? null,
+
+                'phone'                 => Str::limit($cedente['Contatti']['Telefono'] ?? null, 255),
+                'fax'                   => Str::limit($cedente['Contatti']['Fax'] ?? null, 255),
+                'email'                 => Str::limit($cedente['Contatti']['Email'] ?? null, 255),
+                'pec'                   => null
+            ];
+
+            $newSupplier = Supplier::create($data);
+
+            if ($newSupplier) {
+                $output['new'] = true;
+                return $newSupplier;
+            }
+
+            return null;
+        } catch (Exception $e) {
+            // Se c'è un errore (es. database) restituiamo null per attivare il fallback Estero
+            return null;
+        }
     }
 
     private function createPassiveInvoice(array $param): PassiveInvoice

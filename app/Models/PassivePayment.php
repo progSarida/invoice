@@ -73,16 +73,16 @@ class PassivePayment extends Model
             $payment->registration_date = now()->toDateString();
             $payment->registration_user_id = Auth::id();
             $updatedInvoice = false;
+            $invoice = $payment->passiveInvoice;
 
-            if ($payment->isDirty('amount') && $payment->passiveInvoice) {
+            if ($payment->isDirty('amount') && $invoice) {
                 $originalAmount = $payment->getOriginal('amount');
-                $invoice = $payment->passiveInvoice;
                 $invoice->total_payment = $invoice->total_payment - $originalAmount + $payment->amount;
                 $updatedInvoice = true;
             }
 
-            if ($payment->isDirty('payment_date') && $payment->passiveInvoice && $payment->passiveInvoice->last_payment_date < $payment->payment_date) {
-                $payment->passiveInvoice->last_payment_date = $payment->payment_date;
+            if ($payment->isDirty('payment_date') && $invoice && $invoice->last_payment_date < $payment->payment_date) {
+                $invoice->last_payment_date = $payment->payment_date;
                 $updatedInvoice = true;
             }
 

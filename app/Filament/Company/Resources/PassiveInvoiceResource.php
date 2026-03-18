@@ -68,11 +68,11 @@ class PassiveInvoiceResource extends Resource
                         // ->visible(fn($record) => $record && filled($record->pi_validation_id))
                         ->visible(fn($record) => $record )
                         ->content(function ($record) {
-                            if (!$record->pi_validation_id) {
+                            if (!$record?->pi_validation_id) {
                                 return 'Nessuna validazione selezionata';
                             }
 
-                            return optional($record->piValidation)->name;
+                            return optional($record?->piValidation)->name;
                         })
                         ->extraAttributes(function ($record) {
                             $statusEnum = $record?->piValidation?->pi_validation_status;
@@ -127,7 +127,7 @@ class PassiveInvoiceResource extends Resource
                                 ->columnSpan(3)
                                 ->relationship('parent', 'denomination')
                                 ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => $record->number
+                                    fn (Model $record) => $record?->number
                                 )
                                 ->visible(fn (Get $get) => !is_null($get('parent_id')))
                                 //  ->disabled()
@@ -193,7 +193,7 @@ class PassiveInvoiceResource extends Resource
                                 )
                                 ->getOptionLabelFromRecordUsing(
                                     function (Model $record) {
-                                        $return = "Fattura n. {$record->number} del {$record->invoice_date->format('d/m/Y')} ";
+                                        $return = "Fattura n. {$record?->number} del {$record?->invoice_date->format('d/m/Y')} ";
                                         return $return;
                                     }
                                 )
@@ -220,9 +220,9 @@ class PassiveInvoiceResource extends Resource
                                     ->label('Visualizza pdf')
                                     ->icon('heroicon-o-eye')
                                     // ->url(fn($record): ?string => $record && $record->pdf_path ? Storage::url($record->pdf_path) : null)
-                                    ->url(fn($record): ?string => $record->pdf_path ? Storage::temporaryUrl($record->pdf_path,now()->addMinutes(1)) : null)
+                                    ->url(fn($record): ?string => $record?->pdf_path ? Storage::temporaryUrl($record?->pdf_path,now()->addMinutes(1)) : null)
                                     ->openUrlInNewTab()
-                                    ->visible(fn($record): bool => $record && $record->pdf_path)
+                                    ->visible(fn($record): bool => $record && $record?->pdf_path)
                                     ->color('primary'),
                             ])
                             ->columnSpan(2),
@@ -252,9 +252,9 @@ class PassiveInvoiceResource extends Resource
                                     ->label('Visualizza xml')
                                     ->icon('heroicon-o-eye')
                                     // ->url(fn($record): ?string => $record && $record->xml_path ? Storage::url($record->xml_path) : null)
-                                    ->url(fn($record): ?string => $record->xml_path ? Storage::temporaryUrl($record->xml_path,now()->addMinutes(1)) : null)
+                                    ->url(fn($record): ?string => $record?->xml_path ? Storage::temporaryUrl($record?->xml_path,now()->addMinutes(1)) : null)
                                     ->openUrlInNewTab()
-                                    ->visible(fn($record): bool => $record && $record->xml_path)
+                                    ->visible(fn($record): bool => $record && $record?->xml_path)
                                     ->color('primary'),
                             ])
                             ->columnSpan(2),
@@ -368,7 +368,7 @@ class PassiveInvoiceResource extends Resource
                     ->label('Tipo documento')
                     ->searchable()
                     ->limit(30)
-                    ->tooltip(fn ($record) => $record->docType->description)
+                    ->tooltip(fn ($record) => $record?->docType->description)
                     ->sortable(),
                 TextColumn::make('number')
                     ->label('Numero')
@@ -382,14 +382,14 @@ class PassiveInvoiceResource extends Resource
                     ->label('Fornitore')
                     ->searchable()
                     ->limit(30)
-                    ->tooltip(fn ($record) => $record->supplier->denomination)
+                    ->tooltip(fn ($record) => $record?->supplier->denomination)
                     ->sortable(),
                 TextColumn::make('description')
                     ->label('Descrizione')
                     ->searchable()
                     ->wrap()
                     ->limit(25)
-                    ->tooltip(fn ($record) => $record->description)
+                    ->tooltip(fn ($record) => $record?->description)
                     ->sortable(),
                 TextColumn::make('total')
                     ->label('Dovuto')
@@ -407,7 +407,7 @@ class PassiveInvoiceResource extends Resource
                 Tables\Columns\IconColumn::make('piValidation.pi_validation_status')
                     ->label('Validazione')
                     ->default(\App\Enums\PiValidationStatus::NO_STATUS)
-                    ->tooltip(fn ($record): string => $record->piValidation ? $record->piValidation->name : 'Non validata')
+                    ->tooltip(fn ($record): string => $record?->piValidation ? $record?->piValidation->name : 'Non validata')
                     ->sortable(),
                 TextColumn::make('total_payment')
                     ->label('Pagato')
@@ -433,7 +433,7 @@ class PassiveInvoiceResource extends Resource
                             ->toArray();
                         return $suppliers;
                     })
-                    ->getOptionLabelUsing(fn ($record) => $record->description),
+                    ->getOptionLabelUsing(fn ($record) => $record?->description),
                 SelectFilter::make('doc_type')
                     ->label('Seleziona tipo documento')
                     ->options(function () {
@@ -464,7 +464,7 @@ class PassiveInvoiceResource extends Resource
                             ->toArray();
                         return $actualTypes;
                     })
-                    ->getOptionLabelUsing(fn ($record) => $record->description)
+                    ->getOptionLabelUsing(fn ($record) => $record?->description)
                     ->default(function() {
                         // $excludedGroups = ['Note di variazione', 'Autofatture'];
                         $excludedGroups = ['Autofatture'];
@@ -753,7 +753,7 @@ class PassiveInvoiceResource extends Resource
                     //     }
                     // })
                     ->query(function (Builder $query, array $data): Builder {
-Log::info("Valore: " . CurrencyService::parseNumber($data['total_from']));
+// Log::info("Valore: " . CurrencyService::parseNumber($data['total_from']));
                         return $query
                             // Applica il filtro "Da" se presente
                             ->when(
@@ -812,7 +812,7 @@ Log::info("Valore: " . CurrencyService::parseNumber($data['total_from']));
                     ->tooltip('Scarica PDF')
                     ->icon('phosphor-file-pdf-duotone')
                     ->iconSize('lg')
-                    ->url(fn($record): ?string => $record->pdf_path ? Storage::temporaryUrl($record->pdf_path,now()->addMinutes(1)) : null)
+                    ->url(fn($record): ?string => $record?->pdf_path ? Storage::temporaryUrl($record?->pdf_path,now()->addMinutes(1)) : null)
                     ->openUrlInNewTab()
                     // ->action(function ($record) {
                     //     $pdfPath = $record->pdf_path;
@@ -824,7 +824,7 @@ Log::info("Valore: " . CurrencyService::parseNumber($data['total_from']));
                     //     }
                     //     return redirect()->back()->with('error', 'File PDF non trovato.');
                     // })
-                    ->visible(fn($record) => $record && $record->pdf_path)
+                    ->visible(fn($record) => $record && $record?->pdf_path)
                     // ->visible(function ($record) {
                     //     $visible = !empty($record->pdf_path) && Storage::disk('public')->exists($record->pdf_path);
                     //     return $visible;
@@ -835,7 +835,7 @@ Log::info("Valore: " . CurrencyService::parseNumber($data['total_from']));
                     ->tooltip('Scarica XML')
                     ->icon('tabler-file-type-xml')
                     ->iconSize('lg')
-                    ->url(fn($record): ?string => $record->xml_path ? Storage::temporaryUrl($record->xml_path,now()->addMinutes(1)) : null)
+                    ->url(fn($record): ?string => $record?->xml_path ? Storage::temporaryUrl($record?->xml_path,now()->addMinutes(1)) : null)
                     ->openUrlInNewTab()
                     // ->action(function ($record) {
                     //     $xmlPath = $record->xml_path;
@@ -847,7 +847,7 @@ Log::info("Valore: " . CurrencyService::parseNumber($data['total_from']));
                     //     }
                     //     return redirect()->back()->with('error', 'File XML non trovato.');
                     // })
-                    ->visible(fn($record) => $record && $record->xml_path)
+                    ->visible(fn($record) => $record && $record?->xml_path)
                     // ->visible(function ($record) {
                     //     $visible = !empty($record->xml_path) && Storage::disk('public')->exists($record->xml_path);
                     //     return $visible;
