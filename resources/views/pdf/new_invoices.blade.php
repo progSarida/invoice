@@ -256,8 +256,8 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Descrizione</th>
                 <th></th>
+                <th>Descrizione</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -296,10 +296,15 @@
                 @php
                     $payments = $invoice->activePayments?->sum('amount') ?? 0;
 
-                    $notes = $invoice->creditNotes?->sum('total') ?? 0;
+                    $notes = $invoice->client->type == App\Enums\ClientType::PUBLIC ? $invoice->creditNotes?->sum('no_vat_total') ?? 0 : $invoice->creditNotes?->sum('total') ?? 0;
                     $n[] = $notes;
 
-                    $residue = $invoice->total - $payments - $notes;
+                    $total = $invoice->client->type == App\Enums\ClientType::PUBLIC ? $invoice->no_vat_total : $invoice->total;
+
+                    $residue = $total - $payments - $notes;
+
+                    if($invoice->docType?->name == 'TD04') $residue = 0.0;
+
                 @endphp
                 <tr class="record-row-first">
                     <td colspan="2">{{ $invoice->id }}</td>
@@ -312,7 +317,7 @@
                     <td colspan="2">{{ $invoice->client->denomination }}</td>
                     <td colspan="2">{{ $invoice->tax_type->getLabel() }}</td>
                     <td colspan="2">{{ $invoice->contract?->payment_type->getLabel() }}</td>
-                    <td colspan="2">{{ euroFormat($invoice->total) }}</td>
+                    <td colspan="2">{{ euroFormat($total) }}</td>
                     <td colspan="2">{{ $invoice->sdi_status->getLabel() }}</td>
                 </tr>
                 <tr class="record-row-third">
