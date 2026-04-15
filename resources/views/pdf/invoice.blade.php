@@ -42,9 +42,9 @@
         <tr>
             @php
                 $paied = '';
-                if (in_array($invoice->payment_status->value, ['paied', 'paied_credit_note'])) {
-                    $paied = 'FATTURA PAGATA - ';
-                }
+                // if (in_array($invoice->payment_status->value, ['paied', 'paied_credit_note'])) {
+                //     $paied = 'FATTURA PAGATA - ';
+                // }
             @endphp
             <td class="padding">{{ $paied }}{{ $invoice->description }}</td>
         </tr>
