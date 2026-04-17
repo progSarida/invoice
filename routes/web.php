@@ -2,9 +2,7 @@
 
 use App\Http\Controllers\SsoController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
 
 Route::get('/auth/callback', [SsoController::class, 'callback'])->name('sso.callback');
 Route::get('/sso-login', [SsoController::class, 'redirect'])->name('sso.login');

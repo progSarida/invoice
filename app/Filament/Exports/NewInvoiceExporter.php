@@ -138,7 +138,15 @@ class NewInvoiceExporter extends Exporter
             //     ->label('Bollo'),
             ExportColumn::make('total')
                 ->label('Totale')
-                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '.') : $state),
+                // ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '.') : $state)
+                ->formatStateUsing(function ($record) {
+                    // Usa 'total' se il cliente è pubblico, altrimenti 'no_vat_total'
+                    $value = $record->client?->isPublic()
+                        ? $record->total
+                        : $record->no_vat_total;
+
+                    return is_numeric($value) ? number_format($value, 2, ',', '.') : $value;
+                }),
             // ExportColumn::make('no_vat_total')
             //     ->label('Totale senza IVA'),
             ExportColumn::make('bankAccount.name')

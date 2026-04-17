@@ -63,7 +63,7 @@ class NewActivePaymentsResource extends Resource
                 Forms\Components\Select::make('invoice_id')
                     ->label('Fattura')
                     ->placeholder('Seleziona una fattura...')
-                    ->hintIcon('heroicon-o-information-circle', tooltip: "Digitare 'Tutte' nella ricerca per mostrare tutte fatture non pagate")
+                    ->hintIcon('heroicon-o-information-circle', tooltip: "Digitare 'Tutte' nella ricerca per mostrare tutte fatture non pagate, oppure inserire direttamente numero e anno, oppure il nome del cliente.")
                     ->getSearchResultsUsing(function (string $search, $record) {
                         // Rimuovi spazi multipli e trim
                         $search = trim(preg_replace('/\s+/', ' ', $search));
@@ -75,16 +75,34 @@ class NewActivePaymentsResource extends Resource
                             ->where('sdi_status', '!=', 'da_inviare')                   // solo le fatture inviate allo sdi
                             ->whereNull('parent_id')                                    // escludo le note di credito
                             ->with(['client', 'sectional'])
+                            // ->where(function ($q) {
+                            //     $q->whereHas('client', function ($clientQuery) {
+                            //         $clientQuery->where('type', ClientType::PUBLIC);
+                            //     })
+                            //     ->whereColumn('total_payment', '<', 'no_vat_total')     // solo non pagate (verso pubb. amm.)
+                            //     ->orWhere(function ($q2) {                              // o
+                            //         $q2->whereHas('client', function ($clientQuery) {
+                            //             $clientQuery->where('type', ClientType::PRIVATE);
+                            //         })
+                            //         ->whereColumn('total_payment', '<', 'total');       // solo no pagate (verso privati)
+                            //     });
+                            // });
                             ->where(function ($q) {
-                                $q->whereHas('client', function ($clientQuery) {
-                                    $clientQuery->where('type', ClientType::PUBLIC);
+                                // Caso: Pubblica Amministrazione
+                                $q->where(function ($publicQuery) {
+                                    $publicQuery->whereHas('client', function ($clientQuery) {
+                                        $clientQuery->where('type', ClientType::PUBLIC);
+                                    })
+                                    // Verifica se pagamenti + note di credito sono inferiori al totale imponibile
+                                    ->whereRaw('(total_payment + total_notes) < no_vat_total');
                                 })
-                                ->whereColumn('total_payment', '<', 'no_vat_total')     // solo non pagate (verso pubb. amm.)
-                                ->orWhere(function ($q2) {                              // o
-                                    $q2->whereHas('client', function ($clientQuery) {
+                                // Caso: Privati
+                                ->orWhere(function ($privateQuery) {
+                                    $privateQuery->whereHas('client', function ($clientQuery) {
                                         $clientQuery->where('type', ClientType::PRIVATE);
                                     })
-                                    ->whereColumn('total_payment', '<', 'total');       // solo no pagate (verso privati)
+                                    // Verifica se pagamenti + note di credito sono inferiori al totale ivato
+                                    ->whereRaw('(total_payment + total_notes) < total');
                                 });
                             });
 
@@ -119,6 +137,14 @@ class NewActivePaymentsResource extends Resource
                                     $query->where(function ($q) use ($value) {
                                         $q->where('number', $value)
                                         ->orWhere('year', $value);
+                                    });
+                                }
+                                else{
+                                    // Se non è numerico, cerco match parziale in client.denomination o sectional.description
+                                    $query->where(function ($q) use ($search) {
+                                        $q->whereHas('client', function ($clientQ) use ($search) {
+                                            $clientQ->where('denomination', 'like', "%{$search}%");
+                                        });
                                     });
                                 }
                             }

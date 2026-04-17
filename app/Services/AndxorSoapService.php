@@ -859,7 +859,7 @@ Log::info("Creazione notitifca sdi");
             if (Storage::exists('temp/' . $zipName)) {
                 Storage::delete('temp/' . $zipName);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             \Log::error("Errore durante il cleanup dei file SDI", [
                 'zip' => $zipName,
                 'error' => $e->getMessage()
@@ -876,7 +876,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
         }
 
         SdiRequest::create([
-            'company_id' => \Filament\Facades\Filament::getTenant()->id,
+            'company_id' => Filament::getTenant()->id,
             'request_date' => today()->format('Y-m-d'),
             'sdi_request_type' => 'mass',
             'invoice_id' => null
@@ -1007,7 +1007,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
         // if (Storage::disk('public')->put($relativePath, $content)) {
             return $relativePath; // Restituisco il percorso relativo
         } else {
-            throw new \Exception("Errore durante il salvataggio del file XML: $filename");
+            throw new Exception("Errore durante il salvataggio del file XML: $filename");
         }
     }
 
@@ -1023,7 +1023,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
         // if (Storage::disk('public')->put($relativePath, $content)) {
             return $relativePath; // Restituisco il percorso relativo
         } else {
-            throw new \Exception("Errore durante il salvataggio del file PDF: $filename");
+            throw new Exception("Errore durante il salvataggio del file PDF: $filename");
         }
     }
 
@@ -1039,7 +1039,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
         // if (Storage::disk('public')->put($relativePath, $content)) {
             return $relativePath; // Restituisco il percorso relativo
         } else {
-            throw new \Exception("Errore durante il salvataggio del file XML: $filename");
+            throw new Exception("Errore durante il salvataggio del file XML: $filename");
         }
     }
 
@@ -1055,7 +1055,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
         // if (Storage::disk('public')->put($relativePath, $content)) {
             return $relativePath; // Restituisco il percorso relativo
         } else {
-            throw new \Exception("Errore durante il salvataggio del file PDF: $filename");
+            throw new Exception("Errore durante il salvataggio del file PDF: $filename");
         }
     }
 
@@ -1798,12 +1798,12 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
             DB::commit();
 
             return $download;
-        } catch (\SoapFault $soapEx) {
+        } catch (SoapFault $soapEx) {
             DB::rollBack();
-            throw new \Exception('Errore SOAP: ' . $soapEx->getMessage());
-        } catch (\Exception $ex) {
+            throw new Exception('Errore SOAP: ' . $soapEx->getMessage());
+        } catch (Exception $ex) {
             DB::rollBack();
-            throw new \Exception('Errore: ' . $ex->getMessage());
+            throw new Exception('Errore: ' . $ex->getMessage());
         }
     }
 }

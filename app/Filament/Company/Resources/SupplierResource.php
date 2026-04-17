@@ -9,6 +9,7 @@ use App\Models\State;
 use App\Models\Supplier;
 use App\Services\CurrencyService;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -17,6 +18,7 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -34,7 +36,7 @@ class SupplierResource extends Resource
 
     protected static ?string $navigationGroup = 'Fatture passive';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {
@@ -215,16 +217,42 @@ class SupplierResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Data creazione')
-                    ->dateTime()
+                    ->date('d/m/Y H:m:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')->label('Data aggiornamento')
-                    ->dateTime()
+                    ->date('d/m/Y H:m:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('create_date_range')
+                    ->form([
+                        DatePicker::make('create_from_date')
+                            ->label('Data creazione da'),
+                        DatePicker::make('create_to_date')
+                            ->label('Data creazione a'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['create_from_date'])) {
+                            $query->whereDate('created_at', '>=', $data['create_from_date']);
+                        }
+                        if (! empty($data['create_to_date'])) {
+                            $query->whereDate('created_at', '<=', $data['create_to_date']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (! empty($data['create_from_date']) && ! empty($data['create_to_date'])) {
+                            return "Data creazione dal {$data['create_from_date']} al {$data['create_to_date']}";
+                        }
+                        if (! empty($data['create_from_date'])) {
+                            return "Data creazione dal {$data['create_from_date']}";
+                        }
+                        if (! empty($data['create_to_date'])) {
+                            return "Data creazione al {$data['create_to_date']}";
+                        }
+                        return null;
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
