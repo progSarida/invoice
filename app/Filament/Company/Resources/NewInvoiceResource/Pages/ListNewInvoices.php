@@ -4,7 +4,6 @@ namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 
 use App\Enums\ContractType;
 use Carbon\Carbon;
-use App\Models\User;
 use Filament\Actions;
 use App\Models\Invoice;
 use App\Models\NewContract;
@@ -29,8 +28,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Colors\Color;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class ListNewInvoices extends ListRecords
 {
@@ -407,7 +404,7 @@ class ListNewInvoices extends ListRecords
                                 ->warning()
                                 ->send();
                         try {
-                            $response = $soapService->updateStatusList($list, $data['password']);
+                            $soapService->updateStatusList($list, $data['password']);
                             Notification::make()
                                 ->title('Stato fatture aggiornato con successo')
                                 ->success()

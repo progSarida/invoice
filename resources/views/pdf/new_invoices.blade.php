@@ -285,7 +285,7 @@
                 <th></th>
                 <th>Tipo pagamento</th>
                 <th></th>
-                <th>Totale a doversi</th>
+                <th>Totale</th>
                 <th></th>
                 <th>Status</th>
                 <th></th>
@@ -311,7 +311,7 @@
                     <td colspan="14" class="description-cell">{{ trim($invoice->description) }}</td>
                 </tr>
                 <tr class="record-row-second">
-                    <td colspan="2">{{ $invoice->docType?->name }}</td>
+                    <td colspan="2">{{ $invoice->docType?->description }}</td>
                     <td colspan="2">{{ $invoice->getNewInvoiceNumber() }}</td>
                     <td colspan="2">{{ \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y') }}</td>
                     <td colspan="2">{{ $invoice->client->denomination }}</td>
@@ -332,7 +332,7 @@
                     <td>{{ euroFormat($payments) }}</td>
                     <th>Nota</th>
                     <td>{{ euroFormat($notes) }}</td>
-                    <th>Residuo</th>
+                    <th>Dovuto</th>
                     <td>{{ euroFormat($residue) }}</td>
                     <td></td>
                     <td></td>
