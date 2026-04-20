@@ -703,7 +703,12 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
         $contract = $invoice->contract;
         if (!$contract) return;
 
-        $totalInvoiced = Invoice::where('contract_id', $contract->id)->sum('no_vat_total'); // totale non ivato di tutte le fatture per questo contratto
+        $query = Invoice::where('contract_id', $contract->id)                               // calcolo il totale fatturato
+            ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
+        if($contract->client->type == ClientType::PUBLIC)
+            $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
+        else
+            $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
 
         $limit = $contract->amount;
 

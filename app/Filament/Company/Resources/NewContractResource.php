@@ -1,9 +1,12 @@
 <?php
 namespace App\Filament\Company\Resources;
 
+use App\Enums\ClientType;
 use App\Enums\InvoicingCicle;
+use App\Models\Invoice;
 use App\Services\CurrencyService;
 use Filament\Forms;
+use Filament\Forms\Components\Checkbox;
 use Filament\Tables;
 use App\Enums\TaxType;
 use App\Models\Client;
@@ -11,6 +14,8 @@ use App\Models\Company;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use App\Models\AccrualType;
 use App\Models\NewContract;
@@ -389,8 +394,60 @@ class NewContractResource extends Resource
                     ->label('Capienza')
                     ->sortable()
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . " €"),
+                TextColumn::make('invoiced')
+                    ->label('Fatturato')
+                    ->sortable()
+                    ->state(function ($record) {
+                        $query = Invoice::where('contract_id', $record->id)                                 // calcolo il totale fatturato
+                            ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
+                        if($record->client->type == ClientType::PUBLIC)
+                            $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
+                        else
+                            $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
+                        return number_format($totalInvoiced, 2, ',', '.') . " €";
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('closed')
+                    ->label('Stato')
+                    ->formatStateUsing(fn ($state) => $state ? 'Chiuso' : 'Attivo')
+                    ->colors([
+                        'success' => fn($state) => $state === false,
+                        'danger' => fn($state) => $state === true,
+                    ])
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('invoicing_cycle')
+                    ->label('Periodicità')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Filter::make('past_deadline')
+                    ->form([
+                        Checkbox::make('active')
+                            ->label('Mostra solo attivi')
+                            ->disabled(function(Get $get) {
+                                return $get('closed') === true;
+                            }),
+                        Checkbox::make('closed')
+                            ->label('Mostra solo scaduti')
+                            ->disabled(function(Get $get) {
+                                return $get('active') === true;
+                            }),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['active'])) {
+                            $query->where('closed', false);
+                        }
+                        else if (!empty($data['closed'])) {
+                            $query->where('closed', true);
+                        }
+                        else $query;
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if(!empty($data['active'])) return 'Attivi';
+                        if(!empty($data['closed'])) return 'Chiusi';
+                        return null;
+                    }),
                 SelectFilter::make('client_id')->label('Cliente')
                     // ->relationship(name: 'client', titleAttribute: 'denomination')
                     ->getSearchResultsUsing(function (string $search) {
@@ -462,6 +519,8 @@ class NewContractResource extends Resource
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('payment_type')->label('Remunerazione')->options(TenderPaymentType::class)
+                    ->multiple()->preload(),
+                SelectFilter::make('invoicing_cycle')->label('Periodicità')->options(InvoicingCicle::class)
                     ->multiple()->preload(),
             // ], layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
             ])
@@ -827,10 +886,12 @@ class NewContractResource extends Resource
     {
         $contract->company_id = Filament::getTenant()->id;
         $contract->client_id = $data['client_id'];
-        $contract->tax_types = $data['tax_types'];
+        // $contract->tax_types = $data['tax_types'];
+        $contract->setTaxTypesAttribute($data['tax_types']);
         $contract->start_validity_date = $data['start_validity_date'];
         $contract->end_validity_date = $data['end_validity_date'];
-        $contract->accrual_types = $data['accrual_types'];
+        // $contract->accrual_types = $data['accrual_types'];
+        $contract->setAccrualTypesAttribute($data['accrual_types']);
         $contract->payment_type = $data['payment_type'];
         $contract->cig_code = $data['cig_code'];
         $contract->cup_code = $data['cup_code'];
