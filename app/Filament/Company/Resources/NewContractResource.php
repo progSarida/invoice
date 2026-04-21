@@ -393,7 +393,8 @@ class NewContractResource extends Resource
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Capienza')
                     ->sortable()
-                    ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . " €"),
+                    ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . " €")
+                    ->alignRight(),
                 TextColumn::make('invoiced')
                     ->label('Fatturato')
                     ->sortable()

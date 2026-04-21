@@ -171,6 +171,7 @@ class PassiveItemsRelationManager extends RelationManager
                     ->label('Aliquota IVA')
                     ->required()
                     // ->numeric()
+                    ->formatStateUsing(fn ($state) => (int) $state)
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->prefix('%')
                     ->columnSpan(4),
