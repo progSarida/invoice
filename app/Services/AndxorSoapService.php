@@ -689,7 +689,7 @@ Log::info("Stato sdi: " . $newStatus);
             $info = $this->processResponse($sdiStatus, $responseZIP);
         }
 // dd('STOP');
-        if($invoice->sdi_status != $newStatus && $invoice->sdi_status->updateStatus()){                     // modifico se è diverso da quello esistente
+        if($invoice->sdi_status->value != $newStatus && $invoice->sdi_status->updateStatus()){              // modifico se è diverso da quello esistente
                                                                                                             // e questo non è RIFIUTO_EMESSO, RIFIUTO_ARCHIVIATO, SCARTO_VALIDATO,
                                                                                                             // MANCATA_CONSEGNA_VALIDATA, AUTO_INVIATA, APERTA
         // Aggiorno stato e data modifica stato della fattura

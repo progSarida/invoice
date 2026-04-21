@@ -1312,6 +1312,10 @@ class PostalExpenseResource extends Resource
                 Tables\Columns\TextColumn::make('actType.name')
                     // ->badge()
                     ->label('Tipo atto'),
+                Tables\Columns\TextColumn::make('act_date')
+                    // ->badge()
+                    ->date('d/m/Y')
+                    ->label('Data atto'),
                 Tables\Columns\TextColumn::make('counterpart')
                     ->label('Controparte')
                     ->getStateUsing(function ($record) {
