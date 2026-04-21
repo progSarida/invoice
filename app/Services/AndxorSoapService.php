@@ -41,7 +41,7 @@ class AndxorSoapService
         $options = [
             'trace' => true,
             'exceptions' => true,
-            'cache_wsdl' => WSDL_CACHE_NONE,
+            'cache_wsdl' => \WSDL_CACHE_NONE,
             'soap_version' => SOAP_1_1,
         ];
 

@@ -355,6 +355,66 @@ Log::info('Commit');
                         }, 'fattura-' . $record->printNumber() . '.pdf');
                     }),
 
+                // Actions\Action::make('sendInvoice')
+                //     ->label('Invia a SDI')
+                //     ->icon('tabler-send')
+                //     ->visible(function($record) {
+                //         $prec = Invoice::where('year', $record->year)
+                //                     ->where('sectional_id', $record->sectional_id)
+                //                     ->where('number', '<', $record->number)
+                //                     ->with(['client'])
+                //                     ->whereHas('client', function ($q) {
+                //                         $q->whereNotIn('subtype', [ClientSubType::MAN, ClientSubType::WOMAN]);
+                //                     })
+                //                     ->orderBy('number', 'desc')
+                //                     ->first();
+                //         $precOk = $prec ? $prec->sdi_status != SdiStatus::DA_INVIARE : true;
+                //         $noForewarning = $record->docType->name != 'TD00';
+                //         return $precOk && $noForewarning;
+                //     })
+                //     ->action(function (Invoice $record, array $data) {
+                //         $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
+                //             ? $record->invoiceItems->where('auto', false)
+                //             : $record->invoiceItems()->where('auto', false)->get();
+                //         if($items == null)
+                //             Notification::make()
+                //                 ->title('Errore')
+                //                 ->body('Impossibile inviare la fattura alla SdI. Voci fattura non presenti.')
+                //                 ->warning()
+                //                 ->send();
+                //         else{
+                //             $soapService = app(AndxorSoapService::class);
+                //             try {
+                //                 $response = $soapService->sendInvoice($record, $data['password']);
+                //                 // $response = $soapService->sendInvoice($record, 'W3iDWc3Q9w.3AUgd2zpz4');
+                //                 Notification::make()
+                //                     ->title('Fattura inviata con successo')
+                //                     ->body('Progressivo: ' . $response->ProgressivoInvio)
+                //                     ->success()
+                //                     ->send();
+                //             } catch (\Exception $e) {
+                //                 Notification::make()
+                //                     ->title('Errore')
+                //                     ->body($e->getMessage())
+                //                     ->danger()
+                //                     ->duration(10000)
+                //                     ->send();
+                //             }
+                //         }
+                //     })
+                //     ->disabled(function (Invoice $record) {
+                //         // return $record->service_code != null;
+                //         return $record->sdi_status->lockSend();
+                //     })
+                //     ->form([
+                //         TextInput::make('password')
+                //             ->label('Password SOAP')
+                //             ->password()
+                //             ->revealable()
+                //             ->required(),
+                //     ])
+                //     ->requiresConfirmation(),
+
                 Actions\Action::make('sendInvoice')
                     ->label('Invia a SDI')
                     ->icon('tabler-send')
@@ -383,27 +443,21 @@ Log::info('Commit');
                                 ->warning()
                                 ->send();
                         else{
-                            $soapService = app(AndxorSoapService::class);
-                            try {
-                                $response = $soapService->sendInvoice($record, $data['password']);
-                                // $response = $soapService->sendInvoice($record, 'W3iDWc3Q9w.3AUgd2zpz4');
-                                Notification::make()
-                                    ->title('Fattura inviata con successo')
-                                    ->body('Progressivo: ' . $response->ProgressivoInvio)
-                                    ->success()
-                                    ->send();
-                            } catch (\Exception $e) {
-                                Notification::make()
-                                    ->title('Errore')
-                                    ->body($e->getMessage())
-                                    ->danger()
-                                    ->duration(10000)
-                                    ->send();
-                            }
+                            // Dispatch del job in background
+                            \App\Jobs\SendInvoiceToSdiJob::dispatch(
+                                $record,
+                                $data['password'],
+                                auth()->id()
+                            );
+
+                            Notification::make()
+                                ->title('Invio in elaborazione')
+                                ->body("La fattura {$record->getNewInvoiceNumber()} è stata messa in coda per l'invio allo SDI. Riceverai una notifica al termine.")
+                                ->info()
+                                ->send();
                         }
                     })
                     ->disabled(function (Invoice $record) {
-                        // return $record->service_code != null;
                         return $record->sdi_status->lockSend();
                     })
                     ->form([
@@ -415,37 +469,68 @@ Log::info('Commit');
                     ])
                     ->requiresConfirmation(),
 
+                // Actions\Action::make('getStatus')
+                //     ->label('Aggiorna stato SDI')
+                //     ->icon('tabler-refresh')
+                //     ->visible(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE && $record->docType->name != 'TD00')
+                //     ->action(function (Invoice $record, array $data) {
+                //         $soapService = app(AndxorSoapService::class);
+                //         try {
+                //             $response = $soapService->updateStatus($record, $data['password']);
+
+                //             SdiRequest::create([
+                //                 'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                //                 'request_date' => today()->format('Y-m-d'),
+                //                 'sdi_request_type' => 'single',
+                //                 'invoice_id' => $record->id
+                //             ]);
+
+                //             Notification::make()
+                //                 ->title('Stato fattura aggiornato con successo')
+                //                 // ->body('Progressivo: ' . $response->ProgressivoInvio)
+                //                 ->success()
+                //                 ->send();
+                //         } catch (\Exception $e) {
+                //             Notification::make()
+                //                 ->title('Errore')
+                //                 ->body($e->getMessage())
+                //                 ->danger()
+                //                 ->send();
+                //         }
+                //     })
+                //     ->disabled(function (Invoice $record) {
+                //         // return $record->service_code != null;
+                //         return $record->sdi_status->lockUpdate();
+                //     })
+                //     ->form([
+                //         TextInput::make('password')
+                //             ->label('Password SOAP')
+                //             ->password()
+                //             ->revealable()
+                //             ->required(),
+                //     ])
+                //     ->requiresConfirmation(),
+
                 Actions\Action::make('getStatus')
                     ->label('Aggiorna stato SDI')
                     ->icon('tabler-refresh')
                     ->visible(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE && $record->docType->name != 'TD00')
                     ->action(function (Invoice $record, array $data) {
-                        $soapService = app(AndxorSoapService::class);
-                        try {
-                            $response = $soapService->updateStatus($record, $data['password']);
+                        // Dispatch del job in background
+                        \App\Jobs\UpdateInvoiceSdiStatusJob::dispatch(
+                            $record,
+                            $data['password'],
+                            Filament::getTenant()->id,
+                            auth()->id()
+                        );
 
-                            SdiRequest::create([
-                                'company_id' => \Filament\Facades\Filament::getTenant()->id,
-                                'request_date' => today()->format('Y-m-d'),
-                                'sdi_request_type' => 'single',
-                                'invoice_id' => $record->id
-                            ]);
-
-                            Notification::make()
-                                ->title('Stato fattura aggiornato con successo')
-                                // ->body('Progressivo: ' . $response->ProgressivoInvio)
-                                ->success()
-                                ->send();
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->title('Errore')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
+                        Notification::make()
+                            ->title('Aggiornamento in elaborazione')
+                            ->body("L'aggiornamento dello stato per la fattura {$record->getNewInvoiceNumber()} è stato messo in coda. Riceverai una notifica al termine.")
+                            ->info()
+                            ->send();
                     })
                     ->disabled(function (Invoice $record) {
-                        // return $record->service_code != null;
                         return $record->sdi_status->lockUpdate();
                     })
                     ->form([

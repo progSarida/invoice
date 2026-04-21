@@ -387,36 +387,62 @@ class ListNewInvoices extends ListRecords
                 //         CheckInvoicingContractsJob::dispatch(Filament::getTenant(), Auth::user());
                 //     }),
 
+                // Actions\Action::make('getStatusList')
+                //     ->label('Aggiorna stati SDI')
+                //     ->icon('tabler-refresh')
+                //     ->action(function (array $data) {
+                //         $soapService = app(AndxorSoapService::class);
+                //         $list = Invoice::where('flow', 'out')
+                //             ->whereNotIn('sdi_status', ['rifiutata', 'accettata', 'decorrenza_termini', 'scartata', 'mancata_consegna'])
+                //             ->where(function ($query) {
+                //                 $query->whereNotNull('sdi_code')
+                //                     ->orWhere('sdi_status', 'generata');
+                //             })
+                //             ->get();
+                //         if (count($list) === 0)
+                //             Notification::make()
+                //                 ->title('Nessuna fattura da aggiornare')
+                //                 ->warning()
+                //                 ->send();
+                //         try {
+                //             $soapService->updateStatusList($list, $data['password']);
+                //             Notification::make()
+                //                 ->title('Stato fatture aggiornato con successo')
+                //                 ->success()
+                //                 ->send();
+                //         } catch (\Exception $e) {
+                //             Notification::make()
+                //                 ->title('Errore')
+                //                 ->body($e->getMessage())
+                //                 ->danger()
+                //                 ->send();
+                //         }
+                //     })
+                //     ->form([
+                //         TextInput::make('password')
+                //             ->label('Password SOAP')
+                //             ->password()
+                //             ->revealable()
+                //             ->required(),
+                //     ])
+                //     ->requiresConfirmation(),
+
                 Actions\Action::make('getStatusList')
                     ->label('Aggiorna stati SDI')
                     ->icon('tabler-refresh')
                     ->action(function (array $data) {
-                        $soapService = app(AndxorSoapService::class);
-                        $list = Invoice::where('flow', 'out')
-                            ->whereNotIn('sdi_status', ['rifiutata', 'accettata', 'decorrenza_termini', 'scartata', 'mancata_consegna'])
-                            ->where(function ($query) {
-                                $query->whereNotNull('sdi_code')
-                                    ->orWhere('sdi_status', 'generata');
-                            })
-                            ->get();
-                        if (count($list) === 0)
-                            Notification::make()
-                                ->title('Nessuna fattura da aggiornare')
-                                ->warning()
-                                ->send();
-                        try {
-                            $soapService->updateStatusList($list, $data['password']);
-                            Notification::make()
-                                ->title('Stato fatture aggiornato con successo')
-                                ->success()
-                                ->send();
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->title('Errore')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
+                        // Dispatch del job in background
+                        \App\Jobs\UpdateMultipleInvoicesSdiStatusJob::dispatch(
+                            $data['password'],
+                            Filament::getTenant()->id,
+                            auth()->id()
+                        );
+
+                        Notification::make()
+                            ->title('Aggiornamento massivo avviato')
+                            ->body('L\'aggiornamento degli stati SDI è stato messo in coda. Riceverai una notifica al termine.')
+                            ->info()
+                            ->send();
                     })
                     ->form([
                         TextInput::make('password')
@@ -426,6 +452,7 @@ class ListNewInvoices extends ListRecords
                             ->required(),
                     ])
                     ->requiresConfirmation(),
+
                 // Actions\Action::make('emptyFolders')
                 //     ->label('Svuota Cartella XML e PDF')
                 //     ->icon('heroicon-o-trash')
