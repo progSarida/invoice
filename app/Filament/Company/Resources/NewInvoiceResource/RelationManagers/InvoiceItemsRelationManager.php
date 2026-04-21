@@ -324,14 +324,14 @@ class InvoiceItemsRelationManager extends RelationManager
                 //             ->money('EUR', true, 'it_IT'),
                 //     ]),
                 Tables\Columns\TextColumn::make('display_total')
-                ->label('Totale')
-                ->money('EUR', true, 'it_IT')
-                ->sortable()
-                ->summarize([
-                    Tables\Columns\Summarizers\Sum::make()
-                        ->label('')
-                        ->money('EUR', true, 'it_IT'),
-                ]),
+                    ->label('Totale')
+                    ->money('EUR', true, 'it_IT')
+                    ->sortable()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ]),
                 // Tables\Columns\TextColumn::make('total')->label('Totale')
                 //     // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                 //     // ->numeric()

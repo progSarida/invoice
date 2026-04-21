@@ -1372,8 +1372,7 @@ class NewInvoiceResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('docType.description')
-                    ->label('Tipo')
+                Tables\Columns\TextColumn::make('docType.description')->label('Tipo')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('number')->label('Numero')
@@ -1429,36 +1428,73 @@ class NewInvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('no_vat_total')->label('Imponibile')
                     ->money('EUR')
                     ->sortable()
-                    ->state(fn (Invoice $invoice) => $invoice->getTaxable())
+                    // ->state(fn (Invoice $invoice) => $invoice->getTaxable())
                     ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ])
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('vat')->label('IVA')
                     ->money('EUR')
                     // ->state(fn (Invoice $invoice) => $invoice->getVat())
                     ->sortable()
                     ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ])
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total')->label('Totale')
                     ->money('EUR')
                     ->sortable()
                     ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ])
                     // ->tooltip(fn (Invoice $record) => $record->total . " - " . "(" . $record->total_payment . " + " . $record->total_notes . ")" . " = " . $record->total-($record->total_payment+$record->total_notes))
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total_payment')->label('Pagamenti')
                     ->money('EUR')
                     ->sortable()
                     ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ])
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total_notes')->label('Note di credito')
                     ->money('EUR')
                     ->sortable()
                     ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ])
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('tot_res')->label('Dovuto')
                     ->money('EUR')
                     ->state(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getResidue())
                     ->sortable()
                     ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Summarizer::make()
+                            ->label('')
+                            ->using(function ($query) {
+                                // Forza il recupero come Collection di modelli Invoice
+                                return Invoice::query()
+                                    ->whereIn('id', $query->pluck('id'))
+                                    ->get()
+                                    ->sum(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getResidue());
+                            })
+                            ->money('EUR', true, 'it_IT'),
+                    ])
                     ->toggleable(isToggledHiddenByDefault: false),
                 // Tables\Columns\TextColumn::make('sdi_status')->label('Stato')
                 //     ->searchable()
@@ -1998,22 +2034,28 @@ class NewInvoiceResource extends Resource
             ->send();
     }
 
-    public static function saveContract(array $data, NewContract $contract): void
+    public static function saveContract(array $data, NewContract $contract, Set $set): void
     {
         $contract->company_id = Filament::getTenant()->id;
         $contract->client_id = $data['client_id'];
-        $contract->tax_type = $data['tax_type'];
+        // $contract->tax_types = $data['tax_types'];
+        $contract->setTaxTypesAttribute($data['tax_types']);
         $contract->start_validity_date = $data['start_validity_date'];
         $contract->end_validity_date = $data['end_validity_date'];
-        // $contract->accrual_type_id = $data['accrual_type_id'];
-        $contract->accrual_types = $data['accrual_types'];
+        // $contract->accrual_types = $data['accrual_types'];
+        $contract->setAccrualTypesAttribute($data['accrual_types']);
         $contract->payment_type = $data['payment_type'];
         $contract->cig_code = $data['cig_code'];
         $contract->cup_code = $data['cup_code'];
         $contract->office_code = $data['office_code'];
         $contract->office_name = $data['office_name'];
         $contract->amount = $data['amount'];
+        $contract->invoicing_cycle = $data['invoicing_cycle'] ?? null;
+        $contract->new_contract_copy_path = $data['new_contract_copy_path'] ?? null;
+        $contract->new_contract_copy_date = $data['new_contract_copy_date'] ?? null;
+        $contract->reinvoice = $data['reinvoice'] ?? false;
         $contract->save();
+        $set('contract_id', $contract->id);
         Notification::make()
             ->title('Contratto salvato con successo')
             ->success()
