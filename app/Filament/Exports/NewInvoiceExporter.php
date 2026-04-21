@@ -141,10 +141,12 @@ class NewInvoiceExporter extends Exporter
                 // ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '.') : $state)
                 ->formatStateUsing(function ($record) {
                     // Usa 'total' se il cliente è pubblico, altrimenti 'no_vat_total'
-                    $value = $record->client?->isPublic()
-                        ? $record->total
-                        : $record->no_vat_total;
-
+                    $value = 0;
+                    if(!$record->parent_id){
+                        $value = $record->client?->isPublic()
+                            ? $record->total
+                            : $record->no_vat_total;
+                    }
                     return is_numeric($value) ? number_format($value, 2, ',', '.') : $value;
                 }),
             // ExportColumn::make('no_vat_total')

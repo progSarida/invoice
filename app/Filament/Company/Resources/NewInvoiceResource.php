@@ -1431,8 +1431,22 @@ class NewInvoiceResource extends Resource
                     // ->state(fn (Invoice $invoice) => $invoice->getTaxable())
                     ->alignRight()
                     ->summarize([
-                        Tables\Columns\Summarizers\Sum::make()
+                        Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
+                            ->using(function ($query) {
+                                $sum = 0;
+                                $records = $query->get();
+
+                                foreach ($records as $record) {
+                                    if ($record->parent_id) {
+                                        $sum -= $record->no_vat_total;
+                                    } else {
+                                        $sum += $record->no_vat_total;
+                                    }
+                                }
+
+                                return $sum;
+                            })
                             ->money('EUR', true, 'it_IT'),
                     ])
                     ->toggleable(isToggledHiddenByDefault: false),
@@ -1442,8 +1456,22 @@ class NewInvoiceResource extends Resource
                     ->sortable()
                     ->alignRight()
                     ->summarize([
-                        Tables\Columns\Summarizers\Sum::make()
+                        Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
+                            ->using(function ($query) {
+                                $sum = 0;
+                                $records = $query->get();
+
+                                foreach ($records as $record) {
+                                    if ($record->parent_id) {
+                                        $sum -= $record->vat;
+                                    } else {
+                                        $sum += $record->vat;
+                                    }
+                                }
+
+                                return $sum;
+                            })
                             ->money('EUR', true, 'it_IT'),
                     ])
                     ->toggleable(isToggledHiddenByDefault: false),
@@ -1452,8 +1480,22 @@ class NewInvoiceResource extends Resource
                     ->sortable()
                     ->alignRight()
                     ->summarize([
-                        Tables\Columns\Summarizers\Sum::make()
+                        Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
+                            ->using(function ($query) {
+                                $sum = 0;
+                                $records = $query->get();
+
+                                foreach ($records as $record) {
+                                    if ($record->parent_id) {
+                                        $sum -= $record->total;
+                                    } else {
+                                        $sum += $record->total;
+                                    }
+                                }
+
+                                return $sum;
+                            })
                             ->money('EUR', true, 'it_IT'),
                     ])
                     // ->tooltip(fn (Invoice $record) => $record->total . " - " . "(" . $record->total_payment . " + " . $record->total_notes . ")" . " = " . $record->total-($record->total_payment+$record->total_notes))
@@ -1525,6 +1567,7 @@ class NewInvoiceResource extends Resource
                     // ->options(function () {
                     //     return DocType::orderBy('doc_group_id')->pluck('description', 'id')->toArray();
                     // })
+                    ->placeholder('Selezionare fatture e note di credito per avere i totali corretti')
                     ->options(function (Get $record) {
                         $docs = Filament::getTenant()
                                     ->docTypes()

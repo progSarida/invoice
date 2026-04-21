@@ -327,14 +327,12 @@
                     <td>{{ $invoice->budget_year }}</td>
                     <td></td>
                     <td></td>
-                    <td></td>
                     <th>Pagamenti</th>
-                    <td>{{ euroFormat($payments) }}</td>
+                    <td colspan="2">{{ euroFormat($payments) }}</td>
                     <th>Nota</th>
                     <td>{{ euroFormat($notes) }}</td>
                     <th>Dovuto</th>
-                    <td>{{ euroFormat($residue) }}</td>
-                    <td></td>
+                    <td colspan="2">{{ euroFormat($residue) }}</td>
                     <td></td>
                     <td></td>
                 </tr>

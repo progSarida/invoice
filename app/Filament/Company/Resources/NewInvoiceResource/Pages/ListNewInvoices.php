@@ -1041,7 +1041,7 @@ Log::info("Da fatturare: {$toInvoice}");
 
                         foreach ($byTipoFattura as $tipo_fattura => $invoicesGroup) {
                             $total = $invoicesGroup->sum(function ($invoice) use ($contract) {
-                                return $contract->client && $contract->client->type === 'public'
+                                return $contract->client && $contract->client->type === ClientType::PUBLIC
                                     ? ($invoice->no_vat_total ?? 0)
                                     : ($invoice->total ?? 0);
                             });
