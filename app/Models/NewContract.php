@@ -28,7 +28,9 @@ class NewContract extends Model
         'new_contract_copy_path',
         'new_contract_copy_date',
         'reinvoice',
-        'closed'
+        'closed',
+        'courtesy',
+        'courtesy_address'
     ];
 
     protected $casts = [
@@ -41,6 +43,7 @@ class NewContract extends Model
         'new_contract_copy_date' => 'date',
         'reinvoice' => 'boolean',
         'closed' => 'boolean',
+        'courtesy' => 'boolean',
         'accrual_types' => 'json',
         'manage_types' => 'json',
     ];

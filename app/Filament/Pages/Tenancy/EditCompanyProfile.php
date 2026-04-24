@@ -2,12 +2,15 @@
 
 namespace App\Filament\Pages\Tenancy;
 
+use App\Enums\ConnectionSafetyType;
+use App\Enums\MailProtocolType;
 use App\Models\City;
 use App\Models\User;
 use App\Models\State;
 use App\Enums\FundType;
 use App\Models\DocType;
 use App\Services\CurrencyService;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Form;
 use App\Enums\VatCodeType;
 use App\Enums\TaxRegimeType;
@@ -783,6 +786,48 @@ class EditCompanyProfile extends EditTenantProfile
                                     ->columnSpan(12),
                             ])
                             ->columns(12),
+
+                        Tabs\Tab::make('Mittente fattura di cortesia')
+                            ->schema([
+                                Section::make("Parametri email per l'invio della fattura di cortesia")
+                                    ->relationship('sender')
+                                    ->extraAttributes(['style' => 'font-weight: normal;'])
+                                    ->schema([
+                                        TextInput::make('public_name')->label('Denominazione casella')->columnSpan(5)
+                                            ->required(),
+                                        TextInput::make('address')->label('Indirizzo@email')->columnSpan(5)
+                                            ->required()
+                                            ->live(onBlur: true)
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                $set('out_username', $state);
+                                            }),
+                                        Select::make('connection_safety_type')->label('Tipo cifratura')->columnSpan(2)
+                                            ->required()
+                                            ->options(ConnectionSafetyType::class),
+                                        Fieldset::make('Configurazione invio')
+                                            ->columns(12)
+                                            ->schema([
+                                                TextInput::make('out_mail_server')->label('Server')->columnSpan(6)
+                                                    ->required(),
+                                                Select::make('out_mail_protocol_type')->label('Protocollo')->columnSpan(3)
+                                                    ->required()
+                                                    ->options(MailProtocolType::class),
+                                                TextInput::make('out_mail_port')->label('Porta')->columnSpan(3)
+                                                    ->required(),
+                                                Checkbox::make('out_authentication')->label('Richiesta autenticazione')->columnSpan(4),
+                                                TextInput::make('out_username')->label('Username')->columnSpan(4)
+                                                    ->required(),
+                                                TextInput::make('out_password')->label('Password')->columnSpan(4)
+                                                    ->required()
+                                                    ->password()
+                                                    ->revealable()
+                                                    ->afterStateHydrated(fn ($set, $record) => $record?->out_password != '' ? $set('out_password', decrypt($record?->out_password)) : $set('out_password', null)
+                                                    )
+                                                    ->dehydrateStateUsing(fn ($state) => $state ? encrypt($state) : ''),
+                                            ]),
+                                    ])
+                                    ->columns(12),
+                            ]),
                     ])
                     ->columnSpan(12),
             ]);

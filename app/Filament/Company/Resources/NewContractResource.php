@@ -294,6 +294,23 @@ class NewContractResource extends Resource
                     ->label('CUP')
                     // ->required()
                     ->columnSpan(2),
+                Forms\Components\Toggle::make('courtesy')
+                    ->label('Inviare fattura di cortesia')
+                    // ->dehydrated(fn ($state) => $state)
+                    ->afterStateUpdated(function (Get $get, Set $set) {
+                        if (!$get('courtesy')) {
+                            $set('courtesy_address', null);
+                        }
+                    })
+                    ->live()
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('courtesy_address')
+                    ->label('indirizzo invio fattura di cortesia')
+                    ->required(fn(Get $get) => $get('courtesy'))
+                    ->visible()
+                    ->email()
+                    ->columnSpan(4),
+
                 // Forms\Components\FileUpload::make('new_contract_copy_path')->label('Copia contratto')
                 //     ->live()
                 //     ->disk('public')
@@ -315,6 +332,7 @@ class NewContractResource extends Resource
                 //         return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxTypes, $cig, $extension);
                 //     })
                 //     ->columnSpan(5),
+
                 Placeholder::make('')
                     ->content('')
                     ->columnSpan(10),
@@ -329,6 +347,7 @@ class NewContractResource extends Resource
                         ->color('primary'),
                 ])
                 ->columnSpan(2),
+
                 // DatePicker::make('new_contract_copy_date')
                 //     ->readonly()
                 //     ->dehydrated()

@@ -104,6 +104,11 @@ class Company extends Model
         return $this->hasMany(Sectional::class);
     }
 
+    public function sender()
+    {
+        return $this->hasOne(Sender::class);
+    }
+
     public function bankAccounts()
     {
         return $this->hasMany(BankAccount::class);

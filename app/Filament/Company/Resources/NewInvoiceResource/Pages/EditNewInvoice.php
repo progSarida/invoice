@@ -12,13 +12,12 @@ use App\Models\Invoice;
 use App\Models\Sectional;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Placeholder;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\DocType;
 use App\Models\ReversalMotivationType;
-use App\Models\SdiRequest;
-use App\Services\AndxorSoapService;
 use Carbon\Carbon;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
@@ -29,6 +28,7 @@ use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\HtmlString;
 
 class EditNewInvoice extends EditRecord
 {
@@ -450,6 +450,15 @@ Log::info('Commit');
                                 auth()->id()
                             );
 
+                            // Dispatch del job per invio email PDF se presente indirizzo di cortesia
+                            if ($record->contract?->courtesy_address && $record->company->sender !== null) {
+                                \App\Jobs\SendInvoicePdfEmailJob::dispatch(
+                                    $record,
+                                    $record->contract->courtesy_address,
+                                    auth()->id()
+                                );
+                            }
+
                             Notification::make()
                                 ->title('Invio in elaborazione')
                                 ->body("La fattura {$record->getNewInvoiceNumber()} è stata messa in coda per l'invio allo SDI. Riceverai una notifica al termine.")
@@ -461,6 +470,20 @@ Log::info('Commit');
                         return $record->sdi_status->lockSend();
                     })
                     ->form([
+                        Placeholder::make('courtesy')
+                            ->label('')
+                            ->visible(fn($record) => $record->contract?->courtesy_address && $record->company->sender == null)
+                            // ->content('Attenzione non è possivbile inviare la copia di cortesia perchè non sono stati inseriti i parametri dell amail di invio.')
+                            ->content(new HtmlString('
+                                <div style="background-color: #fbe36e; border-color: #dac524;" class="p-4 rounded-lg bg-warning-500/10 border border-warning-500">
+                                    <span class="text-warning-600 font-bold">
+                                        ⚠️ Attenzione:
+                                    </span>
+                                    <span class="text-warning-700">
+                                        la copia di cortesia non sarà inviata perché non sono stati inseriti i parametri dell\'email di invio.
+                                    </span>
+                                </div>
+                            ')),
                         TextInput::make('password')
                             ->label('Password SOAP')
                             ->password()
