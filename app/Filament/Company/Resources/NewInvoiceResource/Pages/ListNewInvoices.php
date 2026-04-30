@@ -59,7 +59,7 @@ class ListNewInvoices extends ListRecords
             foreach ($invoicingContracts['to_invoice'] as $contract) {
                 Log::info("Contratto da fatturare: {$contract->id}");
 
-                Notification::make()
+                Notification::make('to_invoice_' . $contract->id)
                     ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
                     ->icon('heroicon-o-exclamation-triangle')
                     ->warning()
@@ -69,7 +69,7 @@ class ListNewInvoices extends ListRecords
             }
 
             foreach($invoicingContracts['partial'] as $partial) {
-                Notification::make()
+                Notification::make('to_partial_' . $contract->id)
                     ->title('Il contratto con ' . $partial->client->denomination . ' (' . implode('-', $partial->tax_types) . ' - ' . $partial->cig_code . ') ' . 'ha una fattura parzialmente stornata')
                     ->icon('heroicon-o-exclamation-triangle')
                     ->warning()
@@ -106,41 +106,39 @@ class ListNewInvoices extends ListRecords
                     $filters = $livewire->tableFilters ?? []; // recupero i filtri
                     $search = $livewire->tableSearch ?? null; // recupero la ricerca
 
-                    $fileName = 'Fatture_' . \Carbon\Carbon::today()->format('d-m-Y') . '.pdf';
+                    $fileName = 'Fatture_' . Carbon::today()->format('d-m-Y') . '.pdf';
+
+                    Notification::make()
+                        ->title('Stampa avviata')
+                        ->success()
+                        ->send();
 
                     return response()
                         ->streamDownload(function () use ($records, $search, $filters) {
-                            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML(
+                            $pdf = Pdf::loadHTML(
                                 Blade::render('pdf.new_invoices', [
                                     'invoices' => $records,
                                     'search' => $search,
                                     'filters' => $filters,
                                 ])
                             )
-                                ->setPaper('A4', 'landscape')
-                                ->setOptions([
-                                    'isHtml5ParserEnabled' => true, // Abilita parser HTML5 per CSS avanzato
-                                    'isPhpEnabled' => true, // Abilita PHP nel template
-                                    'isFontSubsettingEnabled' => true, // Ottimizza i font
-                                ]);
+                            ->setPaper('A4', 'landscape')
+                            ->setOptions([
+                                'isHtml5ParserEnabled' => true, // Abilita parser HTML5 per CSS avanzato
+                                'isPhpEnabled' => true, // Abilita PHP nel template
+                                'isFontSubsettingEnabled' => true, // Ottimizza i font
+                            ]);
 
                             echo $pdf->stream();
                         }, $fileName);
-
-                    Notification::make()
-                        ->title('Stampa avviata')
-                        ->success()
-                        ->send();
                 })
-                // ->keyBindings(['alt+s'])
-                ,
+                ->keyBindings(['alt+s']),
             ExportAction::make('esporta')
                 ->icon('phosphor-export')
                 ->label('Esporta')
                 ->color(Color::rgb('rgb(0, 153, 0)'))
                 ->exporter(NewInvoiceExporter::class)
-                // ->keyBindings(['alt+e'])
-                ,
+                ->keyBindings(['alt+e']),
             Actions\Action::make('compare')
                 ->icon('fluentui-column-double-compare-20-o')
                 ->label('Comparata')
@@ -173,7 +171,7 @@ class ListNewInvoices extends ListRecords
                                 ->label('Tipo documento')
                                 ->columnSpan(6)
                                 ->options(function () {
-                                    $docs = \Filament\Facades\Filament::getTenant()
+                                    $docs = Filament::getTenant()
                                         ->docTypes()
                                         ->select('doc_types.id', 'doc_types.description')
                                         ->get();
@@ -301,7 +299,7 @@ class ListNewInvoices extends ListRecords
                     // \Log::info('Filtri ricevuti:', $data);
 
                     // Query contratti con relazioni caricate
-                    $contracts = \Filament\Facades\Filament::getTenant()
+                    $contracts = Filament::getTenant()
                         ->newContracts()
                         ->with([
                             'invoices' => function ($query) use ($docTypeId, $manageTypeId, $fromBudgetYear, $toBudgetYear, $fromInvoiceDate, $toInvoiceDate) {
@@ -377,7 +375,8 @@ class ListNewInvoices extends ListRecords
                         ->title('Stampa avviata')
                         ->success()
                         ->send();
-                }),
+                })
+                ->keyBindings(['alt+c']),
 
                 // Actions\Action::make('checkInvoicing')
                 //     // ->hidden()
@@ -451,7 +450,8 @@ class ListNewInvoices extends ListRecords
                             ->revealable()
                             ->required(),
                     ])
-                    ->requiresConfirmation(),
+                    ->requiresConfirmation()
+                ->keyBindings(['alt+s']),
 
                 // Actions\Action::make('emptyFolders')
                 //     ->label('Svuota Cartella XML e PDF')

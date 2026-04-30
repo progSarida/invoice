@@ -10,10 +10,12 @@ use App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassiveItemsRelationManager;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassivePaymentsRelationManager;
+use App\Filament\Exports\PassiveInvoiceExporter;
 use App\Models\DocType;
 use App\Models\PassiveInvoice;
 use App\Models\Supplier;
 use App\Services\CurrencyService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Forms;
@@ -28,6 +30,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Colors\Color;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -38,7 +41,9 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -395,7 +400,12 @@ class PassiveInvoiceResource extends Resource
                     ->label('Dovuto')
                     ->money('EUR')
                     ->sortable()
-                    ->alignRight(),
+                    ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ]),
                 TextColumn::make('payment_deadline')
                     ->label('Scadenza')
                     ->date('d/m/Y')
@@ -406,17 +416,22 @@ class PassiveInvoiceResource extends Resource
                 //     ->sortable(),
                 Tables\Columns\IconColumn::make('piValidation.pi_validation_status')
                     ->label('Validazione')
-                    ->default(\App\Enums\PiValidationStatus::NO_STATUS)
+                    ->default(PiValidationStatus::NO_STATUS)
                     ->tooltip(fn ($record): string => $record?->piValidation ? $record?->piValidation->name : 'Non validata')
                     ->sortable(),
                 TextColumn::make('total_payment')
                     ->label('Pagato')
                     ->money('EUR')
                     ->sortable()
-                    ->alignRight(),
+                    ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ]),
             ])
-            ->filtersFormWidth('2xl')
-            ->filtersFormColumns(2)
+            ->filtersFormWidth('4xl')
+            ->filtersFormColumns(4)
             ->filters([
                 SelectFilter::make('supplier_id')
                     ->label('Fornitore')
@@ -484,6 +499,88 @@ class PassiveInvoiceResource extends Resource
                             fn (Builder $query, $values): Builder => $query->whereNotIn('doc_type', $values)
                         );
                     }),
+                Filter::make('total_range')
+                    ->columnSpan(2)
+                    ->columns(2)
+                    ->form([
+                        TextInput::make('total_from')
+                            ->label('Totale da')
+                            ->extraInputAttributes(['class' => 'text-right'])
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, $component) {
+                                if($state === null) {
+                                    $component->state(null);
+                                    return;
+                                }
+                                $float = CurrencyService::parseNumber($state);
+                                $formatted = number_format($float, 2, ',', '.');
+                                $component->state($formatted);
+                            })
+                            ->formatStateUsing(function ($state) {
+                                if (blank($state)) return null;
+
+                                // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
+                                $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
+                                // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
+                                $floatValue = floatval($state);
+
+                                return number_format($floatValue, 2, ',', '.');
+                            })
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
+                            ->columnSpan(1),
+                        TextInput::make('total_to')
+                            ->label('Totale a')
+                            ->extraInputAttributes(['class' => 'text-right'])
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, $component) {
+                                if($state === null) {
+                                    $component->state(null);
+                                    return;
+                                }
+                                $float = CurrencyService::parseNumber($state);
+                                $formatted = number_format($float, 2, ',', '.');
+                                $component->state($formatted);
+                            })
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            ->formatStateUsing(function ($state) {
+                                if (blank($state)) return null;
+
+                                // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
+                                $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
+                                // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
+                                $floatValue = floatval($state);
+
+                                return number_format($floatValue, 2, ',', '.');
+                            })
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
+                            ->columnSpan(1),
+                        ])
+                        ->query(function (Builder $query, array $data): Builder {
+
+                            return $query
+                                // Applica il filtro "Da" se presente
+                                ->when(
+                                    $data['total_from'],
+                                    fn (Builder $query, $value): Builder => $query->where('total_doc', '>=', CurrencyService::parseNumber($value)),
+                                )
+                                // Applica il filtro "A" se presente
+                                ->when(
+                                    $data['total_to'],
+                                    fn (Builder $query, $value): Builder => $query->where('total_doc', '<=', CurrencyService::parseNumber($value)),
+                                );
+                        })
+                        ->indicateUsing(function (array $data): ?string {
+                            if ($data['total_from'] && $data['total_to']) {
+                                return "Totale da " . $data['total_from'] . "€ a " . $data['total_to'] . "€";
+                            }
+                            if ($data['total_from']) {
+                                return "Totale da " . $data['total_from'] . "€";
+                            }
+                            if ($data['total_to']) {
+                                return "Totale a " . $data['total_to'] . "€";
+                            }
+                            return null;
+                        }),
                 SelectFilter::make('pi_validation_status')
                     ->label('Validazione')
                     ->columnSpan(1)
@@ -545,9 +642,11 @@ class PassiveInvoiceResource extends Resource
                         DatePicker::make('invoice_from_date')
                             ->label('Data fattura da')
                             ->extraInputAttributes(['class' => 'text-center'])
+                            ->default(now()->year . '-01-01')
                             ->columnSpan(1),
                         DatePicker::make('invoice_to_date')
                             ->extraInputAttributes(['class' => 'text-center'])
+                            ->default(now()->year . '-12-31')
                             ->label('Data fattura a')
                             ->columnSpan(1),
                     ])
@@ -604,204 +703,6 @@ class PassiveInvoiceResource extends Resource
                         }
                         return null;
                     }),
-                // SelectFilter::make('notes')
-                //     ->label('Note di credito')
-                //     ->columnSpan(1)
-                //     ->placeholder('Includi')
-                //     ->options([
-                //         'no' => 'Escludi',
-                //         'si' => 'Seleziona',
-                //     ])
-                //     ->query(function (Builder $query, array $data): Builder {
-                //         if (!isset($data['value'])) {
-                //             return $query;
-                //         }
-                //         return $query->when($data['value'] === 'si', function ($q) {
-                //                 return $q->where('doc_type', 'TD04');
-                //             })->when($data['value'] === 'no', function ($q) {
-                //                 return $q->where('doc_type', '!=', 'TD04');
-                //             });
-                //     })
-                //     ->default('no')
-                //     ->preload(),
-                // SelectFilter::make('autos')
-                //     ->label('Autofatture')
-                //     ->columnSpan(1)
-                //     ->placeholder('Includi')
-                //     ->options([
-                //         'no' => 'Escludi',
-                //         'si' => 'Seleziona',
-                //     ])
-                //     ->query(function (Builder $query, array $data): Builder {
-                //         $value = $data['value'] ?? null;
-
-                //         if (!$value) return $query;
-
-                //         $filterGroup = function ($q) {
-                //             $q->whereHas('docGroup', fn ($qGroup) => $qGroup->where('name', 'Autofatture'));
-                //         };
-
-                //         return $query->when(
-                //             $value === 'si',                                                            // Tutte
-                //             fn ($q) => $q->whereHas('docType', $filterGroup),                           // Solo autofatture
-                //             fn ($q) => $q->whereDoesntHave('docType', $filterGroup)                     // Esclude autofatture
-                //         );
-                //     })
-                //     ->default('no')
-                //     ->preload(),
-                Filter::make('total_range')
-                    ->columnSpan(2)
-                    ->columns(2)
-                    ->form([
-                        TextInput::make('total_from')
-                            ->label('Totale da')
-                            ->extraInputAttributes(['class' => 'text-right'])
-                            ->live(onBlur: true)
-                            // ->afterStateUpdated(function ($state, $component) {
-                            //     if(str_contains($state, ',')){                                  // Se contiene una virgola
-                            //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                            //     }
-                            //     else {
-                            //         $amount = $state ?? 0;
-                            //     }
-                            //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                            //     $number = str_replace(',', '.', $clean);
-                            //     $float = floatval($number);
-                            //     $formatted = number_format($float, 2, ',', '.');
-                            //     $component->state($formatted);
-                            // })
-                            ->afterStateUpdated(function ($state, $component) {
-                                if($state === null) {
-                                    $component->state(null);
-                                    return;
-                                }
-                                $float = CurrencyService::parseNumber($state);
-                                $formatted = number_format($float, 2, ',', '.');
-                                $component->state($formatted);
-                            })
-                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                            ->formatStateUsing(function ($state) {
-                                if (blank($state)) return null;
-
-                                // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
-                                $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
-                                // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
-                                $floatValue = floatval($state);
-
-                                return number_format($floatValue, 2, ',', '.');
-                            })
-                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
-                            ->columnSpan(1),
-                        TextInput::make('total_to')
-                            ->label('Totale a')
-                            ->extraInputAttributes(['class' => 'text-right'])
-                            ->live(onBlur: true)
-                            // ->afterStateUpdated(function ($state, $component) {
-                            //     if(str_contains($state, ',')){                                  // Se contiene una virgola
-                            //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
-                            //     }
-                            //     else {
-                            //         $amount = $state ?? 0;
-                            //     }
-                            //     $clean = preg_replace('/[^\d,\.-]/', '', $amount);
-                            //     $number = str_replace(',', '.', $clean);
-                            //     $float = floatval($number);
-                            //     $formatted = number_format($float, 2, ',', '.');
-                            //     $component->state($formatted);
-                            // })
-                            ->afterStateUpdated(function ($state, $component) {
-                                if($state === null) {
-                                    $component->state(null);
-                                    return;
-                                }
-                                $float = CurrencyService::parseNumber($state);
-                                $formatted = number_format($float, 2, ',', '.');
-                                $component->state($formatted);
-                            })
-                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                            ->formatStateUsing(function ($state) {
-                                if (blank($state)) return null;
-
-                                // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
-                                $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
-                                // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
-                                $floatValue = floatval($state);
-
-                                return number_format($floatValue, 2, ',', '.');
-                            })
-                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
-                            ->columnSpan(1),
-                    ])
-                    // ->query(function (Builder $query, array $data) {
-                    //     if(str_contains($data['total_from'], ',')){                                  // Se contiene una virgola
-                    //         $amount_from = str_replace(',', '.', str_replace('.', '', $data['total_from']));                                          // rimuovo i punti e sostituisco la virgola
-                    //     }
-                    //     else {
-                    //         $amount_from = $data['total_from'] ?? 0;
-                    //     }
-                    //     if(str_contains($data['total_to'], ',')){                                  // Se contiene una virgola
-                    //         $amount_to = str_replace(',', '.', str_replace('.', '', $data['total_to']));                                          // rimuovo i punti e sostituisco la virgola
-                    //     }
-                    //     else {
-                    //         $amount_to = $data['total_to'] ?? 0;
-                    //     }
-                    //     if (! empty($data['total_from'])) {
-                    //         $query->where('total_doc', '>=', $amount_from);
-                    //     }
-                    //     if (! empty($data['total_to'])) {
-                    //         $query->where('total_doc', '<=', $amount_to);
-                    //     }
-                    // })
-                    ->query(function (Builder $query, array $data): Builder {
-// Log::info("Valore: " . CurrencyService::parseNumber($data['total_from']));
-                        return $query
-                            // Applica il filtro "Da" se presente
-                            ->when(
-                                $data['total_from'],
-                                fn (Builder $query, $value): Builder => $query->where('total_doc', '>=', CurrencyService::parseNumber($value)),
-                            )
-                            // Applica il filtro "A" se presente
-                            ->when(
-                                $data['total_to'],
-                                fn (Builder $query, $value): Builder => $query->where('total_doc', '<=', CurrencyService::parseNumber($value)),
-                            );
-                    })
-                    // ->indicateUsing(function (array $data): ?string {
-                    //     if(str_contains($data['total_from'], ',')){                                  // Se contiene una virgola
-                    //         $amount_from = str_replace(',', '.', str_replace('.', '', $data['total_from']));                                          // rimuovo i punti e sostituisco la virgola
-                    //     }
-                    //     else {
-                    //         $amount_from = $data['total_from'] ?? 0;
-                    //     }
-                    //     if(str_contains($data['total_to'], ',')){                                  // Se contiene una virgola
-                    //         $amount_to = str_replace(',', '.', str_replace('.', '', $data['total_to']));                                          // rimuovo i punti e sostituisco la virgola
-                    //     }
-                    //     else {
-                    //         $amount_to = $data['total_to'] ?? 0;
-                    //     }
-                    //     if ($data['total_from'] && $data['total_to']) {
-                    //         return "Importo da " . number_format($amount_from, 2, ',', '.') . " fino a " . number_format($amount_to, 2, ',', '.');
-                    //     }
-                    //     if ($data['total_from']) {
-                    //         return "Importo da " . number_format($amount_from, 2, ',', '.');
-                    //     }
-                    //     if ($data['total_to']) {
-                    //         return "Importo fino a " . number_format($amount_to, 2, ',', '.');
-                    //     }
-                    //     return null;
-                    // })
-                    ->indicateUsing(function (array $data): ?string {
-                        if ($data['total_from'] && $data['total_to']) {
-                            return "Totale da " . $data['total_from'] . "€ a " . $data['total_to'] . "€";
-                        }
-                        if ($data['total_from']) {
-                            return "Totale da " . $data['total_from'] . "€";
-                        }
-                        if ($data['total_to']) {
-                            return "Totale a " . $data['total_to'] . "€";
-                        }
-                        return null;
-                    }),
             ])
             ->persistFiltersInSession()
             ->actions([
@@ -814,22 +715,7 @@ class PassiveInvoiceResource extends Resource
                     ->iconSize('lg')
                     ->url(fn($record): ?string => $record?->pdf_path ? Storage::temporaryUrl($record?->pdf_path,now()->addMinutes(1)) : null)
                     ->openUrlInNewTab()
-                    // ->action(function ($record) {
-                    //     $pdfPath = $record->pdf_path;
-                    //     if ($pdfPath && Storage::disk('public')->exists($pdfPath)) {
-                    //         return response()->download(
-                    //             Storage::disk('public')->path($pdfPath),
-                    //             'document_' . $record->number . '.pdf'
-                    //         );
-                    //     }
-                    //     return redirect()->back()->with('error', 'File PDF non trovato.');
-                    // })
-                    ->visible(fn($record) => $record && $record?->pdf_path)
-                    // ->visible(function ($record) {
-                    //     $visible = !empty($record->pdf_path) && Storage::disk('public')->exists($record->pdf_path);
-                    //     return $visible;
-                    // })
-                    ,
+                    ->visible(fn($record) => $record && $record?->pdf_path),
                 Action::make('download_xml')
                     ->label('')
                     ->tooltip('Scarica XML')
@@ -837,27 +723,199 @@ class PassiveInvoiceResource extends Resource
                     ->iconSize('lg')
                     ->url(fn($record): ?string => $record?->xml_path ? Storage::temporaryUrl($record?->xml_path,now()->addMinutes(1)) : null)
                     ->openUrlInNewTab()
-                    // ->action(function ($record) {
-                    //     $xmlPath = $record->xml_path;
-                    //     if ($xmlPath && Storage::disk('public')->exists($xmlPath)) {
-                    //         return response()->download(
-                    //             Storage::disk('public')->path($xmlPath),
-                    //             'document_' . $record->number . '.xml'
-                    //         );
-                    //     }
-                    //     return redirect()->back()->with('error', 'File XML non trovato.');
-                    // })
-                    ->visible(fn($record) => $record && $record?->xml_path)
-                    // ->visible(function ($record) {
-                    //     $visible = !empty($record->xml_path) && Storage::disk('public')->exists($record->xml_path);
-                    //     return $visible;
-                    // })
-                    ,
+                    ->visible(fn($record) => $record && $record?->xml_path),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn (): bool => Auth::user()->isManager()),
+                    // Tables\Actions\DeleteBulkAction::make()->visible(fn (): bool => Auth::user()->isManager()),
+                    Tables\Actions\BulkAction::make('list')
+                        ->label('Lista selezionate')
+                        // ->icon('heroicon-m-arrow-down-tray')
+                        ->icon('heroicon-o-printer')
+                        ->color(Color::rgb('rgb(255, 0, 0)'))
+                        ->openUrlInNewTab()
+                        // ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records) {
+                            $fileName = 'Fatture_' . Carbon::today()->format('d-m-Y') . '.pdf';
+                            return response()
+                                ->streamDownload(function () use ($records) {
+                                    $pdf = Pdf::loadHTML(
+                                        Blade::render('pdf.passive_invoices', [
+                                            'invoices' => $records,
+                                        ])
+                                    )
+                                    ->setPaper('A4', 'landscape')
+                                    ->setOptions([
+                                        'isHtml5ParserEnabled' => true, // Abilita parser HTML5 per CSS avanzato
+                                        'isPhpEnabled' => true, // Abilita PHP nel template
+                                        'isFontSubsettingEnabled' => true, // Ottimizza i font
+                                    ]);
+
+                                    echo $pdf->stream();
+                                }, $fileName);
+                        }),
+                    Tables\Actions\BulkAction::make('pdfs')
+                        ->label('Scarica PDF')
+                        ->icon('phosphor-file-pdf-duotone')
+                        ->color(Color::rgb('rgb(255, 0, 0)'))
+                        // ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records) {
+                            // Filtra solo le fatture che hanno un PDF disponibile
+                            $recordsWithPdf = $records->filter(function ($record) {
+                                return !empty($record->pdf_path) &&
+                                    Storage::disk(config('filesystems.default'))->exists($record->pdf_path);
+                            });
+
+                            if ($recordsWithPdf->isEmpty()) {
+                                Notification::make()
+                                    ->title('Nessun PDF disponibile')
+                                    ->body('Nessuna delle fatture selezionate ha un PDF disponibile per il download.')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            // Se c'è solo un PDF, scaricalo direttamente
+                            if ($recordsWithPdf->count() === 1) {
+                                $record = $recordsWithPdf->first();
+                                return response()->download(
+                                    Storage::disk(config('filesystems.default'))->path($record->pdf_path),
+                                    basename($record->pdf_path)
+                                );
+                            }
+
+                            // Se ci sono più PDF, crea un archivio ZIP
+                            $zipFileName = 'Fatture_PDF_' . now()->format('d-m-Y_His') . '.zip';
+                            $zipPath = storage_path('app/temp/' . $zipFileName);
+
+                            // Crea la directory temp se non esiste
+                            if (!file_exists(storage_path('app/temp'))) {
+                                mkdir(storage_path('app/temp'), 0755, true);
+                            }
+
+                            $zip = new \ZipArchive();
+
+                            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+                                foreach ($recordsWithPdf as $record) {
+                                    $pdfPath = Storage::disk(config('filesystems.default'))->path($record->pdf_path);
+
+                                    // Mantieni il nome originale del file
+                                    $fileName = basename($record->pdf_path);
+
+                                    $zip->addFile($pdfPath, $fileName);
+                                }
+
+                                $zip->close();
+
+                                $skippedCount = $records->count() - $recordsWithPdf->count();
+
+                                if ($skippedCount > 0) {
+                                    Notification::make()
+                                        ->title('Download completato con avvisi')
+                                        ->body("Scaricati {$recordsWithPdf->count()} PDF. {$skippedCount} fatture non avevano PDF disponibili.")
+                                        ->warning()
+                                        ->send();
+                                } else {
+                                    Notification::make()
+                                        ->title('Download completato')
+                                        ->body("Scaricati {$recordsWithPdf->count()} PDF.")
+                                        ->success()
+                                        ->send();
+                                }
+
+                                return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+                            } else {
+                                Notification::make()
+                                    ->title('Errore')
+                                    ->body('Impossibile creare l\'archivio ZIP.')
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    Tables\Actions\BulkAction::make('xmls')
+                        ->label('Scarica XML')
+                        ->icon('tabler-file-type-xml')
+                        ->color(Color::rgb('rgb(255, 123, 0)'))
+                        // ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records) {
+                            // Filtra solo le fatture che hanno un PDF disponibile
+                            $recordsWithXml = $records->filter(function ($record) {
+                                return !empty($record->xml_path) &&
+                                    Storage::disk(config('filesystems.default'))->exists($record->xml_path);
+                            });
+
+                            if ($recordsWithXml->isEmpty()) {
+                                Notification::make()
+                                    ->title('Nessun XML disponibile')
+                                    ->body('Nessuna delle fatture selezionate ha un XML disponibile per il download.')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            // Se c'è solo un XML, scaricalo direttamente
+                            if ($recordsWithXml->count() === 1) {
+                                $record = $recordsWithXml->first();
+                                return response()->download(
+                                    Storage::disk(config('filesystems.default'))->path($record->xml_path),
+                                    basename($record->xml_path)
+                                );
+                            }
+
+                            // Se ci sono più XML, crea un archivio ZIP
+                            $zipFileName = 'Fatture_PDF_' . now()->format('d-m-Y_His') . '.zip';
+                            $zipPath = storage_path('app/temp/' . $zipFileName);
+
+                            // Crea la directory temp se non esiste
+                            if (!file_exists(storage_path('app/temp'))) {
+                                mkdir(storage_path('app/temp'), 0755, true);
+                            }
+
+                            $zip = new \ZipArchive();
+
+                            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+                                foreach ($recordsWithXml as $record) {
+                                    $pdfPath = Storage::disk(config('filesystems.default'))->path($record->xml_path);
+
+                                    // Mantieni il nome originale del file
+                                    $fileName = basename($record->xml_path);
+
+                                    $zip->addFile($pdfPath, $fileName);
+                                }
+
+                                $zip->close();
+
+                                $skippedCount = $records->count() - $recordsWithXml->count();
+
+                                if ($skippedCount > 0) {
+                                    Notification::make()
+                                        ->title('Download completato con avvisi')
+                                        ->body("Scaricati {$recordsWithXml->count()} XML. {$skippedCount} fatture non avevano PDF disponibili.")
+                                        ->warning()
+                                        ->send();
+                                } else {
+                                    Notification::make()
+                                        ->title('Download completato')
+                                        ->body("Scaricati {$recordsWithXml->count()} XML.")
+                                        ->success()
+                                        ->send();
+                                }
+
+                                return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+                            } else {
+                                Notification::make()
+                                    ->title('Errore')
+                                    ->body('Impossibile creare l\'archivio ZIP.')
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    Tables\Actions\ExportBulkAction::make('xls')
+                        ->label('Esporta in Excel')
+                        ->exporter(PassiveInvoiceExporter::class)
+                        ->color(Color::rgb('rgb(0, 153, 0)'))
+                        ->icon('phosphor-file-xls-duotone'),
+                        // ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

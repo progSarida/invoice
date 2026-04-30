@@ -3,9 +3,11 @@
 namespace App\Filament\Company\Resources;
 
 use App\Enums\ClientSubType;
+use App\Filament\Exports\NewInvoiceExporter;
 use App\Models\ContractDetail;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Support\Colors\Color;
 use Filament\Tables;
 use App\Enums\TaxType;
 use App\Models\Client;
@@ -1987,17 +1989,194 @@ class NewInvoiceResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     // Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\BulkAction::make('Export')
-                    ->icon('heroicon-m-arrow-down-tray')
-                    ->openUrlInNewTab()
-                    ->deselectRecordsAfterCompletion()
-                    ->action(function (Collection $records) {
-                        return response()->streamDownload(function () use ($records) {
-                            echo Pdf::loadHTML(
-                                Blade::render('prints/invoices_list', ['records' => $records])
-                            )->stream();
-                        }, 'lista_fatture_'.date('dFY').'.pdf');
-                    }),
+                    Tables\Actions\BulkAction::make('list')
+                        ->label('Lista selezionate')
+                        // ->icon('heroicon-m-arrow-down-tray')
+                        ->icon('heroicon-o-printer')
+                        ->color(Color::rgb('rgb(255, 0, 0)'))
+                        ->openUrlInNewTab()
+                        // ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records) {
+                            $fileName = 'Fatture_' . Carbon::today()->format('d-m-Y') . '.pdf';
+                            return response()
+                                ->streamDownload(function () use ($records) {
+                                    $pdf = Pdf::loadHTML(
+                                        Blade::render('pdf.new_invoices', [
+                                            'invoices' => $records,
+                                        ])
+                                    )
+                                    ->setPaper('A4', 'landscape')
+                                    ->setOptions([
+                                        'isHtml5ParserEnabled' => true, // Abilita parser HTML5 per CSS avanzato
+                                        'isPhpEnabled' => true, // Abilita PHP nel template
+                                        'isFontSubsettingEnabled' => true, // Ottimizza i font
+                                    ]);
+
+                                    echo $pdf->stream();
+                                }, $fileName);
+                        }),
+                    Tables\Actions\BulkAction::make('pdfs')
+                        ->label('Scarica PDF')
+                        ->icon('phosphor-file-pdf-duotone')
+                        ->color(Color::rgb('rgb(255, 0, 0)'))
+                        // ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records) {
+                            // Filtra solo le fatture che hanno un PDF disponibile
+                            $recordsWithPdf = $records->filter(function ($record) {
+                                return !empty($record->pdf_path) &&
+                                    Storage::disk(config('filesystems.default'))->exists($record->pdf_path);
+                            });
+
+                            if ($recordsWithPdf->isEmpty()) {
+                                Notification::make()
+                                    ->title('Nessun PDF disponibile')
+                                    ->body('Nessuna delle fatture selezionate ha un PDF disponibile per il download.')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            // Se c'è solo un PDF, scaricalo direttamente
+                            if ($recordsWithPdf->count() === 1) {
+                                $record = $recordsWithPdf->first();
+                                return response()->download(
+                                    Storage::disk(config('filesystems.default'))->path($record->pdf_path),
+                                    basename($record->pdf_path)
+                                );
+                            }
+
+                            // Se ci sono più PDF, crea un archivio ZIP
+                            $zipFileName = 'Fatture_PDF_' . now()->format('d-m-Y_His') . '.zip';
+                            $zipPath = storage_path('app/temp/' . $zipFileName);
+
+                            // Crea la directory temp se non esiste
+                            if (!file_exists(storage_path('app/temp'))) {
+                                mkdir(storage_path('app/temp'), 0755, true);
+                            }
+
+                            $zip = new \ZipArchive();
+
+                            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+                                foreach ($recordsWithPdf as $record) {
+                                    $pdfPath = Storage::disk(config('filesystems.default'))->path($record->pdf_path);
+
+                                    // Mantieni il nome originale del file
+                                    $fileName = basename($record->pdf_path);
+
+                                    $zip->addFile($pdfPath, $fileName);
+                                }
+
+                                $zip->close();
+
+                                $skippedCount = $records->count() - $recordsWithPdf->count();
+
+                                if ($skippedCount > 0) {
+                                    Notification::make()
+                                        ->title('Download completato con avvisi')
+                                        ->body("Scaricati {$recordsWithPdf->count()} PDF. {$skippedCount} fatture non avevano PDF disponibili.")
+                                        ->warning()
+                                        ->send();
+                                } else {
+                                    Notification::make()
+                                        ->title('Download completato')
+                                        ->body("Scaricati {$recordsWithPdf->count()} PDF.")
+                                        ->success()
+                                        ->send();
+                                }
+
+                                return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+                            } else {
+                                Notification::make()
+                                    ->title('Errore')
+                                    ->body('Impossibile creare l\'archivio ZIP.')
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    Tables\Actions\BulkAction::make('xmls')
+                        ->label('Scarica XML')
+                        ->icon('tabler-file-type-xml')
+                        ->color(Color::rgb('rgb(255, 123, 0)'))
+                        // ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records) {
+                            // Filtra solo le fatture che hanno un PDF disponibile
+                            $recordsWithXml = $records->filter(function ($record) {
+                                return !empty($record->xml_path) &&
+                                    Storage::disk(config('filesystems.default'))->exists($record->xml_path);
+                            });
+
+                            if ($recordsWithXml->isEmpty()) {
+                                Notification::make()
+                                    ->title('Nessun XML disponibile')
+                                    ->body('Nessuna delle fatture selezionate ha un XML disponibile per il download.')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            // Se c'è solo un XML, scaricalo direttamente
+                            if ($recordsWithXml->count() === 1) {
+                                $record = $recordsWithXml->first();
+                                return response()->download(
+                                    Storage::disk(config('filesystems.default'))->path($record->xml_path),
+                                    basename($record->xml_path)
+                                );
+                            }
+
+                            // Se ci sono più XML, crea un archivio ZIP
+                            $zipFileName = 'Fatture_PDF_' . now()->format('d-m-Y_His') . '.zip';
+                            $zipPath = storage_path('app/temp/' . $zipFileName);
+
+                            // Crea la directory temp se non esiste
+                            if (!file_exists(storage_path('app/temp'))) {
+                                mkdir(storage_path('app/temp'), 0755, true);
+                            }
+
+                            $zip = new \ZipArchive();
+
+                            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+                                foreach ($recordsWithXml as $record) {
+                                    $pdfPath = Storage::disk(config('filesystems.default'))->path($record->xml_path);
+
+                                    // Mantieni il nome originale del file
+                                    $fileName = basename($record->xml_path);
+
+                                    $zip->addFile($pdfPath, $fileName);
+                                }
+
+                                $zip->close();
+
+                                $skippedCount = $records->count() - $recordsWithXml->count();
+
+                                if ($skippedCount > 0) {
+                                    Notification::make()
+                                        ->title('Download completato con avvisi')
+                                        ->body("Scaricati {$recordsWithXml->count()} XML. {$skippedCount} fatture non avevano PDF disponibili.")
+                                        ->warning()
+                                        ->send();
+                                } else {
+                                    Notification::make()
+                                        ->title('Download completato')
+                                        ->body("Scaricati {$recordsWithXml->count()} XML.")
+                                        ->success()
+                                        ->send();
+                                }
+
+                                return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+                            } else {
+                                Notification::make()
+                                    ->title('Errore')
+                                    ->body('Impossibile creare l\'archivio ZIP.')
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    Tables\Actions\ExportBulkAction::make('xls')
+                        ->label('Esporta in Excel')
+                        ->exporter(NewInvoiceExporter::class)
+                        ->color(Color::rgb('rgb(0, 153, 0)'))
+                        ->icon('phosphor-file-xls-duotone'),
+                        // ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

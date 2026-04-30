@@ -4,6 +4,8 @@ namespace App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 
 use App\Filament\Company\Resources\PassiveInvoiceResource;
 use App\Filament\Exports\PassiveInvoiceExporter;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Notifications\Notification;
@@ -12,6 +14,7 @@ use Filament\Actions\ExportAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\MaxWidth;
+use Illuminate\Support\Facades\Blade;
 
 class ListPassiveInvoices extends ListRecords
 {
@@ -21,6 +24,51 @@ class ListPassiveInvoices extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\Action::make('stampa')
+                ->icon('heroicon-o-printer')
+                ->label('Stampa')
+                ->tooltip('Stampa elenco fatture')
+                // ->iconButton() // mostro solo icona
+                ->color(Color::rgb('rgb(255, 0, 0)'))
+                ->action(function ($livewire) {
+                    $records = $livewire->getFilteredTableQuery()->get(); // recupero risultato della query
+                    $filters = $livewire->tableFilters ?? []; // recupero i filtri
+                    $search = $livewire->tableSearch ?? null; // recupero la ricerca
+
+                    $fileName = 'Fatture_' . Carbon::today()->format('d-m-Y') . '.pdf';
+
+                    Notification::make()
+                        ->title('Stampa avviata')
+                        ->success()
+                        ->send();
+
+                    return response()
+                        ->streamDownload(function () use ($records, $search, $filters) {
+                            $pdf = Pdf::loadHTML(
+                                Blade::render('pdf.passive_invoices', [
+                                    'invoices' => $records,
+                                    'search' => $search,
+                                    'filters' => $filters,
+                                ])
+                            )
+                            ->setPaper('A4', 'landscape')
+                            ->setOptions([
+                                'isHtml5ParserEnabled' => true, // Abilita parser HTML5 per CSS avanzato
+                                'isPhpEnabled' => true, // Abilita PHP nel template
+                                'isFontSubsettingEnabled' => true, // Ottimizza i font
+                            ]);
+
+                            echo $pdf->stream();
+                        }, $fileName);
+                })
+                ->keyBindings(['alt+s']),
+            ExportAction::make('esporta')
+                ->icon('heroicon-s-table-cells')
+                ->label('Esporta')
+                ->tooltip('Esporta elenco fatture passive')
+                ->color(Color::rgb('rgb(0,153,0)'))
+                ->exporter(PassiveInvoiceExporter::class)
+                ->keyBindings(['alt+e']),
             Actions\Action::make('passiveList')
                 ->label('Scarica fatture passive')
                 ->action(function (array $data) {
@@ -74,12 +122,6 @@ class ListPassiveInvoices extends ListRecords
                     //     ->label('Numero fatture')
                 ])
                 ->requiresConfirmation(),
-            ExportAction::make('esporta')
-                ->icon('heroicon-s-table-cells')
-                ->label('Esporta')
-                ->tooltip('Esporta elenco fatture passive')
-                ->color(Color::rgb('rgb(0,153,0)'))
-                ->exporter(PassiveInvoiceExporter::class)
         ];
     }
 

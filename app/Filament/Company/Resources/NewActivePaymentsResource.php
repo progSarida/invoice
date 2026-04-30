@@ -402,6 +402,12 @@ class NewActivePaymentsResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
+                    ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ])
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('client')->label('Cliente')
                     // ->numeric()
@@ -564,8 +570,8 @@ class NewActivePaymentsResource extends Resource
                     ->label('Anno Fattura')
                     ->attribute(null)
                     ->options(function () {
-                        $tenant = \Filament\Facades\Filament::getTenant();
-                        return \App\Models\Invoice::query()
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
                             ->select('year')
                             ->distinct()
                             ->where('flow', 'out')
@@ -582,13 +588,14 @@ class NewActivePaymentsResource extends Resource
                             });
                         }
                         return $query;
-                    }),
+                    })
+                    ->default(now()->year),
                 SelectFilter::make('invoice_budget_year')
                     ->label('Anno Bilancio')
                     ->attribute(null)
                     ->options(function () {
-                        $tenant = \Filament\Facades\Filament::getTenant();
-                        return \App\Models\Invoice::query()
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
                             ->select('budget_year')
                             ->distinct()
                             ->where('flow', 'out')
@@ -610,8 +617,8 @@ class NewActivePaymentsResource extends Resource
                     ->label('Anno Competenza')
                     ->attribute(null)
                     ->options(function () {
-                        $tenant = \Filament\Facades\Filament::getTenant();
-                        return \App\Models\Invoice::query()
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
                             ->select('accrual_year')
                             ->distinct()
                             ->where('flow', 'out')

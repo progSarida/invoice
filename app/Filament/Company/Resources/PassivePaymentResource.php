@@ -276,7 +276,13 @@ class PassivePaymentResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
+                    ->sortable()
                     ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ])
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('payment_date')
                     ->label('Data pag.')
@@ -395,9 +401,11 @@ class PassivePaymentResource extends Resource
                     ->form([
                         DatePicker::make('payment_from_date')
                             ->label('Pagamento da')
+                            ->default(now()->year . '-01-01')
                             ->columnSpan(1),
                         DatePicker::make('payment_to_date')
                             ->label('Pagamento a')
+                            ->default(now()->year . '-12-31')
                             ->columnSpan(1),
                     ])
                     ->query(function (Builder $query, array $data) {
