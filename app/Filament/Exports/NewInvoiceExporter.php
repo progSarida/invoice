@@ -43,7 +43,7 @@ class NewInvoiceExporter extends Exporter
                         ? $record->invoiceItems->where('auto', false)
                         : $record->invoiceItems()->where('auto', false)->get();
                     $item = $items[$i] ?? null;
-                    return $item && is_numeric($item->amount) ? number_format($item->amount, 2, ',', '.') : ($item?->amount ?? '0,00');
+                    return $item && is_numeric($item->amount) ? number_format($item->amount, 2, ',', '') : ($item?->amount ?? '0,00');
                 });
 
             $invoiceItemColumns[] = ExportColumn::make("item_{$i}_vat_rate")
@@ -65,7 +65,7 @@ class NewInvoiceExporter extends Exporter
                         ? $record->invoiceItems->where('auto', false)
                         : $record->invoiceItems()->where('auto', false)->get();
                     $item = $items[$i] ?? null;
-                    return $item && is_numeric($item->total) ? number_format($item->total, 2, ',', '.') : ($item?->total ?? '0,00');
+                    return $item && is_numeric($item->total) ? number_format($item->total, 2, ',', '') : ($item?->total ?? '0,00');
                 });
         }
 
@@ -138,7 +138,7 @@ class NewInvoiceExporter extends Exporter
             //     ->label('Bollo'),
             ExportColumn::make('total')
                 ->label('Totale')
-                // ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '.') : $state)
+                // ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '') : $state)
                 ->formatStateUsing(function ($record) {
                     // Usa 'total' se il cliente è pubblico, altrimenti 'no_vat_total'
                     $value = 0;
@@ -147,7 +147,7 @@ class NewInvoiceExporter extends Exporter
                             ? $record->total
                             : $record->no_vat_total;
                     }
-                    return is_numeric($value) ? number_format($value, 2, ',', '.') : $value;
+                    return is_numeric($value) ? number_format($value, 2, ',', '') : $value;
                 }),
             // ExportColumn::make('no_vat_total')
             //     ->label('Totale senza IVA'),
@@ -163,10 +163,10 @@ class NewInvoiceExporter extends Exporter
                 ->label('Giorni'),
             ExportColumn::make('total_payment')
                 ->label('Totale pagamenti')
-                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '.') : $state),
+                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '') : $state),
             ExportColumn::make('total_notes')
                 ->label('Totale note di credito')
-                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '.') : $state),
+                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '') : $state),
             ExportColumn::make('last_payment_date')
                 ->label('Data ultimo pagamento')
                 ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : null),

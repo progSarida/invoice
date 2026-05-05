@@ -2,7 +2,6 @@
 
 namespace App\Filament\Company\Resources;
 
-use App\Enums\ClientSubType;
 use App\Filament\Exports\NewInvoiceExporter;
 use App\Models\ContractDetail;
 use Carbon\Carbon;
@@ -11,7 +10,6 @@ use Filament\Support\Colors\Color;
 use Filament\Tables;
 use App\Enums\TaxType;
 use App\Models\Client;
-use App\Models\Tender;
 use App\Models\DocType;
 use App\Models\Invoice;
 use Filament\Forms\Get;
@@ -22,24 +20,18 @@ use App\Enums\ClientType;
 use App\Enums\InvoiceReference;
 use App\Enums\TimingType;
 use App\Models\Sectional;
-use App\Enums\InvoiceType;
-use App\Enums\InvoicingCicle;
 use App\Enums\PaymentMode;
 use App\Enums\PaymentType;
 use App\Models\ManageType;
-use App\Models\NewInvoice;
 use Filament\Tables\Table;
 use App\Models\AccrualType;
 use App\Models\NewContract;
 use App\Enums\PaymentStatus;
 use App\Enums\ReversalGroupType;
-use App\Enums\VatEnforceType;
 use Filament\Facades\Filament;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Filament\Forms\Components\Grid;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Support\Facades\Blade;
@@ -47,11 +39,9 @@ use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Actions\Action;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\NewInvoiceResource\Pages;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\CreditNotesRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\InvoiceItemsRelationManager;
@@ -60,7 +50,6 @@ use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\SdiNotifi
 use App\Models\ReversalMotivationType;
 use App\Models\SocialContribution;
 use App\Models\Withholding;
-use Exception;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Storage;
@@ -1950,6 +1939,50 @@ class NewInvoiceResource extends Resource
                             return "Importo fino a " . number_format($data['total_to'], 2, ',', '.');
                         }
                         return null;
+                    }),
+                Filter::make('ignore_limit')
+                    ->columns(24)
+                    ->form([
+                        Toggle::make('filter_residue')
+                            ->label("Ignora 'Dovuto' inferiore a")
+                            ->columnSpan(12),
+                        TextInput::make('ignore_limit')
+                            ->label('Importo')
+                            ->numeric()
+                            ->columnSpan(12)
+                            ->disabled(fn (Get $get) => $get('ignore_limit'))
+                            ->default(5),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if($data['filter_residue']){
+                            $limit = $data['ignore_limit'];
+                            if (blank($limit)) {
+                                return $query;
+                            }
+                            return $query->where(function (Builder $q) use ($limit) {
+                                $q->where(function ($q2) use ($limit) {
+                                    $q2->whereHas('client', function ($c) {
+                                        $c->where('type', 'public');
+                                    })
+                                    ->whereRaw('(COALESCE(no_vat_total, 0) - (COALESCE(total_payment, 0) + COALESCE(total_notes, 0))) > ?', $limit);
+                                })
+                                ->orWhere(function ($q3) use ($limit) {
+                                    $q3->whereHas('client', function ($c) {
+                                        $c->where('type', '!=', 'public');
+                                    })
+                                    ->whereRaw('(COALESCE(total, 0) - (COALESCE(total_payment, 0) + COALESCE(total_notes, 0))) > ?', $limit);
+                                });
+                            });
+                        }
+                        else { return $query; }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if($data['filter_residue']){
+                            return "Ignora documenti con residuo minore di " . number_format($data['ignore_limit'], 2, ',', '.') . " €";
+                        }
+                        else {
+                            return null;
+                        }
                     }),
             // ],layout: FiltersLayout::Modal)->filtersFormColumns(4)
             ])
