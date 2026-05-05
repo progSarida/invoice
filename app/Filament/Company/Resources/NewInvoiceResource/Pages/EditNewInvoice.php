@@ -265,7 +265,7 @@ Log::info('Commit');
 
                             $record->doc_type_id = DocType::where('name', 'TD01')->first()->id;
                             $record->number = $record->calculateNextInvoiceNumber();
-                            $record->invoice_date = today()->toDateString();
+                            $record->invoice_date = today();
                             $record->sdi_status = SdiStatus::DA_INVIARE;
 
                             DB::commit();
