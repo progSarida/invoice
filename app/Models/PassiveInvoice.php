@@ -28,7 +28,8 @@ class PassiveInvoice extends Model
         'pi_validation_id',
         'filename',
         'xml_path',
-        'pdf_path'
+        'pdf_path',
+        'attachments_path'
     ];
 
     protected $casts = [

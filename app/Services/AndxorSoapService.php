@@ -1059,6 +1059,23 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
         }
     }
 
+    private function savePassiveAttachment(PassiveInvoice $passiveInvoice, string $filename, string $content): string
+    {
+        // Definisco il percorso relativo per il file allegato
+        $relativePath = 'passive_invoices/attachments/' . $passiveInvoice->id . '/' . $filename;
+
+        $disk = config('filesystems.default');
+
+        // Decodifico il Base64 e salvo il file
+        $decodedContent = base64_decode($content);
+
+        if (Storage::disk($disk)->put($relativePath, $decodedContent)) {
+            return 'passive_invoices/attachments/' . $passiveInvoice->id; // Restituisco il percorso relativo
+        } else {
+            throw new Exception("Errore durante il salvataggio dell'allegato: $filename");
+        }
+    }
+
     private function checkSupplier(array $param): array
     {
         $output['new'] = false;
@@ -1716,6 +1733,31 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                         $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
                         $param['passive_invoice']  = $passiveInvoice;
 
+                        // Gestione allegati
+                        if (isset($param['content']['FatturaElettronicaBody']['Allegati'])) {
+                            $allegati = $param['content']['FatturaElettronicaBody']['Allegati'];
+
+                            // Normalizzo in array (potrebbe essere singolo o multiplo)
+                            if (!isset($allegati[0])) {
+                                $allegati = [$allegati];
+                            }
+
+                            foreach ($allegati as $allegato) {
+                                if (!empty($allegato['Attachment'])) {
+                                    $nomeFile = $allegato['NomeAttachment'] ?? 'allegato_' . time() . '.' . ($allegato['FormatoAttachment'] ?? 'pdf');
+                                    $contenutoBase64 = $allegato['Attachment'];
+
+                                    // Salvo il file allegato
+                                    $allegatoPath = $this->savePassiveAttachment($passiveInvoice, $nomeFile, $contenutoBase64);
+
+                                    // Salvo il path dell'allegato nella fattura passiva
+                                    $passiveInvoice->update([
+                                        'attachments_path' => $allegatoPath,
+                                    ]);
+                                }
+                            }
+                        }
+
                         $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
 
                         if(!$passiveInvoice->total){                                                                // controllo valore totale fattura passiva
@@ -1761,6 +1803,31 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
 
                         $passiveInvoice = $this->createPassiveInvoice($param);                                      // creo una nuova fattura passiva e ritorno la fattura creata
                         $param['passive_invoice']  = $passiveInvoice;
+
+                        // Gestione allegati
+                        if (isset($param['content']['FatturaElettronicaBody']['Allegati'])) {
+                            $allegati = $param['content']['FatturaElettronicaBody']['Allegati'];
+
+                            // Normalizzo in array (potrebbe essere singolo o multiplo)
+                            if (!isset($allegati[0])) {
+                                $allegati = [$allegati];
+                            }
+
+                            foreach ($allegati as $allegato) {
+                                if (!empty($allegato['Attachment'])) {
+                                    $nomeFile = $allegato['NomeAttachment'] ?? 'allegato_' . time() . '.' . ($allegato['FormatoAttachment'] ?? 'pdf');
+                                    $contenutoBase64 = $allegato['Attachment'];
+
+                                    // Salvo il file allegato
+                                    $allegatoPath = $this->savePassiveAttachment($passiveInvoice, $nomeFile, $contenutoBase64);
+
+                                    // Salvo il path dell'allegato nella fattura passiva
+                                    $passiveInvoice->update([
+                                        'attachments_path' => $allegatoPath,
+                                    ]);
+                                }
+                            }
+                        }
 
                         $detailsNumber = $this->createPassiveItems($param);                                         // creo i dettagli della fattura passiva
 
