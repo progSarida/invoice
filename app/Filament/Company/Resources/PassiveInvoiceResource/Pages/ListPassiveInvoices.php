@@ -122,6 +122,50 @@ class ListPassiveInvoices extends ListRecords
                     //     ->label('Numero fatture')
                 ])
                 ->requiresConfirmation(),
+            Actions\Action::make('getAttachments')
+                ->label('Scarica allegati fatture passive')
+                ->action(function (array $data) {
+                    $soapService = app(AndxorSoapService::class);
+                    try {
+                        $attached = $soapService->downloadAttachments($data);
+                        // $response = $soapService->downloadAttachments(['password' => 'W3iDWc3Q9w.3AUgd2zpz4']);
+
+                        $title = 'Allegati fatture passive scaricati con successo.';
+                        $msg = '';
+                        if ($attached == 1) {
+                            $msg .= 'Trovati allegati di ' . $attached . ' fattura.<br> ';
+                        } elseif ($attached > 1) {
+                            $msg .= 'Trovati allegati di ' . $attached . ' fatture.<br> ';
+                        }
+                        if (empty($msg)) {
+                            $title = 'Procedura completata.';
+                            $msg = 'Nessun allegato mancante trovato.';
+                        }
+
+                        Notification::make()
+                            ->title($title)
+                            ->body($msg)
+                            ->success()
+                            ->send();
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Errore')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->form([
+                    // Inserire filtri per gestire input opzionali
+                    TextInput::make('password')
+                        ->label('Password SOAP')
+                        ->password()
+                        ->revealable()
+                        ->required(),
+                    // TextInput::make('limit')
+                    //     ->label('Numero fatture')
+                ])
+                ->requiresConfirmation(),
         ];
     }
 

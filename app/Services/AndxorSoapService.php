@@ -1873,4 +1873,91 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
             throw new Exception('Errore: ' . $ex->getMessage());
         }
     }
+
+    public function downloadAttachments(array $data): int
+    {
+        try {
+
+            DB::beginTransaction();
+
+            $attached = 0;
+
+            $latest = DB::table('passive_downloads')->orderBy('date', 'desc')->first();
+            $dataInizio = $latest ? Carbon::parse($latest->date)->addDay()->toDateString() : '1970-01-01';
+            $dataFine = Carbon::yesterday()->toDateString();
+
+            $input = [
+                'Autenticazione' => $this->getAutenticazione(null, $data['password']),
+                'IncludiArchiviate' => false,
+
+                // filtro ricerca fatture passive con data ultimo scarico
+                // 'DataInizio' => $dataInizio,                                                                    // Formato: YYYY-MM-DD
+                // 'DataOraInizio' => $dataInizio . 'T00:00:00',                                                   // Formato: YYYY-MM-DDThh:mm:ss
+                // 'DataFine' => $dataFine,                                                                        // Formato: YYYY-MM-DD
+                // 'DataOraFine' => $dataFine . 'T23:59:59',                                                       // Formato: YYYY-MM-DDThh:mm:ss
+
+                // 'Limite' => 1, // Opzionale, se vuoi limitare il numero di fatture
+                // 'DataParam' => 'data_fattura', // Opzionale, se vuoi specificare il tipo di data
+            ];
+
+            $response = $this->client->PasvElencoFatture($input);                                                   // scarico elenco fatture passive
+
+            if(isset($response->Fattura)){
+                $invoices = $response->Fattura;
+                if (!isset($invoices[0])) {
+                    $invoices = [$invoices];
+                }
+                foreach($invoices as $item){
+                    $passiveInvoice = PassiveInvoice::where('sdi_code', $item->IdentificativoSdI)->first();
+                    if($passiveInvoice->attachments_path) { continue; }
+
+                    $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
+                    $i_input['IdentificativoSdI'] = $item->IdentificativoSdI;
+                    $i_input['Unwrap'] = true;
+                    $i_response_xml = $this->client->PasvDownload($i_input);                                        // recupero file XML della fattura
+
+                    $param['content']  = $this->xmlToArray($i_response_xml->Contenuto);                             // creo l'array con i dati dell'xml della fattura
+
+                    // Gestione allegati
+                    if (isset($param['content']['FatturaElettronicaBody']['Allegati'])) {
+                        $allegati = $param['content']['FatturaElettronicaBody']['Allegati'];
+
+                        // Normalizzo in array (potrebbe essere singolo o multiplo)
+                        if (!isset($allegati[0])) {
+                            $allegati = [$allegati];
+                        }
+
+                        foreach ($allegati as $allegato) {
+                            if (!empty($allegato['Attachment'])) {
+                                $nomeFile = $allegato['NomeAttachment'] ?? 'allegato_' . time() . '.' . ($allegato['FormatoAttachment'] ?? 'pdf');
+                                $contenutoBase64 = $allegato['Attachment'];
+
+                                // Salvo il file allegato
+                                $allegatoPath = $this->savePassiveAttachment($passiveInvoice, $nomeFile, $contenutoBase64);
+
+                                // Salvo il path dell'allegato nella fattura passiva
+                                $passiveInvoice->update([
+                                    'attachments_path' => $allegatoPath,
+                                ]);
+                            }
+                        }
+
+                        $attached++;
+                    }
+                }
+
+            }
+
+            DB::commit();
+
+            return $attached;
+
+        } catch (SoapFault $soapEx) {
+            DB::rollBack();
+            throw new Exception('Errore SOAP: ' . $soapEx->getMessage());
+        } catch (Exception $ex) {
+            DB::rollBack();
+            throw new Exception('Errore: ' . $ex->getMessage());
+        }
+    }
 }
