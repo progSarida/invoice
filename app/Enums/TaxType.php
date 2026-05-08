@@ -20,6 +20,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
     // case PUB = "pub";
     case PUBBLICITA = "pubblicita";
     case TARI = "tari";
+    case RSU = "rsu";
     case TEP = "tep";
     case TOSAP = "tosap";
     case VOTIVA = "votiva";
@@ -38,7 +39,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
             self::PARCHEGGIO => 'Parcheggio',
             // self::PUB => 'Imposta sulla Pubblicità (In disuso)',
             self::PUBBLICITA => 'Imposta sulla Pubblicità (In disuso)',
-            self::TARI => 'Smaltimento rifiuti solidi urbani',
+            self::TARI, self::RSU => 'Smaltimento rifiuti solidi urbani',
             self::TEP => 'TEP',
             self::TOSAP => 'Tassa per l\'Occupazione del Suolo Pubblico (In disuso)',
             self::COATTIVA => 'Riscossione coattiva',
@@ -59,7 +60,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
             self::PARCHEGGIO => 'PARCHEGGIO',
             // self::PUB => 'PUBBLICITA',
             self::PUBBLICITA => 'PUBBLICITA',
-            self::TARI => 'RSU',
+            self::TARI, self::RSU => 'RSU',
             self::TEP => 'TEP',
             self::TOSAP => 'TOSAP',
             self::VOTIVA => 'VOTIVA',
@@ -80,7 +81,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
             self::PARCHEGGIO => 'PAR',
             // self::PUB => 'PUB',
             self::PUBBLICITA => 'PUB',
-            self::TARI => 'RSU',
+            self::TARI, self::RSU => 'RSU',
             self::TEP => 'TEP',
             self::TOSAP => 'OSP',
             self::VOTIVA => 'VOT',
@@ -100,7 +101,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
         //     self::PARCHEGGIO =>  Color::Blue,
         //     self::PUB => Color::Cyan,
         //     self::PUBBLICITA => Color::Cyan,
-        //     self::TARI =>  Color::Orange,
+        //     self::TARI, self::RSU =>  Color::Orange,
         //     self::TEP => Color::Amber,
         //     self::TOSAP => Color::Yellow,
         // };
@@ -119,7 +120,7 @@ enum TaxType: string implements HasLabel, HasColor, HasDescription
             "parcheggio" =>  'info',
             // "pub" => 'info',
             "pubblicita" => 'info',
-            "tari" =>  'primary',
+            "tari", "rsu" =>  'primary',
             "tep" => 'primary',
             "tosap" => 'warning',
             "votiva" => 'info',
