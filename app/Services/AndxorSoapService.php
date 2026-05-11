@@ -1909,6 +1909,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                 }
                 foreach($invoices as $item){
                     $passiveInvoice = PassiveInvoice::where('sdi_code', $item->IdentificativoSdI)->first();
+                    if(!$passiveInvoice) { continue; }
                     if($passiveInvoice->attachments_path) { continue; }
 
                     $i_input['Autenticazione'] = $this->getAutenticazione(null, $data['password']);
@@ -1944,6 +1945,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
 
                         $attached++;
                     }
+                    usleep(250000);
                 }
 
             }

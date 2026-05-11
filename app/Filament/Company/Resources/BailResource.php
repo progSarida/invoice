@@ -374,9 +374,9 @@ class BailResource extends Resource
                             $lastDetail = $contract->lastDetail()->first();
 
                             // Imposta cig_code come nella select semplice
-                            $set('cig_code', $contract->cig_code);
+                            $set('cig_code', $contract?->cig_code);
                             // mostra descrizione contratto
-                            $set('aid', $contract->lastDetail->description);
+                            $set('aid', $contract->lastDetail?->description);
 
                             // Controllo dettagli come nel codice complesso
                             if (!$lastDetail) {
