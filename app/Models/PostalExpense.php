@@ -688,7 +688,7 @@ class PostalExpense extends Model
             $finalPath = "reg_richiesta/{$fileName}";
             $fullFinalPath = $disk->path($finalPath);
 
-            $disk->makeDirectory('reg_richiesta', 0755, true, true);
+            $disk->makeDirectory('reg_richiesta');
 
             $pdf->Output($fullFinalPath, 'F');
 
@@ -790,7 +790,7 @@ class PostalExpense extends Model
             $finalPath = "reg_post_richiesta/{$fileName}";
             $fullFinalPath = $disk->path($finalPath);
 
-            $disk->makeDirectory('reg_post_richiesta', 0755, true, true);
+            $disk->makeDirectory('reg_post_richiesta');
 
             $pdf->Output($fullFinalPath, 'F');
 
