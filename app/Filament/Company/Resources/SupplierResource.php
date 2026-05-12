@@ -9,10 +9,12 @@ use App\Models\State;
 use App\Models\Supplier;
 use App\Services\CurrencyService;
 use Filament\Forms;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
@@ -52,6 +54,9 @@ class SupplierResource extends Resource
                     ->columnSpan(1),
                 TextInput::make('vat_code')
                     ->label('Partita IVA')
+                    ->columnSpan(1),
+                Toggle::make('notify_expense')
+                    ->label('Spese notifica')
                     ->columnSpan(1),
                 TextInput::make('address')
                     ->label('Indirizzo')

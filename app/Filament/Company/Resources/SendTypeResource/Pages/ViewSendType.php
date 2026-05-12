@@ -9,4 +9,15 @@ use Filament\Resources\Pages\ViewRecord;
 class ViewSendType extends ViewRecord
 {
     protected static string $resource = SendTypeResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('back')
+                ->label('Indietro')
+                ->url($this->getResource()::getUrl('index'))
+                ->color('gray'),
+            Actions\EditAction::make(),
+        ];
+    }
 }

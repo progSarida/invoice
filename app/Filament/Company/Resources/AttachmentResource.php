@@ -195,21 +195,22 @@ class AttachmentResource extends Resource
                     ->tooltip('Scarica file')
                     ->icon('tabler-file-download')
                     ->iconSize('lg')
-                    ->url(fn($record): ?string => $record->attachment_path ? Storage::temporaryUrl($record->attachment_path,now()->addMinutes(1)) : null)
+                    // ->url(fn($record): ?string => $record->attachment_path ? Storage::temporaryUrl($record->attachment_path,now()->addMinutes(1)) : null)
+                    ->url(function ($record) {
+                        if (! $record?->attachment_path) return null;
+
+                        $disk = Storage::disk(config('filesystems.default'));
+
+                        try {
+                            // Se il driver supporta i link temporanei (es. S3), usa questo
+                            return $disk->temporaryUrl($record->attachment_path, now()->addMinutes(1));
+                        } catch (\RuntimeException | \InvalidArgumentException $e) {
+                            // Se sei in locale (driver local/public), usa l'URL standard
+                            // Assicurati di aver lanciato 'php artisan storage:link'
+                            return $disk->url($record->attachment_path);
+                        }
+                    })
                     ->openUrlInNewTab()
-                    // ->action(function ($record) {
-                    //     $filePath = $record->attachment_path;
-                    //     // dd($filePath);
-                    //     if ($filePath && Storage::disk('public')->exists($filePath)) {
-                    //         $filename = explode("/", $filePath)[1];
-                    //         return response()->download(
-                    //             Storage::disk('public')->path($filePath),
-                    //             // 'document_' . $record->number . '.pdf'
-                    //             $filename
-                    //         );
-                    //     }
-                    //     return redirect()->back()->with('error', 'File PDF non trovato.');
-                    // }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -218,15 +219,17 @@ class AttachmentResource extends Resource
                         ->label('Scarica selezionati')
                         ->icon('tabler-download')
                         ->action(function ($records) {
+                            $disk = config('filesystems.default');
+                            $storage = Storage::disk($disk);
                             $zip = new \ZipArchive();
                             $zipFileName = 'allegati_' . now()->format('Y-m-d_His') . '.zip';
-                            $zipFilePath = storage_path('app/public/' . $zipFileName);
+                            $zipFilePath = $storage->path($zipFileName);
 
                             if ($zip->open($zipFilePath, \ZipArchive::CREATE) === TRUE) {
                                 foreach ($records as $record) {
                                     $filePath = $record->attachment_path;
-                                    if ($filePath && Storage::disk('public')->exists($filePath)) {
-                                        $fullPath = Storage::disk('public')->path($filePath);
+                                    if ($filePath && $storage->exists($filePath)) {
+                                        $fullPath = $storage->path($filePath);
                                         $fileName = basename($filePath);
 
                                         // aggiung prefisso per evitare duplicati
@@ -257,9 +260,9 @@ class AttachmentResource extends Resource
     {
         return [
             'index' => Pages\ListAttachments::route('/'),
-            'create' => Pages\CreateAttachment::route('/create'),
-            'edit' => Pages\EditAttachment::route('/{record}/edit'),
-            'view' => Pages\ViewAttachment::route('/{record}'),
+            // 'create' => Pages\CreateAttachment::route('/create'),
+            // 'edit' => Pages\EditAttachment::route('/{record}/edit'),
+            // 'view' => Pages\ViewAttachment::route('/{record}'),
         ];
     }
 }

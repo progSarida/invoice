@@ -2,15 +2,20 @@
 
 namespace App\Models;
 
+use App\Enums\ClientType;
 use App\Enums\ExpenseType;
 use App\Enums\Month;
 use App\Enums\NotifyType;
+use App\Enums\ReinvoiceType;
 use App\Enums\ShipmentDocType;
 use App\Enums\TaxType;
 use App\Enums\VatCodeType;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use setasign\Fpdi\Tcpdf\Fpdi;
 
 class PostalExpense extends Model
 {
@@ -69,6 +74,7 @@ class PostalExpense extends Model
         'notify_expense_amount',
         'mark_expense_amount',
         'reinvoice',
+        'reinvoice_type',
         'shipment_doc_type',
         'shipment_doc_number',
         'shipment_doc_date',
@@ -117,13 +123,14 @@ class PostalExpense extends Model
         'expense_type' => ExpenseType::class,
         'shipment_doc_type' => ShipmentDocType::class,
         'notify_month' => Month::class,
+        'reinvoice_type' => ReinvoiceType::class,
 
         // date
         'send_protocol_date' => 'date',
-        'act_date',
+        'act_date' => 'date',
         'act_attachment_date' => 'date',
         'shipment_insert_date' => 'date',
-        'notify_date',
+        'notify_date' => 'date',
         'notify_attachment_date' => 'date',
         'receive_protocol_date' => 'date',
         'amount_registration_date' => 'date',
@@ -136,6 +143,7 @@ class PostalExpense extends Model
         'reinvoice_attachment_date' => 'date',
         'notify_date_registration_date' => 'date',
         'reinvoice_registration_date' => 'date',
+        'shipment_doc_date' => 'date',
 
         // decimali
         'notify_amount' => 'decimal:2',
@@ -307,6 +315,7 @@ class PostalExpense extends Model
             $expense->shipment_insert_date = today();
             $contract = NewContract::find($expense->new_contract_id);
             $expense->reinvoice = $contract->reinvoice ?? false;
+            $expense->reinvoice_type = $contract->reinvoice_type ?? null;
             if ($expense->notify_type === NotifyType::MESSO) {
                 $expense->shipment_doc_type = ShipmentDocType::MESSO;
             } elseif ($expense->notify_type === NotifyType::SPEDIZIONE) {
@@ -364,9 +373,36 @@ class PostalExpense extends Model
                     $expense->notify_insert_date = today();
                 });
             }
+            // Aggiornamento allegati
+            if ($expense->isDirty('notify_attachment_path')) {
+                $oldPath = $expense->getOriginal('notify_attachment_path');
+                if ($oldPath) {
+                    $disk = config('filesystems.default');
+                    Storage::disk($disk)->delete($oldPath);
+                }
+            }
+            // dd(!array($expense->notify_attachment_path));
+            if (!array($expense->notify_attachment_path)){
+                $expense->notify_attachment_path[0] = $expense->notify_attachment_path;
+            }
+            // dd($expense->notify_attachment_path);
+            // Gestione merge PDF multipli anche in update
+            if (is_array($expense->notify_attachment_path) && count($expense->notify_attachment_path) >= 1) {
+                $processedPath = self::mergePdfFiles($expense->notify_attachment_path, $expense);
+
+                $oldPath = $expense->getOriginal('notify_attachment_path');
+
+                if ($oldPath && !is_array($oldPath) && $oldPath !== $processedPath) {
+                    $disk = config('filesystems.default');
+                    Storage::disk($disk)->delete($oldPath);
+                }
+
+                $expense->notify_attachment_path = $processedPath;
+            }
             // creazione voce fattura
             if($expense->reinvoice_id && !$expense->reinvoice_registration_user_id){
-                $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                // $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                $amount = ($expense->notify_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
                 $checkInvoiceItems = InvoiceItem::where('postal_expense_id', $expense->id)->first();
                 if(!$checkInvoiceItems){
                     $invoiceItem = InvoiceItem::create([
@@ -385,21 +421,65 @@ class PostalExpense extends Model
                     $invoiceItem->checkStampDuty();
                     $invoiceItem->autoInsert();
 
-                    PostalExpense::withoutEvents(function () use ($expense) {
+                    PostalExpense::withoutEvents(function () use ($expense, $amount) {
                             $expense->update([
-                                'reinvoice_amount' => $expense->reInvoice->total,
+                                'reinvoice_amount' => $amount,
                             ]);
                         });
                 }
             }
         });
 
+        static::saving(function ($expense) {
+            if (is_array($expense->notify_attachment_path)) {
+                $disk = Storage::disk(config('filesystems.default'));
+                $cleanPaths = [];
+
+                foreach ($expense->notify_attachment_path as $path) {
+                    if (!empty($path) && $disk->exists($path)) {
+                        $cleanPaths[] = $path;
+                    } else {
+                        \Log::warning("File rimosso perché non esiste più", ['path' => $path]);
+                    }
+                }
+
+                if (empty($cleanPaths)) {
+                    $expense->notify_attachment_path = null;
+                } elseif (count($cleanPaths) === 1) {
+                    $expense->notify_attachment_path = $cleanPaths[0];
+                } else {
+                    $expense->notify_attachment_path = $cleanPaths; // array con più file → verrà mergiato dopo
+                }
+            }
+        });
+
         static::saved(function ($expense) {
+            // if (!is_array($expense->notify_attachment_path) || count($expense->notify_attachment_path) <= 1) {
+            //     return;
+            // }
+
+            // $paths = array_filter($expense->notify_attachment_path);
+
+            // $mergedPath = self::mergeNotifyPdfs($paths, $expense);
+
+            // if ($mergedPath) {
+            //     PostalExpense::withoutEvents(function () use ($expense, $mergedPath) {
+            //         $expense->update(['notify_attachment_path' => $mergedPath]);
+            //     });
+
+            //     // Elimina i vecchi file
+            //     foreach ($paths as $path) {
+            //         if ($path !== $mergedPath) {
+            //             Storage::disk('local')->delete($path);
+            //         }
+            //     }
+            // }
+
             $existA = Attachment::where('attachment_type', 'postal_act')->where('element_id', $expense->id)->first();
             if ($expense->act_attachment_path) {
                 $filenameAct = basename($expense->act_attachment_path) ?: 'unknown';
                 $dataA = [
-                    'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                    'company_id' => Filament::getTenant()->id,
                     'client_id' => $expense->client_id,
                     'contract_id' => $expense->new_contract_id,
                     'element_id' => $expense->id,
@@ -417,7 +497,7 @@ class PostalExpense extends Model
             if ($expense->notify_attachment_path) {
                 $filenameAct = basename($expense->notify_attachment_path) ?: 'unknown';
                 $dataN = [
-                    'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                    'company_id' => Filament::getTenant()->id,
                     'client_id' => $expense->client_id,
                     'contract_id' => $expense->new_contract_id,
                     'element_id' => $expense->id,
@@ -435,7 +515,7 @@ class PostalExpense extends Model
             if ($expense->reinvoice_attachment_path) {
                 $filenameAct = basename($expense->reinvoice_attachment_path) ?: 'unknown';
                 $dataR = [
-                    'company_id' => \Filament\Facades\Filament::getTenant()->id,
+                    'company_id' => Filament::getTenant()->id,
                     'client_id' => $expense->client_id,
                     'contract_id' => $expense->new_contract_id,
                     'element_id' => $expense->id,
@@ -465,5 +545,740 @@ class PostalExpense extends Model
             if ($existReinvoice) { $existReinvoice->delete(); }
         });
 
+    }
+
+    /**
+     * Unisce più file PDF in un unico file usando FPDI
+     */
+    // private static function mergePdfFilesA(array $paths, PostalExpense $expense): ?string
+    // {
+    //     try {
+    //         $disk = Storage::disk(config('filesystems.default'));
+    //         $pdf = new \setasign\Fpdi\Fpdi();
+
+    //         \Log::info('=== INIZIO MERGE PDF ===', ['paths' => $paths]);
+
+    //         foreach ($paths as $path) {
+    //             if (!$disk->exists($path)) {
+    //                 \Log::warning("File non trovato: {$path}");
+    //                 continue;
+    //             }
+
+    //             $fullPath = $disk->path($path);
+    //             \Log::info("Aggiungo al merge: {$fullPath}");
+
+    //             $pageCount = $pdf->setSourceFile($fullPath);
+
+    //             for ($i = 1; $i <= $pageCount; $i++) {
+    //                 $tplIdx = $pdf->importPage($i);
+    //                 $size = $pdf->getTemplateSize($tplIdx);
+
+    //                 $pdf->AddPage(
+    //                     $size['width'] > $size['height'] ? 'L' : 'P',
+    //                     [$size['width'], $size['height']]
+    //                 );
+    //                 $pdf->useTemplate($tplIdx);
+    //             }
+
+    //             $processedFiles[] = $path;
+    //         }
+
+    //         if (empty($processedFiles)) {
+    //             \Log::warning("Nessun file valido da unire");
+    //             return reset($paths) ?? null;
+    //         }
+
+    //         // Nome file finale
+    //         $date = $expense->receive_protocol_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+    //         $shipmentType = $expense->shipmentType->name ?? 'modalita';
+    //         $client = Str::slug(optional($expense->client)->denomination ?? 'cliente', '_');
+    //         $taxType = $expense->taxType?->getLabel() ?? '';
+    //         $actType = $expense->actType?->name ?? 'tipo';
+    //         $rifOrder = $expense->order_rif;
+    //         $amount = ($record->notify_amount ?? 0);
+    //         $fileName = sprintf('%s_REG-POST-RICHIESTA_%s_%s_%s_%s_%s_%s.%s', $date, $shipmentType, $client, $taxType, $actType, $rifOrder, $amount, 'pdf');
+
+    //         $finalPath = "reg_post_richiesta/{$fileName}";
+
+    //         // Crea directory se non esiste
+    //         $disk->makeDirectory('reg_post_richiesta', 0755, true, true);
+
+    //         $fullFinalPath = $disk->path($finalPath);
+    //         $pdf->Output('F', $fullFinalPath);
+
+    //         \Log::info("✅ Merge completato con successo", ['path' => $finalPath]);
+
+    //         foreach ($processedFiles as $path) {
+    //             if ($path !== $finalPath) {
+    //                 $disk->delete($path);
+    //                 \Log::info("File eliminato: {$path}");
+    //             }
+    //         }
+
+    //         return $finalPath;
+
+    //     } catch (\Exception $e) {
+    //         \Log::error("Errore merge PDF: " . $e->getMessage());
+    //         \Log::error($e->getTraceAsString());
+    //         return $paths[0] ?? null;
+    //     }
+    // }
+
+    // private static function mergePdfFilesB(array $paths, PostalExpense $expense): ?string
+    // {
+    //     if (count($paths) <= 1) {
+    //         return reset($paths) ?: null;
+    //     }
+
+    //     try {
+    //         $disk = Storage::disk(config('filesystems.default'));
+    //         $pdf = new Fpdi();   // Usa la versione TCPDF di FPDI
+
+    //         $processedCount = 0;
+    //         $processedFiles = []; // AGGIUNGI QUESTA RIGA - era mancante!
+
+    //         \Log::info('=== INIZIO MERGE PDF CON TCPDF ===', ['paths' => $paths]);
+
+    //         foreach ($paths as $path) {
+    //             if (empty($path) || !$disk->exists($path)) {
+    //                 \Log::warning("File non trovato per il merge", ['path' => $path]);
+    //                 continue;
+    //             }
+
+    //             $fullPath = $disk->path($path);
+
+    //             try {
+    //                 $pageCount = $pdf->setSourceFile($fullPath);
+    //                 \Log::info("Importo {$pageCount} pagine da: {$path}");
+
+    //                 for ($i = 1; $i <= $pageCount; $i++) {
+    //                     $tplIdx = $pdf->importPage($i);
+    //                     $size = $pdf->getTemplateSize($tplIdx);
+
+    //                     $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
+    //                     $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                     $pdf->useTemplate($tplIdx);
+    //                 }
+
+    //                 $processedFiles[] = $path;
+    //                 $processedCount++;
+    //                 \Log::info("✅ File importato con successo: {$path}");
+
+    //             } catch (\Exception $e) {
+    //                 \Log::error("❌ Impossibile importare il file: {$path}", [
+    //                     'error' => $e->getMessage(),
+    //                     'trace' => $e->getTraceAsString()
+    //                 ]);
+    //                 continue;
+    //             }
+    //         }
+
+    //         if ($processedCount === 0) {
+    //             \Log::error('❌ Nessun PDF valido da mergiare');
+    //             return reset($paths) ?? null;
+    //         }
+
+    //         if ($processedCount === 1) {
+    //             \Log::info('Solo un file valido, restituisco quello senza merge');
+    //             return $processedFiles[0];
+    //         }
+
+    //         // Nome file finale - CORRETTO
+    //         $date = $expense->receive_protocol_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+    //         $shipmentType = Str::slug($expense->shipmentType->name ?? 'modalita', '_');
+    //         $client = Str::slug(optional($expense->client)->denomination ?? 'cliente', '_');
+    //         $taxType = Str::slug($expense->tax_type?->getLabel() ?? 'tax', '_'); // CORRETTO: tax_type invece di taxType
+    //         $actType = Str::slug($expense->actType?->name ?? 'tipo', '_');
+    //         $rifOrder = Str::slug($expense->order_rif ?? 'rif', '_');
+    //         $amount = number_format($expense->notify_amount ?? 0, 2, '_', ''); // CORRETTO: $expense invece di $record
+
+    //         $fileName = sprintf(
+    //             '%s_REG-POST-RICHIESTA_%s_%s_%s_%s_%s_%s.pdf',
+    //             $date,
+    //             $shipmentType,
+    //             $client,
+    //             $taxType,
+    //             $actType,
+    //             $rifOrder,
+    //             $amount
+    //         );
+
+    //         $finalPath = "reg_post_richiesta/{$fileName}";
+
+    //         // Crea directory se non esiste
+    //         if (!$disk->exists('reg_post_richiesta')) {
+    //             $disk->makeDirectory('reg_post_richiesta', 0755, true);
+    //         }
+
+    //         $fullFinalPath = $disk->path($finalPath);
+    //         $pdf->Output($fullFinalPath, 'F');
+
+    //         \Log::info('✅ Merge PDF completato con FPDI+TCPDF', [
+    //             'path' => $finalPath,
+    //             'full_path' => $fullFinalPath,
+    //             'files_processed' => $processedCount,
+    //             'file_size' => file_exists($fullFinalPath) ? filesize($fullFinalPath) : 'N/A'
+    //         ]);
+
+    //         // Verifica che il file sia stato creato
+    //         if (!file_exists($fullFinalPath) || filesize($fullFinalPath) === 0) {
+    //             \Log::error('❌ Il file merged non è stato creato o è vuoto');
+    //             return reset($processedFiles) ?? null;
+    //         }
+
+    //         // Elimina i file temporanei
+    //         foreach ($processedFiles as $path) {
+    //             if ($path !== $finalPath && $disk->exists($path)) {
+    //                 $disk->delete($path);
+    //                 \Log::info("File temporaneo eliminato: {$path}");
+    //             }
+    //         }
+
+    //         return $finalPath;
+
+    //     } catch (\Exception $e) {
+    //         \Log::error('❌ Errore critico merge PDF con TCPDF', [
+    //             'message' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
+    //         return reset($paths) ?? null;
+    //     }
+    // }
+
+    /**
+     * Unisce (se necessario) e rinomina sempre il file PDF con nome standard
+     */
+    // private static function mergePdfFilesC(array $paths, PostalExpense $expense): ?string
+    // {
+    //     if (empty($paths)) {
+    //         return null;
+    //     }
+
+    //     try {
+    //         $disk = Storage::disk(config('filesystems.default'));
+    //         $pdf = new Fpdi();
+    //         $processedFiles = [];
+    //         $processedCount = 0;
+
+    //         \Log::info('=== INIZIO PROCESSAMENTO PDF ===', ['paths' => $paths]);
+
+    //         foreach ($paths as $path) {
+    //             if (empty($path) || !$disk->exists($path)) {
+    //                 \Log::warning("File non trovato", ['path' => $path]);
+    //                 continue;
+    //             }
+
+    //             $fullPath = $disk->path($path);
+
+    //             try {
+    //                 $pageCount = $pdf->setSourceFile($fullPath);
+    //                 \Log::info("Importo {$pageCount} pagine da: {$path}");
+
+    //                 for ($i = 1; $i <= $pageCount; $i++) {
+    //                     $tplIdx = $pdf->importPage($i);
+    //                     $size = $pdf->getTemplateSize($tplIdx);
+    //                     $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
+    //                     $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                     $pdf->useTemplate($tplIdx);
+    //                 }
+
+    //                 $processedFiles[] = $path;
+    //                 $processedCount++;
+    //                 \Log::info("✅ File importato con successo: {$path}");
+
+    //             } catch (\Exception $e) {
+    //                 \Log::error("❌ Impossibile importare il file: {$path}", ['error' => $e->getMessage()]);
+    //                 continue;
+    //             }
+    //         }
+
+    //         if ($processedCount === 0) {
+    //             \Log::error('Nessun PDF valido');
+    //             return reset($paths) ?? null;
+    //         }
+
+    //         // ====================== CREAZIONE NOME STANDARD ======================
+    //         $date = $expense->receive_protocol_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+    //         $shipmentType = Str::slug($expense->shipmentType->name ?? 'modalita', '_');
+    //         $client = Str::slug(optional($expense->client)->denomination ?? 'cliente', '_');
+    //         $taxType = Str::slug($expense->tax_type?->getLabel() ?? 'tax', '_');
+    //         $actType = Str::slug($expense->actType?->name ?? 'tipo', '_');
+    //         $rifOrder = Str::slug($expense->order_rif ?? 'rif', '_');
+    //         $amount = number_format($expense->notify_amount ?? 0, 2, '', '');
+
+    //         $fileName = sprintf(
+    //             '%s_REG-POST-RICHIESTA_%s_%s_%s_%s_%s_%s.pdf',
+    //             $date,
+    //             $shipmentType,
+    //             $client,
+    //             $taxType,
+    //             $actType,
+    //             $rifOrder,
+    //             $amount
+    //         );
+
+    //         $finalPath = "reg_post_richiesta/{$fileName}";
+    //         $fullFinalPath = $disk->path($finalPath);
+
+    //         // Crea cartella se non esiste
+    //         $disk->makeDirectory('reg_post_richiesta', 0755, true, true);
+
+    //         // Salva il file (merged o singolo rinominato)
+    //         $pdf->Output($fullFinalPath, 'F');
+
+    //         \Log::info('✅ PDF processato e rinominato con successo', [
+    //             'final_path' => $finalPath,
+    //             'files_processed' => $processedCount
+    //         ]);
+
+    //         // Elimina i file originali (tranne quello finale)
+    //         foreach ($processedFiles as $oldPath) {
+    //             if ($oldPath !== $finalPath && $disk->exists($oldPath)) {
+    //                 $disk->delete($oldPath);
+    //                 \Log::info("File temporaneo eliminato: {$oldPath}");
+    //             }
+    //         }
+
+    //         return $finalPath;
+
+    //     } catch (\Exception $e) {
+    //         \Log::error('Errore critico nel processamento PDF', [
+    //             'message' => $e->getMessage()
+    //         ]);
+    //         return reset($paths) ?? null;
+    //     }
+    // }
+
+    /**
+     * Processa, unisce (se necessario) e rinomina sempre il PDF
+     * Gestisce anche file vecchi non esistenti
+     */
+    // private static function mergePdfFilesD(array $paths, PostalExpense $expense): ?string
+    // {
+    //     if (empty($paths)) {
+    //         return null;
+    //     }
+
+    //     $disk = Storage::disk(config('filesystems.default'));
+
+    //     // ====================== PULIZIA DEI PATH ======================
+    //     $validPaths = [];
+    //     foreach ($paths as $path) {
+    //         if (empty($path)) continue;
+
+    //         // Se il file esiste → lo teniamo
+    //         if ($disk->exists($path)) {
+    //             $validPaths[] = $path;
+    //         } else {
+    //             \Log::warning("File non esistente, verrà ignorato", ['path' => $path]);
+    //         }
+    //     }
+
+    //     if (empty($validPaths)) {
+    //         \Log::error('Nessun file valido dopo pulizia');
+    //         return null;
+    //     }
+
+    //     try {
+    //         $pdf = new Fpdi();
+    //         $processedCount = 0;
+
+    //         \Log::info('=== INIZIO PROCESSAMENTO PDF ===', ['valid_paths' => $validPaths]);
+
+    //         foreach ($validPaths as $path) {
+    //             $fullPath = $disk->path($path);
+
+    //             try {
+    //                 $pageCount = $pdf->setSourceFile($fullPath);
+    //                 \Log::info("Importo {$pageCount} pagine da: {$path}");
+
+    //                 for ($i = 1; $i <= $pageCount; $i++) {
+    //                     $tplIdx = $pdf->importPage($i);
+    //                     $size = $pdf->getTemplateSize($tplIdx);
+    //                     $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
+    //                     $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                     $pdf->useTemplate($tplIdx);
+    //                 }
+
+    //                 $processedCount++;
+    //             } catch (\Exception $e) {
+    //                 \Log::error("❌ Impossibile importare {$path}", ['error' => $e->getMessage()]);
+    //                 continue;
+    //             }
+    //         }
+
+    //         if ($processedCount === 0) {
+    //             return reset($validPaths);
+    //         }
+
+    //         // ====================== GENERA NOME STANDARD ======================
+    //         $date = $expense->receive_protocol_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+    //         $shipmentType = Str::slug($expense->shipmentType->name ?? 'modalita', '_');
+    //         $client = Str::slug(optional($expense->client)->denomination ?? 'cliente', '_');
+    //         $taxType = Str::slug($expense->tax_type?->getLabel() ?? 'tax', '_');
+    //         $actType = Str::slug($expense->actType?->name ?? 'tipo', '_');
+    //         $rifOrder = Str::slug($expense->order_rif ?? 'rif', '_');
+    //         $amount = number_format($expense->notify_amount ?? 0, 2, '', '');
+
+    //         $fileName = sprintf(
+    //             '%s_REG-POST-RICHIESTA_%s_%s_%s_%s_%s_%s.pdf',
+    //             $date, $shipmentType, $client, $taxType, $actType, $rifOrder, $amount
+    //         );
+
+    //         $finalPath = "reg_post_richiesta/{$fileName}";
+    //         $fullFinalPath = $disk->path($finalPath);
+
+    //         $disk->makeDirectory('reg_post_richiesta', 0755, true, true);
+
+    //         $pdf->Output($fullFinalPath, 'F');
+
+    //         \Log::info('✅ PDF processato con successo', [
+    //             'final_path' => $finalPath,
+    //             'files_processed' => $processedCount
+    //         ]);
+
+    //         // Elimina i vecchi file (tranne il nuovo)
+    //         foreach ($validPaths as $oldPath) {
+    //             if ($oldPath !== $finalPath && $disk->exists($oldPath)) {
+    //                 $disk->delete($oldPath);
+    //             }
+    //         }
+
+    //         return $finalPath;
+
+    //     } catch (\Exception $e) {
+    //         \Log::error('Errore critico merge PDF', ['message' => $e->getMessage()]);
+    //         return reset($validPaths) ?? null;
+    //     }
+    // }
+
+    /**
+     * Processa SEMPRE il file (rinomina anche se è uno solo)
+     * Gestisce sostituzione, merge e pulizia
+     */
+    // private static function mergePdfFilesE(array $paths, PostalExpense $expense): ?string
+    // {
+    //     if (empty($paths)) {
+    //         return null;
+    //     }
+
+    //     $disk = Storage::disk(config('filesystems.default'));
+    //     $validPaths = [];
+
+    //     // Pulizia file non esistenti
+    //     foreach ($paths as $path) {
+    //         if (!empty($path) && $disk->exists($path)) {
+    //             $validPaths[] = $path;
+    //         } else {
+    //             \Log::warning("File ignorato perché non esiste", ['path' => $path]);
+    //         }
+    //     }
+
+    //     if (empty($validPaths)) {
+    //         return null;
+    //     }
+
+    //     try {
+    //         $pdf = new Fpdi();
+    //         $processedCount = 0;
+
+    //         \Log::info('=== PROCESSAMENTO PDF ===', ['valid_paths_count' => count($validPaths)]);
+
+    //         foreach ($validPaths as $path) {
+    //             $fullPath = $disk->path($path);
+
+    //             try {
+    //                 $pageCount = $pdf->setSourceFile($fullPath);
+
+    //                 for ($i = 1; $i <= $pageCount; $i++) {
+    //                     $tplIdx = $pdf->importPage($i);
+    //                     $size = $pdf->getTemplateSize($tplIdx);
+    //                     $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
+    //                     $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                     $pdf->useTemplate($tplIdx);
+    //                 }
+
+    //                 $processedCount++;
+    //             } catch (\Exception $e) {
+    //                 \Log::error("Errore importazione file {$path}", ['error' => $e->getMessage()]);
+    //                 continue;
+    //             }
+    //         }
+
+    //         if ($processedCount === 0) {
+    //             return reset($validPaths);
+    //         }
+
+    //         // ====================== GENERAZIONE NOME STANDARD (sempre) ======================
+    //         $date = $expense->receive_protocol_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+    //         $shipmentType = Str::slug($expense->shipmentType->name ?? 'modalita', '_');
+    //         $client = Str::slug(optional($expense->client)->denomination ?? 'cliente', '_');
+    //         $taxType = Str::slug($expense->tax_type?->getLabel() ?? 'tax', '_');
+    //         $actType = Str::slug($expense->actType?->name ?? 'tipo', '_');
+    //         $rifOrder = Str::slug($expense->order_rif ?? 'rif', '_');
+    //         $amount = number_format($expense->notify_amount ?? 0, 2, '', '');
+
+    //         $fileName = sprintf(
+    //             '%s_REG-POST-RICHIESTA_%s_%s_%s_%s_%s_%s.pdf',
+    //             $date, $shipmentType, $client, $taxType, $actType, $rifOrder, $amount
+    //         );
+
+    //         $finalPath = "reg_post_richiesta/{$fileName}";
+    //         $fullFinalPath = $disk->path($finalPath);
+
+    //         $disk->makeDirectory('reg_post_richiesta', 0755, true, true);
+
+    //         $pdf->Output($fullFinalPath, 'F');
+
+    //         \Log::info('✅ PDF rinominato con successo', [
+    //             'final_path' => $finalPath,
+    //             'was_merge' => count($validPaths) > 1
+    //         ]);
+
+    //         // Elimina i vecchi file
+    //         foreach ($validPaths as $oldPath) {
+    //             if ($oldPath !== $finalPath && $disk->exists($oldPath)) {
+    //                 $disk->delete($oldPath);
+    //             }
+    //         }
+
+    //         return $finalPath;
+
+    //     } catch (\Exception $e) {
+    //         \Log::error('Errore merge/rinomina PDF', ['message' => $e->getMessage()]);
+    //         return reset($validPaths) ?? null;
+    //     }
+    // }
+
+    // private static function mergePdfFilesF(array $paths, PostalExpense $expense): ?string
+    // {
+    //     if (empty($paths)) {
+    //         return null;
+    //     }
+
+    //     $disk = Storage::disk(config('filesystems.default'));
+
+    //     // Ottieni il vecchio path per eliminarlo dopo
+    //     $oldPath = $expense->getOriginal('notify_attachment_path');
+
+    //     $validPaths = [];
+    //     // Pulizia file non esistenti
+    //     foreach ($paths as $path) {
+    //         if (!empty($path) && $disk->exists($path)) {
+    //             $validPaths[] = $path;
+    //         } else {
+    //             \Log::warning("File ignorato perché non esiste", ['path' => $path]);
+    //         }
+    //     }
+
+    //     if (empty($validPaths)) {
+    //         return null;
+    //     }
+
+    //     try {
+    //         $pdf = new Fpdi();
+    //         $processedCount = 0;
+
+    //         \Log::info('=== PROCESSAMENTO PDF ===', [
+    //             'valid_paths_count' => count($validPaths),
+    //             'old_path' => $oldPath
+    //         ]);
+
+    //         foreach ($validPaths as $path) {
+    //             $fullPath = $disk->path($path);
+
+    //             try {
+    //                 $pageCount = $pdf->setSourceFile($fullPath);
+    //                 \Log::info("Importo {$pageCount} pagine da: {$path}");
+
+    //                 for ($i = 1; $i <= $pageCount; $i++) {
+    //                     $tplIdx = $pdf->importPage($i);
+    //                     $size = $pdf->getTemplateSize($tplIdx);
+    //                     $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
+    //                     $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                     $pdf->useTemplate($tplIdx);
+    //                 }
+
+    //                 $processedCount++;
+    //                 \Log::info("✅ File processato: {$path}");
+
+    //             } catch (\Exception $e) {
+    //                 \Log::error("❌ Errore importazione file {$path}", [
+    //                     'error' => $e->getMessage()
+    //                 ]);
+    //                 continue;
+    //             }
+    //         }
+
+    //         if ($processedCount === 0) {
+    //             \Log::error('Nessun file processato con successo');
+    //             return reset($validPaths);
+    //         }
+
+    //         // ====================== GENERAZIONE NOME STANDARD ======================
+    //         $date = $expense->receive_protocol_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+    //         $shipmentType = Str::slug($expense->shipmentType->name ?? 'modalita', '_');
+    //         $client = Str::slug(optional($expense->client)->denomination ?? 'cliente', '_');
+    //         $taxType = Str::slug($expense->tax_type?->getLabel() ?? 'tax', '_');
+    //         $actType = Str::slug($expense->actType?->name ?? 'tipo', '_');
+    //         $rifOrder = Str::slug($expense->order_rif ?? 'rif', '_');
+    //         $amount = number_format($expense->notify_amount ?? 0, 2, '', '');
+
+    //         $fileName = sprintf(
+    //             '%s_REG-POST-RICHIESTA_%s_%s_%s_%s_%s_%s.pdf',
+    //             $date, $shipmentType, $client, $taxType, $actType, $rifOrder, $amount
+    //         );
+
+    //         $finalPath = "reg_post_richiesta/{$fileName}";
+    //         $fullFinalPath = $disk->path($finalPath);
+
+    //         // Crea directory se non esiste
+    //         if (!$disk->exists('reg_post_richiesta')) {
+    //             $disk->makeDirectory('reg_post_richiesta', 0755, true);
+    //         }
+
+    //         // Salva il PDF con il nome standard
+    //         $pdf->Output($fullFinalPath, 'F');
+
+    //         \Log::info('✅ PDF salvato con successo', [
+    //             'final_path' => $finalPath,
+    //             'full_path' => $fullFinalPath,
+    //             'was_merge' => count($validPaths) > 1,
+    //             'files_merged' => $processedCount,
+    //             'file_exists' => file_exists($fullFinalPath),
+    //             'file_size' => file_exists($fullFinalPath) ? filesize($fullFinalPath) : 'N/A'
+    //         ]);
+
+    //         // Verifica che il file sia stato creato
+    //         if (!file_exists($fullFinalPath) || filesize($fullFinalPath) === 0) {
+    //             \Log::error('❌ Il file finale non è stato creato o è vuoto');
+    //             return reset($validPaths);
+    //         }
+
+    //         // Elimina i file temporanei caricati dall'utente
+    //         foreach ($validPaths as $tempPath) {
+    //             if ($tempPath !== $finalPath && $disk->exists($tempPath)) {
+    //                 $disk->delete($tempPath);
+    //                 \Log::info("File temporaneo eliminato: {$tempPath}");
+    //             }
+    //         }
+
+    //         // Elimina il vecchio file merged se esiste e non è lo stesso del nuovo
+    //         if ($oldPath && !is_array($oldPath) && $oldPath !== $finalPath && $disk->exists($oldPath)) {
+    //             $disk->delete($oldPath);
+    //             \Log::info("File vecchio merged eliminato: {$oldPath}");
+    //         }
+
+    //         return $finalPath;
+
+    //     } catch (\Exception $e) {
+    //         \Log::error('❌ Errore critico merge/rinomina PDF', [
+    //             'message' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
+    //         return reset($validPaths) ?? null;
+    //     }
+    // }
+
+    /**
+     * Processa SEMPRE i PDF (rinomina anche singolo file)
+     * Gestisce sostituzione di merged → singolo e viceversa
+     */
+    private static function mergePdfFiles(array $paths, PostalExpense $expense): ?string
+    {
+        if (empty($paths)) {
+            return null;
+        }
+
+        $disk = Storage::disk(config('filesystems.default'));
+        $validPaths = [];
+
+        // Pulizia rigorosa
+        foreach ($paths as $path) {
+            if (!empty($path) && $disk->exists($path)) {
+                $validPaths[] = $path;
+            } else {
+                \Log::warning("File ignorato (non esiste)", ['path' => $path]);
+            }
+        }
+
+        if (empty($validPaths)) {
+            \Log::warning('Nessun file valido dopo pulizia');
+            return null;
+        }
+
+        try {
+            $pdf = new Fpdi();
+            $processedCount = 0;
+
+            \Log::info('=== PROCESSAMENTO PDF INIZIATO ===', [
+                'input_count' => count($paths),
+                'valid_count' => count($validPaths)
+            ]);
+
+            foreach ($validPaths as $path) {
+                $fullPath = $disk->path($path);
+
+                try {
+                    $pageCount = $pdf->setSourceFile($fullPath);
+                    \Log::info("→ Importando {$pageCount} pagine da: {$path}");
+
+                    for ($i = 1; $i <= $pageCount; $i++) {
+                        $tplIdx = $pdf->importPage($i);
+                        $size = $pdf->getTemplateSize($tplIdx);
+                        $orientation = $size['width'] > $size['height'] ? 'L' : 'P';
+                        $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+                        $pdf->useTemplate($tplIdx);
+                    }
+                    $processedCount++;
+                } catch (\Exception $e) {
+                    \Log::error("Errore importazione {$path}", ['error' => $e->getMessage()]);
+                    continue;
+                }
+            }
+
+            if ($processedCount === 0) {
+                return reset($validPaths);
+            }
+
+            // ====================== NOME STANDARD (sempre applicato) ======================
+            $date       = $expense->receive_protocol_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+            $shipment   = Str::slug($expense->shipmentType->name ?? 'modalita', '_');
+            $client     = Str::slug(optional($expense->client)->denomination ?? 'cliente', '_');
+            $taxType    = Str::slug($expense->tax_type?->getLabel() ?? 'tax', '_');
+            $actType    = Str::slug($expense->actType?->name ?? 'tipo', '_');
+            $rifOrder   = Str::slug($expense->order_rif ?? 'rif', '_');
+            $amount     = number_format($expense->notify_amount ?? 0, 2, '', '');
+
+            $fileName = sprintf(
+                '%s_REG-POST-RICHIESTA_%s_%s_%s_%s_%s_%s.pdf',
+                $date, $shipment, $client, $taxType, $actType, $rifOrder, $amount
+            );
+
+            $finalPath = "reg_post_richiesta/{$fileName}";
+            $fullFinalPath = $disk->path($finalPath);
+
+            $disk->makeDirectory('reg_post_richiesta', 0755, true, true);
+
+            $pdf->Output($fullFinalPath, 'F');
+
+            \Log::info('✅ PDF salvato e rinominato', [
+                'final_path' => $finalPath,
+                'was_single' => count($validPaths) === 1
+            ]);
+
+            // Pulizia vecchi file
+            foreach ($validPaths as $oldPath) {
+                if ($oldPath !== $finalPath && $disk->exists($oldPath)) {
+                    $disk->delete($oldPath);
+                }
+            }
+
+            return $finalPath;
+
+        } catch (\Exception $e) {
+            \Log::error('Errore critico in mergePdfFiles', ['message' => $e->getMessage()]);
+            return reset($validPaths) ?? null;
+        }
     }
 }

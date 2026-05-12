@@ -153,7 +153,7 @@
             </tr>
             <tr>
                 <td class="label-col">Rifatturazione spese di notifica</td>
-                <td class="value-col">{{ $contract->reinvoice ? 'Sì' : 'No' }}</td>
+                <td class="value-col">{{ $contract->reinvoice_type->getLabel() ?? '' }}</td>
             </tr>
             <tr>
                 <td class="label-col">Periodicità fatturazione</td>

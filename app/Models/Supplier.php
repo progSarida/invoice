@@ -26,6 +26,7 @@ class Supplier extends Model
         'fax',
         'email',
         'pec',
+        'notify_expense',
     ];
 
     protected $casts = [

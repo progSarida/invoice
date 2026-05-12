@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\NotifyType;
 use Illuminate\Database\Eloquent\Model;
 
 class SendType extends Model
@@ -10,6 +11,11 @@ class SendType extends Model
         'order',
         'name',
         'description',
+        'notify_type',
+    ];
+
+    protected $casts = [
+        'notify_type' => NotifyType::class,
     ];
 
     public function company()

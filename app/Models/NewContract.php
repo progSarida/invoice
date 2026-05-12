@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use App\Enums\InvoicingCicle;
+use App\Enums\ReinvoiceType;
 use App\Enums\TaxType;
 use App\Enums\TenderPaymentType;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +29,7 @@ class NewContract extends Model
         'new_contract_copy_path',
         'new_contract_copy_date',
         'reinvoice',
+        'reinvoice_type',
         'closed',
         'courtesy',
         'courtesy_address'
@@ -35,6 +37,7 @@ class NewContract extends Model
 
     protected $casts = [
         'tax_types' => 'array',
+        'reinvoice_type' => ReinvoiceType::class,
         'payment_type' => TenderPaymentType::class,
         'start_validity_date' => 'date',
         'end_validity_date' => 'date',

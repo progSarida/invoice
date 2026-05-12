@@ -30,7 +30,8 @@
         "secondnetwork/blade-tabler-icons": "^3.34",
         "setasign/fpdf": "^1.8",
         "setasign/fpdi": "^2.6",
-        "spatie/laravel-permission": "^6.23"
+        "spatie/laravel-permission": "^6.23",
+        "tecnickcom/tcpdf": "^6.11"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

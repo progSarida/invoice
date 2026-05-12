@@ -2309,6 +2309,7 @@ class NewInvoiceResource extends Resource
         $contract->new_contract_copy_path = $data['new_contract_copy_path'] ?? null;
         $contract->new_contract_copy_date = $data['new_contract_copy_date'] ?? null;
         $contract->reinvoice = $data['reinvoice'] ?? false;
+        $contract->reinvoice_type = $data['reinvoice_type'] ?? false;
         $contract->save();
         $set('contract_id', $contract->id);
         Notification::make()

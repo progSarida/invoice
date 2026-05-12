@@ -3,6 +3,7 @@ namespace App\Filament\Company\Resources;
 
 use App\Enums\ClientType;
 use App\Enums\InvoicingCicle;
+use App\Enums\ReinvoiceType;
 use App\Models\Invoice;
 use App\Services\CurrencyService;
 use Filament\Forms;
@@ -247,9 +248,15 @@ class NewContractResource extends Resource
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->suffix('€'),
-                Forms\Components\Toggle::make('reinvoice')
-                    ->label('Rifatturazione spese postali')
-                    ->dehydrated(fn ($state) => filled($state))
+                // Forms\Components\Toggle::make('reinvoice')
+                //     ->label('Rifatturazione spese postali')
+                //     ->dehydrated(fn ($state) => filled($state))
+                //     ->columnSpan(3),
+                Forms\Components\Select::make('reinvoice_type')
+                    ->label('Tipo rifatturazione')
+                    ->options(ReinvoiceType::class)
+                    ->required()
+                    ->preload()
                     ->columnSpan(3),
                 Forms\Components\Select::make('invoicing_cycle')
                     ->label('Periodicità fatturazione')
@@ -784,9 +791,15 @@ class NewContractResource extends Resource
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                     ->suffix('€'),
-                Forms\Components\Toggle::make('reinvoice')
-                    ->label('Rifatturazione spese postali')
-                    ->dehydrated(fn ($state) => filled($state))
+                // Forms\Components\Toggle::make('reinvoice')
+                //     ->label('Rifatturazione spese postali')
+                //     ->dehydrated(fn ($state) => filled($state))
+                //     ->columnSpan(3),
+                Forms\Components\Select::make('reinvoice_type')
+                    ->label('Tipo rifatturazione')
+                    ->options(ReinvoiceType::class)
+                    ->required()
+                    ->preload()
                     ->columnSpan(3),
                 Forms\Components\Select::make('invoicing_cycle')
                     ->label('Periodicità fatturazione')
@@ -922,6 +935,7 @@ class NewContractResource extends Resource
         $contract->new_contract_copy_path = $data['new_contract_copy_path'] ?? null;
         $contract->new_contract_copy_date = $data['new_contract_copy_date'] ?? null;
         $contract->reinvoice = $data['reinvoice'] ?? false;
+        $contract->reinvoice_type = $data['reinvoice_type'] ?? false;
         $contract->save();
         $set('contract_id', $contract->id);
         Notification::make()

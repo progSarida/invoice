@@ -387,7 +387,7 @@ class BailResource extends Resource
                                     ->actions([
                                         \Filament\Notifications\Actions\Action::make('edit')
                                             ->label('Vai al contratto')
-                                            ->url(NewContractResource::getUrl('edit', ['record' => $contract->id]))
+                                            ->url(NewContractResource::getUrl('edit', ['record' => $contract?->id]))
                                             ->openUrlInNewTab()
                                             ->color('warning'),
                                     ])

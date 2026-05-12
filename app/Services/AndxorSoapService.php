@@ -24,7 +24,6 @@ use App\Models\SdiNotification;
 use App\Models\SdiRequest;
 use App\Models\Supplier;
 use Filament\Facades\Filament;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;

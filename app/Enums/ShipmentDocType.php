@@ -14,7 +14,7 @@ enum ShipmentDocType: string implements HasLabel, HasDescription
     {
         return match($this) {
             self::SPEDIZIONE => 'Fattura passiva',
-            self::MESSO => 'Documento',
+            self::MESSO => 'Distinta postale',
         };
     }
 
@@ -22,7 +22,7 @@ enum ShipmentDocType: string implements HasLabel, HasDescription
     {
         return match($this) {
             self::SPEDIZIONE=> 'Fattura passiva',
-            self::MESSO => 'Documento',
+            self::MESSO => 'Distinta postale',
         };
     }
 
@@ -30,7 +30,15 @@ enum ShipmentDocType: string implements HasLabel, HasDescription
     {
         return match($this) {
             self::SPEDIZIONE => 'SPD',
-            self::MESSO => 'MSS',
+            self::MESSO => 'DP',
+        };
+    }
+
+    public function getShipmentType(): string
+    {
+        return match($this) {
+            self::SPEDIZIONE => 'stampatore',
+            self::MESSO => 'bolgetta',
         };
     }
 

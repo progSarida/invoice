@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources;
 
+use App\Enums\NotifyType;
 use App\Filament\Company\Resources\ShipmentTypeResource\Pages;
 use App\Filament\Company\Resources\ShipmentTypeResource\RelationManagers;
 use App\Models\ShipmentType;
@@ -57,7 +58,11 @@ class ShipmentTypeResource extends Resource
                     ->columnspan(1),
                 Forms\Components\TextInput::make('description')->label('Descrizione')
                     ->maxLength(255)
-                    ->columnspan(3),
+                    ->columnspan(2),
+                Forms\Components\Select::make('notify_type')->label('Tipo notifica')
+                    ->options(NotifyType::class)
+                    ->required()
+                    ->columnspan(1),
             ]);
     }
 
@@ -80,6 +85,7 @@ class ShipmentTypeResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('notify_type')->label('Tipo notifica'),
             ])
             ->filters([
                 //

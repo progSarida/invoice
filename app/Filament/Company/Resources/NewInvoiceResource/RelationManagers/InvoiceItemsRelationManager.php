@@ -415,7 +415,8 @@ class InvoiceItemsRelationManager extends RelationManager
 
                         return [
                             'postal_expenses' => $postalExpenses->map(function ($expense) {
-                                $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                                // $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                                $amount = ($expense->notify_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
 
                                 return [
                                     'id' => $expense->id,
@@ -450,7 +451,8 @@ class InvoiceItemsRelationManager extends RelationManager
 
                             if ($expense) {
                                 // $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
-                                $totPostalExpense += ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                                // $totPostalExpense += ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
+                                $totPostalExpense += ($expense->notify_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
                                 // // Crea l'invoice item
                                 // $invoiceItem = InvoiceItem::create([
                                 //     'invoice_id' => $invoice->id,

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources;
 
+use App\Enums\NotifyType;
 use App\Filament\Company\Resources\SendTypeResource\Pages;
 use App\Filament\Company\Resources\SendTypeResource\RelationManagers;
 use App\Models\SendType;
@@ -37,7 +38,11 @@ class SendTypeResource extends Resource
                     ->columnspan(1),
                 Forms\Components\TextInput::make('description')->label('Descrizione')
                     ->maxLength(255)
-                    ->columnspan(3),
+                    ->columnspan(2),
+                Forms\Components\Select::make('notify_type')->label('Tipo notifica')
+                    ->options(NotifyType::class)
+                    ->required()
+                    ->columnspan(1),
             ]);
     }
 
@@ -60,6 +65,7 @@ class SendTypeResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('notify_type')->label('Tipo notifica'),
             ])
             ->filters([
                 //
