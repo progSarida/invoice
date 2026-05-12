@@ -23,8 +23,8 @@ class ExpenseSection
                 $shipmentType = ShipmentType::find($get('shipment_type_id'));
                 return $record &&
                         ($record->notify_insert_user_id && $record->notify_insert_date) &&
-                        $get('notify_type') === NotifyType::SPEDIZIONE->value &&
-                        str_contains(strtolower($shipmentType?->name), ShipmentDocType::SPEDIZIONE->getShipmentType());
+                        ($get('notify_type') === NotifyType::SPEDIZIONE->value &&
+                        str_contains(strtolower($shipmentType?->name), ShipmentDocType::SPEDIZIONE->getShipmentType()));
             })
             ->schema([
                 self::passiveInvoiceField(),

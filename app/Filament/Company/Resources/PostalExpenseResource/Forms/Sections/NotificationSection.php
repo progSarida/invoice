@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Illuminate\Support\Facades\Storage;
 
 class NotificationSection
 {
@@ -146,6 +147,7 @@ class NotificationSection
     {
         return Forms\Components\FileUpload::make('notify_attachment_path')
             ->label('Allegato notifica')
+            ->required()
             ->multiple()
             ->reorderable()
             ->directory('reg_post_richiesta')
@@ -154,13 +156,25 @@ class NotificationSection
                 Forms\Components\Actions\Action::make('attach')
                     ->label('')
                     ->icon(function($record){
-                        return $record?->notify_attachment_path ? 'heroicon-o-check-circle' : 'heroicon-o-information-circle';
+                        return $record?->notify_attachment_path ? 'heroicon-o-x-circle' : 'heroicon-o-information-circle';
                     })
                     ->color(function($record){
-                        return $record?->notify_attachment_path ? 'success' : 'gray';
+                        return $record?->notify_attachment_path ? 'danger' : 'gray';
                     })
                     ->tooltip(function($record){
-                        return $record?->notify_attachment_path ? 'Pdf presente' : 'Caricare uno o più pdf';
+                        return $record?->notify_attachment_path ? 'Elimina allegato' : 'Caricare uno o più pdf';
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Conferma eliminazione')
+                    ->modalDescription('Vuoi davvero eliminare questo allegato? L\'operazione non può essere annullata.')
+                    ->modalSubmitActionLabel('Sì, elimina')
+                    ->modalCancelActionLabel('Annulla')
+                    ->action(function (Forms\Components\Actions\Action $action, $record) {
+                        if ($record?->notify_attachment_path) {
+                            $disk = Storage::disk(config('filesystems.default'));
+                            $disk->delete($record?->notify_attachment_path);
+                            $record->update(['notify_attachment_path' => null]);
+                        }
                     })
             )
             ->maxSize(10240)

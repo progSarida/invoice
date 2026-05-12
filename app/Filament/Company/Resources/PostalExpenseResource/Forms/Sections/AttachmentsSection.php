@@ -13,7 +13,8 @@ class AttachmentsSection
         return Forms\Components\Section::make('Visualizza Allegati e Dati Lavorazione')
                     ->icon('heroicon-o-paper-clip')
                     ->collapsed()
-                    // ->visible(fn($record): bool => $record && ($record->act_attachment_path || $record->notify_attachment_path || $record->reinvoice_attachment_path))
+                    ->visible(fn($record): bool => $record && ($record->act_attachment_path || $record->notify_attachment_path || $record->reinvoice_attachment_path ||
+                                                    $record->contract?->new_contract_copy_path || $record->passiveInvoice?->pdf_path || $record->reInvoice?->pdf_path))
                     ->columnSpanFull()
                     ->schema([
                         Forms\Components\Actions::make([

@@ -3,6 +3,7 @@
 namespace App\Filament\Company\Resources\PostalExpenseResource\Forms\Sections;
 
 use App\Enums\ClientType;
+use App\Enums\NotifyType;
 use App\Models\Invoice;
 use Filament\Forms;
 use Filament\Forms\Get;
@@ -15,7 +16,9 @@ class ReinvoiceSection
         return Forms\Components\Section::make('Estremi della rifatturazione delle spese della lavorazione/notifica')
             ->icon('heroicon-o-receipt-refund')
             ->collapsed(fn($record): bool => $record && $record->reinvoiceInserted())
-            ->visible(fn($record): bool => $record && $record->reinvoice_type?->showReinvoice() && ($record->payment_insert_user_id && $record->payment_insert_date))
+            ->visible(fn($record): bool => $record && $record->reinvoice_type?->showReinvoice() &&
+                                            (($record->notify_type === NotifyType::SPEDIZIONE && $record->payment_insert_user_id && $record->payment_insert_date) ||
+                                                ($record->notify_type === NotifyType::MESSO && $record->notify_insert_user_id && $record->notify_insert_date)))
             ->schema([
                 self::reinvoiceIdField(),
                 self::reinvoiceNumberField(),

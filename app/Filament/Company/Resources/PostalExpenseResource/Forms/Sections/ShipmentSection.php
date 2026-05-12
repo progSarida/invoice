@@ -4,15 +4,12 @@ namespace App\Filament\Company\Resources\PostalExpenseResource\Forms\Sections;
 
 use App\Enums\NotifyType;
 use App\Enums\ShipmentDocType;
-use App\Enums\TaxType;
-use App\Models\ActType;
-use App\Models\Client;
 use App\Models\SendType;
 use App\Models\ShipmentType;
 use Filament\Forms;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class ShipmentSection
 {
@@ -35,7 +32,6 @@ class ShipmentSection
                 self::actYearField(),
                 self::actDateField(),
                 self::actAttachmentField(),
-                self::actAttachmentDateField(),
                 self::shipmentInsertUserField(),
                 self::shipmentInsertDateField(),
             ])
@@ -80,9 +76,9 @@ class ShipmentSection
             )
             ->afterStateUpdated(function($state, Set $set){
                 $shipmentType = ShipmentType::find($state);
-                if(str_contains(strtolower($shipmentType->name), ShipmentDocType::SPEDIZIONE->getShipmentType()))
+                if(str_contains(strtolower($shipmentType?->name), ShipmentDocType::SPEDIZIONE->getShipmentType()))
                     $set('shipment_doc_type', ShipmentDocType::SPEDIZIONE->value);
-                else if(str_contains(strtolower($shipmentType->name), ShipmentDocType::MESSO->getShipmentType()))
+                else if(str_contains(strtolower($shipmentType?->name), ShipmentDocType::MESSO->getShipmentType()))
                     $set('shipment_doc_type', ShipmentDocType::MESSO->value);
             })
             ->searchable()
@@ -212,9 +208,36 @@ class ShipmentSection
         return Forms\Components\FileUpload::make('act_attachment_path')
             ->label('Allegato atto')
             ->required()
+            ->multiple() // AGGIUNGI QUESTA RIGA
+            ->reorderable() // AGGIUNGI QUESTA RIGA
             ->directory('reg_richiesta')
             ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
-            ->acceptedFileTypes(['application/pdf', 'image/*'])
+            ->acceptedFileTypes(['application/pdf'])
+            ->hintAction(
+                Forms\Components\Actions\Action::make('attach')
+                    ->label('')
+                    ->icon(function($record){
+                        return $record?->act_attachment_path ? 'heroicon-o-x-circle' : 'heroicon-o-information-circle';
+                    })
+                    ->color(function($record){
+                        return $record?->act_attachment_path ? 'danger' : 'gray';
+                    })
+                    ->tooltip(function($record){
+                        return $record?->act_attachment_path ? 'Elimina allegato' : 'Caricare uno o più pdf';
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Conferma eliminazione')
+                    ->modalDescription('Vuoi davvero eliminare questo allegato? L\'operazione non può essere annullata.')
+                    ->modalSubmitActionLabel('Sì, elimina')
+                    ->modalCancelActionLabel('Annulla')
+                    ->action(function (Forms\Components\Actions\Action $action, $record) {
+                        if ($record?->act_attachment_path) {
+                            $disk = Storage::disk(config('filesystems.default'));
+                            $disk->delete($record?->act_attachment_path);
+                            $record->update(['act_attachment_path' => null]);
+                        }
+                    })
+            )
             ->afterStateUpdated(function (Set $set, $state) {
                 if (!empty($state)) {
                     $set('act_attachment_date', now()->toDateString());
@@ -222,27 +245,23 @@ class ShipmentSection
                     $set('act_attachment_date', null);
                 }
             })
-            ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get, $record) {
-                $number = $get('send_protocol_number') ?? '******';
-                $date = $get('send_protocol_date') ?? '******';
-                $shipmentType = ShipmentType::find($get('shipment_type_id'))->name ?? 'modalita';
-                $client = Client::find($get('client_id'))->denomination;
-                $taxType = TaxType::tryFrom($get('tax_type'))->getLabel() ?? '';
-                $actType = ActType::find($get('act_type_id'))->name ?? 'tipo';
-                $extension = $file->getClientOriginalExtension();
-
-                return sprintf('%s_%s_REG-RICHIESTA_%s_%s_%s_%s.%s', $number, $date, $shipmentType, $client, $taxType, $actType, $extension);
+            ->saveUploadedFileUsing(function ($file) {
+                return $file->store('reg_richiesta', config('filesystems.default'));
+            })
+            ->afterStateHydrated(function ($component, $state, $record) {
+                // Se il record ha un path salvato (stringa) convertilo in array per il component
+                if ($record && is_string($record->act_attachment_path)) {
+                    $component->state([$record->act_attachment_path]);
+                }
+            })
+            ->dehydrateStateUsing(function ($state, $record) {
+                // Se lo state è vuoto o null, mantieni il valore originale del database
+                if (empty($state)) {
+                    return $record?->getOriginal('act_attachment_path');
+                }
+                return $state;
             })
             ->maxSize(10240)
-            ->columnSpan(4);
-    }
-
-    private static function actAttachmentDateField(): Forms\Components\DatePicker
-    {
-        return Forms\Components\DatePicker::make('act_attachment_date')
-            ->label('Data caricamento atto')
-            ->extraInputAttributes(['class' => 'text-center'])
-            ->visible(fn(Get $get): bool => $get('notify_type') === NotifyType::MESSO->value)
             ->columnSpan(4);
     }
 

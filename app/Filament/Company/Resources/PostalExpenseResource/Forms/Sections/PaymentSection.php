@@ -3,6 +3,7 @@
 namespace App\Filament\Company\Resources\PostalExpenseResource\Forms\Sections;
 
 use App\Enums\ShipmentDocType;
+use App\Enums\NotifyType;
 use App\Models\ShipmentType;
 use App\Services\CurrencyService;
 use Filament\Forms;
@@ -18,12 +19,14 @@ class PaymentSection
             ->visible(fn($record): bool => $record && self::show($record))
             ->schema([
                 self::payedField(),
+                self::fundField(),
+                self::placeholderField(),
                 self::paymentDateField(),
                 self::paymentTotalField(),
                 self::paymentInsertUserField(),
                 self::paymentInsertDateField(),
             ])
-            ->columns(3);
+            ->columns(6);
     }
 
     private static function payedField(): Forms\Components\Toggle
@@ -33,6 +36,25 @@ class PaymentSection
             ->formatStateUsing(function ($state, $record) {
                 return $record?->passiveInvoice?->last_payment_date !== null && $record?->passiveInvoice?->passivePayments?->sum('amount') >= $record?->notify_expense_amount;
             })
+            ->columnSpan(1)
+            ->live();
+    }
+
+    private static function fundField(): Forms\Components\Toggle
+    {
+        return Forms\Components\Toggle::make('fund')
+            ->label('Spese su fondo')
+            ->visible(fn($record) => $record && $record->notify_type === NotifyType::MESSO)
+            ->columnSpan(1)
+            ->live();
+    }
+
+    private static function placeholderField(): Forms\Components\Placeholder
+    {
+        return Forms\Components\Placeholder::make('placeholder')
+            ->label('')
+            ->visible(fn($record) => $record && $record->notify_type !== NotifyType::MESSO)
+            ->columnSpan(1)
             ->live();
     }
 
@@ -41,7 +63,7 @@ class PaymentSection
         return Forms\Components\DatePicker::make('payment_date')
             ->label('Data pagamento')
             ->extraInputAttributes(['class' => 'text-center'])
-            ->required()
+            ->required(fn($record) => $record && $record->notify_type === NotifyType::SPEDIZIONE)
             ->formatStateUsing(function ($state, $record) {
                 if ($state) {
                     // Opzione A: Forza il fuso orario dell'app e poi prendi la data
@@ -56,6 +78,7 @@ class PaymentSection
 
                 return null;
             })
+            ->columnSpan(2)
             ->helperText('In caso di più pagamenti, inserire la data dell\'ultimo pagamento');
     }
 
@@ -82,6 +105,7 @@ class PaymentSection
 
                 return number_format($total, 2, ',', '.') ?? null;
             })
+            ->columnSpan(2)
             ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
             ->inputMode('decimal')
             ->step(0.01)
@@ -97,6 +121,7 @@ class PaymentSection
             ->relationship('paymentInsertUser', 'name')
             ->searchable()
             ->preload()
+            ->columnSpan(2)
             ->optionsLimit(5);
     }
 
@@ -106,6 +131,7 @@ class PaymentSection
             ->label('Data inserimento pagamento')
             ->extraInputAttributes(['class' => 'text-center'])
             ->disabled()
+            ->columnSpan(2)
             ->visible(fn($record): bool => $record && $record->payment_insert_date);
     }
 
