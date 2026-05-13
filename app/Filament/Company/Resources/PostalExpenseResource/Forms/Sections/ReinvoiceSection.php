@@ -17,8 +17,10 @@ class ReinvoiceSection
             ->icon('heroicon-o-receipt-refund')
             ->collapsed(fn($record): bool => $record && $record->reinvoiceInserted())
             ->visible(fn($record): bool => $record && $record->reinvoice_type?->showReinvoice() &&
-                                            (($record->notify_type === NotifyType::SPEDIZIONE && $record->payment_insert_user_id && $record->payment_insert_date) ||
-                                                ($record->notify_type === NotifyType::MESSO && $record->notify_insert_user_id && $record->notify_insert_date)))
+                                            (
+                                                ($record->notify_type === NotifyType::SPEDIZIONE && $record->paymentInserted()) ||
+                                                ($record->notify_type === NotifyType::MESSO && $record->notificationInserted()))
+                                            )
             ->schema([
                 self::reinvoiceIdField(),
                 self::reinvoiceNumberField(),

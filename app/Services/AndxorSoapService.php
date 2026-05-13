@@ -262,6 +262,24 @@ class AndxorSoapService
         ], fn($value) => !empty($value)) : [];
     }
 
+    private function getDatiFattureCollegate(Invoice $invoice): ?array
+    {
+        if(strpos($invoice->contract?->cig_code, '#') === false){
+            $cig = $invoice->contract?->cig_code;
+        }
+        else{
+            $cig = '';
+        }
+        return $invoice->invoice ? array_filter([
+            array_filter([
+                'IdDocumento' => $invoice->invoice->getNewInvoiceNumber(),
+                'Data' => $invoice->invoice->invoice_date ?? null,
+                'CodiceCUP' => $invoice->contract?->cup_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract?->cup_code) ? $invoice->contract?->cup_code : null,
+                'CodiceCIG' => $cig && preg_match('/^[A-Za-z0-9]{1,15}$/', $cig) ? $cig : null,
+            ], fn($value) => !is_null($value) && $value !== '')
+        ], fn($value) => !empty($value)) : [];
+    }
+
     private function getDatiDDT(Invoice $invoice): ?array
     {
         return $invoice->delivery_note ? [
@@ -405,7 +423,14 @@ class AndxorSoapService
             $payload['CessionarioCommittente'] = $this->getCessionarioCommittente($invoice);
             $payload['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento'] = $this->getDatiGeneraliDocumento($invoice, $withholdings, $funds);
             // $payload['FatturaElettronicaBody']['DatiGenerali']['DatiOrdineAcquisto'] = $this->getDatiOrdineAcquisto($invoice);
-            $payload['FatturaElettronicaBody']['DatiGenerali']['DatiContratto'] = $this->getDatiContratto($invoice) == [] ? null : $this->getDatiContratto($invoice);
+            if($invoice->docType->name == 'TD04' || $invoice->docType->name == 'TD20'){
+                $dataI = $this->getDatiFattureCollegate($invoice);
+                $payload['FatturaElettronicaBody']['DatiGenerali']['DatiFattureCollegate'] = $dataI == [] ? null : $dataI;
+            }
+            elseif($invoice->docType->name == 'TD04' || $invoice->docType->name == 'TD20'){
+                $dataC = $this->getDatiContratto($invoice);
+                $payload['FatturaElettronicaBody']['DatiGenerali']['DatiContratto'] = $dataC == [] ? null : $dataC;
+            }
             $payload['FatturaElettronicaBody']['DatiGenerali']['DatiDDT'] = $this->getDatiDDT($invoice);
             $payload['FatturaElettronicaBody']['DatiBeniServizi'] = $this->getDatiBeniServizi($invoice);
             $payload['FatturaElettronicaBody']['DatiPagamento'] = $this->getDatiPagamento($invoice);

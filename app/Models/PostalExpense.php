@@ -366,7 +366,9 @@ class PostalExpense extends Model
                     $expense->reinvoice_registration_date = today();
                 });
             }
-            else if($expense->paymentInserted() && $expense->reinvoice_id){
+            else if((($expense->notify_type === NotifyType::SPEDIZIONE && $expense->paymentInserted()) ||                       // è un a spedizione ed è stato inserito il pagamento
+                     ($expense->notify_type === NotifyType::MESSO && $expense->notificationInserted())) &&                      // è un messo ed è stata inserita la notifica
+                     $expense->reinvoice_id){                                                                                   // è stata selezionata una fattura per la rifatturazione
                 PostalExpense::withoutEvents(function () use ($expense) {
                     $expense->reinvoice_insert_user_id = Auth::id();
                     $expense->reinvoice_insert_date = today();

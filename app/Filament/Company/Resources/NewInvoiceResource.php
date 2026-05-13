@@ -2431,7 +2431,7 @@ class NewInvoiceResource extends Resource
 
                 $parent = Invoice::find($get('parent_id'));
                 if($parent){
-                    $description .= ' di ' . lcfirst($parent?->docType->description);
+                    $description .= ' della ' . lcfirst($parent?->docType->description);
                     $description .= ' n.ro ' . $parent?->getNewInvoiceNumber();
                     $description .= ' del ' . Carbon::parse($parent?->invoice_date)->format('d/m/Y');
 
