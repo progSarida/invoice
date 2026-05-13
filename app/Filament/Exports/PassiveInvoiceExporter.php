@@ -7,7 +7,6 @@ use App\Models\PassiveInvoice;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
-use Illuminate\Support\Facades\Log;
 
 class PassiveInvoiceExporter extends Exporter
 {

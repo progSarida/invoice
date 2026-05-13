@@ -34,7 +34,7 @@ class PaymentSection
         return Forms\Components\Toggle::make('payed')
             ->label('Spese pagate')
             ->formatStateUsing(function ($state, $record) {
-                return $record?->passiveInvoice?->last_payment_date !== null && $record?->passiveInvoice?->passivePayments?->sum('amount') >= $record?->notify_expense_amount;
+                return $state ? $state : $record?->passiveInvoice?->last_payment_date !== null && $record?->passiveInvoice?->passivePayments?->sum('amount') >= $record?->notify_expense_amount;
             })
             ->columnSpan(1)
             ->live();

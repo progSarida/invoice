@@ -69,10 +69,10 @@ class BailExporter extends Exporter
                 ->getStateUsing(function ($record) {
                     if (self::$activeAtDate) {
                         $detail = $record->selectedDetail(self::$activeAtDate);
-                        return $detail ? \Carbon\Carbon::parse($detail->bill_start)->format('d/m/Y') : NULL;
+                        return $detail ? \Carbon\Carbon::parse($detail->bill_start)->format('d/m/Y') : null;
                     }
                     $detail = $record->lastDetail;
-                    return $detail ? \Carbon\Carbon::parse($detail->bill_start)->format('d/m/Y') : NULL;
+                    return $detail ? \Carbon\Carbon::parse($detail->bill_start)->format('d/m/Y') : null;
                 }),
             // ExportColumn::make('deadline')
             //     ->label('Fine')
@@ -82,10 +82,10 @@ class BailExporter extends Exporter
                 ->getStateUsing(function ($record) {
                     if (self::$activeAtDate) {
                         $detail = $record->selectedDetail(self::$activeAtDate);
-                        return $detail ? \Carbon\Carbon::parse($detail->bill_deadline)->format('d/m/Y') : NULL;
+                        return $detail ? \Carbon\Carbon::parse($detail->bill_deadline)->format('d/m/Y') : null;
                     }
                     $detail = $record->lastDetail;
-                    return $detail ? \Carbon\Carbon::parse($detail->bill_deadline)->format('d/m/Y') : NULL;
+                    return $detail ? \Carbon\Carbon::parse($detail->bill_deadline)->format('d/m/Y') : null;
                 }),
             ExportColumn::make('year_duration')
                 ->label('Anni'),
