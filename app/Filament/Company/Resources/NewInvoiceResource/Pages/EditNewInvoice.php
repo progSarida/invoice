@@ -616,7 +616,7 @@ Log::info('Commit');
     {
         return [
             $this->getSaveFormAction()
-                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
+                // ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
                 ->color('success'),
             $this->getCancelFormAction(),
             $this->getResetFormAction(),
