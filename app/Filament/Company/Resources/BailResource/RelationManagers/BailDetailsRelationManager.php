@@ -28,22 +28,50 @@ class BailDetailsRelationManager extends RelationManager
         return $form
             ->columns(6)
             ->schema([
-                Forms\Components\DatePicker::make('bill_start')->label('Inizio Polizza')
+                // Forms\Components\DatePicker::make('bill_start')->label('Inizio Polizza')
+                //     ->required()
+                //     ->extraInputAttributes(['class' => 'text-center'])
+                //     ->default(function(){
+                //         $bail = $this->getOwnerRecord();
+                //         $prev = $bail->lastDetail;
+                //         // if($prev) return \Carbon\Carbon::parse($prev->bill_deadline)->addYear($bail->year_duration)->addMonth($bail->month_duration)->addDays($bail->day_duration); // è un rinnovo
+                //         // else return \Carbon\Carbon::parse($bail->bill_date);                                                                                                        // prima creazione
+                //         if($prev) return $prev->bill_deadline->addYear($bail->year_duration)->addMonth($bail->month_duration)->addDays($bail->day_duration);                        // è un rinnovo
+                //         else return $bail->bill_date;                                                                                                                               // prima creazione
+                //     })
+                //     ->columnSpan(2),
+                Forms\Components\DatePicker::make('bill_start')
+                    ->label('Inizio Polizza')
                     ->required()
                     ->extraInputAttributes(['class' => 'text-center'])
-                    ->default(function(){
-                        $prev = $this->getOwnerRecord()->lastDetail;
-                        if($prev) return \Carbon\Carbon::parse($prev->bill_start)->addYear();
-                        else null;
+                    ->default(function () {
+                        $bail = $this->getOwnerRecord();
+                        $prev = $bail->lastDetail;
+                        if ($prev && $prev->bill_deadline) { return $prev->bill_deadline; }
+                        return $bail->bill_date;
                     })
                     ->columnSpan(2),
-                Forms\Components\DatePicker::make('bill_deadline')->label('Scadenza Polizza')
+                // Forms\Components\DatePicker::make('bill_deadline')->label('Scadenza Polizza')
+                //     ->required()
+                //     ->extraInputAttributes(['class' => 'text-center'])
+                //     ->default(function(Get $get){
+                //         $bail = $this->getOwnerRecord();
+                //         $prev = $bail->lastDetail;
+                //         // if($prev) return \Carbon\Carbon::parse($get('bill_start'))->addYear($bail->year_duration)->addMonth($bail->month_duration)->addDays($bail->day_duration);   // è un rinnovo
+                //         // else return \Carbon\Carbon::parse($bail->bill_date)->addYear($bail->year_duration)->addMonth($bail->month_duration)->addDays($bail->day_duration);          // prima creazione
+                //         if($prev) return \Carbon\Carbon::parse($get('bill_start'))->addYear($bail->year_duration)->addMonth($bail->month_duration)->addDays($bail->day_duration);   // è un rinnovo
+                //         else return $bail->bill_date->addYear($bail->year_duration)->addMonth($bail->month_duration)->addDays($bail->day_duration);                                 // prima creazione
+                //     })
+                //     ->columnSpan(2),
+                Forms\Components\DatePicker::make('bill_deadline')
+                    ->label('Scadenza Polizza')
                     ->required()
                     ->extraInputAttributes(['class' => 'text-center'])
-                    ->default(function(){
-                        $prev = $this->getOwnerRecord()->lastDetail;
-                        if($prev) return \Carbon\Carbon::parse($prev->bill_deadline)->addYear();
-                        else null;
+                    ->default(function (Get $get) {
+                        $bail = $this->getOwnerRecord();
+                        $billStart = $get('bill_start');
+                        if ($billStart) { return \Carbon\Carbon::parse($billStart)->addYears((int) $bail->year_duration)->addMonths((int) $bail->month_duration)->addDays((int) $bail->day_duration); }
+                        return null;
                     })
                     ->columnSpan(2),
 
@@ -51,41 +79,14 @@ class BailDetailsRelationManager extends RelationManager
                     ->label('')
                     ->columnSpan(2),
 
-                Forms\Components\DatePicker::make('receipt_date')->label('Data Quietanza')
-                    ->extraInputAttributes(['class' => 'text-center'])
-                    ->columnSpan(2)
-                    ->nullable(),
-                Forms\Components\FileUpload::make('attachment_path')->label('Quietanza')
-                    ->live()
-                    // ->disk('public')
-                    // ->directory('bail/bill-attachments')
-                    ->directory(function (Get $get) {
-                        $ownerRecord = $this->getOwnerRecord();
-                        $client = Client::find($ownerRecord->client_id)->denomination;
-                        return "bail/bill-attachments/{$client}_{$ownerRecord->bill_number}";
-                    })
-                    // ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing(
-                        fn ($file, Get $get): string => 'Quietanza_' . $get('receipt_date') . '.' . $file->getClientOriginalExtension()
-                    )
-                    ->columnSpan(3)
-                    ->extraAttributes(['class' => 'file-upload-with-preview']),
-                Forms\Components\Actions::make([
-                    \Filament\Forms\Components\Actions\Action::make('view_receipt')
-                        // ->label('Visualizza')
-                        ->label('Quietanza')
-                        ->tooltip('Visualizza quietanza')
-                        ->icon('heroicon-o-eye')
-                        // ->url(fn($record): ?string => $record && $record->attachment_path ? Storage::url($record->attachment_path) : null)
-                        ->url(fn($record): ?string => $record && $record->attachment_path ? Storage::temporaryUrl($record->attachment_path,now()->addMinutes(1)) : null)
-                        ->openUrlInNewTab()
-                        ->hidden(fn ($record) => !$record || !$record->attachment_path),
-                ])
-                ->columnSpan(1),
-
                 Forms\Components\TextInput::make('premium')->label('Importo Premio')
                     ->columnSpan(2)
                     ->required()
+                    ->default(function (Get $get) {
+                        $prev = $this->getOwnerRecord()->lastDetail;
+                        if ($prev) { return $prev->premium; }
+                        return 0;
+                    })
                     // ->numeric()
                     ->live(onBlur: true)
                     ->debounce(3000)
@@ -110,6 +111,39 @@ class BailDetailsRelationManager extends RelationManager
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->columnSpan(2)
                     ->nullable(),
+
+                Forms\Components\DatePicker::make('receipt_date')->label('Data Quietanza')
+                    ->extraInputAttributes(['class' => 'text-center'])
+                    ->columnSpan(2)
+                    ->nullable(),
+                Forms\Components\FileUpload::make('attachment_path')->label('Quietanza')
+                    ->live()
+                    // ->disk('public')
+                    // ->directory('bail/bill-attachments')
+                    ->directory(function (Get $get) {
+                        $ownerRecord = $this->getOwnerRecord();
+                        $client = Client::find($ownerRecord->client_id)->denomination;
+                        return "bail/bill-attachments/{$client}_{$ownerRecord->bill_number}";
+                    })
+                    // ->visibility('public')
+                    ->getUploadedFileNameForStorageUsing(
+                        fn ($file, Get $get): string => 'Quietanza_' . $get('receipt_date') . '.' . $file->getClientOriginalExtension()
+                    )
+                    ->columnSpan(3)
+                    ->extraAttributes(['class' => 'file-upload-with-preview']),
+
+                Forms\Components\Actions::make([
+                    \Filament\Forms\Components\Actions\Action::make('view_receipt')
+                        // ->label('Visualizza')
+                        ->label('Quietanza')
+                        ->tooltip('Visualizza quietanza')
+                        ->icon('heroicon-o-eye')
+                        // ->url(fn($record): ?string => $record && $record->attachment_path ? Storage::url($record->attachment_path) : null)
+                        ->url(fn($record): ?string => $record && $record->attachment_path ? Storage::temporaryUrl($record->attachment_path,now()->addMinutes(1)) : null)
+                        ->openUrlInNewTab()
+                        ->hidden(fn ($record) => !$record || !$record->attachment_path),
+                ])
+                ->columnSpan(1),
 
                 Forms\Components\DatePicker::make('release_date')->label('Data Svincolo')
                     ->extraInputAttributes(['class' => 'text-center'])

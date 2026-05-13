@@ -3,6 +3,7 @@
 namespace App\Filament\Company\Resources;
 
 use App\Enums\PaymentType;
+use App\Models\Supplier;
 use App\Services\CurrencyService;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -13,9 +14,9 @@ use App\Models\PassivePayment;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+// use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Company\Resources\PassivePaymentResource\Pages;
-use App\Filament\Company\Resources\PassivePaymentResource\RelationManagers;
+// use App\Filament\Company\Resources\PassivePaymentResource\RelationManagers;
 use App\Models\DocType;
 use App\Models\PassiveInvoice;
 use Filament\Facades\Filament;
@@ -24,7 +25,6 @@ use Filament\Forms\Set;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class PassivePaymentResource extends Resource
 {
@@ -73,7 +73,7 @@ class PassivePaymentResource extends Resource
                                 ->limit(50)
                                 // ->toSql();dd($list);
                                 ->get()
-                                ->mapWithKeys(fn ($i) => [$i->id => static::getPassiveInvoiceLabel($i)]) // Usa una funzione helper
+                                ->mapWithKeys(fn (PassiveInvoice $i) => [$i->id => static::getPassiveInvoiceLabel($i)]) // Usa una funzione helper
                                 ->toArray();
                         } else {
                             $list = PassiveInvoice::query()
@@ -99,7 +99,7 @@ class PassivePaymentResource extends Resource
                                 ->with(['supplier'])
                                 ->limit(50)
                                 ->get()
-                                ->mapWithKeys(fn ($i) => [$i->id => static::getPassiveInvoiceLabel($i)]) // Usa una funzione helper
+                                ->mapWithKeys(fn (PassiveInvoice $i) => [$i->id => static::getPassiveInvoiceLabel($i)]) // Usa una funzione helper
                                 ->toArray();
                         }
                         return $list;
@@ -272,6 +272,7 @@ class PassivePaymentResource extends Resource
                         }
                         return "{$invoice->number}/{$invoice->invoice_date->format('d-m-Y')}";
                     })
+                    ->alignRight()
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
@@ -344,7 +345,33 @@ class PassivePaymentResource extends Resource
                         $record->save();
                     }),
             ])
+            ->filtersFormWidth('3xl')
+            ->filtersFormColumns(12)
             ->filters([
+                SelectFilter::make('supplier_id')
+                    ->label('Fornitore')
+                    // ->multiple()
+                    ->searchable()
+                    // ->preload()
+                    ->columnSpanFull()
+                    ->options(function () {
+                        $suppliers = Supplier::select('suppliers.id', 'suppliers.denomination')
+                            ->join('passive_invoices', 'suppliers.id', '=', 'passive_invoices.supplier_id')
+                            ->distinct()
+                            ->get()
+                            ->pluck('denomination', 'id')
+                            ->toArray();
+                        return $suppliers;
+                    })
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value'])) {
+                            return $query;
+                        }
+                        return $query->whereHas('passiveInvoice', function (Builder $innerQuery) use ($data) {
+                            $innerQuery->where('supplier_id', $data['value']);
+                        });
+                    })
+                    ->getOptionLabelUsing(fn ($record) => $record?->description),
                 SelectFilter::make('validated')
                     ->label('Validati')
                     ->options([
@@ -358,6 +385,7 @@ class PassivePaymentResource extends Resource
                         return $query->when($data['value'] === 'si', fn ($q) => $q->where('validated', true))
                                     ->when($data['value'] === 'no', fn ($q) => $q->where('validated', false));
                     })
+                    ->columnSpan(4)
                     ->preload(),
                 SelectFilter::make('select_doc_type')
                     ->label('Seleziona tipo documento')
@@ -365,6 +393,7 @@ class PassivePaymentResource extends Resource
                     ->options(function () {
                         return DocType::orderBy('doc_group_id')->pluck('description', 'name')->toArray();
                     })
+                    ->columnSpan(4)
                     ->multiple()
                     ->searchable()
                     ->preload()
@@ -384,6 +413,7 @@ class PassivePaymentResource extends Resource
                     ->options(function () {
                         return DocType::orderBy('doc_group_id')->pluck('description', 'name')->toArray();
                     })
+                    ->columnSpan(4)
                     ->multiple()
                     ->searchable()
                     ->preload()
@@ -398,6 +428,7 @@ class PassivePaymentResource extends Resource
                         });
                     }),
                 Filter::make('payment_date_range')
+                    ->columns(2)
                     ->form([
                         DatePicker::make('payment_from_date')
                             ->label('Pagamento da')
@@ -408,6 +439,7 @@ class PassivePaymentResource extends Resource
                             ->default(now()->year . '-12-31')
                             ->columnSpan(1),
                     ])
+                    ->columnSpan(6)
                     ->query(function (Builder $query, array $data) {
                         if (! empty($data['payment_from_date'])) {
                             $query->whereDate('payment_date', '>=', $data['payment_from_date']);
@@ -429,6 +461,7 @@ class PassivePaymentResource extends Resource
                         return null;
                     }),
                 Filter::make('registration_date_range')
+                    ->columns(2)
                     ->form([
                         DatePicker::make('registration_from_date')
                             ->label('Registrazione da')
@@ -437,6 +470,7 @@ class PassivePaymentResource extends Resource
                             ->label('Registrazione a')
                             ->columnSpan(1),
                     ])
+                    ->columnSpan(6)
                     ->query(function (Builder $query, array $data) {
                         if (! empty($data['registration_from_date'])) {
                             $query->whereDate('registration_date', '>=', $data['registration_from_date']);

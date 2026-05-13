@@ -415,6 +415,7 @@ class PassiveInvoiceResource extends Resource
                     ->sortable(),
                 TextColumn::make('number')
                     ->label('Numero')
+                    ->alignRight()
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('invoice_date')
@@ -500,7 +501,22 @@ class PassiveInvoiceResource extends Resource
                     })
                     ->multiple()
                     ->searchable()
-                    ->columnSpanFull()
+                    ->columnSpan(3)
+                    ->preload(),
+                SelectFilter::make('attached')
+                    ->label('Con allegati')
+                    ->options([
+                        'yes' => 'Sì',
+                        'no' => 'No',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value'])) {
+                            return $query;
+                        }
+                        return $query->when($data['value'] === 'yes', fn ($q) => $q->whereNotNull('attachments_path'))
+                                    ->when($data['value'] === 'no', fn ($q) => $q->whereNull('attachments_path'));
+                    })
+                    ->columnSpan(1)
                     ->preload(),
                 SelectFilter::make('exclude_doc_types')
                     ->label('Escludi tipo documento')

@@ -204,4 +204,9 @@ class Company extends Model
     {
         return $this->hasMany(SendType::class);
     }
+
+    public function actTypes()
+    {
+        return $this->hasMany(ActType::class);
+    }
 }

@@ -112,12 +112,26 @@ class InvoiceExporter extends Exporter
         ];
     }
 
+    // public static function getCompletedNotificationBody(Export $export): string
+    // {
+    //     $body = 'Your invoice export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
+
+    //     if ($failedRowsCount = $export->getFailedRowsCount()) {
+    //         $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to export.';
+    //     }
+
+    //     return $body;
+    // }
+
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = 'Your invoice export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
+        $append1 = $export->successful_rows === 1 ? 'riga è stata' : 'righe sono state';
+        $failedRowsCount = $export->getFailedRowsCount();
+        $append2 = $export->successful_rows === 1 ? 'riga ha ' : 'righe hanno';
+        $body = 'L\'esportazione delle fatture è stata completata e ' . number_format($export->successful_rows) . ' ' . $append1 . ' esportate.';
 
-        if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to export.';
+        if ($failedRowsCount) {
+            $body .= '<br>' . number_format($failedRowsCount) . ' ' . $append2 . ' fallito l\'esportazione.';
         }
 
         return $body;

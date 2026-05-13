@@ -484,6 +484,7 @@ class BailResource extends Resource
                     ->nullable(),
                 Forms\Components\TextInput::make('bill_number')->label('Numero Polizza')
                     ->required()
+                    ->extraInputAttributes(['class' => 'text-center'])
                     ->maxLength(255)
                     ->columnSpan(2),
                 Forms\Components\DatePicker::make('bill_date')->label('Data Polizza')
@@ -706,7 +707,7 @@ class BailResource extends Resource
                             $deadline = \Carbon\Carbon::parse($detail->bill_deadline);
                             $today = \Carbon\Carbon::today();
                             $daysRemaining = $today->diffInDays($deadline, false);
-                            return $daysRemaining >= 0 ? $daysRemaining : 'Scaduta';
+                            return $daysRemaining >= 0 ? $daysRemaining : ($detail->release_date ? 'Scaduta' : 'Scaduta e non svincolata');
                         } catch (\Exception $e) {
                             \Illuminate\Support\Facades\Log::error('Errore nel calcolo dei giorni rimanenti: ' . $e->getMessage());
                             return 'Errore';
@@ -716,43 +717,99 @@ class BailResource extends Resource
                 //     ->label('Stato Cauzione')
                 //     ->formatStateUsing(fn ($state) => $state?->getLabel() ?? 'N/A'),
             ])
+            ->filtersFormWidth('3xl')
+            ->filtersFormColumns(6)
             ->filters([
+                Tables\Filters\SelectFilter::make('bail_type')
+                    ->options(\App\Enums\BailType::class)
+                    ->multiple()
+                    ->label('Tipo')
+                    ->columnSpan(2)
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['values'])) {
+                            foreach ($data as $taxType) {
+                                $query->whereIn('bail_type', $data['values']);
+                            }
+                        }
+                    }),
                 Tables\Filters\Filter::make('active_at_date') // Cambiato il nome per coerenza
+                    ->columnSpan(2)
                     ->form([
                         Forms\Components\DatePicker::make('selected_date')
-                            ->label('Attive al')
-                            ->default(today()),
+                            ->label('Attive al'),
+                            // ->default(today()),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         if (empty($data['selected_date'])) {
                             return $query;
                         }
 
-                        return $query->whereHas('bailDetails', function (Builder $subQuery) use ($data) {
-                            $subQuery->where('bill_start', '<=', $data['selected_date'])
-                                    ->where('bill_deadline', '>=', $data['selected_date']);
+                        return $query->whereHas('lastDetail', function (Builder $subQuery) use ($data) {
+                            $subQuery->where('bill_deadline', '>=', $data['selected_date'])
+                                ->orWhere(function ($q) use ($data) {
+                                    $q->where('bill_deadline', '<', $data['selected_date'])
+                                        ->whereNull('release_date');
+                                });
                         });
-                    }),
-                Tables\Filters\SelectFilter::make('insurance')
-                    ->options(function () {
-                        return \App\Models\Insurance::all()->pluck('name', 'id')->toArray();
-                    })
-                    ->label('Compagnia assicurativa')
-                    ->query(function ($query, $data) {
-                        if (!empty($data['value'])) {
-                            $query->where('insurance_id', $data);
-                        }
                     }),
                 Tables\Filters\SelectFilter::make('tax_types')
                     ->options(\App\Enums\TaxType::class)
                     ->multiple()
                     ->label('Entrata')
+                    ->columnSpan(2)
                     ->query(function (Builder $query, array $data) {
                         if (!empty($data['values'])) {
                             foreach ($data as $taxType) {
                                 $query->whereJsonContains('tax_types', $taxType);
                             }
                         }
+                    }),
+                // Tables\Filters\SelectFilter::make('insurance')
+                //     ->options(function () {
+                //         return \App\Models\Insurance::all()->pluck('name', 'id')->toArray();
+                //     })
+                //     ->label('Compagnia assicurativa')
+                //     ->query(function ($query, $data) {
+                //         if (!empty($data['value'])) {
+                //             $query->where('insurance_id', $data);
+                //         }
+                //     }),
+                Tables\Filters\Filter::make('insurance_agency')
+                    ->columnSpan(6)
+                    ->columns(2)
+                    ->form([
+                        // Campo Assicurazione
+                        Forms\Components\Select::make('insurance_id')
+                            ->label('Compagnia assicurativa')
+                            ->options(\App\Models\Insurance::pluck('name', 'id'))
+                            ->reactive() // Fondamentale per aggiornare l'altro campo
+                            ->afterStateUpdated(fn (Forms\Set $set) => $set('agency_id', null)), // Reset agenzia se cambio assicurazione
+
+                        // Campo Agenzia
+                        Forms\Components\Select::make('agency_id')
+                            ->label('Agenzia')
+                            ->options(function (Forms\Get $get) {
+                                $insuranceId = $get('insurance_id');
+
+                                if (!$insuranceId) {
+                                    return \App\Models\Agency::pluck('name', 'id');
+                                }
+
+                                return \App\Models\Agency::where('insurance_id', $insuranceId)
+                                    ->pluck('name', 'id');
+                            })
+                            ->disabled(fn (Forms\Get $get) => !$get('insurance_id')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['insurance_id'],
+                                fn (Builder $query, $value): Builder => $query->where('insurance_id', $value),
+                            )
+                            ->when(
+                                $data['agency_id'],
+                                fn (Builder $query, $value): Builder => $query->where('agency_id', $value),
+                            );
                     }),
                 // Tables\Filters\SelectFilter::make('bail_status')
                 //     ->options(\App\Enums\BailStatus::class)
@@ -765,6 +822,7 @@ class BailResource extends Resource
                 Tables\Filters\SelectFilter::make('bail_status')
                     ->options(\App\Enums\BailStatus::class)
                     ->label('Stato')
+                    ->columnSpan(3)
                     ->query(function (Builder $query, array $data) {
                         if (!empty($data['value'])) {
                             // Utilizziamo doveHas per entrare nella relazione lastDetail
@@ -791,10 +849,11 @@ class BailResource extends Resource
                 //     }),
                 Tables\Filters\SelectFilter::make('expiration_status')
                     ->label('Stato Scadenza')
+                    ->columnSpan(3)
                     ->options([
-                        'expired' => 'Scaduti',
-                        'expired_not_paid' => 'Scaduti e non pagati',
-                        'expired_not_released' => 'Scaduti e non svincolati',
+                        'expired' => 'Scadute',
+                        'expired_not_paid' => 'Scadute e non pagate',
+                        'expired_not_released' => 'Scadute e non svincolate',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         if (empty($data['value'])) {
@@ -834,6 +893,7 @@ class BailResource extends Resource
                         Forms\Components\Checkbox::make('not_paid')
                             ->label('Senza data di pagamento'),
                     ])
+                    ->columnSpan(3)
                     ->query(function (Builder $query, array $data): Builder {
                         // Se la checkbox non è spuntata, non applichiamo filtri
                         if (!$data['not_paid']) {
@@ -859,6 +919,7 @@ class BailResource extends Resource
                         Forms\Components\Checkbox::make('not_receipt')
                             ->label('Senza allegato quietanza'),
                     ])
+                    ->columnSpan(3)
                     ->query(function (Builder $query, array $data): Builder {
                         if (!$data['not_receipt']) {
                             return $query;
