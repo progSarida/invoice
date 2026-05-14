@@ -113,6 +113,7 @@ class AndxorSoapService
 
     private function getAutenticazione(?Invoice $invoice, string $password): ?array
     {
+Log::info("Recupero dati di autenticazione.");
         $entity = $invoice ? $invoice->company : Filament::getTenant();
 
         $state = State::find($entity->state_id);
@@ -121,6 +122,7 @@ class AndxorSoapService
         $idCodice = $entity->vat_number ?? $entity->taxnumber;
 
         if ($alpha2 && preg_match('/^[A-Za-z0-9]{1,28}$/', $idCodice)) {
+Log::info("Dati di autenticazione recuperati.");
             return [
                 'Cedente' => [
                     'IdPaese' => $alpha2,
@@ -135,7 +137,9 @@ class AndxorSoapService
 
     private function getOverrideCedente(Invoice $invoice): ?array
     {
+Log::info("Recupero dati cedente.");
         $idPaeseCedente = $invoice->company->state_id && State::find($invoice->company->state_id) && preg_match('/^[A-Z]{2}$/', State::find($invoice->company->state_id)->alpha2) ? State::find($invoice->company->state_id)->alpha2 : 'IT';
+Log::info("Dati cedente recuperati.");
         return [
             'DatiAnagrafici' => array_filter([
                 'IdFiscaleIVA' => $this->validateIdFiscaleIVACompany($invoice->company, $idPaeseCedente),
@@ -162,7 +166,9 @@ class AndxorSoapService
 
     private function getCessionarioCommittente(Invoice $invoice): ?array
     {
+Log::info("Recupero dati committente.");
         $idPaeseCommittente = $invoice->client->state_id && State::find($invoice->client->state_id) && preg_match('/^[A-Z]{2}$/', State::find($invoice->client->state_id)->alpha2) ? State::find($invoice->client->state_id)->alpha2 : 'IT';
+Log::info("Dati committente recuperati.");
         return [
             'DatiAnagrafici' => [
                 'IdFiscaleIVA' => $this->validateIdFiscaleIVAClient($invoice->client, $idPaeseCommittente),
@@ -184,6 +190,7 @@ class AndxorSoapService
 
     private function getDatiGeneraliDocumento(Invoice $invoice, array $withholdings, array $funds): ?array
     {
+Log::info("Recupero dati documento.");
         $out = [
                 'TipoDocumento' => $invoice->docType->name && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->docType->name) ? $invoice->docType->name : 'TD01',
                 'Divisa' => $invoice->divisa ?? 'EUR',
@@ -222,18 +229,20 @@ class AndxorSoapService
                 ], fn($value) => !is_null($value) && $value !== '');
             }, $funds);
         }
-
+Log::info("Dati documento recuperati.");
         return $out;
     }
 
     private function getDatiOrdineAcquisto(Invoice $invoice): ?array
     {
+Log::info("Recupero dati ordine di acquisto.");
         if(strpos($invoice->contract?->cig_code, '#') === false){
             $cig = $invoice->contract?->cig_code;
         }
         else{
             $cig = '';
         }
+Log::info("Dati ordine di acquisto recuperati.");
         return $invoice->contract ? array_filter([
             array_filter([
                 'IdDocumento' => $invoice->contract->lastDetail->number && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->contract->lastDetail->number) ? $invoice->contract->lastDetail->number : null,
@@ -246,12 +255,14 @@ class AndxorSoapService
 
     private function getDatiContratto(Invoice $invoice): ?array
     {
+Log::info("Recupero dati contratto.");
         if(strpos($invoice->contract?->cig_code, '#') === false){
             $cig = $invoice->contract?->cig_code;
         }
         else{
             $cig = '';
         }
+Log::info("Dati contratto recuperati.");
         return $invoice->contract ? array_filter([
             array_filter([
                 'IdDocumento' => $invoice->contract?->lastDetail?->number && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->contract?->lastDetail?->number) ? $invoice->contract?->lastDetail?->number : null,
@@ -264,12 +275,14 @@ class AndxorSoapService
 
     private function getDatiFattureCollegate(Invoice $invoice): ?array
     {
+Log::info("Recupero dati fattura collegata.");
         if(strpos($invoice->contract?->cig_code, '#') === false){
             $cig = $invoice->contract?->cig_code;
         }
         else{
             $cig = '';
         }
+Log::info("Dati fattura collegata recuperati.");
         return $invoice->invoice ? array_filter([
             array_filter([
                 'IdDocumento' => $invoice->invoice->getNewInvoiceNumber(),
@@ -282,6 +295,7 @@ class AndxorSoapService
 
     private function getDatiDDT(Invoice $invoice): ?array
     {
+Log::info("Recupero dati DDT.");
         return $invoice->delivery_note ? [
             [
                 'NumeroDDT' => $invoice->delivery_note,
@@ -292,6 +306,7 @@ class AndxorSoapService
 
     private function getDatiBeniServizi(Invoice $invoice): ?array
     {
+Log::info("Recupero dati beni e servizi.");
         return [
             'DettaglioLinee' => $invoice->invoiceItems->where('auto', false)->map(function ($item, $index) {
                 return [
@@ -320,6 +335,7 @@ class AndxorSoapService
 
     private function getDatiPagamento(Invoice $invoice): ?array
     {
+Log::info("Recupero dati pagamento.");
         $total = $invoice->client->type->value == 'public' ? $invoice->no_vat_total : $invoice->total ;
         return [
             [
@@ -382,6 +398,7 @@ class AndxorSoapService
 
     public function sendInvoice(Invoice $invoice, string $password)
     {
+Log::info("Tentativo invio documento.");
         try {
             $vats = $invoice->vatResume();
             $funds = array_filter($invoice->getFundBreakdown(), function ($fund) {
@@ -427,7 +444,7 @@ class AndxorSoapService
                 $dataI = $this->getDatiFattureCollegate($invoice);
                 $payload['FatturaElettronicaBody']['DatiGenerali']['DatiFattureCollegate'] = $dataI == [] ? null : $dataI;
             }
-            elseif($invoice->docType->name == 'TD04' || $invoice->docType->name == 'TD20'){
+            elseif($invoice->docType->name !== 'TD04' || $invoice->docType->name !== 'TD20'){
                 $dataC = $this->getDatiContratto($invoice);
                 $payload['FatturaElettronicaBody']['DatiGenerali']['DatiContratto'] = $dataC == [] ? null : $dataC;
             }
@@ -645,12 +662,14 @@ class AndxorSoapService
             // Log::debug('Richiesta SOAP: ' . $this->client->getLastRequest());
             // Log::debug('Risposta SOAP: ' . $this->client->getLastResponse());
 
+Log::info("Documento inviato con successo.");
+
             return $response;
         } catch (SoapFault $fault) {
             Log::error('Errore SOAP: ' . $fault->faultcode . ' - ' . $fault->faultstring);
             throw new Exception('Errore SOAP: ' . $fault->faultstring, 0, $fault);
         } catch (Exception $e) {
-            Log::error('Errore generico: ' . $e->getMessage());
+            Log::error('Errore generico: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
             throw new Exception('Errore generico: ' . $e->getMessage());
         }
     }

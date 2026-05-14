@@ -85,6 +85,26 @@
                 <td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td>
             </tr>
             @endif
+            @if ($invoice->invoice)
+            <tr>
+                <td class="padding"></td>
+                @php
+                    $cig = '';
+                    if(strpos($invoice->contract?->cig_code, '#') === false){
+                        $cig = ', CIG: ' . $invoice->contract?->cig_code;
+                    }
+                @endphp
+                <td class="padding" style="font-size: 2.25mm;">
+                    Fatt.Coll. {{ $invoice->invoice?->getNewInvoiceNumber() }} del {{ $invoice->invoice?->invoice_date->format('d-m-Y') }}{{ $cig }}
+                </td>
+                <td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td>
+            </tr>
+            <tr>
+                <td class="padding"></td>
+                <td class="padding">---------------</td>
+                <td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td><td class="padding"></td>
+            </tr>
+            @endif
             @php
                 $items = $invoice->invoiceItems instanceof \Illuminate\Support\Collection
                     ? $invoice->invoiceItems->where('auto', false)

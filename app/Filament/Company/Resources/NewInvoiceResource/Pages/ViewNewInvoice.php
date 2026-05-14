@@ -462,7 +462,8 @@ Log::info('===== INIZIO AZIONE NOTA CREDITO =====');
 
                             $newInvoice = $record->replicate();                                             // creo una nuova istanza della fattura
 Log::info('Nota di credito creata ---------------------------------------');
-                            $newInvoice->contract_detail_id = $newInvoice->contract?->lastDetail?->id;      // metto l'id del dettaglio contratto in vigore
+                            // $newInvoice->contract_detail_id = $newInvoice->contract?->lastDetail?->id;      // metto l'id del dettaglio contratto in vigore
+                            $newInvoice->contract_detail_id = null;                                         // non metto l'id del dettaglio contratto
 Log::info('ID dettaglio contratto');
                             $newInvoice->doc_type_id = DocType::where('name', 'TD04')->first()->id;         // assegno il tipo di documento nota di credito
 Log::info('Assegno il tipo di documento \'Nota di credito\'');
@@ -541,7 +542,7 @@ Log::info('===== FINE AZIONE NOTA CREDITO =====');
 
                             $record->doc_type_id = DocType::where('name', 'TD01')->first()->id;
                             $record->number = $record->calculateNextInvoiceNumber();
-                            $record->invoice_date = today()->toDateString();
+                            $record->invoice_date = today();
                             $record->sdi_status = SdiStatus::DA_INVIARE;
 
                             DB::commit();

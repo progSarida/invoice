@@ -547,7 +547,7 @@ class PostalExpense extends Model
             if ($expense->act_attachment_path) {
                 $filenameAct = basename($expense->act_attachment_path) ?: 'unknown';
                 $dataA = [
-                    'company_id' => Filament::getTenant()->id,
+                    'company_id' => $expense->company_id,
                     'client_id' => $expense->client_id,
                     'contract_id' => $expense->new_contract_id,
                     'element_id' => $expense->id,
@@ -565,7 +565,7 @@ class PostalExpense extends Model
             if ($expense->notify_attachment_path) {
                 $filenameAct = basename($expense->notify_attachment_path) ?: 'unknown';
                 $dataN = [
-                    'company_id' => Filament::getTenant()->id,
+                    'company_id' => $expense->company_id,
                     'client_id' => $expense->client_id,
                     'contract_id' => $expense->new_contract_id,
                     'element_id' => $expense->id,
@@ -583,7 +583,7 @@ class PostalExpense extends Model
             if ($expense->reinvoice_attachment_path) {
                 $filenameAct = basename($expense->reinvoice_attachment_path) ?: 'unknown';
                 $dataR = [
-                    'company_id' => Filament::getTenant()->id,
+                    'company_id' => $expense->company_id,
                     'client_id' => $expense->client_id,
                     'contract_id' => $expense->new_contract_id,
                     'element_id' => $expense->id,
