@@ -1,6 +1,7 @@
 <?php
 namespace App\Filament\Company\Resources;
 
+use App\Enums\BailType;
 use App\Enums\TaxType;
 use App\Filament\Company\Resources\BailResource\Pages;
 use App\Filament\Company\Resources\BailResource\RelationManagers;
@@ -480,6 +481,7 @@ class BailResource extends Resource
                 Forms\Components\Select::make('bail_type')->label('Tipo Polizza')
                     ->columnSpan(3)
                     ->required()
+                    ->live()
                     ->options(\App\Enums\BailType::class)
                     ->nullable(),
                 Forms\Components\TextInput::make('bill_number')->label('Numero Polizza')
@@ -507,9 +509,48 @@ class BailResource extends Resource
                     ->maxLength(255)
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(1),
+                Forms\Components\TextInput::make('first_premium')
+                    ->label(fn (Get $get) => $get('bail_type') == BailType::BAIL->value ? 'Importo Premio iniziale' : 'Importo Premio')
+                    ->columnSpan(2)
+                    ->required()
+                    // ->numeric()
+                    ->live(onBlur: true)
+                    ->debounce(3000)
+                    ->extraInputAttributes(['class' => 'text-right'])
+                    ->afterStateUpdated(function ($state, $component) {
+                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    // ->nullable()
+                    ->prefix('€'),
+                Forms\Components\TextInput::make('renewal_premium')->label('Importo premio per rinnovo')
+                    ->columnSpan(3)
+                    ->required()
+                    ->visible(fn (Get $get) => $get('bail_type') == BailType::BAIL->value)
+                    // ->numeric()
+                    ->live(onBlur: true)
+                    ->debounce(3000)
+                    ->extraInputAttributes(['class' => 'text-right'])
+                    ->afterStateUpdated(function ($state, $component) {
+                        $clean = preg_replace('/[^\d,\.-]/', '', $state);
+                        $number = str_replace(',', '.', $clean);
+                        $float = floatval($number);
+                        $formatted = number_format($float, 2, ',', '.');
+                        $component->state($formatted);
+                    })
+                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
+                    // ->nullable()
+                    ->prefix('€'),
                 Placeholder::make('')
                     ->label('')
-                    ->columnSpan(4),
+                    ->visible(fn (Get $get) => $get('bail_type') == BailType::INSURANCE->value)
+                    ->columnSpan(2),
                 Forms\Components\FileUpload::make('bill_attachment_path')->label('Allegato Polizza')
                     ->live()
                     // ->disk('public')

@@ -47,8 +47,8 @@ class BailDetailsRelationManager extends RelationManager
                     ->default(function () {
                         $bail = $this->getOwnerRecord();
                         $prev = $bail->lastDetail;
-                        if ($prev && $prev->bill_deadline) { return $prev->bill_deadline; }
-                        return $bail->bill_date;
+                        if ($prev && $prev->bill_deadline) { return $prev->bill_deadline; }                                                                                                 // rinnovo
+                        return $bail->bill_date;                                                                                                                                            // prima creazione
                     })
                     ->columnSpan(2),
                 // Forms\Components\DatePicker::make('bill_deadline')->label('Scadenza Polizza')
@@ -69,9 +69,12 @@ class BailDetailsRelationManager extends RelationManager
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->default(function (Get $get) {
                         $bail = $this->getOwnerRecord();
+                        $prev = $bail->lastDetail;
                         $billStart = $get('bill_start');
-                        if ($billStart) { return \Carbon\Carbon::parse($billStart)->addYears((int) $bail->year_duration)->addMonths((int) $bail->month_duration)->addDays((int) $bail->day_duration); }
-                        return null;
+                        if ($prev && $prev->bill_deadline) {
+                            return \Carbon\Carbon::parse($billStart)->addYears((int) $bail->year_duration)->addMonths((int) $bail->month_duration)->addDays((int) $bail->day_duration);     // rinnovo
+                            }
+                        return \Carbon\Carbon::parse($bail->bill_date)->addYears((int) $bail->year_duration)->addMonths((int) $bail->month_duration)->addDays((int) $bail->day_duration);   // prima creazione
                     })
                     ->columnSpan(2),
 
@@ -83,9 +86,10 @@ class BailDetailsRelationManager extends RelationManager
                     ->columnSpan(2)
                     ->required()
                     ->default(function (Get $get) {
-                        $prev = $this->getOwnerRecord()->lastDetail;
-                        if ($prev) { return $prev->premium; }
-                        return 0;
+                        $bail = $this->getOwnerRecord();
+                        $prev = $bail->lastDetail;
+                        if ($prev) { return $bail->renewal_premium; }
+                        return $bail->first_premium;;
                     })
                     // ->numeric()
                     ->live(onBlur: true)

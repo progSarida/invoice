@@ -267,10 +267,12 @@ class NewContractResource extends Resource
                 Forms\Components\TextInput::make('office_name')
                     ->label('Denominazione UO')
                     ->required(fn (Get $get) => Client::find($get('client_id'))?->subtype->isPublic())
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('office_code')
                     ->label('Codice Univoco')
                     ->required()
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(3),
                 View::make('links.ipa-link')
                     ->columnSpan(2),
@@ -278,6 +280,7 @@ class NewContractResource extends Resource
                     ->label('CIG (Rif. contratto)')
                     ->hintIcon('heroicon-o-information-circle', tooltip: "Il codice CIG deve essere univoco e di 10 caratteri. In caso di contratto senza CIG (solo con privati o con enti pubblici per il recupero delle spese postali) si deve inserire il dato preceduto da '#' e la procedura elude questo controllo.")
                     ->required()
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->live(onBlur: true)
                     ->afterStateUpdated(function ($state){
                         if (strpos($state, '#') === false && strlen($state) !== 10) {
@@ -300,6 +303,7 @@ class NewContractResource extends Resource
                 Forms\Components\TextInput::make('cup_code')
                     ->label('CUP')
                     // ->required()
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->columnSpan(2),
                 Forms\Components\Toggle::make('courtesy')
                     ->label('Inviare fattura di cortesia')
@@ -313,8 +317,8 @@ class NewContractResource extends Resource
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('courtesy_address')
                     ->label('Indirizzo email di invio fattura di cortesia')
-                    ->required(fn(Get $get) => $get('courtesy'))
-                    ->visible()
+                    ->required()
+                    ->visible(fn(Get $get) => $get('courtesy'))
                     ->email()
                     ->columnSpan(4),
 

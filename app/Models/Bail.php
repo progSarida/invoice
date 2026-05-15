@@ -25,6 +25,8 @@ class Bail extends Model
         'year_duration',                                            // durata polizza
         'month_duration',                                           // durata polizza
         'day_duration',                                             // durata polizza
+        'first_premium',                                            // importo premio iniziale
+        'renewal_premium',                                          // importo premio per rinnovo
         // 'original_premium',                                         // importo
         // 'original_pay_date',                                        // data pagamento premio originario
         // 'bail_status',                                              // stato cauzione (Enum)
