@@ -445,8 +445,8 @@ class InvoiceItemsRelationManager extends RelationManager
                         // Crea gli invoice items per le spese selezionate
                         $invoice = $this->getOwnerRecord();
                         // dd($selectedExpenses);
-                        $totPostalExpense = 0;
                         foreach ($selectedExpenses as $expenseData) {
+                            $totPostalExpense = 0;
                             $expense = PostalExpense::find($expenseData['id']);
 
                             if ($expense) {
@@ -491,38 +491,38 @@ class InvoiceItemsRelationManager extends RelationManager
                                 //     'reinvoice_insert_user_id' => Auth::id(),
                                 //     'reinvoice_insert_date' => today()
                                 // ]);
+
+                                // Crea l'invoice item
+                                $invoiceItem = InvoiceItem::create([
+                                    'invoice_id' => $invoice->id,
+                                    // 'description' => 'Rimborso spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier_name),
+                                    'description' => 'Rimborsi escl.Art. 15 ex D.P.R. 633/72',
+                                    'amount' => $totPostalExpense,
+                                    'total' => $totPostalExpense,
+                                    'vat_code_type' => VatCodeType::VC06,
+                                    'auto' => false,
+                                    'postal_expense_id' => $expense->id
+                                ]);
+
+                                // $invoiceItem->invoice->updateTotal();
+                                $invoiceItem->save();
+                                $invoiceItem->checkStampDuty();
+                                $invoiceItem->autoInsert();
+                                $invoiceItem->invoice->updateTotal();
+
+                                // Aggiorna la spesa postale con l'ID della fattura
+                                PostalExpense::withoutEvents(function () use ($expense, $invoice, $totPostalExpense) {
+                                    $expense->update([
+                                        'reinvoice_id' => $invoice->id,
+                                        'reinvoice_number' => $invoice->number,
+                                        'reinvoice_date' => $invoice->invoice_date,
+                                        'reinvoice_amount' => $invoice->total + $totPostalExpense,
+                                        'reinvoice_insert_user_id' => Auth::id(),
+                                        'reinvoice_insert_date' => today()
+                                    ]);
+                                });
                             }
                         }
-
-                        // Crea l'invoice item
-                        $invoiceItem = InvoiceItem::create([
-                            'invoice_id' => $invoice->id,
-                            // 'description' => 'Rimborso spese di notifica da ' . ($expense->supplier_id ? $expense->supplier->denomination : $expense->supplier_name),
-                            'description' => 'Rimborsi escl.Art. 15 ex D.P.R. 633/72',
-                            'amount' => $totPostalExpense,
-                            'total' => $totPostalExpense,
-                            'vat_code_type' => VatCodeType::VC06,
-                            'auto' => false,
-                            'postal_expense_id' => $expense->id
-                        ]);
-
-                        // $invoiceItem->invoice->updateTotal();
-                        $invoiceItem->save();
-                        $invoiceItem->checkStampDuty();
-                        $invoiceItem->autoInsert();
-                        $invoiceItem->invoice->updateTotal();
-
-                        // Aggiorna la spesa postale con l'ID della fattura
-                        PostalExpense::withoutEvents(function () use ($expense, $invoice) {
-                            $expense->update([
-                                'reinvoice_id' => $invoice->id,
-                                'reinvoice_number' => $invoice->number,
-                                'reinvoice_date' => $invoice->invoice_date,
-                                'reinvoice_amount' => $invoice->total,
-                                'reinvoice_insert_user_id' => Auth::id(),
-                                'reinvoice_insert_date' => today()
-                            ]);
-                        });
 
                         // Notifica di successo
                         \Filament\Notifications\Notification::make()

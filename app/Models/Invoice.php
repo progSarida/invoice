@@ -164,6 +164,10 @@ class Invoice extends Model
         return $this->belongsTo(ContractDetail::class,'contract_detail_id');
     }
 
+    public function postalExpenses(){
+        return $this->hasMany(PostalExpense::class,'reinvoice_id','id');
+    }
+
     // Ritorna i dettagli contratto cui fa riferimenti la fattura (obsoleto perchè ora salviamo id dettagli in fattura)
     public function updatedContract()
     {

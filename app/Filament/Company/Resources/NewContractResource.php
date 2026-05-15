@@ -253,7 +253,7 @@ class NewContractResource extends Resource
                 //     ->dehydrated(fn ($state) => filled($state))
                 //     ->columnSpan(3),
                 Forms\Components\Select::make('reinvoice_type')
-                    ->label('Tipo rifatturazione')
+                    ->label('Rifatturazione spese postali')
                     ->options(ReinvoiceType::class)
                     ->required()
                     ->preload()
@@ -312,7 +312,7 @@ class NewContractResource extends Resource
                     ->live()
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('courtesy_address')
-                    ->label('indirizzo invio fattura di cortesia')
+                    ->label('Indirizzo email di invio fattura di cortesia')
                     ->required(fn(Get $get) => $get('courtesy'))
                     ->visible()
                     ->email()

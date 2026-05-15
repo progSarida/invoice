@@ -313,7 +313,7 @@ Log::info("Recupero dati beni e servizi.");
                     'NumeroLinea' => $index + 1,
                     'Descrizione' => $item->description ?? 'Servizio',
                     'Quantita' => sprintf("%.2f", (float) ($item->quantity ?? 1.00)),
-                    'UnitaMisura ' => $item->measure_unit ?? null,
+                    'UnitaMisura' => $item->measure_unit ?? null,
                     'PrezzoUnitario' => sprintf("%.2f", (float) ($item->unit_price ?? $item->amount)),
                     'PrezzoTotale' => sprintf("%.2f", (float) $item->amount),
                     'AliquotaIVA' => is_numeric($item->vat_code_type->getRate()) ? sprintf("%.2f", (float) $item->vat_code_type->getRate()) : "0.00",
@@ -350,6 +350,152 @@ Log::info("Recupero dati pagamento.");
                 ],
             ],
         ];
+    }
+
+    private function getAllegatiOld($invoice): ?array
+    {
+Log::info("Recupero allegati.");
+        $expenses = $invoice->postalExpenses;
+        if ($expenses->isEmpty()) { return null; }
+        $disk = config('filesystems.default');
+        $allegati = [];
+
+        foreach ($expenses as $index => $expense) {
+            $attachments = [
+                'act' => [
+                    'path' => $expense->act_attachment_path,
+                    'descrizione' => 'Allegato atto'
+                ],
+                'notify' => [
+                    'path' => $expense->notify_attachment_path,
+                    'descrizione' => 'Allegato notifica'
+                ],
+                'reinvoice' => [
+                    'path' => $expense->reinvoice_attachment_path,
+                    'descrizione' => 'Fattura rifatturazione'
+                ],
+            ];
+
+            foreach ($attachments as $type => $attachment) {
+                $path = $attachment['path'];
+                if (!$path || !Storage::disk($disk)->exists($path)) { continue; }
+                try {
+                    $fileContent = Storage::disk($disk)->get($path);
+                    // $fileName = basename($path);
+                    $extension = strtoupper(pathinfo($path, PATHINFO_EXTENSION));
+                    $fileName = $attachment['descrizione'] . '.' . $extension;
+                    $base64Content = base64_encode($fileContent);
+
+$size = strlen($fileContent);
+Log::info("Allegato recuperato", [
+    'filename' => $fileName,
+    'size_bytes' => $size,
+    'starts_with_pdf_header' => substr($fileContent, 0, 8) === '%PDF-1.',
+    'mime_detected' => mime_content_type($path ? storage_path('app/' . $path) : ''),
+]);
+
+                    $allegati[] = [
+                        'NomeAttachment' => $fileName,
+                        'AlgoritmoCompressione' => 'NONE',
+                        'FormatoAttachment' => $extension,
+                        'DescrizioneAttachment' => $attachment['descrizione'],
+                        'Attachment' => $base64Content,
+                    ];
+
+                } catch (Exception $e) {
+                    Log::error("Errore recupero allegato", [
+                        'invoice_id' => $invoice->id,
+                        'path' => $path,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        }
+
+        return empty($allegati) ? null : $allegati;
+    }
+
+    private function getAllegati($invoice): ?array
+    {
+        Log::info("Recupero allegati per fattura {$invoice->id}");
+
+        $expenses = $invoice->postalExpenses;
+        if ($expenses->isEmpty()) {
+            Log::info("Nessun allegato presente.");
+            return null;
+        }
+
+        $disk = config('filesystems.default');
+        $allegati = [];
+
+        foreach ($expenses as $expense) {
+            $attachments = [
+                'act'       => ['path' => $expense->act_attachment_path,     'descrizione' => 'Allegato atto'],
+                'notify'    => ['path' => $expense->notify_attachment_path,  'descrizione' => 'Allegato notifica'],
+                'reinvoice' => ['path' => $expense->reinvoice_attachment_path, 'descrizione' => 'Fattura rifatturazione'],
+            ];
+
+            foreach ($attachments as $type => $att) {
+                $relativePath = $att['path'];
+
+                if (empty($relativePath)) {
+                    continue;
+                }
+
+                // Controllo esistenza
+                if (!Storage::disk($disk)->exists($relativePath)) {
+                    Log::warning("Allegato non trovato sul filesystem", [
+                        'invoice_id' => $invoice->id,
+                        'path' => $relativePath
+                    ]);
+                    continue;
+                }
+
+                try {
+                    $fileContent = Storage::disk($disk)->get($relativePath);
+                    $size = strlen($fileContent);
+
+                    if ($size < 512) {
+                        Log::warning("Allegato troppo piccolo (probabilmente corrotto)", [
+                            'path' => $relativePath,
+                            'size' => $size
+                        ]);
+                        continue;
+                    }
+
+                    // Verifica header PDF (opzionale ma consigliato)
+                    if (substr($fileContent, 0, 5) !== '%PDF-') {
+                        Log::warning("File non sembra un PDF valido", ['path' => $relativePath]);
+                        // Continua lo stesso o fai continue se vuoi essere strict
+                    }
+
+                    $extension = strtoupper(pathinfo($relativePath, PATHINFO_EXTENSION));
+                    $fileName = $att['descrizione'] . '.' . $extension;
+
+                    $allegati[] = [
+                        'NomeAttachment'        => $fileName,
+                        'AlgoritmoCompressione' => 'NONE',
+                        'FormatoAttachment'     => $extension,
+                        'DescrizioneAttachment' => $att['descrizione'],
+                        'Attachment'            => base64_encode($fileContent),
+                    ];
+
+                    Log::info("Allegato aggiunto correttamente", [
+                        'filename' => $fileName,
+                        'size' => $size . ' bytes'
+                    ]);
+
+                } catch (Exception $e) {
+                    Log::error("Errore durante la lettura dell'allegato", [
+                        'invoice_id' => $invoice->id,
+                        'path' => $relativePath,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        }
+
+        return empty($allegati) ? null : $allegati;
     }
 
     private function translateStatus(string $status): string
@@ -444,13 +590,18 @@ Log::info("Tentativo invio documento.");
                 $dataI = $this->getDatiFattureCollegate($invoice);
                 $payload['FatturaElettronicaBody']['DatiGenerali']['DatiFattureCollegate'] = $dataI == [] ? null : $dataI;
             }
-            elseif($invoice->docType->name !== 'TD04' || $invoice->docType->name !== 'TD20'){
+            elseif($invoice->docType->name !== 'TD04' && $invoice->docType->name !== 'TD20'){
                 $dataC = $this->getDatiContratto($invoice);
                 $payload['FatturaElettronicaBody']['DatiGenerali']['DatiContratto'] = $dataC == [] ? null : $dataC;
             }
             $payload['FatturaElettronicaBody']['DatiGenerali']['DatiDDT'] = $this->getDatiDDT($invoice);
             $payload['FatturaElettronicaBody']['DatiBeniServizi'] = $this->getDatiBeniServizi($invoice);
             $payload['FatturaElettronicaBody']['DatiPagamento'] = $this->getDatiPagamento($invoice);
+
+            // INSERIMENTO ALLEGATI ALLA FATTURA (PROBLEMA CONTENUTO FILE)
+            // if(count($invoice->postalExpenses) > 0 && ($invoice->docType->name !== 'TD04' && $invoice->docType->name !== 'TD20')){
+            //     $payload['FatturaElettronicaBody']['Allegati'] = $this->getAllegati($invoice);
+            // }
 
             // $payload_ = [
             //     'Autenticazione' => [
@@ -589,8 +740,8 @@ Log::info("Tentativo invio documento.");
             // ];
 
             // dd(json_encode($payload, JSON_PRETTY_PRINT));
-
-            // Log::debug('Payload SOAP: ' . json_encode($payload, JSON_PRETTY_PRINT));
+// dd('STOP');
+            Log::debug('Payload SOAP: ' . json_encode($payload, JSON_PRETTY_PRINT));
 
             // Esegui la chiamata SOAP per l'invio della fattura
             $response = $this->client->InviaFattura($payload);

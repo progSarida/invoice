@@ -28,7 +28,9 @@ use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
+use ZipArchive;
 
 class EditNewInvoice extends EditRecord
 {
@@ -564,12 +566,252 @@ Log::info('Commit');
                             ->required(),
                     ])
                     ->requiresConfirmation(),
+                    
+                // Actions\Action::make('_postal_attachments_')
+                //     ->label('*Allegati spese postali*')
+                //     ->color('info')
+                //     ->icon('heroicon-o-paper-clip')
+                //     ->visible(fn ($record) => (bool) count($record->postalExpenses) > 0)
+                //     ->action(function ($record) {
+                //         $disk = config('filesystems.default');
+                //         $zip = new ZipArchive();
+                //         $zipFileName = 'spese_postali_' . $record->id . '_' . time() . '.zip';
+                //         $zipPath = storage_path('app/temp/' . $zipFileName);
+
+                //         // Crea la directory temp se non esiste
+                //         if (!Storage::disk($disk)->exists('temp')) {
+                //             Storage::disk($disk)->makeDirectory('temp');
+                //         }
+
+                //         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+                //             $addedFiles = 0;
+
+                //             foreach ($record->postalExpenses as $index => $expense) {
+                //                 if ($expense->act_attachment_path && Storage::disk($disk)->exists($expense->act_attachment_path)) {
+                //                     // Ottieni il contenuto del file
+                //                     $fileContent = Storage::disk($disk)->get($expense->act_attachment_path);
+                //                     $fileName = basename($expense->act_attachment_path);
+
+                //                     // Aggiungi il file allo ZIP con un numero progressivo per evitare duplicati
+                //                     $zip->addFromString(($index + 1) . '_' . $fileName, $fileContent);
+                //                     $addedFiles++;
+                //                 }
+                //                 if ($expense->notify_attachment_path && Storage::disk($disk)->exists($expense->notify_attachment_path)) {
+                //                     // Ottieni il contenuto del file
+                //                     $fileContent = Storage::disk($disk)->get($expense->notify_attachment_path);
+                //                     $fileName = basename($expense->notify_attachment_path);
+
+                //                     // Aggiungi il file allo ZIP con un numero progressivo per evitare duplicati
+                //                     $zip->addFromString(($index + 1) . '_' . $fileName, $fileContent);
+                //                     $addedFiles++;
+                //                 }
+                //                 if ($expense->reinvoice_attachment_path && Storage::disk($disk)->exists($expense->reinvoice_attachment_path)) {
+                //                     // Ottieni il contenuto del file
+                //                     $fileContent = Storage::disk($disk)->get($expense->reinvoice_attachment_path);
+                //                     $fileName = basename($expense->reinvoice_attachment_path);
+
+                //                     // Aggiungi il file allo ZIP con un numero progressivo per evitare duplicati
+                //                     $zip->addFromString(($index + 1) . '_' . $fileName, $fileContent);
+                //                     $addedFiles++;
+                //                 }
+                //             }
+
+                //             $zip->close();
+
+                //             if ($addedFiles > 0) {
+                //                 // Scarica lo ZIP e cancellalo dopo il download
+                //                 return response()->download($zipPath)->deleteFileAfterSend(true);
+                //             } else {
+                //                 // Nessun file aggiunto, cancella lo ZIP vuoto
+                //                 if (file_exists($zipPath)) {
+                //                     unlink($zipPath);
+                //                 }
+
+                //                 Notification::make()
+                //                     ->title('Nessun file trovato')
+                //                     ->warning()
+                //                     ->send();
+                //             }
+                //         } else {
+                //             Notification::make()
+                //                 ->title('Errore nella creazione dello ZIP')
+                //                 ->danger()
+                //                 ->send();
+                //         }
+                //     }),
+
+                Actions\Action::make('postal_attachments')
+                    ->label('Allegati spese postali')
+                    ->color('info')
+                    ->icon('heroicon-o-paper-clip')
+                    ->visible(fn ($record) => (bool) count($record->postalExpenses) > 0)
+                    ->action(function ($record) {
+                        set_time_limit(300); // 5 minuti per operazioni S3
+
+                        $disk = config('filesystems.default');
+                        $zip = new ZipArchive();
+                        $zipFileName = 'spese_postali_' . $record->id . '_' . time() . '.zip';
+                        $zipPath = storage_path('app/temp/' . $zipFileName);
+
+                        // Crea directory temp locale
+                        if (!is_dir(storage_path('app/temp'))) {
+                            mkdir(storage_path('app/temp'), 0755, true);
+                        }
+
+                        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+                            $addedFiles = 0;
+                            $fileCounter = 0;
+
+                            foreach ($record->postalExpenses as $index => $expense) {
+                                $attachments = [
+                                    'atto' => $expense->act_attachment_path,
+                                    'notifica' => $expense->notify_attachment_path,
+                                    'rifatturazione' => $expense->reinvoice_attachment_path,
+                                ];
+
+                                foreach ($attachments as $type => $path) {
+                                    if (!$path || !Storage::disk($disk)->exists($path)) {
+                                        continue;
+                                    }
+
+                                    try {
+                                        // Per file grandi, usa stream
+                                        $stream = Storage::disk($disk)->readStream($path);
+
+                                        if ($stream === false) {
+                                            throw new \Exception("Impossibile aprire lo stream per {$path}");
+                                        }
+
+                                        $tempFile = tempnam(sys_get_temp_dir(), 'zip_');
+                                        file_put_contents($tempFile, $stream);
+
+                                        if (is_resource($stream)) {
+                                            fclose($stream);
+                                        }
+
+                                        $fileName = basename($path);
+                                        $zipEntryName = sprintf('%02d_%s_%s', ++$fileCounter, $type, $fileName);
+
+                                        $zip->addFile($tempFile, $zipEntryName);
+                                        $addedFiles++;
+
+                                        // Non cancellare subito, lo ZIP deve poter leggere il file
+                                        register_shutdown_function(function() use ($tempFile) {
+                                            if (file_exists($tempFile)) {
+                                                @unlink($tempFile);
+                                            }
+                                        });
+
+                                    } catch (\Exception $e) {
+                                        logger()->error("Errore download file S3", [
+                                            'path' => $path,
+                                            'error' => $e->getMessage()
+                                        ]);
+                                    }
+                                }
+                            }
+
+                            $zip->close();
+
+                            if ($addedFiles > 0) {
+                                return response()->download($zipPath)->deleteFileAfterSend(true);
+                            } else {
+                                @unlink($zipPath);
+
+                                Notification::make()
+                                    ->title('Nessun file trovato')
+                                    ->warning()
+                                    ->send();
+                            }
+                        } else {
+                            Notification::make()
+                                ->title('Errore nella creazione dello ZIP')
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+
+
+
+                    // Actions\Action::make('testBase64Notify')
+                    //     ->label('Test Base64 + Apri Allegato')
+                    //     ->icon('tabler-file-check')
+                    //     ->color('gray')
+                    //     ->action(function (Invoice $record) {
+
+                    //         $expense = $record->postalExpenses->first();
+                    //         $path = $expense?->notify_attachment_path;
+
+                    //         if (empty($path)) {
+                    //             Notification::make()
+                    //                 ->title('Nessun allegato')
+                    //                 ->body('notify_attachment_path non presente')
+                    //                 ->warning()
+                    //                 ->send();
+                    //             return;
+                    //         }
+
+                    //         $disk = config('filesystems.default');
+
+                    //         if (!Storage::disk($disk)->exists($path)) {
+                    //             Notification::make()
+                    //                 ->title('File non trovato')
+                    //                 ->body("Percorso: {$path}")
+                    //                 ->danger()
+                    //                 ->send();
+                    //             return;
+                    //         }
+
+                    //         try {
+                    //             $content = Storage::disk($disk)->get($path);
+                    //             $size = strlen($content);
+                    //             $base64 = base64_encode($content);
+                    //             $isPdf = str_starts_with($content, '%PDF-');
+
+                    //             // Test info
+                    //             $html = "
+                    //                 <p><strong>Percorso:</strong> {$path}</p>
+                    //                 <p><strong>Stato:</strong> " . ($isPdf ? '✅ PDF valido' : '⚠️ Non sembra un PDF') . "</p>
+                    //                 <p><strong>Dimensione:</strong> " . number_format($size) . " bytes</p>
+                    //                 <p><strong>Base64 Length:</strong> " . number_format(strlen($base64)) . " caratteri</p>
+                    //                 <hr>
+                    //                 <small>Prime 80 caratteri Base64:</small><br>
+                    //                 <code style='font-size:0.8em; word-break:break-all;'>" . substr($base64, 0, 80) . "...</code>
+                    //             ";
+
+                    //             Notification::make()
+                    //                 ->title('Test Base64 Allegato')
+                    //                 ->body(new HtmlString($html))
+                    //                 ->success()
+                    //                 ->persistent()
+                    //                 ->send();
+
+                    //             // Download automatico del file
+                    //             return response()->streamDownload(function () use ($content) {
+                    //                 echo $content;
+                    //             }, basename($path), [
+                    //                 'Content-Type' => 'application/pdf',
+                    //             ]);
+
+                    //         } catch (\Exception $e) {
+                    //             Notification::make()
+                    //                 ->title('Errore')
+                    //                 ->body($e->getMessage())
+                    //                 ->danger()
+                    //                 ->send();
+                    //         }
+                    //     })
+
+
+
+
+
             ])
             ->label('Operazioni')
             ->icon('heroicon-m-ellipsis-vertical')
             ->color('info')
             ->button(),
-                ];
+        ];
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
