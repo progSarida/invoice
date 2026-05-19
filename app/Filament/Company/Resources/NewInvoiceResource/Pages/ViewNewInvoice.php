@@ -569,7 +569,8 @@ Log::info('===== FINE AZIONE NOTA CREDITO =====');
                 Actions\EditAction::make()
                     ->hidden(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE                                // posso modificare se non è stata inviata
                                             && $record->sdi_status != SdiStatus::RIFIUTATA                              // posso modificare se è stata rifiutata
-                                            && $record->sdi_status != SdiStatus::SCARTATA),                             // posso modificare se è stata scartata
+                                            && $record->sdi_status != SdiStatus::SCARTATA                              // posso modificare se è stata scartata
+                                            && $record->sdi_status != SdiStatus::PREAVVISO),                            // posso modificare se è un preavviso
             ])
             ->label('Operazioni')
             ->icon('heroicon-m-ellipsis-vertical')
