@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
 
+use App\Enums\PaymentType;
 use App\Enums\PiValidationStatus;
 use App\Services\CurrencyService;
 use Carbon\Carbon;
@@ -32,26 +33,12 @@ class PassivePaymentsRelationManager extends RelationManager
         return $form
             ->columns(12)
             ->schema([
-                // Forms\Components\Select::make('passive_invoice_id')
-                //     ->label('Fattura')
-                //     ->placeholder('Seleziona una fattura...')
-                //     ->relationship(name: 'passiveInvoice', titleAttribute: 'id')
-                //     ->getOptionLabelFromRecordUsing(function (Model $record) {
-                //         $fornitore = $record->supplier?->denomination ?? 'Fornitore sconosciuto';
-                //         return "{$fornitore} - {$record->number}/{$record->invoice_date->format('d-m-Y')}";
-                //     })
-                //     ->required()
-                //     ->disabled(fn ($get) => $get('validated'))
-                //     ->searchable(['number', 'section', 'year'])
-                //     ->live()
-                //     ->preload()
-                //     // ->optionsLimit(20)
-                //     // ->autofocus()
-                //     ->columnSpan(5),
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()
-                    ->disabled(fn ($get) => $get('validated'))
+                    ->live(onBlur: true)
+                    ->debounce(2000)
+                    ->extraInputAttributes(['class' => 'text-right'])
                     // ->afterStateUpdated(function ($state, $component) {
                     //     if(str_contains($state, ',')){                                  // Se contiene una virgola
                     //         $amount = str_replace(',', '.', str_replace('.', '', $state));                                          // rimuovo i punti e sostituisco la virgola
@@ -65,35 +52,46 @@ class PassivePaymentsRelationManager extends RelationManager
                     //     $formatted = number_format($float, 2, ',', '.');
                     //     $component->state($formatted);
                     // })
-                    // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                    // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->afterStateUpdated(function ($state, $component) {
                         $float = CurrencyService::parseNumber($state);
                         $formatted = number_format($float, 2, ',', '.');
                         $component->state($formatted);
                     })
+                    // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                    // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
-                    ->rules(['numeric', 'min:0'])
+                    // ->rules(['numeric', 'min:0'])
                     ->suffix('€')
-                    ->columnSpan(3),
-                Forms\Components\Placeholder::make('')
-                    ->content('')
-                    ->columnSpan(2),
+                    ->default(function ($livewire) {
+                        // $livewire->ownerRecord restituisce l'istanza di PassiveInvoice a cui appartiene il RelationManager
+                        $passiveInvoice = $livewire->ownerRecord;
+
+                        if ($passiveInvoice) {
+                            // Calcola il residuo con la stessa logica usata nell'afterStateUpdated della risorsa
+                            $residual = $passiveInvoice->total - ($passiveInvoice->total_payment + $passiveInvoice->total_note);
+
+                            // Restituisce il valore formattato con la virgola, pronto per il TextInput
+                            return $residual;
+                        }
+
+                        return null;
+                    })
+                    ->columnSpan(4),
                 Forms\Components\DatePicker::make('payment_date')
                     ->label('Data pagamento')
+                    ->required()
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
                     ->date()
-                    ->columnSpan(3),
-                Forms\Components\Placeholder::make('')
-                    ->content('')
-                    ->columnSpan(2),
+                    ->columnSpan(4),
+                // Forms\Components\Placeholder::make('')
+                //     ->content('')
+                //     ->columnSpan(1),
                 Forms\Components\Toggle::make('validated')
                     ->label('Validato')
                     ->live()
                     ->default(false)
-                    ->visible(fn($record) => $record)
                     ->afterStateUpdated(function (Set $set, bool $state) {
                         if ($state) {
                             $set('validation_date', now()->format('Y-m-d'));
@@ -104,28 +102,16 @@ class PassivePaymentsRelationManager extends RelationManager
                             $set('validation_user_id', null);
                         }
                     })
+                    ->visible(fn($record) => $record)
                     ->columnSpan(2),
+                //
                 Forms\Components\TextInput::make('bank')
-                    ->label('Banca')
-                    ->default(function ($operation, $record) {
-                        if ($operation === 'create') {
-                            $ownerRecord = $this->getOwnerRecord();
-                            return $ownerRecord?->bank;
-                        }
-                        return $record?->bank;
-                    })
-                    ->columnSpan(4),
+                    ->label('Banca da accreditare')
+                    ->columnSpan(8),
                 Forms\Components\TextInput::make('iban')
-                    ->label('IBAN')
-                    ->default(function ($operation, $record) {
-                        if ($operation === 'create') {
-                            $ownerRecord = $this->getOwnerRecord();
-                            return $ownerRecord?->iban;
-                        }
-                        return $record?->iban;
-                    })
+                    ->label('IBAN da accreditare')
                     ->columnSpan(3),
-                Forms\Components\Select::make('bank_account_id')->label('Conto')
+                Forms\Components\Select::make('bank_account_id')->label('Conto di debito')
                     ->relationship(
                         name: 'bankAccount',
                         modifyQueryUsing: fn (Builder $query) =>
@@ -138,14 +124,28 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->required()
                     ->columnSpan(5)
                     ->preload(),
-                // Forms\Components\Placeholder::make('')
-                //     ->columnSpan(1),
+                Forms\Components\Select::make('payment_type')
+                    ->label('Metodo di pagamento')
+                    ->columnSpan(5)
+                    ->options(
+                        collect(PaymentType::cases())
+                            ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                            ->mapWithKeys(fn (PaymentType $type) => [
+                                $type->getCode() => $type->getLabel()
+                            ])
+                            ->toArray()
+                    ),
+                Forms\Components\Placeholder::make('')
+                    ->columnSpan(1),
+                Forms\Components\Textarea::make('note')->label('Note')
+                    ->columnSpanFull(),
+                //
                 Forms\Components\DatePicker::make('registration_date')
                     ->label('Data registrazione')
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled()
                     ->date()
-                    ->columnSpan(3),
+                    ->columnSpan(2),
                 Forms\Components\Select::make('registered_by_user_id')
                     ->label('Registrato da')
                     ->relationship('registrationUser', 'name')
@@ -155,12 +155,14 @@ class PassivePaymentsRelationManager extends RelationManager
                     ->label('Data validazione')
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled()
+                    ->dehydrated()
                     ->visible(fn ($get) => $get('validated'))
                     ->columnSpan(2),
                 Forms\Components\Select::make('validation_user_id')
                     ->label('Validato da')
                     ->relationship('validationUser', 'name')
                     ->disabled()
+                    ->dehydrated()
                     ->visible(fn ($get) => $get('validated'))
                     ->columnSpan(3),
             ]);

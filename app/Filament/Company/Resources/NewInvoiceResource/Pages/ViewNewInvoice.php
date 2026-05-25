@@ -167,9 +167,22 @@ class ViewNewInvoice extends ViewRecord
 
                         $pdf->setOptions(['margin-top' => 0]);
 
+                        $tipo = '';
+                        switch($record->docType->name){
+                            case 'TD00':
+                                $tipo = 'preavviso';
+                                break;
+                            case 'TD01':
+                                $tipo = 'fattura';
+                                break;
+                            case 'TD04':
+                                $tipo = 'nota';
+                                break;
+                        }
+
                         return response()->streamDownload(function () use ($pdf, $record) {
                             echo $pdf->output();
-                        }, 'fattura-' . $record->printNumber() . '.pdf');
+                        }, $tipo . '-' . $record->printNumber() . '.pdf');
                     }),
                 Actions\Action::make('getStatus')
                     ->label('Aggiorna stato SDI')

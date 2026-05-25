@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Enums\ClientSubType;
 use App\Enums\FundType;
-use DateTime;
 use Exception;
 use Illuminate\Support\Str;
 use SoapFault;
@@ -27,7 +26,6 @@ use Filament\Facades\Filament;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use ZipArchive;
 
 class AndxorSoapService
 {
@@ -839,49 +837,19 @@ Log::info("Documento inviato con successo.");
             return null;
 Log::info("Recupero stato sdi");
         $response = $this->client->Stato($input);
-Log::info("Risposta"); Log::info("Risposta ", (array) $response);        // dd($response);
-        // Log::info('Stato-----------------------------------------------------------------------------------------');
-        // Log::info('NomeFile : ' . ($response?->NomeFile ?? 'N\D'));
-        // Log::info('Stato : ' . ($response?->Stato ?? 'N\D'));
-        // Log::info('Descrizione : ' . ($response?->Descrizione ?? 'N\D'));
-        // Log::info('Emessa : ' . ($response?->Emessa ?? 'N\D'));
-        // Log::info('Finale : ' . ($response?->Finale ?? 'N\D'));
-        // Log::info('DataOraCreazione : ' . ($response?->DataOraCreazione ?? 'N\D'));
-        // Log::info('IdSdI : ' . ($response?->IdSdI ?? 'N\D'));
-        // Log::info('DataOraRicezione : ' . ($response?->DataOraRicezione ?? 'N\D'));
-        // Log::info('DataOraConsegna : ' . ($response?->DataOraConsegna ?? 'N\D'));
-        // Log::info('Anomalia : ' . ($response?->Anomalia ?? 'N\D'));
-        // Log::info('Notifica-NomeFile : ' . ($response?->Notifica?->NomeFile ?? 'N\D'));
-        // Log::info('Notifica-DataOraRicezione : ' . ($response?->Notifica?->DataOraRicezione ?? 'N\D'));
-        // Log::info('Notifica-Tipo : ' . ($response?->Notifica?->Tipo ?? 'N\D'));
-        // Log::info('Notifica-ProgressivoRicezione : ' . ($response?->Notifica?->ProgressivoRicezione ?? 'N\D'));
+// Log::info("Risposta ", (array) $response);
+// dd($response);
+Log::info("Risposta:\n" . json_encode((array) $response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        $date = explode("T", $response->DataOraCreazione);                                              // la data deve essere in base allo stato?
+        $date = explode("T", $response->DataOraCreazione);                                                  // la data deve essere in base allo stato?
         // $date = explode("T", $this->getDate($response));
         $newStatus = $this->translateStatus($response->Stato);
 // dd($newStatus, 'STOP');
         $sdiStatus = SdiStatus::tryFrom($newStatus);
 Log::info("Stato sdi: " . $newStatus);
-        // $outcomes = ['rifiutata', 'accettata'];
-        // if(1 == 1){
-        // // if (in_array($newStatus, $outcomes)) {
-        //     $responseZIP = $this->client->DownloadZip($input);
 
-        //     if (isset($responseZIP->Contenuto)) {
-        //         $fileName = $responseZIP->Nome ?? "invoice_{$invoice->id}.zip";
-        //         $fileContent = base64_decode($responseZIP->Contenuto);
-
-        //         $filePathZIP = $this->tempFromZip($responseZIP->Nome, $responseZIP->Contenuto);             // salvo temporaneamente il file ZIP
-
-        //     }
-        // }
-        if($sdiStatus->sdiReceiptCode() == ''){
-            $info = null;
-        }
-        else{
-            $responseZIP = $this->client->DownloadZip($input);
-            $info = $this->processResponse($sdiStatus, $responseZIP);
-        }
+        if($sdiStatus->sdiReceiptCode() == ''){ $info = null; }
+        else{ $info = $response?->Descrizione; }
 // dd('STOP');
         if($invoice->sdi_status->value != $newStatus && $invoice->sdi_status->updateStatus()){              // modifico se è diverso da quello esistente
                                                                                                             // e questo non è RIFIUTO_EMESSO, RIFIUTO_ARCHIVIATO, SCARTO_VALIDATO,
@@ -905,160 +873,6 @@ Log::info("Creazione notitifca sdi");
         }
 
         return $response;
-    }
-
-    private function processResponse($sdiStatus, $responseZIP): ?string
-    {
-        $zipContent = $responseZIP->Contenuto;
-        $zipName = $responseZIP->Nome;
-        $receiptCode = $sdiStatus->sdiReceiptCode();
-// dd($sdiStatus, 'STOP');
-        try{
-            // Salvo lo ZIP
-            $livewireDisk = config('livewire.temporary_file_upload.disk', 'local');
-            Storage::put('temp/' . $zipName, $zipContent);
-
-            // Estraggo i file dello ZIP
-            $zip = new ZipArchive;
-            $zipPath = Storage::path('temp/' . $zipName);
-
-            if ($zip->open($zipPath) !== true) {
-                throw new \RuntimeException("Impossibile aprire il file ZIP: {$zipName}");
-            }
-
-
-            $extractPath = Storage::path('extracted/' . pathinfo($zipName, PATHINFO_FILENAME));
-            $zip->extractTo($extractPath);
-            $zip->close();
-
-            // Leggo i file estratti
-            $files = Storage::files('extracted/' . pathinfo($zipName, PATHINFO_FILENAME));
-
-            // Trovo il file con il codice ricevuta
-            $file = collect($files)->first(fn($file) => str_contains($file, $receiptCode));
-
-            if (!$file) {
-                \Log::warning("File con codice {$receiptCode} non trovato nello ZIP", [
-                    'zip' => $zipName,
-                    'files' => $files
-                ]);
-                return null;
-            }
-
-            $content = Storage::get($file);
-            $xmlArray = $this->xmlToArray($content);
-// dd($xmlArray, 'STOP');
-            $output = $this->parseReceiptData($receiptCode, $xmlArray);
-// dd($output, 'STOP');
-            $info = $this->createInfo($receiptCode, $output);
-// dd($info, 'STOP');
-            // Cleanup
-            Storage::delete($files);
-            Storage::delete('temp/' . $zipName);
-
-            return $info;
-        } catch (Exception $e) {
-            \Log::error("Errore nel processare la risposta SDI", [
-                'zip' => $zipName,
-                'receiptCode' => $receiptCode,
-                'error' => $e->getMessage()
-            ]);
-            return null;
-        } finally {
-            // Cleanup sempre eseguito
-            $this->cleanupFiles($zipName);
-        }
-    }
-
-    private function parseReceiptData(string $receiptCode, array $xmlArray): ?array
-    {
-        $output = [];
-
-        switch ($receiptCode) {
-            case '_NS_':                                                                                        // notifica di scarto
-                $output[$receiptCode]['ListaErrori'] = $xmlArray['ListaErrori'] ?? '';                          // array di elementi composti da ['Codice'] e ['Descrizione']
-                break;
-            case '_RC_':                                                                                        // ricevuta di consegna
-                $output[$receiptCode]['DataOraConsegna'] = $xmlArray['DataOraConsegna'] ?? '';                  // stringa in formato ISO 8601:2004 (2026-01-01T12:00:00)
-                break;
-            case '_MC_':                                                                                        // mancato recapito
-                $output[$receiptCode]['Descrizione'] = $xmlArray['Descrizione'] ?? '';                          // stringa
-                $output[$receiptCode]['Note'] = $xmlArray['Note'] ?? '';                                        // stringa
-                break;
-            case '_NE_':                                                                                        // notifica di esito
-                $output[$receiptCode]['Esito'] = $xmlArray['EsitoCommittente']['Esito'] ?? '';                  // EC01/EC02
-                $output[$receiptCode]['Descrizione'] = $xmlArray['EsitoCommittente']['Descrizione'] ?? '';      // stringa
-                break;
-            case '_DT_':                                                                                        // decorsi i termini
-                $output[$receiptCode]['Descrizione'] = $xmlArray['Descrizione'] ?? '';                          // stringa
-                $output[$receiptCode]['Note'] = $xmlArray['Note'] ?? '';                                        // stringa
-                break;
-            case '_AT_':                                                                                        // impossibilità di recapito
-                $output[$receiptCode]['Note'] = $xmlArray['Note'] ?? '';                                        // stringa
-                break;
-            default:
-                \Log::warning("Codice ricevuta SDI sconosciuto: {$receiptCode}");
-                return null;
-        }
-
-        return $output;
-    }
-
-    private function createInfo(string $receiptCode, array $output): string                                     // creazione stringa informativa della notifica SDI
-    {
-        $info = '';
-
-        switch ($receiptCode) {
-            case '_NS_':                                                                                        // notifica di scarto
-                foreach($output[$receiptCode]['ListaErrori'] as $errore){
-                    $info .= "Codice errore: {$errore['Codice']} - Descrizione: {$errore['Descrizione']}\n";
-                }
-                break;
-            case '_RC_':                                                                                        // ricevuta di consegna
-                $dt = new DateTime($output[$receiptCode]['DataOraConsegna']);
-                $date = $dt->format('d/m/Y');
-                $time = $dt->format('H:i');
-                $info .= "Consegnato il {$date} alle {$time}";
-                break;
-            case '_MC_':                                                                                        // mancato recapito
-                $info .= "{$output[$receiptCode]['Descrizione']}\n{$output[$receiptCode]['Note']}";
-                break;
-            case '_NE_':                                                                                        // notifica di esito
-                $info .= "{$output[$receiptCode]['Esito']} - {$output[$receiptCode]['Descrizione']}";
-                break;
-            case '_DT_':                                                                                        // decorsi i termini
-                $info .= "{$output[$receiptCode]['Descrizione']}\n{$output[$receiptCode]['Note']}";
-                break;
-            case '_AT_':                                                                                        // impossibilità di recapito
-                $info .= "{$output[$receiptCode]['Note']}";
-                break;
-            default:
-                \Log::warning("Codice ricevuta SDI sconosciuto: {$receiptCode}");
-        }
-
-        return $info;
-    }
-
-    private function cleanupFiles(string $zipName): void                                                        // pulizia cartelle temporanee
-    {
-        try {
-            $extractFolder = 'extracted/' . pathinfo($zipName, PATHINFO_FILENAME);
-
-            // Elimina i file estratti
-            if (Storage::exists($extractFolder)) {
-                Storage::deleteDirectory($extractFolder);
-            }
-
-            // Elimina lo ZIP temporaneo
-            if (Storage::exists('temp/' . $zipName)) {
-                Storage::delete('temp/' . $zipName);
-            }
-        } catch (Exception $e) {
-            \Log::error("Errore durante il cleanup dei file SDI", [
-                'zip' => $zipName,
-                'error' => $e->getMessage()
-            ]);
-        }
     }
 
     public function updateStatusList($list, string $password)
@@ -1148,46 +962,6 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
 
         return $result;
     }
-
-    // private function tempFromZip(string $filename, string $content): array
-    // {
-    //     $disk = config('filesystems.default');
-    //     $extractedPaths = [];
-
-    //     // 1. Creiamo un file temporaneo fisico per poterlo leggere con ZipArchive
-    //     $tempZipPath = tempnam(sys_get_temp_dir(), 'sdi_');
-    //     file_put_contents($tempZipPath, base64_decode($content));
-
-    //     $zip = new ZipArchive;
-
-    //     if ($zip->open($tempZipPath) === TRUE) {
-    //         // 2. Iteriamo su tutti i file presenti nello ZIP
-    //         for ($i = 0; $i < $zip->numFiles; $i++) {
-    //             $innerFilename = $zip->getNameIndex($i);
-    //             $innerContent = $zip->getFromIndex($i);
-
-    //             // Definiamo dove salvare il file estratto (es. invoices/extracted/nomefile.xml)
-    //             $relativePath = 'invoices/extracted/' . $innerFilename;
-
-    //             if (Storage::disk($disk)->put($relativePath, $innerContent)) {
-    //                 $extractedPaths[] = $relativePath;
-    //             } else {
-    //                 throw new \Exception("Errore durante il salvataggio del file estratto: $innerFilename");
-    //             }
-    //         }
-    //         $zip->close();
-    //     } else {
-    //         throw new \Exception("Impossibile aprire il pacchetto ZIP SDI: $filename");
-    //     }
-
-    //     // 3. Pulizia: eliminiamo lo ZIP temporaneo
-    //     if (file_exists($tempZipPath)) {
-    //         unlink($tempZipPath);
-    //     }
-
-    //     // Ritorna l'elenco dei percorsi dei file salvati
-    //     return $extractedPaths;
-    // }
 
     private function saveActiveXML(string $filename, string $content): string
     {
@@ -1958,6 +1732,12 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                             $passiveInvoice->update(['total' => $passiveInvoice->passiveItems()->sum('total_price')]);
                         }
 
+                        if($passiveInvoice->parent){                                                                // se è una nota di credito aggiorno il totale note del parent
+                            $parentNote = $passiveInvoice->parent->total_note;
+                            $newNote = $parentNote + $passiveInvoice->total;
+                            $passiveInvoice->parent->update(['total_note' => $newNote]);
+                        }
+
                         $invoiceNumber++;                                                                           // incremento il contatore di fatture passive
 
                         if(!$passiveInvoice->parent_id){                                                            // se non è una nota di credito creo la scadenza
@@ -2027,6 +1807,12 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
 
                         if(!$passiveInvoice->total){                                                                // controllo valore totale fattura passiva
                             $passiveInvoice->update(['total' => $passiveInvoice->passiveItems()->sum('total_price')]);
+                        }
+
+                        if($passiveInvoice->parent){                                                                // se è una nota di credito aggiorno il totale note del parent
+                            $parentNote = $passiveInvoice->parent->total_note;
+                            $newNote = $parentNote + $passiveInvoice->total;
+                            $passiveInvoice->parent->update(['total_note' => $newNote]);
                         }
 
                         $invoiceNumber++;                                                                           // incremento il contatore di fatture passive

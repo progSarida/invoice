@@ -680,12 +680,13 @@ class PassiveInvoiceResource extends Resource
                         if (!isset($data['value'])) {
                             return $query;
                         }
+                        $query->where('doc_type', '!=', 'TD04');                                                // escludo le note di credito
                         return $query->when($data['value'] === 'si', function ($q) {
-                                return $q->whereRaw(" total_payment = total ");
+                                return $q->whereRaw(" (total_payment + total_note) >= total ");
                             })->when($data['value'] === 'par', function ($q) {
-                                return $q->whereRaw(" total_payment < total and total_payment != 0.00 ");
+                                return $q->whereRaw(" (total_payment + total_note) < total and total_payment != 0.00 ");
                             })->when($data['value'] === 'no', function ($q) {
-                                return $q->whereRaw(" total_payment = 0.00 ");
+                                return $q->whereRaw(" (total_payment + total_note) = 0.00 ");
                             });
                     })
                     ->preload(),

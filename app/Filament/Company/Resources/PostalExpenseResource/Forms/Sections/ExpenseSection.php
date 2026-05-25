@@ -11,6 +11,7 @@ use App\Services\CurrencyService;
 use Filament\Forms;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 
 class ExpenseSection
 {
@@ -112,12 +113,19 @@ class ExpenseSection
             ->searchable()
             ->preload()
             ->live()
-            ->afterStateUpdated(function (Set $set, $state) {
+            ->afterStateUpdated(function (Get $get, Set $set, $state) {
                 if ($state) {
                     $passiveInvoice = PassiveInvoice::find($state);
                     $set('notify_expense_amount', $passiveInvoice->total);
                     $set('shipment_doc_number', $passiveInvoice->number);
                     $set('shipment_doc_date', $passiveInvoice->invoice_date->toDateString());
+                    if($get('notify_amount') != $get('notify_expense_amount')){
+                        Notification::make()
+                            ->title('Errore')
+                            ->body('Totale fattura selezionata diverso dall\'importo notifica inserito')
+                            ->warning()
+                            ->send();
+                    }
                 }
             })
             ->columnSpanFull();

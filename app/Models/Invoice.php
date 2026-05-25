@@ -724,8 +724,8 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
                 ->title('Budget contratto superato')
                 ->body("
                     <strong>Contratto:</strong> {$contract->office_name} ({$contract->office_code})<br>
-                    <strong>Budget:</strong> " . number_format($limit, 2) . " €<br>
-                    <strong>Totale fatturato:</strong> " . number_format($totalInvoiced, 2) . " €
+                    <strong>Budget:</strong> " . number_format($limit, 2, ',', '.') . " €<br>
+                    <strong>Totale fatturato:</strong> " . number_format($totalInvoiced, 2, ',', '.') . " €
                 ")
                 ->danger()
                 ->duration(6000)

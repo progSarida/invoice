@@ -65,7 +65,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     })
                     ->columnSpan(4)
                     ->preload(),
-                Forms\Components\TextInput::make('description')->label('Descrizione')
+                Forms\Components\TextInput::make('description')->label('Voce visualizzata in fattura')
                     ->required()
                     ->columnSpan(8)
                     ->maxLength(255),
