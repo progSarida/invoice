@@ -840,24 +840,42 @@ class PostalExpenseResource extends Resource
                     Tables\Actions\Action::make('view_act_attachment')
                         ->label('Allegato Atto')
                         ->icon('heroicon-o-document')
-                        // ->url(fn($record): ?string => $record->act_attachment_path ? Storage::url($record->act_attachment_path) : null)
-                        ->url(fn($record): ?string => $record->act_attachment_path ? Storage::temporaryUrl($record->act_attachment_path,now()->addMinutes(1)) : null)
+                        ->url(fn($record): ?string => 
+                            !empty($record->act_attachment_path) && Storage::exists($record->act_attachment_path)
+                                ? Storage::temporaryUrl($record->act_attachment_path, now()->addMinutes(1)) 
+                                : null
+                        )
                         ->openUrlInNewTab()
-                        ->visible(fn($record): bool => (bool)$record->act_attachment_path),             // Nascondo se l'allegato non esiste
+                        ->visible(fn($record): bool => 
+                            !empty($record->act_attachment_path) && 
+                            Storage::exists($record->act_attachment_path)
+                        ),
                     Tables\Actions\Action::make('view_notify_attachment')
                         ->label('Allegato Notifica')
                         ->icon('heroicon-o-document')
-                        // ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::url($record->notify_attachment_path) : null)
-                        ->url(fn($record): ?string => $record->notify_attachment_path ? Storage::temporaryUrl($record->notify_attachment_path,now()->addMinutes(1)) : null)
+                        ->url(fn($record): ?string => 
+                            !empty($record->notify_attachment_path) && Storage::exists($record->notify_attachment_path)
+                                ? Storage::temporaryUrl($record->notify_attachment_path, now()->addMinutes(1)) 
+                                : null
+                        )
                         ->openUrlInNewTab()
-                        ->visible(fn($record): bool => (bool)$record->notify_attachment_path),          // Nascondo se l'allegato non esiste
+                        ->visible(fn($record): bool => 
+                            !empty($record->notify_attachment_path) && 
+                            Storage::exists($record->notify_attachment_path)
+                        ),
                     Tables\Actions\Action::make('view_reinvoice_attachment')
                         ->label('Allegato Rifatturazione')
                         ->icon('heroicon-o-document')
-                        // ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::url($record->reinvoice_attachment_path) : null)
-                        ->url(fn($record): ?string => $record->reinvoice_attachment_path ? Storage::temporaryUrl($record->reinvoice_attachment_path,now()->addMinutes(1)) : null)
+                        ->url(fn($record): ?string => 
+                            !empty($record->reinvoice_attachment_path) && Storage::exists($record->reinvoice_attachment_path)
+                                ? Storage::temporaryUrl($record->reinvoice_attachment_path, now()->addMinutes(1)) 
+                                : null
+                        )
                         ->openUrlInNewTab()
-                        ->visible(fn($record): bool => (bool)$record->reinvoice_attachment_path),       // Nascondo se l'allegato non esiste
+                        ->visible(fn($record): bool => 
+                            !empty($record->reinvoice_attachment_path) && 
+                            Storage::exists($record->reinvoice_attachment_path)
+                        ),
                 ])
                 ->label('Allegati')
                 ->icon('heroicon-o-paper-clip')

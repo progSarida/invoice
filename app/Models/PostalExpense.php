@@ -359,6 +359,7 @@ class PostalExpense extends Model
             //         break;
             //     }
             // }
+            // dd($expense->notify_attachment_path);
             // avanzamento
             if ($expense->reinvoiceInserted() && ($expense->notify_date_registration_date || $expense->reinvoice_attachment_path)) {
                 PostalExpense::withoutEvents(function () use ($expense) {
@@ -409,41 +410,114 @@ class PostalExpense extends Model
             //     }
             // }
 
+            // // ============= GESTIONE act_attachment_path =============
+            // if (!is_array($expense->act_attachment_path)  && $expense->act_attachment_path) {
+            //     $expense->act_attachment_path = [$expense->act_attachment_path];
+            // }
+
+            // if (is_array($expense->act_attachment_path) && count($expense->act_attachment_path) >= 1) {
+            //     $processedPath = self::mergeActPdfFiles($expense->act_attachment_path, $expense);
+
+            //     $oldPath = $expense->getOriginal('act_attachment_path');
+
+            //     if ($oldPath && !is_array($oldPath) && $oldPath !== $processedPath) {
+            //         $disk = config('filesystems.default');
+            //         Storage::disk($disk)->delete($oldPath);
+            //     }
+
+            //     $expense->act_attachment_path = $processedPath;
+            // }
+
+            // // ============= GESTIONE notify_attachment_path (esistente) =============
+            // if (!is_array($expense->notify_attachment_path)  && $expense->notify_attachment_path) {
+            //     $expense->notify_attachment_path = [$expense->notify_attachment_path];
+            // }
+
+            // if (is_array($expense->notify_attachment_path) && count($expense->notify_attachment_path) >= 1) {
+            //     $processedPath = self::mergeNotifyPdfFiles($expense->notify_attachment_path, $expense);
+
+            //     $oldPath = $expense->getOriginal('notify_attachment_path');
+
+            //     if ($oldPath && !is_array($oldPath) && $oldPath !== $processedPath) {
+            //         $disk = config('filesystems.default');
+            //         Storage::disk($disk)->delete($oldPath);
+            //     }
+
+            //     $expense->notify_attachment_path = $processedPath;
+            // }
+
+            // // ============= GESTIONE act_attachment_path =============
+            // $currentActPath = $expense->getOriginal('act_attachment_path');
+            // $newActPath = $expense->act_attachment_path;
+
+            // // Converti in array se necessario
+            // if (!is_array($newActPath) && $newActPath) {
+            //     $newActPath = [$newActPath];
+            // }
+
+            // // CONTROLLA SE CI SONO NUOVI FILE O SE È SOLO IL FILE ESISTENTE
+            // if (is_array($newActPath) && count($newActPath) >= 1) {
+            //     // Se c'è un solo file ed è uguale a quello originale, NON fare il merge
+            //     if (count($newActPath) === 1 && $newActPath[0] === $currentActPath) {
+            //         // Nessuna modifica, mantieni il valore originale
+            //         $expense->act_attachment_path = $currentActPath;
+            //     } else {
+            //         // Ci sono nuovi file o più file: procedi con il merge
+            //         $processedPath = self::mergeActPdfFiles($newActPath, $expense);
+
+            //         // Elimina il vecchio file solo se è diverso dal nuovo
+            //         if ($currentActPath && !is_array($currentActPath) && $currentActPath !== $processedPath) {
+            //             $disk = config('filesystems.default');
+            //             Storage::disk($disk)->delete($currentActPath);
+            //         }
+
+            //         $expense->act_attachment_path = $processedPath;
+            //     }
+            // }
+
+            // // ============= GESTIONE notify_attachment_path =============
+            // $currentNotifyPath = $expense->getOriginal('notify_attachment_path');
+            // $newNotifyPath = $expense->notify_attachment_path;
+
+            // // Converti in array se necessario
+            // if (!is_array($newNotifyPath) && $newNotifyPath) {
+            //     $newNotifyPath = [$newNotifyPath];
+            // }
+
+            // // CONTROLLA SE CI SONO NUOVI FILE O SE È SOLO IL FILE ESISTENTE
+            // if (is_array($newNotifyPath) && count($newNotifyPath) >= 1) {
+            //     // Se c'è un solo file ed è uguale a quello originale, NON fare il merge
+            //     if (count($newNotifyPath) === 1 && $newNotifyPath[0] === $currentNotifyPath) {
+            //         // Nessuna modifica, mantieni il valore originale
+            //         $expense->notify_attachment_path = $currentNotifyPath;
+            //     } else {
+            //         // Ci sono nuovi file o più file: procedi con il merge
+            //         $processedPath = self::mergeNotifyPdfFiles($newNotifyPath, $expense);
+
+            //         // Elimina il vecchio file solo se è diverso dal nuovo
+            //         if ($currentNotifyPath && !is_array($currentNotifyPath) && $currentNotifyPath !== $processedPath) {
+            //             $disk = config('filesystems.default');
+            //             Storage::disk($disk)->delete($currentNotifyPath);
+            //         }
+
+            //         $expense->notify_attachment_path = $processedPath;
+            //     }
+            // }
+
             // ============= GESTIONE act_attachment_path =============
-            if (!is_array($expense->act_attachment_path)  && $expense->act_attachment_path) {
-                $expense->act_attachment_path = [$expense->act_attachment_path];
-            }
+            self::handleAttachmentUpdate(
+                $expense, 
+                'act_attachment_path', 
+                'mergeActPdfFiles'
+            );
 
-            if (is_array($expense->act_attachment_path) && count($expense->act_attachment_path) >= 1) {
-                $processedPath = self::mergeActPdfFiles($expense->act_attachment_path, $expense);
+            // ============= GESTIONE notify_attachment_path =============
+            self::handleAttachmentUpdate(
+                $expense, 
+                'notify_attachment_path', 
+                'mergeNotifyPdfFiles'
+            );
 
-                $oldPath = $expense->getOriginal('act_attachment_path');
-
-                if ($oldPath && !is_array($oldPath) && $oldPath !== $processedPath) {
-                    $disk = config('filesystems.default');
-                    Storage::disk($disk)->delete($oldPath);
-                }
-
-                $expense->act_attachment_path = $processedPath;
-            }
-
-            // ============= GESTIONE notify_attachment_path (esistente) =============
-            if (!is_array($expense->notify_attachment_path)  && $expense->notify_attachment_path) {
-                $expense->notify_attachment_path = [$expense->notify_attachment_path];
-            }
-
-            if (is_array($expense->notify_attachment_path) && count($expense->notify_attachment_path) >= 1) {
-                $processedPath = self::mergeNotifyPdfFiles($expense->notify_attachment_path, $expense);
-
-                $oldPath = $expense->getOriginal('notify_attachment_path');
-
-                if ($oldPath && !is_array($oldPath) && $oldPath !== $processedPath) {
-                    $disk = config('filesystems.default');
-                    Storage::disk($disk)->delete($oldPath);
-                }
-
-                $expense->notify_attachment_path = $processedPath;
-            }
             // creazione voce fattura
             if($expense->reinvoice_id && !$expense->reinvoice_registration_user_id){
                 // $amount = ($expense->notify_amount ?? 0) + ($expense->notify_expense_amount ?? 0) + ($expense->mark_expense_amount ?? 0);
@@ -814,5 +888,39 @@ class PostalExpense extends Model
             \Log::error('Errore critico in mergeNotifyPdfFiles', ['message' => $e->getMessage()]);
             return reset($validPaths) ?? null;
         }
+    }
+
+    /**
+     * Gestisce l'aggiornamento degli allegati evitando merge inutili
+     */
+    private static function handleAttachmentUpdate($expense, $field, $mergeMethod)
+    {
+        $original = $expense->getOriginal($field);
+        $new = $expense->$field;
+
+        // Converti in array se necessario
+        if (!is_array($new) && $new) {
+            $new = [$new];
+        }
+
+        if (!is_array($new) || count($new) < 1) {
+            return;
+        }
+
+        // Se è solo il file originale, non fare nulla
+        if (count($new) === 1 && $new[0] === $original) {
+            $expense->$field = $original;
+            return;
+        }
+
+        // Procedi con il merge
+        $processedPath = self::$mergeMethod($new, $expense);
+
+        // Elimina il vecchio file se diverso
+        if ($original && !is_array($original) && $original !== $processedPath) {
+            Storage::disk(config('filesystems.default'))->delete($original);
+        }
+
+        $expense->$field = $processedPath;
     }
 }

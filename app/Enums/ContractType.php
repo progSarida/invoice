@@ -17,6 +17,7 @@ enum ContractType: string implements HasLabel, HasColor
     case IMPEGNO = "impegno";
     case CONVENZIONE = "convenzione";
     case DISCIPLINARE = "disciplinare";
+    case PREVENTIVO = "preventivo";
 
     public function getLabel(): string
     {
@@ -28,7 +29,8 @@ enum ContractType: string implements HasLabel, HasColor
             self::DETERMINA => 'Determina',
             self::IMPEGNO => 'Impegno',
             self::CONVENZIONE => 'Convenzione',
-            self::DISCIPLINARE => 'Disciplinare'
+            self::DISCIPLINARE => 'Disciplinare',
+            self::PREVENTIVO => 'Preventivo',
         };
     }
 
@@ -42,6 +44,7 @@ enum ContractType: string implements HasLabel, HasColor
             self::IMPEGNO =>  Color::Blue,
             self::CONVENZIONE => Color::Cyan,
             self::DISCIPLINARE =>  Color::Orange,
+            self::PREVENTIVO => Color::Emerald,
         };
     }
 }

@@ -12,6 +12,7 @@ use Filament\Forms;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class ExpenseSection
 {
@@ -113,19 +114,31 @@ class ExpenseSection
             ->searchable()
             ->preload()
             ->live()
-            ->afterStateUpdated(function (Get $get, Set $set, $state) {
+            ->afterStateUpdated(function (Get $get, Set $set, $state, $record) {
                 if ($state) {
                     $passiveInvoice = PassiveInvoice::find($state);
-                    $set('notify_expense_amount', $passiveInvoice->total);
+                    $passiveInvoiceTotal = $passiveInvoice->total;
+                    $set('notify_expense_amount', number_format($passiveInvoiceTotal, 2, ',', '.'));
                     $set('shipment_doc_number', $passiveInvoice->number);
+                    $set('iban', $passiveInvoice->iban);
                     $set('shipment_doc_date', $passiveInvoice->invoice_date->toDateString());
-                    if($get('notify_amount') != $get('notify_expense_amount')){
+                    $notifyAmount = str_replace(',', '.', str_replace('.', '', $get('notify_amount')));
+                    // dd($notifyAmount, $passiveInvoiceTotal, 'STOP');
+                    // dd($get('notify_amount') != $get('notify_expense_amount'), 'STOP');
+                    if($notifyAmount != $passiveInvoiceTotal){
+                        Log::warning("Il totale della fattura passiva selezionata è diverso dall'importo della notifica inserito");
                         Notification::make()
-                            ->title('Errore')
-                            ->body('Totale fattura selezionata diverso dall\'importo notifica inserito')
+                            ->title("Attenzione!")
+                            ->body("Il totale della fattura passiva selezionata è diverso dall'importo della notifica inserito")
                             ->warning()
                             ->send();
-                    }
+                    } else { Log::info("Il totale della fattura passiva selezionata corrisponde all'importo della notifica inserito"); }
+                } else {
+                    $set('notify_expense_amount', null);
+                    $set('shipment_doc_number', null);
+                    $set('iban', null);
+                    $set('shipment_doc_date', null);
+                    Log::info("Resetatti i valori della fattura passiva della spesa di notifica id: {$record->id}");
                 }
             })
             ->columnSpanFull();

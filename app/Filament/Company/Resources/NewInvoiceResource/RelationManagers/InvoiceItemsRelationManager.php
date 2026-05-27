@@ -298,6 +298,7 @@ class InvoiceItemsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
                     // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     // ->numeric()
+                    ->alignRight()
                     ->money('EUR', true, 'it_IT')
                     ->sortable()
                     ->summarize([
@@ -309,6 +310,7 @@ class InvoiceItemsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('vat_code_type')
                     ->label('Aliquota IVA')
                     // ->numeric()
+                    ->alignRight()
                     ->formatStateUsing(fn ($state) => $state?->getRate() . '%')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('vat_amount')->label('Importo IVA')
@@ -316,6 +318,7 @@ class InvoiceItemsRelationManager extends RelationManager
                         $rate = $record->vat_code_type?->getRate() / 100;
                         return $record->vat_code_type == null ? '' : $record->amount * $rate;
                     })
+                    ->alignRight()
                     ->money('EUR', true, 'it_IT')
                     ->sortable(),
                 //     ->summarize([
@@ -326,6 +329,7 @@ class InvoiceItemsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('display_total')
                     ->label('Totale')
                     ->money('EUR', true, 'it_IT')
+                    ->alignRight()
                     ->sortable()
                     ->summarize([
                         Tables\Columns\Summarizers\Sum::make()
@@ -555,6 +559,7 @@ class InvoiceItemsRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
+                    ->hidden(fn($record) => $record->vat_code_type == VatCodeType::VC06A || $record->auto || $record->postal_expense_id)
                     ->using(function (InvoiceItem $record, array $data): InvoiceItem {
                         $record->fill($data);
                         $record->calculateTotal();

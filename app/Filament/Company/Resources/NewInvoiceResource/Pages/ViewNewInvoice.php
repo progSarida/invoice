@@ -16,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
@@ -26,6 +27,8 @@ use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class ViewNewInvoice extends ViewRecord
 {
@@ -577,6 +580,219 @@ Log::info('===== FINE AZIONE NOTA CREDITO =====');
                                 ->body('Si è verificato un errore: ' . $e->getMessage())
                                 ->danger()
                                 ->send();
+                        }
+                    }),
+                    Actions\Action::make('addFile')
+                        ->label('Carica File')
+                        ->icon('heroicon-o-document-arrow-up')
+                        ->color('info')
+                        ->modalSubmitActionLabel('Carica')
+                        ->modalWidth('lg')
+                        ->form([
+                            FileUpload::make('attachments')
+                                ->label('Seleziona File')
+                                ->multiple()
+                                ->disk(fn() => config('filesystems.default'))   // closure = runtime
+                                ->directory(fn($record) => 'invoices/attachments/' . $record->id)
+                                ->getUploadedFileNameForStorageUsing(function ($file, $record) {
+                                    $filename  = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                                    $extension = $file->getClientOriginalExtension();
+                                    $finalName = $filename . '.' . $extension;
+                                    $disk      = config('filesystems.default');
+                                    $basePath  = 'invoices/attachments/' . $record->id;
+                                    $counter   = 1;
+                                    while (Storage::disk($disk)->exists($basePath . '/' . $finalName)) {
+                                        $finalName = $filename . '_' . $counter . '.' . $extension;
+                                        $counter++;
+                                    }
+                                    return $finalName;
+                                })
+                                ->required(),
+                        ])
+                        ->action(function (array $data, $record) {
+                            Notification::make()
+                                ->title('Caricamento completato')
+                                ->body('I file sono stati caricati correttamente.')
+                                ->success()
+                                ->send();
+                        }),
+
+                    Actions\Action::make('subFile')
+                        ->label('Elimina file')
+                        ->icon('heroicon-o-trash')
+                        ->color('danger')
+                        ->form([
+                            Select::make('files_to_delete')
+                                ->label('Seleziona i file da eliminare')
+                                ->multiple()                                     // <-- multiplo
+                                ->options(function ($record) {
+                                    if (!$record || !$record->id) {
+                                        return [];
+                                    }
+
+                                    $basePath = 'invoices/attachments/' . $record->id;
+                                    $files = Storage::files($basePath);
+
+                                    return collect($files)->mapWithKeys(function ($file) {
+                                        return [$file => basename($file)];
+                                    })->toArray();
+                                })
+                                ->required()
+                                ->native(false)
+                                ->searchable(),
+                        ])
+                        ->requiresConfirmation()
+                        ->modalHeading('Elimina allegati')
+                        ->modalDescription('Questa azione non può essere annullata.')
+                        ->modalSubmitActionLabel('Elimina')
+                        ->modalCancelActionLabel('Annulla')
+                        ->action(function (array $data) {
+                            $files = $data['files_to_delete'] ?? [];
+                            if (!is_array($files)) {
+                                $files = [$files];
+                            }
+
+                            $deleted = [];
+                            $notFound = [];
+
+                            foreach ($files as $file) {
+                                if (Storage::exists($file)) {
+                                    Storage::delete($file);
+                                    $deleted[] = basename($file);
+                                } else {
+                                    $notFound[] = basename($file);
+                                }
+                            }
+
+                            if (!empty($deleted)) {
+                                Notification::make()
+                                    ->title('File eliminati: ' . count($deleted))
+                                    ->body(implode(', ', $deleted))
+                                    ->success()
+                                    ->send();
+                            }
+
+                            if (!empty($notFound)) {
+                                Notification::make()
+                                    ->title('File non trovati: ' . count($notFound))
+                                    ->body(implode(', ', $notFound))
+                                    ->warning()
+                                    ->send();
+                            }
+                        }),
+                Actions\Action::make('attachments')
+                    ->label('Scarica allegati')
+                    ->color('info')
+                    ->icon('heroicon-o-paper-clip')
+                    ->visible(fn ($record) => (bool) count($record->postalExpenses) > 0)
+                    ->requiresConfirmation()
+                    ->modalHeading('Selezione archivio')
+                    ->modalDescription('Seleziona il contenuto dell\'archivio degli allegati')
+                    ->modalSubmitActionLabel('Selezione')
+                    ->form([
+                        Select::make('selection')->label('Contenuto archivio')
+                            ->options([
+                                    "all" => "Tutto",
+                                    "postal" => "Solo spese postali"
+                                ]
+                            )
+                            ->default('soft'),
+                    ])
+                    ->action(function ($record, $data) {
+                        set_time_limit(300);
+                        $disk = config('filesystems.default');
+                        $zip = new ZipArchive();
+                        $zipFileName = 'spese_postali_' . $record->id . '_' . time() . '.zip';
+                        $zipPath = storage_path('app/temp/' . $zipFileName);
+
+                        if (!is_dir(storage_path('app/temp'))) {
+                            mkdir(storage_path('app/temp'), 0755, true);
+                        }
+
+                        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+                            $addedFiles = 0;
+                            $fileCounter = 0;
+
+                            // Allegati delle spese postali (sempre inclusi)
+                            foreach ($record->postalExpenses as $index => $expense) {
+                                $attachments = [
+                                    'atto'          => $expense->act_attachment_path,
+                                    'notifica'      => $expense->notify_attachment_path,
+                                    'rifatturazione'=> $expense->reinvoice_attachment_path,
+                                ];
+
+                                foreach ($attachments as $type => $path) {
+                                    if (!$path || !Storage::disk($disk)->exists($path)) {
+                                        continue;
+                                    }
+
+                                    try {
+                                        $stream = Storage::disk($disk)->readStream($path);
+                                        if ($stream === false) {
+                                            throw new \Exception("Impossibile aprire lo stream");
+                                        }
+
+                                        $tempFile = tempnam(sys_get_temp_dir(), 'zip_');
+                                        file_put_contents($tempFile, stream_get_contents($stream));
+                                        if (is_resource($stream)) fclose($stream);
+
+                                        $fileName = basename($path);
+                                        $zipEntryName = sprintf('%02d_%s_%s', ++$fileCounter, $type, $fileName);
+
+                                        $zip->addFile($tempFile, $fileName);
+                                        $addedFiles++;
+
+                                        register_shutdown_function(function() use ($tempFile) {
+                                            if (file_exists($tempFile)) @unlink($tempFile);
+                                        });
+                                    } catch (\Exception $e) {
+                                        logger()->error("Errore download file", ['path' => $path, 'error' => $e->getMessage()]);
+                                    }
+                                }
+                            }
+
+                            // === AGGIUNTA: File extra nella cartella invoices/attachments ===
+                            if ($data['selection'] == 'all') {
+                                $extraFolder = 'invoices/attachments/' . $record->id;                       // $record->attachment_path
+
+                                if (Storage::disk($disk)->exists($extraFolder)) {
+                                    $files = Storage::disk($disk)->files($extraFolder);
+
+                                    foreach ($files as $path) {
+                                        try {
+                                            $stream = Storage::disk($disk)->readStream($path);
+                                            if ($stream === false) continue;
+
+                                            $tempFile = tempnam(sys_get_temp_dir(), 'zip_');
+                                            file_put_contents($tempFile, stream_get_contents($stream));
+                                            fclose($stream);
+
+                                            $fileName = basename($path);
+                                            $zipEntryName = sprintf('%02d_allegato_extra_%s', ++$fileCounter, $fileName);
+
+                                            $zip->addFile($tempFile, $fileName);
+                                            $addedFiles++;
+
+                                            register_shutdown_function(function() use ($tempFile) {
+                                                if (file_exists($tempFile)) @unlink($tempFile);
+                                            });
+                                        } catch (\Exception $e) {
+                                            logger()->error("Errore file extra", ['path' => $path, 'error' => $e->getMessage()]);
+                                        }
+                                    }
+                                }
+                            }
+
+                            $zip->close();
+
+                            if ($addedFiles > 0) {
+                                return response()->download($zipPath)->deleteFileAfterSend(true);
+                            } else {
+                                @unlink($zipPath);
+                                Notification::make()->title('Nessun file trovato')->warning()->send();
+                            }
+                        } else {
+                            Notification::make()->title('Errore nella creazione dello ZIP')->danger()->send();
                         }
                     }),
                 Actions\EditAction::make()
