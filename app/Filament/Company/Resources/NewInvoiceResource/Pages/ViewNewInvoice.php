@@ -583,7 +583,7 @@ Log::info('===== FINE AZIONE NOTA CREDITO =====');
                         }
                     }),
                     Actions\Action::make('addFile')
-                        ->label('Carica File')
+                        ->label('Carica allegati')
                         ->icon('heroicon-o-document-arrow-up')
                         ->color('info')
                         ->modalSubmitActionLabel('Carica')
@@ -618,7 +618,7 @@ Log::info('===== FINE AZIONE NOTA CREDITO =====');
                         }),
 
                     Actions\Action::make('subFile')
-                        ->label('Elimina file')
+                        ->label('Elimina allegati')
                         ->icon('heroicon-o-trash')
                         ->color('danger')
                         ->form([
@@ -796,6 +796,7 @@ Log::info('===== FINE AZIONE NOTA CREDITO =====');
                         }
                     }),
                 Actions\EditAction::make()
+                    ->label('Gestisci')
                     ->hidden(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE                                // posso modificare se non è stata inviata
                                             && $record->sdi_status != SdiStatus::RIFIUTATA                              // posso modificare se è stata rifiutata
                                             && $record->sdi_status != SdiStatus::SCARTATA                              // posso modificare se è stata scartata
