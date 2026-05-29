@@ -238,6 +238,7 @@ class PassivePaymentsRelationManager extends RelationManager
 
                         return $piValidation->pi_validation_status === PiValidationStatus::OK;
                     })
+                    ->after(fn () => $this->dispatch('refreshEditPage'))
                     ->modalWidth('6xl'),
             ])
             ->actions([

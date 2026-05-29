@@ -18,6 +18,15 @@ class EditPassiveInvoice extends EditRecord
 {
     protected static string $resource = PassiveInvoiceResource::class;
 
+    protected $listeners = ['refreshEditPage' => '$refresh'];
+
+    #[On('refreshEditPage')]
+    public function refreshRecord(): void
+    {
+        $this->record->refresh();
+        $this->fillForm();
+    }
+
     public function getTitle(): string | Htmlable
     {
         $number = $this->record->number;
