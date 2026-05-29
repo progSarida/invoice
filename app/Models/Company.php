@@ -209,4 +209,19 @@ class Company extends Model
     {
         return $this->hasMany(ActType::class);
     }
+
+    public function modelTypes()
+    {
+        return $this->hasMany(Template::class);
+    }
+
+    public function modelSubtypes()
+    {
+        return $this->hasMany(Template::class);
+    }
+
+    public function templates()
+    {
+        return $this->hasMany(Template::class);
+    }
 }
