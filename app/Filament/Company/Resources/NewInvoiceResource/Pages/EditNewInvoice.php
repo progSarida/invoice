@@ -878,7 +878,7 @@ Log::info('Commit');
             $this->getDeleteFormAction()
                 // ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
                 ->visible(function (Invoice $record) {
-                    $toSend = $record->sdi_status == SdiStatus::DA_INVIARE || $record->sdi_status == SdiStatus::PREAVVISO;
+                    $toSend = $record->sdi_status == SdiStatus::DA_INVIARE;
                     if ($record->art73) {
                         $maxNumber = Invoice::where('invoice_date', $record->invoice_date)
                             ->where('art_73', true)
@@ -893,7 +893,7 @@ Log::info('Commit');
                             ->max('number');
                         $last = $maxNumber == $record->number;
                     }
-                    return $toSend && $last;
+                    return ($toSend && $last) || $record->sdi_status == SdiStatus::PREAVVISO;
                 })
                 ->extraAttributes([
                     'class' => ' md:ml-auto md:w-auto ',
