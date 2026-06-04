@@ -128,11 +128,11 @@ class InvoiceItemsRelationManager extends RelationManager
                                     $set('vat_amount', number_format($vatAmount, 2, ',', '.'));
                                     $set('total', number_format($total, 2, ',', '.'));
                                 }
-                                else {
-                                    $set('amount', number_format(0, 2, ',', '.'));
-                                    $set('vat_amount', number_format(0, 2, ',', '.'));
-                                    $set('total', number_format(0, 2, ',', '.'));
-                                }
+                                // else {
+                                //     $set('amount', number_format(0, 2, ',', '.'));
+                                //     $set('vat_amount', number_format(0, 2, ',', '.'));
+                                //     $set('total', number_format(0, 2, ',', '.'));
+                                // }
                             })
                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                             ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state),
@@ -182,11 +182,11 @@ class InvoiceItemsRelationManager extends RelationManager
                                     $set('vat_amount', number_format($vatAmount, 2, ',', '.'));
                                     $set('total', number_format($total, 2, ',', '.'));
                                 }
-                                else {
-                                     $set('amount', number_format(0, 2, ',', '.'));
-                                    $set('vat_amount', number_format(0, 2, ',', '.'));
-                                    $set('total', number_format(0, 2, ',', '.'));
-                                }
+                                // else {
+                                //      $set('amount', number_format(0, 2, ',', '.'));
+                                //     $set('vat_amount', number_format(0, 2, ',', '.'));
+                                //     $set('total', number_format(0, 2, ',', '.'));
+                                // }
                             })
                             // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                             // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
@@ -223,6 +223,7 @@ class InvoiceItemsRelationManager extends RelationManager
                         $vatAmount = $amount * $rate;
                         $total = $amount + $vatAmount;
 
+                        $set('amount', number_format($state, 2, ',', '.'));
                         $set('vat_amount', number_format($vatAmount, 2, ',', '.'));
                         $set('total', number_format($total, 2, ',', '.'));
                     })
