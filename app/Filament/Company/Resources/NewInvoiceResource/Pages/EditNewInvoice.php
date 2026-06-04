@@ -871,14 +871,14 @@ Log::info('Commit');
     {
         return [
             $this->getSaveFormAction()
-                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
+                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE || $record->sdi_status == SdiStatus::PREAVVISO)
                 ->color('success'),
             $this->getCancelFormAction(),
             $this->getResetFormAction(),
             $this->getDeleteFormAction()
                 // ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
                 ->visible(function (Invoice $record) {
-                    $toSend = $record->sdi_status == SdiStatus::DA_INVIARE;
+                    $toSend = $record->sdi_status == SdiStatus::DA_INVIARE || $record->sdi_status == SdiStatus::PREAVVISO;
                     if ($record->art73) {
                         $maxNumber = Invoice::where('invoice_date', $record->invoice_date)
                             ->where('art_73', true)
