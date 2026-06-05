@@ -433,6 +433,12 @@ class PassivePaymentResource extends Resource
                         DatePicker::make('payment_from_date')
                             ->label('Pagamento da')
                             ->default(now()->year . '-01-01')
+                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    $set('payment_to_date', $state);
+                                }
+                            })
                             ->columnSpan(1),
                         DatePicker::make('payment_to_date')
                             ->label('Pagamento a')
@@ -475,7 +481,7 @@ class PassivePaymentResource extends Resource
                         if (! empty($data['registration_from_date'])) {
                             $query->whereDate('registration_date', '>=', $data['registration_from_date']);
                         }
-                        if (! empty($data['payment_to_date'])) {
+                        if (! empty($data['registration_to_date'])) {
                             $query->whereDate('registration_date', '<=', $data['registration_to_date']);
                         }
                     })

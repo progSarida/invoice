@@ -566,6 +566,43 @@ class NewActivePaymentsResource extends Resource
                                     ->when($data['value'] === 'no', fn ($q) => $q->where('validated', false));
                     })
                     ->preload(),
+                Filter::make('payment_date_range')
+                    ->columns(2)
+                    ->form([
+                        DatePicker::make('payment_from_date')
+                            ->label('Pagamento da')
+                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    $set('payment_to_date', $state);
+                                }
+                            })
+                            ->columnSpan(1),
+                        DatePicker::make('payment_to_date')
+                            ->label('Pagamento a')
+                            ->columnSpan(1),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['payment_from_date'])) {
+                            $query->whereDate('payment_date', '>=', $data['payment_from_date']);
+                        }
+                        if (! empty($data['payment_to_date'])) {
+                            $query->whereDate('payment_date', '<=', $data['payment_to_date']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['payment_from_date'] && $data['payment_to_date']) {
+                            return "Pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
+                        }
+                        if ($data['payment_from_date']) {
+                            return "Pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y');
+                        }
+                        if ($data['payment_to_date']) {
+                            return "Pagamento al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
+                        }
+                        return null;
+                    })
+                    ->columnSpan(2),
                 SelectFilter::make('invoice_year')
                     ->label('Anno Fattura')
                     ->attribute(null)

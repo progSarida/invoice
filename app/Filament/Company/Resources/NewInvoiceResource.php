@@ -50,7 +50,10 @@ use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\SdiNotifi
 use App\Models\ReversalMotivationType;
 use App\Models\SocialContribution;
 use App\Models\Withholding;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -1653,12 +1656,12 @@ class NewInvoiceResource extends Resource
             ])
             ->defaultSort('id', 'desc')
             ->filters([
+                // Riga 1
                 SelectFilter::make('doc_type_id')
                     ->label('Seleziona tipo documento')
                     // ->options(function () {
                     //     return DocType::orderBy('doc_group_id')->pluck('description', 'id')->toArray();
                     // })
-                    ->placeholder('Selezionare fatture e note di credito per avere i totali corretti')
                     ->options(function (Get $record) {
                         $docs = Filament::getTenant()
                                     ->docTypes()
@@ -1668,14 +1671,14 @@ class NewInvoiceResource extends Resource
                     })
                     ->multiple()
                     ->searchable()
-                    ->columnSpan(2)
+                    ->columnSpan(6)
                     ->preload(),
                 Tables\Filters\SelectFilter::make('exclude_doc_types')
                     ->label('Escludi tipo documento')
                     ->multiple()
                     ->searchable()
                     ->preload()
-                    ->columnSpan(2)
+                    ->columnSpan(6)
                     // 1. Carichiamo le opzioni dal Tenant
                     ->options(function () {
                         $tenant = Filament::getTenant();
@@ -1699,57 +1702,8 @@ class NewInvoiceResource extends Resource
                             fn (Builder $query, $values): Builder => $query->whereNotIn('doc_type_id', $values)
                         );
                     }),
-                Filter::make('number')
-                    ->form([
-                        TextInput::make('number')
-                            ->label('Numero Fattura'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (filled($data['number'])) {
-                            return $query->where('number', $data['number']);
-                        }
-                        return $query;
-                    }),
-                SelectFilter::make('paid')
-                    ->label('Stato pagamento')
-                    ->placeholder('Tutti gli stati')
-                    ->options([
-                        'si' => 'Pagate',
-                        'no' => 'Non pagate',
-                    ])
-                    // ->query(function (Builder $query, array $data): Builder {
-                    //     if (!isset($data['value'])) {
-                    //         return $query;
-                    //     }
-                    //     $sql = 'total - (total_payment + total_notes)';
-                    //     return $query->when($data['value'] === 'si', fn ($q) => $q->whereRaw("$sql <= 0"))
-                    //                 ->when($data['value'] === 'no', fn ($q) => $q->whereRaw("$sql > 0"));
-                    // })
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (!isset($data['value'])) {
-                            return $query;
-                        }
 
-                        return $query->where('parent_id', null) // Escludi quelle con parent_id se necessario
-                            ->when($data['value'] === 'si', function ($q) {
-                                return $q->whereRaw("
-                                    CASE
-                                        WHEN (SELECT type FROM clients WHERE clients.id = invoices.client_id) = 'public'
-                                        THEN no_vat_total - (total_payment + total_notes) <= 0
-                                        ELSE total - (total_payment + total_notes) <= 0
-                                    END
-                                ");
-                            })->when($data['value'] === 'no', function ($q) {
-                                return $q->whereRaw("
-                                    CASE
-                                        WHEN (SELECT type FROM clients WHERE clients.id = invoices.client_id) = 'public'
-                                        THEN no_vat_total - (total_payment + total_notes) > 0
-                                        ELSE total - (total_payment + total_notes) > 0
-                                    END
-                                ");
-                            });
-                    })
-                    ->preload(),
+                // Riga 2
                 SelectFilter::make('client_type')
                     ->label('Tipo cliente')
                     ->options(ClientType::class)
@@ -1763,6 +1717,7 @@ class NewInvoiceResource extends Resource
                         }
                         return $query;
                     })
+                    ->columnSpan(4)
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('client_id')->label('Cliente')
@@ -1825,24 +1780,26 @@ class NewInvoiceResource extends Resource
                     )
                     ->searchable()
                     // ->preload()
-                    ->columnSpan(2)
+                    ->columnSpan(6)
                     ->optionsLimit(5),
                 SelectFilter::make('tax_type')->label('Entrata')
                     ->options(TaxType::class)
                     ->placeholder('Tutte')
                     ->searchable()
+                    ->columnSpan(2)
                     ->multiple()
                     ->preload(),
+
+                // Riga 3
                 SelectFilter::make('contract_id')->label('Contratto')
                     ->relationship('contract','office_name')
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
                     )
-                    ->searchable()->preload()
-                    ->columnSpan(2)
+                    ->searchable()
+                    ->columnSpan(4)
+                    ->preload()
                     ->optionsLimit(5),
-                SelectFilter::make('sdi_status')->label('Stato')->options(SdiStatus::class)
-                    ->multiple()->searchable()->preload(),
                 SelectFilter::make('accrual_type_id')
                     ->label('Gestione')
                     ->placeholder('Tutte')
@@ -1850,6 +1807,7 @@ class NewInvoiceResource extends Resource
                         return AccrualType::pluck('name', 'id')->toArray();
                     })
                     ->multiple()
+                    ->columnSpan(4)
                     ->preload(),
                 SelectFilter::make('manage_type_id')
                     ->label('Servizio')
@@ -1857,8 +1815,149 @@ class NewInvoiceResource extends Resource
                         return ManageType::pluck('name', 'id')->toArray();
                     })
                     ->multiple()
-                    ->columnSpan(2)
+                    ->columnSpan(4)
                     ->preload(),
+
+                // Riga 4
+                Filter::make('number')
+                    ->columns(2)
+                    ->form([
+                        TextInput::make('number_from')
+                            ->label('Numero Fattura da')
+                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    $set('number_to', $state);
+                                }
+                            }),
+                        TextInput::make('number_to')
+                            ->label('Numero Fattura a'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        // Modifichiamo la query per applicare i filtri in cascata senza interrompere l'esecuzione
+                        return $query
+                            ->when(
+                                filled($data['number_from']),
+                                fn (Builder $query) => $query->where('number', '>=', $data['number_from'])
+                            )
+                            ->when(
+                                filled($data['number_to']),
+                                fn (Builder $query) => $query->where('number', '<=', $data['number_to'])
+                            );
+                    })
+                    ->columnSpan(6),
+                Filter::make('dateInvoice')
+                    ->columns(2)
+                    ->form([
+                        DatePicker::make('date_from')
+                            ->label('Data fattura da')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    $set('date_to', $state);
+                                }
+                            }),
+                        DatePicker::make('date_to')
+                            ->label('Data fattura a')
+                            ->extraInputAttributes(['class' => 'text-center']),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        // Modifichiamo la query per applicare i filtri in cascata senza interrompere l'esecuzione
+                        return $query
+                            ->when(
+                                filled($data['date_from']),
+                                fn (Builder $query) => $query->whereDate('invoice_date', '>=', $data['date_from'])
+                            )
+                            ->when(
+                                filled($data['date_to']),
+                                fn (Builder $query) => $query->whereDate('invoice_date', '<=', $data['date_to'])
+                            );
+                    })
+                    ->columnSpan(6),
+
+
+                // Riga 5
+                SelectFilter::make('sdi_status')->label('Stato')->options(SdiStatus::class)
+                    ->multiple()->searchable()->preload()->columnSpan(5),
+                SelectFilter::make('paid')
+                    ->label('Stato pagamento')
+                    ->placeholder('Tutti gli stati')
+                    ->options([
+                        'si' => 'Pagate',
+                        'no' => 'Non pagate',
+                    ])
+                    // ->query(function (Builder $query, array $data): Builder {
+                    //     if (!isset($data['value'])) {
+                    //         return $query;
+                    //     }
+                    //     $sql = 'total - (total_payment + total_notes)';
+                    //     return $query->when($data['value'] === 'si', fn ($q) => $q->whereRaw("$sql <= 0"))
+                    //                 ->when($data['value'] === 'no', fn ($q) => $q->whereRaw("$sql > 0"));
+                    // })
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value'])) {
+                            return $query;
+                        }
+
+                        return $query->where('parent_id', null) // Escludi quelle con parent_id se necessario
+                            ->when($data['value'] === 'si', function ($q) {
+                                return $q->whereRaw("
+                                    CASE
+                                        WHEN (SELECT type FROM clients WHERE clients.id = invoices.client_id) = 'public'
+                                        THEN no_vat_total - (total_payment + total_notes) <= 0
+                                        ELSE total - (total_payment + total_notes) <= 0
+                                    END
+                                ");
+                            })->when($data['value'] === 'no', function ($q) {
+                                return $q->whereRaw("
+                                    CASE
+                                        WHEN (SELECT type FROM clients WHERE clients.id = invoices.client_id) = 'public'
+                                        THEN no_vat_total - (total_payment + total_notes) > 0
+                                        ELSE total - (total_payment + total_notes) > 0
+                                    END
+                                ");
+                            });
+                    })
+                    ->columnSpan(3)
+                    ->preload(),
+                Filter::make('datePayment')
+                    ->columns(2)
+                    ->form([
+                        DatePicker::make('date_from')
+                            ->label('Data pagamento da')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    $set('date_to', $state);
+                                }
+                            }),
+                        DatePicker::make('date_to')
+                            ->label('Data pagamento a')
+                            ->extraInputAttributes(['class' => 'text-center']),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        // Modifichiamo la query per applicare i filtri in cascata senza interrompere l'esecuzione
+                        return $query
+                            ->when(
+                                filled($data['date_from']),
+                                // fn (Builder $query) => $query->whereHas('activePayments', function ($q) use ($data) {
+                                //     $q->whereDate('payment_date', '>=', $data['date_from']);
+                                // })
+                                fn (Builder $query) => $query->whereDate('last_payment_date', '>=', $data['date_from'])
+                            )
+                            ->when(
+                                filled($data['date_to']),
+                                // fn (Builder $query) => $query->whereHas('activePayments', function ($q) use ($data) {
+                                //     $q->whereDate('payment_date', '<=', $data['date_to']);
+                                // })
+                                fn (Builder $query) => $query->whereDate('last_payment_date', '<=', $data['date_to'])
+                            );
+                    })
+                    ->columnSpan(4),
+
+                // Riga 5
                 SelectFilter::make('invoice_year_from')
                     ->label('Anno fattura da')
                     ->attribute(null)
@@ -1903,7 +2002,8 @@ class NewInvoiceResource extends Resource
                             return $query->where('year', ">=", $value);
                         }
                         return $query;
-                    }),
+                    })
+                    ->columnSpan(2),
                 SelectFilter::make('invoice_year_to')
                     ->label('Anno fattura a')
                     ->attribute(null)
@@ -1924,7 +2024,8 @@ class NewInvoiceResource extends Resource
                             return $query->where('year', "<=", $value);
                         }
                         return $query;
-                    }),
+                    })
+                    ->columnSpan(2),
 
                 SelectFilter::make('invoice_budget_year_from')
                     ->label('Anno bilancio da')
@@ -1946,7 +2047,8 @@ class NewInvoiceResource extends Resource
                             return $query->where('budget_year', ">=", $value);
                         }
                         return $query;
-                    }),
+                    })
+                    ->columnSpan(2),
                 SelectFilter::make('invoice_budget_year_to')
                     ->label('Anno bilancio a')
                     ->attribute(null)
@@ -1967,7 +2069,8 @@ class NewInvoiceResource extends Resource
                             return $query->where('budget_year', "<=", $value);
                         }
                         return $query;
-                    }),
+                    })
+                    ->columnSpan(2),
                 SelectFilter::make('invoice_accrual_year_from')
                     ->label('Anno competenza da')
                     ->attribute(null)
@@ -1988,7 +2091,8 @@ class NewInvoiceResource extends Resource
                             return $query->where('accrual_year', ">=", $value);
                         }
                         return $query;
-                    }),
+                    })
+                    ->columnSpan(2),
                 SelectFilter::make('invoice_accrual_year_to')
                     ->label('Anno competenza da')
                     ->attribute(null)
@@ -2009,7 +2113,10 @@ class NewInvoiceResource extends Resource
                             return $query->where('accrual_year', "<=", $value);
                         }
                         return $query;
-                    }),
+                    })
+                    ->columnSpan(2),
+
+                // Riga 6
                 Filter::make('total_range')
                     ->columns(2)
                     ->form([
@@ -2039,9 +2146,10 @@ class NewInvoiceResource extends Resource
                             return "Importo fino a " . number_format($data['total_to'], 2, ',', '.');
                         }
                         return null;
-                    }),
+                    })
+                    ->columnSpan(4),
                 Filter::make('ignore_limit')
-                    ->columns(24)
+                    ->columns(18)
                     ->form([
                         Toggle::make('filter_residue')
                             ->label("Ignora 'Dovuto' inferiore a")
@@ -2049,7 +2157,7 @@ class NewInvoiceResource extends Resource
                         TextInput::make('ignore_limit')
                             ->label('Importo')
                             ->numeric()
-                            ->columnSpan(12)
+                            ->columnSpan(6)
                             ->disabled(fn (Get $get) => $get('ignore_limit'))
                             ->default(5),
                     ])
@@ -2083,10 +2191,11 @@ class NewInvoiceResource extends Resource
                         else {
                             return null;
                         }
-                    }),
-            // ],layout: FiltersLayout::Modal)->filtersFormColumns(4)
-            ])
-            ->filtersFormColumns(4)
+                    })
+                    ->columnSpan(4),
+            ],layout: FiltersLayout::Dropdown)->filtersFormColumns(12)->filtersFormWidth(MaxWidth::SevenExtraLarge)
+            // ],layout: FiltersLayout::Modal)->filtersFormColumns(12)->filtersFormWidth(MaxWidth::SevenExtraLarge)
+            // ])->filtersFormColumns(12)
             ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\ViewAction::make(),

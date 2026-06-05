@@ -697,6 +697,12 @@ class PassiveInvoiceResource extends Resource
                         DatePicker::make('invoice_from_date')
                             ->label('Data fattura da')
                             ->extraInputAttributes(['class' => 'text-center'])
+                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    $set('invoice_to_date', $state);
+                                }
+                            })
                             ->default(now()->year . '-01-01')
                             ->columnSpan(1),
                         DatePicker::make('invoice_to_date')
@@ -732,6 +738,12 @@ class PassiveInvoiceResource extends Resource
                         DatePicker::make('payment_from_date')
                             ->label('Data ultimo pagamento da')
                             ->extraInputAttributes(['class' => 'text-center'])
+                            ->live(debounce: 1000)
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    $set('payment_to_date', $state);
+                                }
+                            })
                             ->columnSpan(1),
                         DatePicker::make('payment_to_date')
                             ->extraInputAttributes(['class' => 'text-center'])
