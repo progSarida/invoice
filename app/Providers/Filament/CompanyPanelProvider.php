@@ -51,8 +51,8 @@ class CompanyPanelProvider extends PanelProvider
                 NavigationGroup::make('Prima nota'),
                 NavigationGroup::make('Costi di notifica'),
                 NavigationGroup::make('Polizze'),
-                NavigationGroup::make('Tabelle'),
                 NavigationGroup::make('Generale'),
+                NavigationGroup::make('Tabelle'),
             ])
             ->discoverPages(in: app_path('Filament/Company/Pages'), for: 'App\\Filament\\Company\\Pages')
             ->pages([
