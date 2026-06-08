@@ -139,15 +139,75 @@ class ListNewInvoices extends ListRecords
                 ->label('Esporta (Completa)')
                 ->color(Color::rgb('rgb(0, 153, 0)'))
                 ->exporter(NewInvoiceExporter::class)
-                ->modalWidth(MaxWidth::FiveExtraLarge)
-                ->keyBindings(['alt+e']),
+                ->modalWidth(MaxWidth::FitContent)
+                ->keyBindings(['alt+e'])
+                // Posizionamento checkbox campi da esportare su quattro colonne
+                ->form(fn (ExportAction $action): array => [
+                    \Filament\Forms\Components\Fieldset::make(__('filament-actions::export.modal.form.columns.label'))
+                        ->columns(4)  // <-- qui il cambiamento
+                        ->inlineLabel()
+                        ->schema(function () use ($action): array {
+                            return array_map(
+                                fn (\Filament\Actions\Exports\ExportColumn $column): \Filament\Forms\Components\Split => \Filament\Forms\Components\Split::make([
+                                    \Filament\Forms\Components\Checkbox::make('isEnabled')
+                                        ->label(__('filament-actions::export.modal.form.columns.form.is_enabled.label', ['column' => $column->getName()]))
+                                        ->hiddenLabel()
+                                        ->default($column->isEnabledByDefault())
+                                        ->live()
+                                        ->grow(false),
+                                    \Filament\Forms\Components\TextInput::make('label')
+                                        ->label(__('filament-actions::export.modal.form.columns.form.label.label', ['column' => $column->getName()]))
+                                        ->hiddenLabel()
+                                        ->default($column->getLabel())
+                                        ->placeholder($column->getLabel())
+                                        ->disabled(fn (\Filament\Forms\Get $get): bool => ! $get('isEnabled'))
+                                        ->required(fn (\Filament\Forms\Get $get): bool => (bool) $get('isEnabled')),
+                                ])
+                                    ->verticallyAlignCenter()
+                                    ->statePath($column->getName()),
+                                $action->getExporter()::getColumns(),
+                            );
+                        })
+                        ->statePath('columnMap'),
+                    ...$action->getExporter()::getOptionsFormComponents(),
+                ]),
             ExportAction::make('esporta_s')
                 ->icon('phosphor-export')
                 ->label('Esporta (Semplice)')
                 ->color(Color::rgb('rgb(0, 153, 0)'))
                 ->exporter(NewInvoiceExporterSimple::class)
                 ->modalWidth(MaxWidth::FiveExtraLarge)
-                ->keyBindings(['alt+shift+e']),
+                ->keyBindings(['alt+shift+e'])
+                // Posizionamento checkbox campi da esportare su due colonne
+                ->form(fn (ExportAction $action): array => [
+                    \Filament\Forms\Components\Fieldset::make(__('filament-actions::export.modal.form.columns.label'))
+                        ->columns(2)  // <-- qui il cambiamento
+                        ->inlineLabel()
+                        ->schema(function () use ($action): array {
+                            return array_map(
+                                fn (\Filament\Actions\Exports\ExportColumn $column): \Filament\Forms\Components\Split => \Filament\Forms\Components\Split::make([
+                                    \Filament\Forms\Components\Checkbox::make('isEnabled')
+                                        ->label(__('filament-actions::export.modal.form.columns.form.is_enabled.label', ['column' => $column->getName()]))
+                                        ->hiddenLabel()
+                                        ->default($column->isEnabledByDefault())
+                                        ->live()
+                                        ->grow(false),
+                                    \Filament\Forms\Components\TextInput::make('label')
+                                        ->label(__('filament-actions::export.modal.form.columns.form.label.label', ['column' => $column->getName()]))
+                                        ->hiddenLabel()
+                                        ->default($column->getLabel())
+                                        ->placeholder($column->getLabel())
+                                        ->disabled(fn (\Filament\Forms\Get $get): bool => ! $get('isEnabled'))
+                                        ->required(fn (\Filament\Forms\Get $get): bool => (bool) $get('isEnabled')),
+                                ])
+                                    ->verticallyAlignCenter()
+                                    ->statePath($column->getName()),
+                                $action->getExporter()::getColumns(),
+                            );
+                        })
+                        ->statePath('columnMap'),
+                    ...$action->getExporter()::getOptionsFormComponents(),
+                ]),
             Actions\Action::make('compare')
                 ->icon('fluentui-column-double-compare-20-o')
                 ->label('Comparata')

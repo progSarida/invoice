@@ -57,6 +57,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
+use ZipArchive;
 
 class NewInvoiceResource extends Resource
 {
@@ -1359,6 +1360,35 @@ class NewInvoiceResource extends Resource
                                     ->files('invoices/attachments/' . $record->id);
                                 return !empty($files);
                             })
+                            ->headerActions([
+                                Action::make('download_zip')
+                                    ->label('Scarica tutti (.zip)')
+                                    ->icon('heroicon-o-archive-box-arrow-down')
+                                    ->color('gray')
+                                    ->action(function ($record) {
+                                        $disk  = config('filesystems.default');
+                                        $files = Storage::disk($disk)->files('invoices/attachments/' . $record->id);
+
+                                        if (empty($files)) return;
+
+                                        $zipPath = sys_get_temp_dir() . '/allegati_fattura_' . $record->id . '_' . time() . '.zip';
+
+                                        $zip = new ZipArchive();
+                                        $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+                                        foreach ($files as $file) {
+                                            $stream   = Storage::disk($disk)->readStream($file);
+                                            $contents = stream_get_contents($stream);
+                                            fclose($stream);
+                                            $zip->addFromString(basename($file), $contents);
+                                        }
+
+                                        $zip->close();
+
+                                        return response()->download($zipPath, 'allegati_fattura_' . $record->id . '.zip')
+                                            ->deleteFileAfterSend(true);
+                                    }),
+                            ])
                             ->schema([
                                 Placeholder::make('attachments')
                                     ->label('')

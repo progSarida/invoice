@@ -16,8 +16,9 @@ class NewInvoiceExporterSimple extends Exporter
     public static function getColumns(): array
     {
         return [
-            // ExportColumn::make('id')
-            //     ->label('#'),
+            ExportColumn::make('id')
+                ->label('#')
+                ->enabledByDefault(false),
             ExportColumn::make('doc_type_id')
                 ->label('Tipo')
                 ->formatStateUsing(fn ($record) => $record->docType?->description),
