@@ -675,6 +675,7 @@ class NewActivePaymentsResource extends Resource
                     }),
             // ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(8)
             ])->filtersFormColumns(2)
+            ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),
