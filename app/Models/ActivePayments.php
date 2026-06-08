@@ -20,6 +20,7 @@ class ActivePayments extends Model
         'validated',
         'validation_date',
         'validation_user_id',
+        'note'
     ];
 
     protected $casts = [
