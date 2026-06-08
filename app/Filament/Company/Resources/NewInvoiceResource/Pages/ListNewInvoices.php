@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Blade;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Exports\NewInvoiceExporter;
+use App\Filament\Exports\NewInvoiceExporterSimple;
 use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\Client;
 use App\Models\DocType;
@@ -133,12 +134,20 @@ class ListNewInvoices extends ListRecords
                         }, $fileName);
                 })
                 ->keyBindings(['alt+s']),
-            ExportAction::make('esporta')
+            ExportAction::make('esporta_f')
                 ->icon('phosphor-export')
-                ->label('Esporta')
+                ->label('Esporta (Completa)')
                 ->color(Color::rgb('rgb(0, 153, 0)'))
                 ->exporter(NewInvoiceExporter::class)
+                ->modalWidth(MaxWidth::FiveExtraLarge)
                 ->keyBindings(['alt+e']),
+            ExportAction::make('esporta_s')
+                ->icon('phosphor-export')
+                ->label('Esporta (Semplice)')
+                ->color(Color::rgb('rgb(0, 153, 0)'))
+                ->exporter(NewInvoiceExporterSimple::class)
+                ->modalWidth(MaxWidth::FiveExtraLarge)
+                ->keyBindings(['alt+shift+e']),
             Actions\Action::make('compare')
                 ->icon('fluentui-column-double-compare-20-o')
                 ->label('Comparata')
