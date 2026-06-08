@@ -102,6 +102,7 @@ class EditPassiveInvoice extends EditRecord
                     ->label('Valida fattura')
                     ->icon('fluentui-checkmark-starburst-20-o')
                     ->requiresConfirmation()
+                    ->visible(fn ($record) => !$record?->pi_validation_id)
                     ->form([
                         Select::make('pi_validation_id')
                             ->label('')
@@ -119,6 +120,17 @@ class EditPassiveInvoice extends EditRecord
                         ]);
                     })
                     ->color(Color::rgb('rgb(51, 204, 51)')),
+                Actions\Action::make('no_validate')
+                    ->label('Annulla validazione')
+                    ->icon('fluentui-dismiss-circle-20-o')
+                    ->requiresConfirmation()
+                    ->modalHeading('Conferma annullamento validazione')
+                    ->modalDescription('Sei sicuro di voler annullare la validazione di questa fattura?') 
+                    ->visible(fn ($record) => $record?->pi_validation_id)
+                    ->action(function (PassiveInvoice $record) {
+                        $record->update([ 'pi_validation_id' => null ]);
+                    })
+                    ->color('danger'),
                 // Actions\DeleteAction::make()
                 //     ->visible(fn (): bool => Auth::user()->isManager()),
             ])
