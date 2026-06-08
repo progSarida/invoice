@@ -194,7 +194,6 @@ class NewActivePaymentsResource extends Resource
                     ->required()
                     ->disabled(fn ($get) => $get('validated'))
                     ->searchable()
-                    ->dehydrated()
                     ->live()
                     ->preload()
                     ->columnSpan(5),
@@ -275,7 +274,6 @@ class NewActivePaymentsResource extends Resource
                     ->label('Data pagamento')
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
-                    ->dehydrated()
                     ->reactive()
                     ->required()
                     ->debounce(500)
