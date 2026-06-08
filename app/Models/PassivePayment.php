@@ -21,7 +21,8 @@ class PassivePayment extends Model
         'registration_user_id',
         'validated',
         'validation_date',
-        'validation_user_id'
+        'validation_user_id',
+        'note'
     ];
 
     protected $casts = [
