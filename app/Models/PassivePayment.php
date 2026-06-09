@@ -71,8 +71,8 @@ class PassivePayment extends Model
         });
 
         static::updating(function ($payment) {
-            $payment->registration_date = now()->toDateString();
-            $payment->registration_user_id = Auth::id();
+            // $payment->registration_date = now()->toDateString();
+            // $payment->registration_user_id = Auth::id();
             $updatedInvoice = false;
             $invoice = $payment->passiveInvoice;
 

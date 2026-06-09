@@ -11,6 +11,7 @@ use App\Models\ActivePayments;
 use App\Models\Invoice;
 use App\Models\NewActivePayments;
 use App\Models\Sectional;
+use App\Policies\ActivePaymentsPolicy;
 use App\Services\CurrencyService;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
@@ -328,6 +329,7 @@ class NewActivePaymentsResource extends Resource
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->name} - $record->iban"
                     )
+                    ->disabled(fn ($get) => $get('validated'))
                     ->searchable()
                     ->required()
                     ->columnSpan(5)
@@ -399,7 +401,20 @@ class NewActivePaymentsResource extends Resource
                         // return "{$number}/{$invoice->section}/{$invoice->year}";
                     })
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('invoice', function (Builder $query) use ($search) {
+                            $query->whereHas('sectional', function (Builder $query) use ($search) {
+                                $query->where('description', 'like', "%{$search}%");
+                            })
+                            ->orWhere('number', 'like', "%{$search}%")
+                            ->orWhere('year', 'like', "%{$search}%");
+                        });
+                    })
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query->leftJoin('invoices', 'invoices.id', '=', 'active_payments.invoice_id')
+                            ->orderBy('invoices.year', $direction)
+                            ->orderBy('invoices.number', $direction);
+                    }),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     ->alignRight()
@@ -412,6 +427,11 @@ class NewActivePaymentsResource extends Resource
                 Tables\Columns\TextColumn::make('client')->label('Cliente')
                     // ->numeric()
                     ->sortable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('invoice.client', function (Builder $query) use ($search) {
+                            $query->where('denomination', 'like', "%{$search}%");
+                        });
+                    })
                     ->getStateUsing(function ($record) {
                         $client = $record->invoice->client;
                         return $client->denomination;
@@ -437,20 +457,64 @@ class NewActivePaymentsResource extends Resource
                     ->label('Registrato da')
                     ->getStateUsing(fn ($record) => optional($record->registrationUser)->name ?? 'Nessun utente')
                     ->sortable(),
-                Tables\Columns\ToggleColumn::make('validated')
-                    ->label('Validato')
-                    ->sortable()
-                    ->afterStateUpdated(function (\App\Models\ActivePayments $record, bool $state) {
-                        if ($state) {
-                            $record->validation_date = now();
-                            $record->validation_user_id = Auth::user()->id;
-                        } else {
-                            $record->validation_date = null;
-                            $record->validation_user_id = null;
-                        }
+                // Tables\Columns\ToggleColumn::make('validated')
+                //     ->label('Validato')
+                //     ->sortable()
+                //     ->disabled(function (\App\Models\ActivePayments $record) {
+                //         return !auth()->user()->can('update', $record);
+                //     })
+                //     ->afterStateUpdated(function (\App\Models\ActivePayments $record, bool $state) {
+                //         if ($state) {
+                //             $record->validation_date = now();
+                //             $record->validation_user_id = Auth::user()->id;
+                //         } else {
+                //             $record->validation_date = null;
+                //             $record->validation_user_id = null;
+                //         }
 
-                        $record->save();
-                    }),
+                //         $record->save();
+                //     }),
+                Tables\Columns\IconColumn::make('validated')
+                    ->label('Validato')
+                    ->boolean()
+                    ->sortable()
+                    ->tooltip(fn (\App\Models\ActivePayments $record) => !auth()->user()->can('update', $record)
+                        ? '' : ($record->validated
+                        ? 'Annulla validazione pagamento.'
+                        : 'Valida pagamento.')
+                    )
+                    ->disabled(function (\App\Models\ActivePayments $record) {
+                        // Disabilita se l'utente NON può aggiornare il record
+                        return !auth()->user()->can('update', $record);
+                    })
+                    ->action(
+                        Tables\Actions\Action::make('toggleValidated')
+                            ->requiresConfirmation()
+                            ->disabled(function (\App\Models\ActivePayments $record) {
+                                return !auth()->user()->can('update', $record);
+                            })
+                            ->modalHeading(fn (\App\Models\ActivePayments $record) => $record->validated
+                                ? 'Rimuovere validazione?'
+                                : 'Confermare validazione?'
+                            )
+                            ->modalDescription(fn (\App\Models\ActivePayments $record) => $record->validated
+                                ? 'Il pagamento verrà marcato come non validato.'
+                                : 'Il pagamento verrà marcato come validato.'
+                            )
+                            ->modalSubmitActionLabel('Conferma')
+                            ->action(function (\App\Models\ActivePayments $record) {
+                                $newState = ! $record->validated;
+                                if ($newState) {
+                                    $record->validation_date = now();
+                                    $record->validation_user_id = Auth::user()->id;
+                                } else {
+                                    $record->validation_date = null;
+                                    $record->validation_user_id = null;
+                                }
+                                $record->validated = $newState;
+                                $record->save();
+                            })
+                    ),
             ])
             ->filters([
                 SelectFilter::make('invoice_client_type')

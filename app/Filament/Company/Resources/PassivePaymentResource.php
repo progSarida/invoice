@@ -329,21 +329,62 @@ class PassivePaymentResource extends Resource
                     ->getStateUsing(fn ($record) => optional($record->registrationUser)->name ?? 'Nessun utente')
                     ->sortable()
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\ToggleColumn::make('validated')
-                    ->label('Validato')
-                    ->sortable()
-                    ->afterStateUpdated(function (\App\Models\PassivePayment $record, bool $state) {
-                        if ($state) {
-                            $record->validation_date = now();
-                            $record->validation_user_id = Auth::id();
-                        } else {
-                            // Se vuoi "annullare" la validazione quando il toggle viene disattivato
-                            $record->validation_date = null;
-                            $record->validation_user_id = null;
-                        }
+                // Tables\Columns\ToggleColumn::make('validated')
+                //     ->label('Validato')
+                //     ->sortable()
+                //     ->afterStateUpdated(function (\App\Models\PassivePayment $record, bool $state) {
+                //         if ($state) {
+                //             $record->validation_date = now();
+                //             $record->validation_user_id = Auth::id();
+                //         } else {
+                //             // Se vuoi "annullare" la validazione quando il toggle viene disattivato
+                //             $record->validation_date = null;
+                //             $record->validation_user_id = null;
+                //         }
 
-                        $record->save();
-                    }),
+                //         $record->save();
+                //     }),
+                Tables\Columns\IconColumn::make('validated')
+                    ->label('Validato')
+                    ->boolean()
+                    ->sortable()
+                    ->tooltip(fn (\App\Models\PassivePayment $record) => !auth()->user()->can('update', $record)
+                        ? '' : ($record->validated
+                        ? 'Annulla validazione pagamento.'
+                        : 'Valida pagamento.')
+                    )
+                    ->disabled(function (\App\Models\PassivePayment $record) {
+                        // Disabilita se l'utente NON può aggiornare il record
+                        return !auth()->user()->can('update', $record);
+                    })
+                    ->action(
+                        Tables\Actions\Action::make('toggleValidated')
+                            ->requiresConfirmation()
+                            ->disabled(function (\App\Models\PassivePayment $record) {
+                                return !auth()->user()->can('update', $record);
+                            })
+                            ->modalHeading(fn (\App\Models\PassivePayment $record) => $record->validated
+                                ? 'Rimuovere validazione?'
+                                : 'Confermare validazione?'
+                            )
+                            ->modalDescription(fn (\App\Models\PassivePayment $record) => $record->validated
+                                ? 'Il pagamento verrà marcato come non validato.'
+                                : 'Il pagamento verrà marcato come validato.'
+                            )
+                            ->modalSubmitActionLabel('Conferma')
+                            ->action(function (\App\Models\PassivePayment $record) {
+                                $newState = ! $record->validated;
+                                if ($newState) {
+                                    $record->validation_date = now();
+                                    $record->validation_user_id = Auth::user()->id;
+                                } else {
+                                    $record->validation_date = null;
+                                    $record->validation_user_id = null;
+                                }
+                                $record->validated = $newState;
+                                $record->save();
+                            })
+                    ),
             ])
             ->filtersFormWidth('3xl')
             ->filtersFormColumns(12)

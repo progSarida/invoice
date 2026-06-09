@@ -114,6 +114,7 @@ class PostalExpenseResource extends Resource
                             ($record->mark_expense_amount ?? 0);
                         return $sum;
                     })
+                    ->alignRight()
                     ->money('EUR'),
                 // Tables\Columns\IconColumn::make('reinvoice')
                 //     ->label('Rifatturare')
