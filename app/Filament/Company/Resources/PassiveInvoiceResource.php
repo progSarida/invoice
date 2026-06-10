@@ -59,7 +59,7 @@ class PassiveInvoiceResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            // ->disabled()
+            ->disabled()
             ->schema([
                 // Grid::make('GRID')->columnSpan(2)->schema([
 
