@@ -223,6 +223,7 @@ class ActivePaymentsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->modalHeading('Crea nuovo pagamento')
+                    ->after(fn () => $this->dispatch('refreshEditPage'))
                     ->modalWidth('6xl'),
             ])
             ->actions([

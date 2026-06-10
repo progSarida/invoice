@@ -13,12 +13,11 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 
 class EditPassiveInvoice extends EditRecord
 {
     protected static string $resource = PassiveInvoiceResource::class;
-
-    protected $listeners = ['refreshEditPage' => '$refresh'];
 
     #[On('refreshEditPage')]
     public function refreshRecord(): void

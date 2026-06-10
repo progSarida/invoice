@@ -30,11 +30,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
+use Livewire\Attributes\On;
 use ZipArchive;
 
 class EditNewInvoice extends EditRecord
 {
     protected static string $resource = NewInvoiceResource::class;
+
+    #[On('refreshEditPage')]
+    public function refreshRecord(): void
+    {
+        $this->record->refresh();
+        $this->fillForm();
+    }
 
     public function getTitle(): string | Htmlable
     {
