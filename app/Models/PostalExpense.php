@@ -12,6 +12,7 @@ use App\Enums\VatCodeType;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use setasign\Fpdi\Tcpdf\Fpdi;
@@ -279,32 +280,33 @@ class PostalExpense extends Model
 
     public function notificationInserted()                                              // funzione che controlla la presenza dell'inserimento della notifica
     {
-        return $this->shipmentInserted() &&
-               (!is_null($this->notify_insert_user_id) && !is_null($this->notify_insert_date));
+        // return $this->shipmentInserted() && (!is_null($this->notify_insert_user_id) && !is_null($this->notify_insert_date));
+        return !is_null($this->notify_insert_user_id) && !is_null($this->notify_insert_date);
     }
 
     public function expenseInserted()                                                   // funzione che controlla la presenza dell'inserimento delle spese
     {
-        return $this->notificationInserted() &&
-               (!is_null($this->expense_insert_user_id) && !is_null($this->expense_insert_date));
+        // return $this->notificationInserted() && (!is_null($this->expense_insert_user_id) && !is_null($this->expense_insert_date));
+        return !is_null($this->expense_insert_user_id) && !is_null($this->expense_insert_date);
     }
 
     public function paymentInserted()                                                   // funzione che controlla la presenza dell'inserimento dei pagamenti
     {
-        return $this->expenseInserted() &&
-               (!is_null($this->payment_insert_user_id) && !is_null($this->payment_insert_date));
+        // return ($this->expenseInserted() || (!str_contains(strtolower($this->shipmentType?->name), ShipmentDocType::SPEDIZIONE->getShipmentType()) &&
+        //      $this->shipment_insert_user_id && $this->shipment_insert_date)) && (!is_null($this->payment_insert_user_id) && !is_null($this->payment_insert_date));
+        return !is_null($this->payment_insert_user_id) && !is_null($this->payment_insert_date);
     }
 
     public function reinvoiceInserted()                                                 // funzione che controlla la presenza dell'inserimento della rifatturazione
     {
-        return $this->paymentInserted() &&
-               (!is_null($this->reinvoice_insert_user_id) && !is_null($this->reinvoice_insert_date));
+        // return $this->paymentInserted() && (!is_null($this->reinvoice_insert_user_id) && !is_null($this->reinvoice_insert_date));
+        return !is_null($this->reinvoice_insert_user_id) && !is_null($this->reinvoice_insert_date);
     }
 
     public function reinvoiceRegistered()                                               // funzione che controlla la presenza della registrazione della rifatturazione
     {
-        return $this->reinvoiceInserted() &&
-               (!is_null($this->reinvoice_registration_user_id) && !is_null($this->reinvoice_registration_date));
+        // return $this->reinvoiceInserted() && (!is_null($this->reinvoice_registration_user_id) && !is_null($this->reinvoice_registration_date));
+        return !is_null($this->reinvoice_registration_user_id) && !is_null($this->reinvoice_registration_date);
     }
 
     protected static function booted()
@@ -361,21 +363,22 @@ class PostalExpense extends Model
             // }
             // dd($expense->notify_attachment_path);
             // avanzamento
-            if ($expense->reinvoiceInserted() && ($expense->notify_date_registration_date || $expense->reinvoice_attachment_path)) {
+
+            // if ($expense->reinvoiceInserted() && ($expense->notify_date_registration_date || $expense->reinvoice_attachment_path)) {
+            if ($expense->reinvoiceInserted()) {
                 PostalExpense::withoutEvents(function () use ($expense) {
                     $expense->reinvoice_registration_user_id = Auth::id();
                     $expense->reinvoice_registration_date = today();
                 });
             }
             else if((($expense->notify_type === NotifyType::SPEDIZIONE && $expense->paymentInserted()) ||                       // è un a spedizione ed è stato inserito il pagamento
-                     ($expense->notify_type === NotifyType::MESSO && $expense->notificationInserted())) &&                      // è un messo ed è stata inserita la notifica
-                     $expense->reinvoice_id){                                                                                   // è stata selezionata una fattura per la rifatturazione
+                     ($expense->notify_type === NotifyType::MESSO && $expense->notificationInserted()))){                       // è un messo ed è stata inserita la notifica
                 PostalExpense::withoutEvents(function () use ($expense) {
                     $expense->reinvoice_insert_user_id = Auth::id();
                     $expense->reinvoice_insert_date = today();
                 });
             }
-            else if($expense->expenseInserted()){
+            else if($expense->expenseInserted() || (!str_contains(strtolower($expense->shipmentType?->name), ShipmentDocType::SPEDIZIONE->getShipmentType()) && $expense->notificationInserted())){
                 PostalExpense::withoutEvents(function () use ($expense) {
                     $expense->payment_insert_user_id = Auth::id();
                     $expense->payment_insert_date = today();
@@ -559,7 +562,7 @@ class PostalExpense extends Model
                     if (!empty($path) && $disk->exists($path)) {
                         $cleanPaths[] = $path;
                     } else {
-                        \Log::warning("File ACT rimosso perché non esiste più", ['path' => $path]);
+                        Log::warning("File ACT rimosso perché non esiste più", ['path' => $path]);
                     }
                 }
 
@@ -581,7 +584,7 @@ class PostalExpense extends Model
                     if (!empty($path) && $disk->exists($path)) {
                         $cleanPaths[] = $path;
                     } else {
-                        \Log::warning("File rimosso perché non esiste più", ['path' => $path]);
+                        Log::warning("File rimosso perché non esiste più", ['path' => $path]);
                     }
                 }
 
@@ -705,12 +708,12 @@ class PostalExpense extends Model
             if (!empty($path) && $disk->exists($path)) {
                 $validPaths[] = $path;
             } else {
-                \Log::warning("File ACT ignorato (non esiste)", ['path' => $path]);
+                Log::warning("File ACT ignorato (non esiste)", ['path' => $path]);
             }
         }
 
         if (empty($validPaths)) {
-            \Log::warning('Nessun file ACT valido dopo pulizia');
+            Log::warning('Nessun file ACT valido dopo pulizia');
             return null;
         }
 
@@ -718,7 +721,7 @@ class PostalExpense extends Model
             $pdf = new Fpdi();
             $processedCount = 0;
 
-            \Log::info('=== PROCESSAMENTO ACT PDF INIZIATO ===', [
+            Log::info('=== PROCESSAMENTO ACT PDF INIZIATO ===', [
                 'input_count' => count($paths),
                 'valid_count' => count($validPaths)
             ]);
@@ -728,7 +731,7 @@ class PostalExpense extends Model
 
                 try {
                     $pageCount = $pdf->setSourceFile($fullPath);
-                    \Log::info("→ Importando {$pageCount} pagine ACT da: {$path}");
+                    Log::info("→ Importando {$pageCount} pagine ACT da: {$path}");
 
                     for ($i = 1; $i <= $pageCount; $i++) {
                         $tplIdx = $pdf->importPage($i);
@@ -739,7 +742,7 @@ class PostalExpense extends Model
                     }
                     $processedCount++;
                 } catch (\Exception $e) {
-                    \Log::error("Errore importazione ACT {$path}", ['error' => $e->getMessage()]);
+                    Log::error("Errore importazione ACT {$path}", ['error' => $e->getMessage()]);
                     continue;
                 }
             }
@@ -768,7 +771,7 @@ class PostalExpense extends Model
 
             $pdf->Output($fullFinalPath, 'F');
 
-            \Log::info('✅ ACT PDF salvato e rinominato', [
+            Log::info('✅ ACT PDF salvato e rinominato', [
                 'final_path' => $finalPath,
                 'was_single' => count($validPaths) === 1
             ]);
@@ -783,7 +786,7 @@ class PostalExpense extends Model
             return $finalPath;
 
         } catch (\Exception $e) {
-            \Log::error('Errore critico in mergeActPdfFiles', ['message' => $e->getMessage()]);
+            Log::error('Errore critico in mergeActPdfFiles', ['message' => $e->getMessage()]);
             return reset($validPaths) ?? null;
         }
     }
@@ -806,12 +809,12 @@ class PostalExpense extends Model
             if (!empty($path) && $disk->exists($path)) {
                 $validPaths[] = $path;
             } else {
-                \Log::warning("File ignorato (non esiste)", ['path' => $path]);
+                Log::warning("File ignorato (non esiste)", ['path' => $path]);
             }
         }
 
         if (empty($validPaths)) {
-            \Log::warning('Nessun file valido dopo pulizia');
+            Log::warning('Nessun file valido dopo pulizia');
             return null;
         }
 
@@ -819,7 +822,7 @@ class PostalExpense extends Model
             $pdf = new Fpdi();
             $processedCount = 0;
 
-            \Log::info('=== PROCESSAMENTO PDF INIZIATO ===', [
+            Log::info('=== PROCESSAMENTO PDF INIZIATO ===', [
                 'input_count' => count($paths),
                 'valid_count' => count($validPaths)
             ]);
@@ -829,7 +832,7 @@ class PostalExpense extends Model
 
                 try {
                     $pageCount = $pdf->setSourceFile($fullPath);
-                    \Log::info("→ Importando {$pageCount} pagine da: {$path}");
+                    Log::info("→ Importando {$pageCount} pagine da: {$path}");
 
                     for ($i = 1; $i <= $pageCount; $i++) {
                         $tplIdx = $pdf->importPage($i);
@@ -840,7 +843,7 @@ class PostalExpense extends Model
                     }
                     $processedCount++;
                 } catch (\Exception $e) {
-                    \Log::error("Errore importazione {$path}", ['error' => $e->getMessage()]);
+                    Log::error("Errore importazione {$path}", ['error' => $e->getMessage()]);
                     continue;
                 }
             }
@@ -870,7 +873,7 @@ class PostalExpense extends Model
 
             $pdf->Output($fullFinalPath, 'F');
 
-            \Log::info('✅ PDF salvato e rinominato', [
+            Log::info('✅ PDF salvato e rinominato', [
                 'final_path' => $finalPath,
                 'was_single' => count($validPaths) === 1
             ]);
@@ -885,7 +888,7 @@ class PostalExpense extends Model
             return $finalPath;
 
         } catch (\Exception $e) {
-            \Log::error('Errore critico in mergeNotifyPdfFiles', ['message' => $e->getMessage()]);
+            Log::error('Errore critico in mergeNotifyPdfFiles', ['message' => $e->getMessage()]);
             return reset($validPaths) ?? null;
         }
     }

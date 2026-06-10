@@ -22,11 +22,8 @@ class ExpenseSection
             ->icon('heroicon-o-currency-euro')
             ->collapsed(fn($record): bool => $record && $record->expenseInserted())
             ->visible(function(Get $get, $record){
-                $shipmentType = ShipmentType::find($get('shipment_type_id'));
-                return $record &&
-                        ($record->notify_insert_user_id && $record->notify_insert_date) &&
-                        ($get('notify_type') === NotifyType::SPEDIZIONE->value &&
-                        str_contains(strtolower($shipmentType?->name), ShipmentDocType::SPEDIZIONE->getShipmentType()));
+                return $record && $record->notificationInserted() &&
+                        ($get('notify_type') === NotifyType::SPEDIZIONE->value && str_contains(strtolower($record->shipmentType?->name), ShipmentDocType::SPEDIZIONE->getShipmentType()));
             })
             ->schema([
                 self::passiveInvoiceField(),

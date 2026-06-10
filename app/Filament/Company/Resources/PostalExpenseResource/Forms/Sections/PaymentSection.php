@@ -137,10 +137,7 @@ class PaymentSection
 
     private static function show($record): bool
     {
-        $shipmentType = ShipmentType::find($record->shipment_type_id);
         return $record &&
-            (($record->expense_insert_user_id && $record->expense_insert_date) ||
-            (!str_contains(strtolower($shipmentType?->name), ShipmentDocType::SPEDIZIONE->getShipmentType()) &&
-             $record->shipment_insert_user_id && $record->shipment_insert_date));
+            ($record->expenseInserted() || (!str_contains(strtolower($record->shipmentType?->name), ShipmentDocType::SPEDIZIONE->getShipmentType()) && $record->notificationInserted()));
     }
 }

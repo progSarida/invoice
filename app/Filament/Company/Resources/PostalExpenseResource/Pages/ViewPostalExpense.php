@@ -39,13 +39,13 @@ class ViewPostalExpense extends ViewRecord
                 ->url($this->getResource()::getUrl('index'))
                 ->color('gray'),
             Actions\Action::make('previous_expense')
-                ->label('Inizio prec.')
+                ->label('Atto prec.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-left-circle')
                 ->visible(fn() => $previousSBail !== null)
                 ->action(fn() => $this->redirect(PostalExpenseResource::getUrl('view', ['record' => $previousSBail->id]))),
             Actions\Action::make('next_expense')
-                ->label('Inizio succ.')
+                ->label('Atto succ.')
                 ->color('info')
                 ->icon('heroicon-o-arrow-right-circle')
                 ->visible(fn() => $nextSBail !== null)

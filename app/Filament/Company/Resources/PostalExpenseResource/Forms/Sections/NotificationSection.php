@@ -18,7 +18,7 @@ class NotificationSection
         return Forms\Components\Section::make('Dati relativi alla lavorazione/notifica richiesta ed effettuata dal fornitore incaricato')
             ->icon('heroicon-o-bell-alert')
             ->collapsed(fn($record): bool => $record && $record->notificationInserted())
-            ->visible(fn($record): bool => $record && ($record->shipment_insert_user_id && $record->shipment_insert_date))
+            ->visible(fn($record): bool => $record && $record->shipmentInserted())
             ->schema([
                 self::orderRifField(),
                 self::receiveProtocolNumberField(),
