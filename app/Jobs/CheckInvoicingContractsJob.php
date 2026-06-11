@@ -6,6 +6,7 @@ use App\Enums\ClientType;
 use App\Models\User;
 use App\Models\NewContract;
 use App\Enums\InvoicingCicle;
+use App\Models\BankAccount;
 use App\Models\Invoice;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
@@ -103,26 +104,28 @@ Log::info("TEST");
 
         foreach ($contracts as $contract) {                                                     // per ogni contratto calcoliamo le informazioni aggiuntive
 
+            $lastInvoice = Invoice::where('contract_id', $contract->id)                     // trovo l'ultima fattura
+                ->where('flow', 'out')
+                ->orderBy('invoice_date', 'desc')
+                ->first();
+            $notRound = BankAccount::find($lastInvoice?->bank_account_id)?->name != 'Giroconto';
+
             $query = Invoice::where('contract_id', $contract->id)                               // calcolo il totale fatturato
                 ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
-            if($contract->client->type == ClientType::PUBLIC)
+            if($contract->client?->type == ClientType::PUBLIC && $notRound)
                 $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
             else
                 $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
 
             if ($contract->amount > $totalInvoiced) {                                           // verifico se il contratto soddisfa la condizione
-
-                $lastInvoice = Invoice::where('contract_id', $contract->id)                     // trovo l'ultima fattura
-                    ->where('flow', 'out')
-                    ->orderBy('invoice_date', 'desc')
-                    ->first();
                                                                                                 // aggiungo i dati calcolati al contratto
                 $contract->total_invoiced = $totalInvoiced;                                     // totale fatturato
                 $contract->last_invoice_date = $lastInvoice?->invoice_date;                     // data ultima fattura
                 $contract->last_invoice_number = $lastInvoice?->number;                         // numero ultima fattura
                 $contract->last_invoice_sectional_id = $lastInvoice?->sectional_id;             // sezionario ultima fattura
                 $contract->last_invoice_year = $lastInvoice?->year;                             // anno ultima fattura
-                if($contract->client?->type?->value == 'public')
+
+                if($contract->client?->type?->value == 'public' && $notRound)
                     $contract->last_invoice_total = $lastInvoice?->no_vat_total;                // totale senza iva ultima fattura
                 else
                     $contract->last_invoice_total = $lastInvoice?->total;                       // totale ultima fattura

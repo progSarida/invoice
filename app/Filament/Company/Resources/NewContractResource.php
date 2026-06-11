@@ -33,6 +33,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Company\Resources\NewContractResource\Pages;
 use App\Filament\Company\Resources\NewContractResource\RelationManagers\ContractDetailsRelationManager;
+use App\Models\BankAccount;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -429,9 +430,10 @@ class NewContractResource extends Resource
                     ->label('Fatturato')
                     ->sortable()
                     ->state(function ($record) {
+                        $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
                         $query = Invoice::where('contract_id', $record->id)                                 // calcolo il totale fatturato
                             ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
-                        if($record->client->type == ClientType::PUBLIC)
+                        if($record->client?->type == ClientType::PUBLIC && $notRound)
                             $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
                         else
                             $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva

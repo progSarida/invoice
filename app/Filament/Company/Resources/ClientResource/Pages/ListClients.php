@@ -16,6 +16,7 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Company\Resources\ClientResource;
 use App\Filament\Exports\ClientExporter;
+use App\Models\BankAccount;
 use App\Models\Client;
 use App\Models\ManageType;
 use Filament\Forms\Components\Checkbox;
@@ -207,7 +208,8 @@ class ListClients extends ListRecords
                         $param[$index]['num_doc'] = $invoice->invoiceNumber();
                         $param[$index]['data_doc'] = \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y');
                         $param[$index]['desc'] = $invoice->description;
-                        $amount = $invoice->client?->type?->value == 'public' ? $invoice->no_vat_total : $invoice->total;
+                        $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+                        $amount = ($invoice->client?->type?->value == 'public' && $notRound) ? $invoice->no_vat_total : $invoice->total;
                         switch($invoice->docType->name) {
                             case 'TD02':                                                                                // acconti/anticipi su fattura
                                 // $saldo -= $amount;

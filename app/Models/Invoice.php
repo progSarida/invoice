@@ -205,7 +205,8 @@ class Invoice extends Model
         $no_vat_total = floatval($this->no_vat_total ?? 0);
         $totalPayment = floatval($this->total_payment ?? 0);
         $totalNotes = floatval($this->total_notes ?? 0);
-        if($this->client->type->value == 'public')
+        $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
+        if($this->client?->type?->value == 'public' && $notRound)
             return $no_vat_total - ($totalPayment + $totalNotes);
         else
             return $total - ($totalPayment + $totalNotes);
@@ -306,7 +307,8 @@ class Invoice extends Model
     // Aggiorna il totale della note di credito riferite alla fattura
     public function updateTotalNotes(): void
     {
-        if($this->client->type->value == 'public')
+        $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
+        if($this->client?->type?->value == 'public' && $notRound)
             $total = $this->creditNotes()->sum('no_vat_total');
         else
             $total = $this->creditNotes()->sum('total');
@@ -434,12 +436,13 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
 
         foreach ($items as $item) {
             $rate = $item->vat_code_type->value;
+            $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
             if (!isset($vats[$rate])) {
                 $vats[$rate] = [
                     'norm' => $item->vat_code_type->getRate() == '0'
                                 // ? 'ART. 15 DPR 633/72'
                                 ? $item->vat_code_type->getNorm()
-                                : ($this->client?->type?->value == 'public'
+                                : (($this->client?->type?->value == 'public' && $notRound)
                                     ? 'S (scissione dei pagamenti)'
                                     : (($this->company->fiscalProfile->tax_regime->value == 'rf16' || $this->company->fiscalProfile->tax_regime->value == 'rf17')
                                         ? 'D (esigibilità differita)'
@@ -706,10 +709,11 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
 
         $contract = $invoice->contract;
         if (!$contract) return;
+        $notRound = BankAccount::find($invoice->bank_account_id)?->name != 'Giroconto';
 
         $query = Invoice::where('contract_id', $contract->id)                               // calcolo il totale fatturato
             ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
-        if($contract->client->type == ClientType::PUBLIC)
+        if($contract->client?->type == ClientType::PUBLIC && $notRound)
             $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
         else
             $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva

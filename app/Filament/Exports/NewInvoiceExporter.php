@@ -2,26 +2,54 @@
 
 namespace App\Filament\Exports;
 
+use App\Models\BankAccount;
 use App\Models\Invoice;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Livewire\Component;
 
 class NewInvoiceExporter extends Exporter
 {
     protected static ?string $model = Invoice::class;
 
-    public static function getColumns(): array
+    public function getCachedColumns(): array
     {
-        $maxItems = Invoice::withCount('invoiceItems')
-                        ->where('flow', 'out')
-                        ->orderBy('invoice_items_count', 'desc')
-                        ->limit(1)
-                        ->value('invoice_items_count') ?? 0;
+        if (isset($this->cachedColumns)) {
+            return $this->cachedColumns;
+        }
+
+        $maxItems = collect($this->columnMap)
+            ->keys()
+            ->filter(fn($key) => str_starts_with($key, 'item_') && str_ends_with($key, '_description'))
+            ->count();
+
+        if ($maxItems === 0) {
+            $maxItems = (int) ($this->options['max_items'] ?? 0);
+        }
+
+        return $this->cachedColumns = array_reduce(
+            static::getColumns($maxItems),
+            function (array $carry, ExportColumn $column): array {
+                $carry[$column->getName()] = $column->exporter($this);
+                return $carry;
+            },
+            []
+        );
+    }
+
+    /**
+     * Il metodo statico riceve il parametro calcolato a monte e genera la struttura
+     */
+    public static function getColumns(int $maxItems = 0): array
+    {
+        // $maxItems = Invoice::withCount('invoiceItems')
+        //                 ->where('flow', 'out')
+        //                 ->orderBy('invoice_items_count', 'desc')
+        //                 ->limit(1)
+        //                 ->value('invoice_items_count') ?? 0;
 
         $invoiceItemColumns = [];
-
-
 
         for ($i = 0; $i < $maxItems; $i++) {
             $labelPrefix = 'Voce ' . ($i + 1);
@@ -69,7 +97,7 @@ class NewInvoiceExporter extends Exporter
                 });
         }
 
-        return [
+        $output = [
             ExportColumn::make('id')
                 ->label('#'),
             ExportColumn::make('company.name')
@@ -79,8 +107,13 @@ class NewInvoiceExporter extends Exporter
                 ->label('Cliente'),
             // ExportColumn::make('tender_id'),
             ExportColumn::make('parent_id')
-                ->label('#')
-                ->enabledByDefault(false),
+                ->label('Fattura stornata')
+                ->enabledByDefault(false)
+                ->formatStateUsing(function ($record) {
+                    if(!$record->flow) $parent = $record->InvoiceNumber();
+                    else $parent = $record->getNewInvoiceNumber();
+                    return $parent ?? 'N\A';
+                }),
             ExportColumn::make('check_validation')
                 ->label('Validata')
                 ->formatStateUsing(fn ($state) => $state == 'Y' ? 'SI' : 'NO'),
@@ -142,12 +175,24 @@ class NewInvoiceExporter extends Exporter
                 ->formatStateUsing(function ($record) {
                     // Usa 'total' se il cliente è pubblico, altrimenti 'no_vat_total'
                     $value = 0;
+                    $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
                     if(!$record->parent_id){
-                        $value = $record->client?->isPublic()
-                            ? $record->total
-                            : $record->no_vat_total;
+                        $value = ($record->client?->type?->value == 'public' && $notRound)
+                            ? $record->no_vat_total
+                            : $record->total;
                     }
                     return is_numeric($value) ? number_format($value, 2, ',', '') : $value;
+                }),
+            ExportColumn::make('receive')
+                ->label('Totale a doversi')
+                ->formatStateUsing(function ($record) {
+                    $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
+                    if($record->client?->type?->value == 'public' && $notRound)
+                        $output = (float) $record->no_vat_total;
+                    else
+                        $output = (float) $record->total;
+                    if($record->docType?->name === 'TD04'){ $output = (float) 0.00;}
+                    return (float) number_format($output, 2, '.', '');
                 }),
             // ExportColumn::make('no_vat_total')
             //     ->label('Totale senza IVA'),
@@ -164,12 +209,23 @@ class NewInvoiceExporter extends Exporter
             ExportColumn::make('total_payment')
                 ->label('Totale pagamenti')
                 ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '') : $state),
-            ExportColumn::make('total_notes')
-                ->label('Totale note di credito')
-                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '') : $state),
             ExportColumn::make('last_payment_date')
                 ->label('Data ultimo pagamento')
                 ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : null),
+            ExportColumn::make('total_notes')
+                ->label('Totale note di credito')
+                ->formatStateUsing(fn ($state) => is_numeric($state) ? number_format($state, 2, ',', '') : $state),
+            ExportColumn::make('residue')
+                ->label('Residuo')
+                ->formatStateUsing(function ($record) {
+                    $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
+                    if($record->client?->type?->value == 'public' && $notRound)
+                        $output = (float) $record->no_vat_total - ($record->total_notes + $record->total_payment);
+                    else
+                        $output = (float) $record->total - ($record->total_notes + $record->total_payment);
+                    if($record->docType?->name === 'TD04'){ $output = (float) 0.00;}
+                    return (float) number_format($output, 2, '.', '');
+                }),
             ExportColumn::make('sdi_code')
                 ->label('Codice SDI'),
             ExportColumn::make('sdi_status')
@@ -185,6 +241,8 @@ class NewInvoiceExporter extends Exporter
             ExportColumn::make('created_at')->enabledByDefault(false),
             ExportColumn::make('updated_at')->enabledByDefault(false),
         ];
+
+        return $output;
     }
 
     // public static function getCompletedNotificationBody(Export $export): string

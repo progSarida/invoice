@@ -89,14 +89,14 @@ class ActivePayments extends Model
             if ($payment->invoice) {
                 $invoice = $payment->invoice;
                 $invoice->total_payment += $payment->amount;
-
+                $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
                 if ( is_null($invoice->last_payment_date) || $invoice->last_payment_date < $payment->payment_date ) {
                     $invoice->last_payment_date = $payment->payment_date;
                 }
                 $invoice->save();
                 $residue = $invoice->getResidue();
                 if ($residue == 0){ $invoice->payment_status = PaymentStatus::PAIED; }
-                else if ($invoice->client->type->value == 'public') {
+                else if ($invoice->client?->type?->value == 'public' && $notRound) {
                     if($residue < $invoice->no_vat_total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
                 }
                 else {
@@ -117,9 +117,10 @@ class ActivePayments extends Model
                 $invoice = $payment->invoice;
                 $invoice->total_payment = $invoice->total_payment - $originalAmount + $payment->amount;
                 $invoice->save();
+                $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
                 $residue = $invoice->getResidue();
                 if ($residue == 0){ $invoice->payment_status = PaymentStatus::PAIED; }
-                else if ($invoice->client->type->value == 'public') {
+                else if ($invoice->client?->type?->value == 'public' && $notRound) {
                     if($residue < $invoice->no_vat_total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
                 }
                 else {
@@ -146,9 +147,10 @@ class ActivePayments extends Model
                 $invoice = $payment->invoice;
                 $invoice->total_payment -= $payment->amount;
                 $invoice->save();
+                $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
                 $residue = $invoice->getResidue();
                 if ($residue == 0){ $invoice->payment_status = PaymentStatus::PAIED; }
-                else if ($invoice->client->type->value == 'public') {
+                else if ($invoice->client?->type?->value == 'public' && $notRound) {
                     if($residue < $invoice->no_vat_total) { $invoice->payment_status = PaymentStatus::PARTIAL; }
                     else { $invoice->payment_status = PaymentStatus::WAITING;}
                 }

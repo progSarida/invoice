@@ -4,6 +4,7 @@ namespace App\Filament\Company\Resources\PostalExpenseResource\Forms\Sections;
 
 use App\Enums\ClientType;
 use App\Enums\NotifyType;
+use App\Models\BankAccount;
 use App\Models\Invoice;
 use Filament\Forms;
 use Filament\Forms\Get;
@@ -113,10 +114,12 @@ class ReinvoiceSection
                     if ($invoice) {
                         $set('reinvoice_number', $invoice->number);
                         $set('reinvoice_date', $invoice->invoice_date->format('Y-m-d'));
-                        if($invoice->client->type == ClientType::PUBLIC)
+                        $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+                        if($invoice->client?->type == ClientType::PUBLIC && $notRound){
                             $invoiceTot = $invoice->no_vat_total;
-                        elseif($invoice->client->type == ClientType::PUBLIC)
+                        } else {
                             $invoiceTot = $invoice->total;
+                        }
                         $notifyAmount = (float) str_replace(['.', ','], ['', '.'], $get('notify_amount'));
                         // $expenseAmount = (float) str_replace(['.', ','], ['', '.'], $get('notify_expense_amount'));
                         $markAmount = (float) str_replace(['.', ','], ['', '.'], $get('mark_expense_amount'));

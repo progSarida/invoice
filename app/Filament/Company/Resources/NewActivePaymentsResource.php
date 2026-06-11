@@ -8,6 +8,7 @@ use App\Filament\Company\Resources\NewActivePaymentsResource\Pages;
 use App\Filament\Company\Resources\NewActivePaymentsResource\RelationManagers;
 use App\Models\AccrualType;
 use App\Models\ActivePayments;
+use App\Models\BankAccount;
 use App\Models\Invoice;
 use App\Models\NewActivePayments;
 use App\Models\Sectional;
@@ -183,7 +184,8 @@ class NewActivePaymentsResource extends Resource
                     ->afterStateUpdated(function(Set $set, $state) {
                         if ($state) {
                             $invoice = Invoice::find($state);
-                            $amount = $invoice->client->type == ClientType::PUBLIC
+                            $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+                            $amount = ($invoice->client?->type == ClientType::PUBLIC && $notRound)
                                         ? $invoice->no_vat_total - ($invoice->total_payment + $invoice->total_notes)
                                         : $invoice->total - ($invoice->total_payment + $invoice->total_notes);
                             if ($invoice) {
@@ -248,7 +250,8 @@ class NewActivePaymentsResource extends Resource
                         $formatted = number_format($amount, 2, ',', '.');
                         $component->state($formatted);
                         $newTotalPayment = $amount + $invoice->total_payment;
-                        $compare = $invoice->client?->type?->value == 'public'
+                        $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+                        $compare = ($invoice->client?->type?->value == 'public' && $notRound)
                             ? $invoice->no_vat_total
                             : $invoice->total;
                         if($amount != $compare){

@@ -3,6 +3,7 @@
 namespace App\Filament\Exports;
 
 use App\Enums\TaxType;
+use App\Models\BankAccount;
 use App\Models\Invoice;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
@@ -22,6 +23,14 @@ class NewInvoiceExporterSimple extends Exporter
             ExportColumn::make('doc_type_id')
                 ->label('Tipo')
                 ->formatStateUsing(fn ($record) => $record->docType?->description),
+            ExportColumn::make('parent_id')
+                ->label('Fattura stornata')
+                ->enabledByDefault(false)
+                ->formatStateUsing(function ($record) {
+                    if(!$record->flow) $parent = $record->InvoiceNumber();
+                    else $parent = $record->getNewInvoiceNumber();
+                    return $parent ?? 'N\A';
+                }),
             ExportColumn::make('invoice_number')
                 ->label('Numero')
                 ->formatStateUsing(function ($record) {
@@ -67,7 +76,8 @@ class NewInvoiceExporterSimple extends Exporter
             ExportColumn::make('receive')
                 ->label('Totale a doversi')
                 ->formatStateUsing(function ($record) {
-                    if($record->client->type->value == 'public')
+                    $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
+                    if($record->client?->type?->value == 'public' && $notRound)
                         $output = (float) $record->no_vat_total;
                     else
                         $output = (float) $record->total;
@@ -75,13 +85,19 @@ class NewInvoiceExporterSimple extends Exporter
                     return (float) number_format($output, 2, '.', '');
                 }),
             ExportColumn::make('total_payment')
-                ->label('Totale pagamenti'),
+                ->label('Totale pagamenti')
+                ->formatStateUsing(function ($record, $state) {
+                    $output = $state;
+                    if($record->docType?->name === 'TD04'){ $output = (float) 0.00;}
+                    return (float) number_format($output, 2, '.', '');
+                }),
             ExportColumn::make('total_notes')
                 ->label('Totale note di credito'),
             ExportColumn::make('residue')
                 ->label('Residuo')
                 ->formatStateUsing(function ($record) {
-                    if($record->client->type->value == 'public')
+                    $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
+                    if($record->client?->type?->value == 'public' && $notRound)
                         $output = (float) $record->no_vat_total - ($record->total_notes + $record->total_payment);
                     else
                         $output = (float) $record->total - ($record->total_notes + $record->total_payment);

@@ -60,7 +60,9 @@
     }
 
     use App\Enums\ClientType;
-    $split = $invoice->client->type == ClientType::PUBLIC;
+    use App\Models\BankAccount;
+    $notRound = BankAccount::find($invoice->bank_account_id)?->name != 'Giroconto';
+    $split = $invoice->client?->type == ClientType::PUBLIC && $notRound;
 
     $fullTotal = 0;
     $vattedTotal = 0;
@@ -400,7 +402,7 @@
         </tr>
         @php
             $split = false;
-            if($invoice->client->type == \App\Enums\ClientType::PUBLIC){
+            if($invoice->client->type == \App\Enums\ClientType::PUBLIC && $notRound){
                 $totalPay = $invoice->no_vat_total;
                 $split = true;
             }
@@ -430,7 +432,7 @@
         @php
         // dd($invoice->company->stampDuty->virtual_stamp && $stamp);
             // use App\Enums\ClientType;
-            // $split = $invoice->client->type == ClientType::PUBLIC;
+            // $split = $invoice->client?->type == ClientType::PUBLIC;
         @endphp
         <tr>
             <td colspan="5" class="note">{{ $split ? 'Iva da versare a cura del concessionario o committente ai sensi dell\'art. 17 - ter del D.P.N.R. Nr 633/1972' : ''}}</td>

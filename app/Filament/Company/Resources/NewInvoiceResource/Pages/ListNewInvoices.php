@@ -22,6 +22,8 @@ use Filament\Resources\Pages\ListRecords;
 use App\Filament\Exports\NewInvoiceExporter;
 use App\Filament\Exports\NewInvoiceExporterSimple;
 use App\Filament\Company\Resources\NewInvoiceResource;
+use App\Jobs\CustomExportCsv;
+use App\Models\BankAccount;
 use App\Models\Client;
 use App\Models\DocType;
 use App\Models\ManageType;
@@ -134,19 +136,75 @@ class ListNewInvoices extends ListRecords
                         }, $fileName);
                 })
                 ->keyBindings(['alt+s']),
+
+            // ExportAction::make('esporta_f')
+            //     ->icon('phosphor-export')
+            //     ->label('Esporta (Completa)')
+            //     ->color(Color::rgb('rgb(0, 153, 0)'))
+            //     ->exporter(NewInvoiceExporter::class)
+            //     ->modalWidth(MaxWidth::FitContent)
+            //     ->keyBindings(['alt+e'])
+            //     // Posizionamento checkbox campi da esportare su quattro colonne
+            //     ->form(fn (ExportAction $action): array => [
+            //         \Filament\Forms\Components\Fieldset::make(__('filament-actions::export.modal.form.columns.label'))
+            //             ->columns(4)  // <-- qui il cambiamento
+            //             ->inlineLabel()
+            //             ->schema(function () use ($action): array {
+            //                 return array_map(
+            //                     fn (\Filament\Actions\Exports\ExportColumn $column): \Filament\Forms\Components\Split => \Filament\Forms\Components\Split::make([
+            //                         \Filament\Forms\Components\Checkbox::make('isEnabled')
+            //                             ->label(__('filament-actions::export.modal.form.columns.form.is_enabled.label', ['column' => $column->getName()]))
+            //                             ->hiddenLabel()
+            //                             ->default($column->isEnabledByDefault())
+            //                             ->live()
+            //                             ->grow(false),
+            //                         \Filament\Forms\Components\TextInput::make('label')
+            //                             ->label(__('filament-actions::export.modal.form.columns.form.label.label', ['column' => $column->getName()]))
+            //                             ->hiddenLabel()
+            //                             ->default($column->getLabel())
+            //                             ->placeholder($column->getLabel())
+            //                             ->disabled(fn (\Filament\Forms\Get $get): bool => ! $get('isEnabled'))
+            //                             ->required(fn (\Filament\Forms\Get $get): bool => (bool) $get('isEnabled')),
+            //                     ])
+            //                         ->verticallyAlignCenter()
+            //                         ->statePath($column->getName()),
+            //                     $action->getExporter()::getColumns(),
+            //                 );
+            //             })
+            //             ->statePath('columnMap'),
+            //         ...$action->getExporter()::getOptionsFormComponents(),
+            //     ]),
+
             ExportAction::make('esporta_f')
                 ->icon('phosphor-export')
                 ->label('Esporta (Completa)')
                 ->color(Color::rgb('rgb(0, 153, 0)'))
                 ->exporter(NewInvoiceExporter::class)
+                ->options(function ($livewire) {
+                    $maxItems = 0;
+                    // $list = $livewire->getFilteredTableQuery()->withCount('invoiceItems')->get();
+                    $list = $livewire->getFilteredTableQuery()
+                                ->withCount(['invoiceItems' => function ($query) {
+                                    $query->where('auto', false);
+                                }])
+                                ->get();
+// dd($list);
+                    foreach($list as $el){
+                        if($maxItems < $el->invoice_items_count) $maxItems = $el->invoice_items_count; 
+                    }
+// dd($maxItems);
+                    return [ 'max_items' => (int) $maxItems, ];
+                })
                 ->modalWidth(MaxWidth::FitContent)
                 ->keyBindings(['alt+e'])
-                // Posizionamento checkbox campi da esportare su quattro colonne
                 ->form(fn (ExportAction $action): array => [
                     \Filament\Forms\Components\Fieldset::make(__('filament-actions::export.modal.form.columns.label'))
-                        ->columns(4)  // <-- qui il cambiamento
+                        ->columns(4)
                         ->inlineLabel()
                         ->schema(function () use ($action): array {
+                            $maxItems = $action->getOptions()['max_items'] ?? 0;
+                            $columns = NewInvoiceExporter::getColumns($maxItems);
+
                             return array_map(
                                 fn (\Filament\Actions\Exports\ExportColumn $column): \Filament\Forms\Components\Split => \Filament\Forms\Components\Split::make([
                                     \Filament\Forms\Components\Checkbox::make('isEnabled')
@@ -165,12 +223,13 @@ class ListNewInvoices extends ListRecords
                                 ])
                                     ->verticallyAlignCenter()
                                     ->statePath($column->getName()),
-                                $action->getExporter()::getColumns(),
+                                $columns
                             );
                         })
                         ->statePath('columnMap'),
                     ...$action->getExporter()::getOptionsFormComponents(),
                 ]),
+    
             ExportAction::make('esporta_s')
                 ->icon('phosphor-export')
                 ->label('Esporta (Semplice)')
@@ -208,6 +267,7 @@ class ListNewInvoices extends ListRecords
                         ->statePath('columnMap'),
                     ...$action->getExporter()::getOptionsFormComponents(),
                 ]),
+
             Actions\Action::make('compare')
                 ->icon('fluentui-column-double-compare-20-o')
                 ->label('Comparata')
@@ -351,6 +411,7 @@ class ListNewInvoices extends ListRecords
                         ]),
                 ])
                 ->action(function ($data) {
+                    ini_set('memory_limit', '512M');
                     // Recupero i dati dalla form
                     $clientId = $data['client_id'] ?? null;
                     $taxType = $data['tax_type'] ?? null;
@@ -796,7 +857,8 @@ class ListNewInvoices extends ListRecords
                 $contract->last_invoice_number = $lastInvoice?->number;                         // numero ultima fattura
                 $contract->last_invoice_sectional_id = $lastInvoice?->sectional_id;             // sezionario ultima fattura
                 $contract->last_invoice_year = $lastInvoice?->year;                             // anno ultima fattura
-                if($contract->client?->type?->value == 'public')
+                $notRound = BankAccount::find($lastInvoice?->bank_account_id)?->name != 'Giroconto';
+                if($contract->client?->type?->value == 'public' && $notRound)
                     $contract->last_invoice_total = $lastInvoice?->no_vat_total;                // totale senza iva ultima fattura
                 else
                     $contract->last_invoice_total = $lastInvoice?->total;                       // totale ultima fattura
@@ -828,26 +890,28 @@ class ListNewInvoices extends ListRecords
 
         foreach ($contracts as $contract) {                                                     // per ogni contratto calcoliamo le informazioni aggiuntive
 
+            $lastInvoice = Invoice::where('contract_id', $contract->id)                     // trovo l'ultima fattura
+                ->where('flow', 'out')
+                ->orderBy('invoice_date', 'desc')
+                ->first();
+            $notRound = BankAccount::find($lastInvoice?->bank_account_id)?->name != 'Giroconto';
+
             $query = Invoice::where('contract_id', $contract->id)                               // calcolo il totale fatturato
                 ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
-            if($contract->client->type == ClientType::PUBLIC)
+            if($contract->client?->type == ClientType::PUBLIC && $notRound)
                 $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
             else
                 $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
 
             if ($contract->amount > $totalInvoiced) {                                           // verifico se il contratto soddisfa la condizione
-
-                $lastInvoice = Invoice::where('contract_id', $contract->id)                     // trovo l'ultima fattura
-                    ->where('flow', 'out')
-                    ->orderBy('invoice_date', 'desc')
-                    ->first();
                                                                                                 // aggiungo i dati calcolati al contratto
                 $contract->total_invoiced = $totalInvoiced;                                     // totale fatturato
                 $contract->last_invoice_date = $lastInvoice?->invoice_date;                     // data ultima fattura
                 $contract->last_invoice_number = $lastInvoice?->number;                         // numero ultima fattura
                 $contract->last_invoice_sectional_id = $lastInvoice?->sectional_id;             // sezionario ultima fattura
                 $contract->last_invoice_year = $lastInvoice?->year;                             // anno ultima fattura
-                if($contract->client?->type?->value == 'public')
+
+                if($contract->client?->type?->value == 'public' && $notRound)
                     $contract->last_invoice_total = $lastInvoice?->no_vat_total;                // totale senza iva ultima fattura
                 else
                     $contract->last_invoice_total = $lastInvoice?->total;                       // totale ultima fattura

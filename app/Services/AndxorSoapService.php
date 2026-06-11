@@ -14,6 +14,7 @@ use App\Models\Company;
 use App\Models\Invoice;
 use App\Enums\SdiStatus;
 use App\Enums\WithholdingType;
+use App\Models\BankAccount;
 use App\Models\Client;
 use App\Models\Deadline;
 use App\Models\PassiveDownload;
@@ -334,7 +335,8 @@ Log::info("Recupero dati beni e servizi.");
     private function getDatiPagamento(Invoice $invoice): ?array
     {
 Log::info("Recupero dati pagamento.");
-        $total = $invoice->client->type->value == 'public' ? $invoice->no_vat_total : $invoice->total ;
+        $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+        $total = ($invoice->client->type->value == 'public' && $notRound) ? $invoice->no_vat_total : $invoice->total ;
         return [
             [
                 'CondizioniPagamento' => $this->mapPaymentTypeToCondizioniPagamento($invoice->payment_type->value ?? 'TP02'),
@@ -570,14 +572,14 @@ Log::info("Tentativo invio documento.");
 
             // Creazione array di input
             $payload['Autenticazione'] = $this->getAutenticazione($invoice, $password);
-            $codiceDestinatario = $invoice->client->ipa_code ?? $invoice->contract->office_code ?? null;
-            if($invoice->client->subtype == ClientSubType::MAN || $invoice->client->subtype == ClientSubType::WOMAN){
+            $codiceDestinatario = $invoice->client?->ipa_code ?? $invoice->contract?->office_code ?? null;
+            if($invoice->client?->subtype == ClientSubType::MAN || $invoice->client?->subtype == ClientSubType::WOMAN){
                 $codiceDestinatario = '0000000';
             }
             if (!empty($codiceDestinatario)) {
                 $payload['CodiceDestinatario'] = $this->validateCodiceDestinatario($codiceDestinatario);
             } else {
-                $payload['PECDestinatario'] = $invoice->client->pec;
+                $payload['PECDestinatario'] = $invoice->client?->pec;
             }
 // GESTIRE INVIO A PRIVATI SENZA CodiceDestinatario e PECDestinatario
             $payload['OverrideCedente'] = $this->getOverrideCedente($invoice);
