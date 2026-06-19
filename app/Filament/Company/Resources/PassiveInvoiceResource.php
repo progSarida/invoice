@@ -301,7 +301,7 @@ class PassiveInvoiceResource extends Resource
                                     ->label('Data ultimo pagamento')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->columnSpan(2)
-                                    //  ->disabled()
+                                     ->disabled()
                                     ,
 
                                 Forms\Components\TextInput::make('total_payment')
@@ -310,7 +310,7 @@ class PassiveInvoiceResource extends Resource
                                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : number_format(0, 2, ',', '.'))
                                     ->columnSpan(2)
                                     // ->visible(fn (Get $get) => !is_null($get('bank')))
-                                    //  ->disabled()
+                                     ->disabled()
                                     ,
 
                                 Forms\Components\TextInput::make('bank')
