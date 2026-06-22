@@ -91,9 +91,9 @@ class PassiveItemsRelationManager extends RelationManager
                                     $amount = $quantity * $unit_price;
                                     $set('total_price', $amount);
                                 }
-                                else {
-                                    $set('total_price', 0);
-                                }
+                                // else {
+                                //     $set('total_price', 0);
+                                // }
                             }),
                             // ->live(debounce: 500)
                             // ->debounce(3000),
@@ -144,9 +144,9 @@ class PassiveItemsRelationManager extends RelationManager
                                     $amount = $quantity * $unit_price;
                                     $set('total_price', $amount);
                                 }
-                                else {
-                                    $set('total_price', 0);
-                                }
+                                // else {
+                                //     $set('total_price', 0);
+                                // }
                             })
                             ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                             ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
