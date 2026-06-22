@@ -125,7 +125,7 @@ class EditNewInvoice extends EditRecord
             Actions\ActionGroup::make([
                 Actions\Action::make('duplica_fattura')
                     ->authorize('create')
-                    ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
+                    ->hidden(fn(Invoice $record) => $record->parent_id || $record->sdi_status == SdiStatus::DA_INVIARE|| $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA)
                     ->label('Duplica')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
@@ -260,7 +260,8 @@ Log::info('Commit');
                     }),
 
                 Actions\Action::make('converti_in_fattura')
-                    ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
+                    // ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
+                    ->hidden(fn(Invoice $record) => $record->parent_id || $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA)
                     ->label('Converti in fattura')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
@@ -365,6 +366,9 @@ Log::info('Commit');
                             case 'TD00':
                                 $tipo = 'preavviso';
                                 break;
+                            case 'TD99':
+                                $tipo = 'quadratura';
+                                break;
                             case 'TD01':
                                 $tipo = 'fattura';
                                 break;
@@ -453,7 +457,8 @@ Log::info('Commit');
                                     ->first();
                         $precOk = $prec ? $prec->sdi_status != SdiStatus::DA_INVIARE : true;
                         $noForewarning = $record->docType->name != 'TD00';
-                        return $precOk && $noForewarning;
+                        $noBalance = $record->docType->name != 'TD99';
+                        return $precOk && $noForewarning && $noBalance;
                     })
                     ->action(function (Invoice $record, array $data) {
                         $items = $record->invoiceItems instanceof \Illuminate\Support\Collection
@@ -560,7 +565,7 @@ Log::info('Commit');
                 Actions\Action::make('getStatus')
                     ->label('Aggiorna stato SDI')
                     ->icon('tabler-refresh')
-                    ->visible(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE && $record->docType->name != 'TD00')
+                    ->visible(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE && !($record->docType->name == 'TD00' || $record->docType->name == 'TD99'))
                     ->action(function (Invoice $record, array $data) {
                         // Dispatch del job in background
                         \App\Jobs\UpdateInvoiceSdiStatusJob::dispatch(
@@ -879,7 +884,7 @@ Log::info('Commit');
     {
         return [
             $this->getSaveFormAction()
-                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE || $record->sdi_status == SdiStatus::PREAVVISO)
+                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE || $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA)
                 ->color('success'),
             $this->getCancelFormAction(),
             $this->getResetFormAction(),
@@ -887,6 +892,7 @@ Log::info('Commit');
                 // ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE)
                 ->visible(function (Invoice $record) {
                     $toSend = $record->sdi_status == SdiStatus::DA_INVIARE;
+                    $last = false;
                     if ($record->art73) {
                         $maxNumber = Invoice::where('invoice_date', $record->invoice_date)
                             ->where('art_73', true)
@@ -901,7 +907,7 @@ Log::info('Commit');
                             ->max('number');
                         $last = $maxNumber == $record->number;
                     }
-                    return ($toSend && $last) || $record->sdi_status == SdiStatus::PREAVVISO;
+                    return ($toSend && $last) || $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA;
                 })
                 ->extraAttributes([
                     'class' => ' md:ml-auto md:w-auto ',

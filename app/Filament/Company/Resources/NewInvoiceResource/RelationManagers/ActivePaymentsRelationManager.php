@@ -223,6 +223,7 @@ class ActivePaymentsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->modalHeading('Crea nuovo pagamento')
+                    ->visible(fn ($livewire) => $livewire->getOwnerRecord()?->docType?->name !== 'TD00' && $livewire->getOwnerRecord()?->docType?->name !== 'TD04')
                     ->after(fn () => $this->dispatch('refreshEditPage'))
                     ->modalWidth('6xl'),
             ])

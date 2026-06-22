@@ -198,7 +198,7 @@ class Invoice extends Model
         return str_replace('/', '_', $number);
     }
 
-    // Calcola il totale a doversi da mostrare in tabella
+    // Calcola il residuo da mostrare in tabella
     public function getResidue()
     {
         $total = floatval($this->total ?? 0);
@@ -210,6 +210,19 @@ class Invoice extends Model
             return $no_vat_total - ($totalPayment + $totalNotes);
         else
             return $total - ($totalPayment + $totalNotes);
+    }
+
+    // Calcola il totale a doversi da mostrare in tabella
+    public function getOwned()
+    {
+        $total = floatval($this->total ?? 0);
+        $no_vat_total = floatval($this->no_vat_total ?? 0);
+        $totalNotes = floatval($this->total_notes ?? 0);
+        $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
+        if($this->client?->type?->value == 'public' && $notRound)
+            return $no_vat_total - $totalNotes;
+        else
+            return $total - $totalNotes;
     }
 
     // controlla se la fattura ha la voce dell'imposta di bollo
@@ -323,6 +336,13 @@ class Invoice extends Model
             // $invoice->contract_detail_id = $invoice->updatedContract()?->id; // Cristallizza nella fattura lo stato dei dettagli del contratto
             $invoice->flow = 'out';                                         // Indica che la fattura è in uscita (attiva)
             // $invoice->user_id = Auth::id();                                 // Registro l'utente che crea la fattura
+            if ($invoice->docType?->name == 'TD00') {
+                $invoice->sdi_status = SdiStatus::PREAVVISO;
+            }
+            
+            if ($invoice->docType?->name == 'TD99') {
+                $invoice->sdi_status = SdiStatus::QUADRATURA;
+            }
         });
 
         static::created(function ($invoice) {
@@ -362,11 +382,17 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
                 }
             }
 
-            if($invoice->number == 0){                                         // Se è preavviso
-                $invoice->update([
-                    'sdi_status' => SdiStatus::PREAVVISO,
-                ]);
-            }
+            // if($invoice->docType?->name == 'TD00'){                                         // Se è preavviso
+            //     $invoice->update([
+            //         'sdi_status' => SdiStatus::PREAVVISO,
+            //     ]);
+            // }
+            
+            // if($invoice->docType?->name == 'TD99'){                                         // Se è quadratura
+            //     $invoice->update([
+            //         'sdi_status' => SdiStatus::QUADRATURA,
+            //     ]);
+            // }
         });
 
         static::updating(function ($invoice) {

@@ -73,14 +73,16 @@ class NewInvoiceExporterSimple extends Exporter
                 }),
             ExportColumn::make('total')
                 ->label('Totale'),
+            ExportColumn::make('total_notes')
+                ->label('Totale note di credito'),
             ExportColumn::make('receive')
                 ->label('Totale a doversi')
                 ->formatStateUsing(function ($record) {
                     $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
                     if($record->client?->type?->value == 'public' && $notRound)
-                        $output = (float) $record->no_vat_total;
+                        $output = (float) $record->no_vat_total - (float) $record->total_notes;
                     else
-                        $output = (float) $record->total;
+                        $output = (float) $record->total - (float) $record->total_notes;
                     if($record->docType?->name === 'TD04'){ $output = (float) 0.00;}
                     return (float) number_format($output, 2, '.', '');
                 }),
@@ -91,8 +93,6 @@ class NewInvoiceExporterSimple extends Exporter
                     if($record->docType?->name === 'TD04'){ $output = (float) 0.00;}
                     return (float) number_format($output, 2, '.', '');
                 }),
-            ExportColumn::make('total_notes')
-                ->label('Totale note di credito'),
             ExportColumn::make('residue')
                 ->label('Residuo')
                 ->formatStateUsing(function ($record) {

@@ -175,6 +175,9 @@ class ViewNewInvoice extends ViewRecord
                             case 'TD00':
                                 $tipo = 'preavviso';
                                 break;
+                            case 'TD99':
+                                $tipo = 'quadratura';
+                                break;
                             case 'TD01':
                                 $tipo = 'fattura';
                                 break;
@@ -190,7 +193,7 @@ class ViewNewInvoice extends ViewRecord
                 Actions\Action::make('getStatus')
                     ->label('Aggiorna stato SDI')
                     ->icon('tabler-refresh')
-                    ->visible(fn($record) => $record->sdi_status->updateStatus() && $record->docType->name != 'TD00')
+                    ->visible(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE && !($record->docType->name == 'TD00' || $record->docType->name == 'TD99'))
                     ->action(function (Invoice $record, array $data) {
                         $soapService = app(AndxorSoapService::class);
                         try {
@@ -295,7 +298,7 @@ class ViewNewInvoice extends ViewRecord
 
                 Actions\Action::make('duplica_fattura')
                     ->authorize('create')
-                    ->hidden(fn(Invoice $record) => $record->parent_id || $record->sdi_status == SdiStatus::DA_INVIARE)
+                    ->hidden(fn(Invoice $record) => $record->parent_id || $record->sdi_status == SdiStatus::DA_INVIARE|| $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA)
                     ->label('Duplica')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
@@ -424,7 +427,7 @@ Log::info('Notifica');
 
                 Actions\Action::make('nota_credito')
                     ->authorize('create')
-                    ->hidden(fn(Invoice $record) => $record->parent_id || $record->sdi_status == SdiStatus::DA_INVIARE || $record->sdi_status->updateStatus())
+                    ->hidden(fn(Invoice $record) => $record->parent_id || $record->sdi_status == SdiStatus::DA_INVIARE || $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA)
                     ->label('Crea Nota di credito')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
@@ -543,7 +546,8 @@ Log::info('===== FINE AZIONE NOTA CREDITO =====');
                     }),
 
                 Actions\Action::make('converti_in_fattura')
-                    ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
+                    // ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
+                    ->hidden(fn(Invoice $record) => $record->parent_id || $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA)
                     ->label('Converti in fattura')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
@@ -799,8 +803,9 @@ Log::info('===== FINE AZIONE NOTA CREDITO =====');
                     ->label('Gestisci')
                     ->hidden(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE                                // posso modificare se non è stata inviata
                                             && $record->sdi_status != SdiStatus::RIFIUTATA                              // posso modificare se è stata rifiutata
-                                            && $record->sdi_status != SdiStatus::SCARTATA                              // posso modificare se è stata scartata
-                                            && $record->sdi_status != SdiStatus::PREAVVISO),                            // posso modificare se è un preavviso
+                                            && $record->sdi_status != SdiStatus::SCARTATA                               // posso modificare se è stata scartata
+                                            && $record->sdi_status != SdiStatus::PREAVVISO                              // posso modificare se è un preavviso
+                                            && $record->sdi_status != SdiStatus::QUADRATURA),                           // posso modificare se è una quadratura saldi
             ])
             ->label('Operazioni')
             ->icon('heroicon-m-ellipsis-vertical')

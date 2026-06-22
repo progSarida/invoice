@@ -690,6 +690,14 @@ class NewInvoiceResource extends Resource
                                         $set('number', 0);
                                         NewInvoiceResource::invoiceNumber($get, $set);
                                     }
+                                    else if($docType?->name === 'TD99'){
+                                        $set('number', 0);
+                                        $set('year', 1901);
+                                        $set('budget_year', 1901);
+                                        $set('accrual_year', 1901);
+                                        $set('invoice_date', '1901-01-01');
+                                        NewInvoiceResource::invoiceNumber($get, $set);
+                                    }
                                     // else if (!$docType || $docType->docGroup?->name !== 'Note di variazione') {
                                     else {
                                         $set('parent_id', null);
@@ -1026,6 +1034,11 @@ class NewInvoiceResource extends Resource
                             Forms\Components\DatePicker::make('invoice_date')->label('Data documento')
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 ->live()
+                                ->dehydrated()
+                                ->readOnly(function(Get $get) {
+                                    $docType = DocType::find($get('doc_type_id'));
+                                    return $docType?->name == 'TD99';
+                                })
                                 ->afterStateUpdated(function (Get $get, Set $set, $state, ?Invoice $record) {
                                     if (!$state || !$get('number') || !$get('sectional_id') || !$get('year')) return;
                                     $year = $get('year');
@@ -1106,20 +1119,58 @@ class NewInvoiceResource extends Resource
                                 ->numeric()
                                 ->required()
                                 ->extraInputAttributes(['class' => 'text-right'])
-                                ->minValue(now()->subYears(11)->year)
+                                // ->minValue(now()->subYears(11)->year)
                                 ->maxValue(now()->year)
                                 ->default(now()->year)
-                                ->rules(['digits:4'])
+                                // ->rules(['digits:4'])
+                                ->rules([
+                                    'digits:4',
+                                    function () {
+                                        return function (string $attribute, $value, \Closure $fail) {
+                                            $currentYear = now()->year;
+                                            $minRecentYear = $currentYear - 11;
+                                            
+                                            // Consente il 1901 OPPURE gli anni compresi nel range
+                                            if (((int)$value < $minRecentYear || (int)$value > $currentYear) && (int)$value !== 1901) {
+                                                $fail("L'anno di bilancio deve essere il 1901 o compreso tra {$minRecentYear} e {$currentYear}.");
+                                            }
+                                        };
+                                    },
+                                ])
+                                ->dehydrated()
+                                ->readonly(function(Get $get) {
+                                    $docType = DocType::find($get('doc_type_id'));
+                                    return $docType?->name == 'TD99';
+                                })
                                 ->columnSpan(2),
 
                             Forms\Components\TextInput::make('accrual_year')->label('Anno di competenza')
                                 ->numeric()
                                 ->required()
                                 ->extraInputAttributes(['class' => 'text-right'])
-                                ->minValue(now()->subYears(11)->year)
+                                // ->minValue(now()->subYears(11)->year)
                                 ->maxValue(now()->year)
                                 ->default(now()->year)
                                 ->rules(['digits:4'])
+                                ->rules([
+                                    'digits:4',
+                                    function () {
+                                        return function (string $attribute, $value, \Closure $fail) {
+                                            $currentYear = now()->year;
+                                            $minRecentYear = $currentYear - 11;
+                                            
+                                            // Consente il 1901 OPPURE gli anni compresi nel range
+                                            if (((int)$value < $minRecentYear || (int)$value > $currentYear) && (int)$value !== 1901) {
+                                                $fail("L'anno di bilancio deve essere il 1901 o compreso tra {$minRecentYear} e {$currentYear}.");
+                                            }
+                                        };
+                                    },
+                                ])
+                                ->dehydrated()
+                                ->readOnly(function(Get $get) {
+                                    $docType = DocType::find($get('doc_type_id'));
+                                    return $docType?->name == 'TD99';
+                                })
                                 ->columnSpan(2),
 
                             Forms\Components\Select::make('accrual_type_id')
@@ -1168,7 +1219,7 @@ class NewInvoiceResource extends Resource
                                 ->columnSpan(3),
                             Forms\Components\Select::make('invoice_reference')
                                 ->label('Riferimento')
-                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04')
+                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04' && DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->live()
                                 ->options(InvoiceReference::class)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'new_ref'))
@@ -1178,7 +1229,7 @@ class NewInvoiceResource extends Resource
                             Forms\Components\DatePicker::make('reference_date_from')
                                 ->label('Da data')
                                 ->extraInputAttributes(['class' => 'text-center'])
-                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04')
+                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04' && DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 // ->live()
                                 ->debounce(1000)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
@@ -1188,7 +1239,7 @@ class NewInvoiceResource extends Resource
                             Forms\Components\DatePicker::make('reference_date_to')
                                 ->label('A data')
                                 ->extraInputAttributes(['class' => 'text-center'])
-                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04')
+                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04' && DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 // ->live()
                                 ->debounce(1000)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
@@ -1199,21 +1250,21 @@ class NewInvoiceResource extends Resource
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->columnSpan(1),
                             Forms\Components\TextInput::make('reference_number_from')->label('Dal numero')
-                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04')
+                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04' && DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->debounce(500)
                                 ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
                                 ->columnSpan(1),
                             Forms\Components\TextInput::make('reference_number_to')->label('Al numero')
-                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04')
+                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04' && DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->debounce(500)
                                 ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
                                 ->afterStateUpdated(fn (Get $get, Set $set) => static::updateDescription($get, $set, 'continue'))
                                 ->columnSpan(1),
                             Forms\Components\TextInput::make('total_number')->label('Totali')
-                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04')
+                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD04' && DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->debounce(500)
                                 ->extraInputAttributes(['class' => 'text-right'])
                                 ->visible(fn (Get $get): bool => $get('invoice_reference') === InvoiceReference::NUMBER->value)
@@ -1265,7 +1316,7 @@ class NewInvoiceResource extends Resource
                                     fn (Model $record) => "{$record->name} $record->iban"
                                 )
                                 ->searchable()
-                                ->required()
+                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->columnSpan(5)
                                 ->preload(),
                             Forms\Components\Select::make('payment_mode')->label('Modalità')
@@ -1287,7 +1338,7 @@ class NewInvoiceResource extends Resource
                                         ])
                                         ->toArray()
                                 )
-                                ->required()
+                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->default(PaymentMode::TP02->value)
                                 ->columnSpan(2),
                             Forms\Components\TextInput::make('rate_number')
@@ -1308,12 +1359,12 @@ class NewInvoiceResource extends Resource
                                         ])
                                         ->toArray()
                                 )
-                                ->required()
+                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->default('mp05')
                                 ->columnSpan(3),
                             Forms\Components\Select::make('payment_days')
                                 ->label('Giorni')
-                                ->required()
+                                ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->options([
                                     30 => '30',
                                     60 => '60',
@@ -1642,16 +1693,6 @@ class NewInvoiceResource extends Resource
                     ])
                     // ->tooltip(fn (Invoice $record) => $record->total . " - " . "(" . $record->total_payment . " + " . $record->total_notes . ")" . " = " . $record->total-($record->total_payment+$record->total_notes))
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('total_payment')->label('Pagamenti')
-                    ->money('EUR')
-                    ->sortable()
-                    ->alignRight()
-                    ->summarize([
-                        Tables\Columns\Summarizers\Sum::make()
-                            ->label('')
-                            ->money('EUR', true, 'it_IT'),
-                    ])
-                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total_notes')->label('Note di credito')
                     ->money('EUR')
                     ->sortable()
@@ -1662,7 +1703,35 @@ class NewInvoiceResource extends Resource
                             ->money('EUR', true, 'it_IT'),
                     ])
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('tot_res')->label('Dovuto')
+                Tables\Columns\TextColumn::make('tot_own')->label('Totale a doversi')
+                    ->money('EUR')
+                    ->state(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getOwned())
+                    ->sortable()
+                    ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Summarizer::make()
+                            ->label('')
+                            ->using(function ($query) {
+                                // Forza il recupero come Collection di modelli Invoice
+                                return Invoice::query()
+                                    ->whereIn('id', $query->pluck('id'))
+                                    ->get()
+                                    ->sum(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getOwned());
+                            })
+                            ->money('EUR', true, 'it_IT'),
+                    ])
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('total_payment')->label('Pagamenti')
+                    ->money('EUR')
+                    ->sortable()
+                    ->alignRight()
+                    ->summarize([
+                        Tables\Columns\Summarizers\Sum::make()
+                            ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ])
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('tot_res')->label('Residuo')
                     ->money('EUR')
                     ->state(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getResidue())
                     ->sortable()
@@ -2241,6 +2310,35 @@ class NewInvoiceResource extends Resource
                         }
                     })
                     ->columnSpan(4),
+                // Tables\Filters\SelectFilter::make('balance')
+                //     ->label('Quadratura saldi')
+                //     ->options([
+                //         '' => 'Tutti i documenti',
+                //         'exclude' => 'Escludi quadrature saldi',
+                //         'only' => 'Solo quadrature saldi',
+                //     ])
+                //     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
+                //         // Recuperiamo l'id del TD99 usando la cache
+                //         $td99Id = \Illuminate\Support\Facades\Cache::remember('doc_type_td99_id', 3600, function () {
+                //             return \App\Models\DocType::where('name', 'TD99')->first()?->id;
+                //         });
+
+                //         if (! $td99Id) return;
+
+                //         // Applichiamo la query in base alla selezione dell'utente
+                //         $query->when($data['value'] === 'exclude', fn ($q) => $q->where('doc_type_id', '!=', $td99Id))
+                //             ->when($data['value'] === 'only', fn ($q) => $q->where('doc_type_id', $td99Id));
+                //     })
+                //     ->indicateUsing(function (array $data): ?string {
+                //         if (! $data['value']) return null;
+
+                //         return match ($data['value']) {
+                //             'exclude' => 'Senza quadrature saldi',
+                //             'only' => 'Solo quadrature saldi',
+                //             default => null,
+                //         };
+                //     })
+                //     ->columnSpan(2),
             ],layout: FiltersLayout::Dropdown)->filtersFormColumns(12)->filtersFormWidth(MaxWidth::SevenExtraLarge)
             // ],layout: FiltersLayout::Modal)->filtersFormColumns(12)->filtersFormWidth(MaxWidth::SevenExtraLarge)
             // ])->filtersFormColumns(12)

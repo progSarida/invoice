@@ -47,6 +47,7 @@ enum SdiStatus: string implements HasColor, HasLabel, HasDescription, HasIcon
 
     // casi custom
     CASE PREAVVISO = "preavviso";
+    CASE QUADRATURA = "quadratura";
 
     public function getLabel(): string
     {
