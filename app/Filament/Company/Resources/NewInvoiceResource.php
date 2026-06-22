@@ -453,7 +453,25 @@ class NewInvoiceResource extends Resource
                                         ->get()
                                         ->mapWithKeys(function ($record) {
                                             // Usa l'attributo calcolato per l'etichetta nel formato desiderato
-                                            $label = "{$record->office_name} ({$record->office_code}) TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code} - {$record->calculated_year}";
+                                            // $label = "{$record->office_name} ({$record->office_code}) TIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code} - {$record->calculated_year}";
+                                            $accruals = '';
+                                            if (!empty($record->accrual_types)) {
+                                                $accrualList = is_array($record->accrual_types) 
+                                                    ? $record->accrual_types 
+                                                    : json_decode($record->accrual_types, true) ?? [];
+                                                $accruals = implode(', ', $accrualList);
+                                            }
+
+                                            $manages = '';
+                                            $manageIds = $record->manage_types ?? [];
+                                            if (is_array($manageIds) && count($manageIds) > 0) {
+                                                $manages = collect($manageIds)
+                                                    ->map(fn($id) => ManageType::find($id)?->name ?? "ID: {$id}")
+                                                    ->filter()
+                                                    ->implode(', ');
+                                            }
+
+                                            $label = $record->calculated_year . ' - ' . 'CIG: ' . $record->cig_code . ' - ' . 'TIPO: ' . $record->payment_type->getLabel() . ' - ' . 'GESTIONI: ' . $accruals . ' - ' . 'SERVIZI: ' . $manages;
                                             return [$record->id => $label];
                                         })
                                         ->toArray();
@@ -474,7 +492,7 @@ class NewInvoiceResource extends Resource
                                                     $manages .= ', ';
                                                 $manages .= ManageType::find($record->manage_types[$j])->name;
                                             }
-                                            return $record->calculated_year . ' - ' . 'TIPO: ' . $record->payment_type->getLabel() . ' - ' . 'GESTIONI: ' . $accruals . ' - ' . 'SERVIZI: ' . $manages;
+                                            return $record->calculated_year . ' - ' . 'CIG: ' . $record->cig_code . ' - ' . 'TIPO: ' . $record->payment_type->getLabel() . ' - ' . 'GESTIONI: ' . $accruals . ' - ' . 'SERVIZI: ' . $manages;
                                         }
                                         else {
                                             // 1. Fallback per l'anno: in Edit/View 'calculated_year' non esiste nella query standard
@@ -501,7 +519,7 @@ class NewInvoiceResource extends Resource
                                             // 4. Composizione finale
                                             $paymentTypeLabel = $record->payment_type ? $record->payment_type->getLabel() : 'N/D';
 
-                                            return "{$year} - TIPO: {$paymentTypeLabel} - GESTIONI: " . ($accruals ?: 'Nessuna') . " - SERVIZI: " . ($manages ?: 'Nessuno');
+                                            return "{$year} - CIG: {$record->cig_code} - TIPO: {$paymentTypeLabel} - GESTIONI: " . ($accruals ?: 'Nessuna') . " - SERVIZI: " . ($manages ?: 'Nessuno');
                                         }
 
                                     }
