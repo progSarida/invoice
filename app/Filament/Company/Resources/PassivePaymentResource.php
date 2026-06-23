@@ -47,7 +47,7 @@ class PassivePaymentResource extends Resource
             // ->disabled(function ($record): bool { return $record !== null && !Auth::user()->isManager(); })
             ->schema([
                 Forms\Components\Select::make('passive_invoice_id')
-                    ->label('Fattura da pagare')
+                    ->label('Fattura validata da pagare')
                     ->relationship(name: 'passiveInvoice', titleAttribute: 'id')
                     ->searchable()
                     ->hintIcon('heroicon-o-information-circle', tooltip: "Digitare 'Tutte' nella ricerca per mostrare tutte fatture non pagate")
