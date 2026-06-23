@@ -2054,22 +2054,53 @@ class NewInvoiceResource extends Resource
                             ->label('Data pagamento a')
                             ->extraInputAttributes(['class' => 'text-center']),
                     ])
+                    // ->query(function (Builder $query, array $data): Builder {
+                    //     // Modifichiamo la query per applicare i filtri in cascata senza interrompere l'esecuzione
+                    //     return $query
+                    //         ->when(
+                    //             filled($data['date_from']),
+                    //             // fn (Builder $query) => $query->whereHas('activePayments', function ($q) use ($data) {
+                    //             //     $q->whereDate('payment_date', '>=', $data['date_from']);
+                    //             // })
+                    //             fn (Builder $query) => $query->whereDate('last_payment_date', '>=', $data['date_from'])
+                    //         )
+                    //         ->when(
+                    //             filled($data['date_to']),
+                    //             // fn (Builder $query) => $query->whereHas('activePayments', function ($q) use ($data) {
+                    //             //     $q->whereDate('payment_date', '<=', $data['date_to']);
+                    //             // })
+                    //             fn (Builder $query) => $query->whereDate('last_payment_date', '<=', $data['date_to'])
+                    //         );
+                    // })
                     ->query(function (Builder $query, array $data): Builder {
-                        // Modifichiamo la query per applicare i filtri in cascata senza interrompere l'esecuzione
                         return $query
                             ->when(
                                 filled($data['date_from']),
-                                // fn (Builder $query) => $query->whereHas('activePayments', function ($q) use ($data) {
-                                //     $q->whereDate('payment_date', '>=', $data['date_from']);
-                                // })
-                                fn (Builder $query) => $query->whereDate('last_payment_date', '>=', $data['date_from'])
+                                fn (Builder $query) => $query->where(function (Builder $query) use ($data) {
+                                    $query->where(function (Builder $q) use ($data) {
+                                        $q->whereNotNull('flow')
+                                            ->whereDate('last_payment_date', '>=', $data['date_from']);
+                                    })->orWhere(function (Builder $q) use ($data) {
+                                        $q->whereNull('flow')
+                                            ->whereHas('activePayments', function ($subQ) use ($data) {
+                                                $subQ->whereDate('payment_date', '>=', $data['date_from']);
+                                            });
+                                    });
+                                })
                             )
                             ->when(
                                 filled($data['date_to']),
-                                // fn (Builder $query) => $query->whereHas('activePayments', function ($q) use ($data) {
-                                //     $q->whereDate('payment_date', '<=', $data['date_to']);
-                                // })
-                                fn (Builder $query) => $query->whereDate('last_payment_date', '<=', $data['date_to'])
+                                fn (Builder $query) => $query->where(function (Builder $query) use ($data) {
+                                    $query->where(function (Builder $q) use ($data) {
+                                        $q->whereNotNull('flow')
+                                            ->whereDate('last_payment_date', '<=', $data['date_to']);
+                                    })->orWhere(function (Builder $q) use ($data) {
+                                        $q->whereNull('flow')
+                                            ->whereHas('activePayments', function ($subQ) use ($data) {
+                                                $subQ->whereDate('payment_date', '<=', $data['date_to']);
+                                            });
+                                    });
+                                })
                             );
                     })
                     ->columnSpan(4),
