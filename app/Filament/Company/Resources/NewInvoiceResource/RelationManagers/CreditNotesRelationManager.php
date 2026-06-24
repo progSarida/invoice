@@ -288,7 +288,7 @@ class CreditNotesRelationManager extends RelationManager
                                 //             ->send();
                                 // })
                                 ->required(function (?Model $record, Get $get) {
-                                    // $privateR = ($record && $record->client->type->isPrivate() ? true : false);
+                                    // $privateR = ($record && $record->client?->type->isPrivate() ? true : false);
                                     // $client_id = $get('client_id');
                                     // $privateI = $client_id && Client::find($client_id)->type->isPrivate() ? true : false;
                                     // $private = $privateR || $privateI;
@@ -318,7 +318,7 @@ class CreditNotesRelationManager extends RelationManager
                                 ->getOptionLabelFromRecordUsing(
                                     function (Model $record) {
                                         $return = "Fattura n. {$record->getNewInvoiceNumber()}";
-                                        if($record->client->type->isPublic())
+                                        if($record->client?->type->isPublic())
                                             $return.= " - {$record->tax_type->getLabel()}\n{$record->contract->office_name} ({$record->contract->office_code}) - CIG: {$record->contract->cig_code}";
                                         $return.= "\nDestinatario: {$record->client->denomination}";
                                         return $return;
@@ -569,7 +569,7 @@ class CreditNotesRelationManager extends RelationManager
                                 ->searchable()
                                 ->preload()
                                 ->disabled(function (?Model $record) {
-                                    return $record && $record->client->type->isPublic() ? true : false;
+                                    return $record && $record->client?->type->isPublic() ? true : false;
                                 })
                                 ->columnSpan(function (?Model $record, $state) {
                                     return $state && $state == 'no' ? 2 : 6;

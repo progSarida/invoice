@@ -134,7 +134,7 @@
         </tbody>
     </table>
     @php
-        $totalPay = $invoice->client->type == \App\Enums\ClientType::PUBLIC ? $invoice->no_vat_total : $invoice->total;
+        $totalPay = $invoice->client?->type == \App\Enums\ClientType::PUBLIC ? $invoice->no_vat_total : $invoice->total;
     @endphp
     <div class="section-title">Metodo di Pagamento</div>
     <table class="data-table">
@@ -255,7 +255,7 @@
                             <td class="text-right">{{ number_format($invoice->vat, 2, ',', '.') }} €</td>
                         </tr>
                         @php
-                            $totalToPay = $invoice->client->type == \App\Enums\ClientType::PUBLIC ? $invoice->no_vat_total : $invoice->total;
+                            $totalToPay = $invoice->client?->type == \App\Enums\ClientType::PUBLIC ? $invoice->no_vat_total : $invoice->total;
                         @endphp
                         <tr class="netto-pagare">
                             <td>Netto a pagare</td>

@@ -402,7 +402,7 @@
         </tr>
         @php
             $split = false;
-            if($invoice->client->type == \App\Enums\ClientType::PUBLIC && $notRound){
+            if($invoice->client?->type == \App\Enums\ClientType::PUBLIC && $notRound){
                 $totalPay = $invoice->no_vat_total;
                 $split = true;
             }

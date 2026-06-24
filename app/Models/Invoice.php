@@ -484,9 +484,9 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
                 ];
             }
             $vats[$rate]['taxable'] += $item->amount;
-            // if($item->invoice->client->type == ClientType::PRIVATE)
+            // if($item->invoice->client?->type == ClientType::PRIVATE)
                 $vats[$rate]['vat'] += $item->amount * ($item->vat_code_type->getRate() / 100);
-            // else if($item->invoice->client->type == ClientType::PUBLIC){
+            // else if($item->invoice->client?->type == ClientType::PUBLIC){
                 // $vats[$rate]['vat'] += $item->total - $item->amount;
                 // $vats[$rate]['vat'] += 0;
             // }

@@ -296,10 +296,10 @@
                 @php
                     $payments = $invoice->activePayments?->sum('amount') ?? 0;
 
-                    $notes = $invoice->client->type == App\Enums\ClientType::PUBLIC ? $invoice->creditNotes?->sum('no_vat_total') ?? 0 : $invoice->creditNotes?->sum('total') ?? 0;
+                    $notes = $invoice->client?->type == App\Enums\ClientType::PUBLIC ? $invoice->creditNotes?->sum('no_vat_total') ?? 0 : $invoice->creditNotes?->sum('total') ?? 0;
                     $n[] = $notes;
 
-                    $total = $invoice->client->type == App\Enums\ClientType::PUBLIC ? $invoice->no_vat_total : $invoice->total;
+                    $total = $invoice->client?->type == App\Enums\ClientType::PUBLIC ? $invoice->no_vat_total : $invoice->total;
 
                     $residue = $total - $payments - $notes;
 

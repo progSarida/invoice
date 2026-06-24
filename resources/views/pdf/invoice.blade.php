@@ -225,7 +225,7 @@
         if(count($funds) > 0)
             $fundTotal = array_sum(array_column($funds, 'amount'));
         $vatTotal = array_sum(array_column($funds, 'vat'));
-        // if($invoice->client->type == \App\Enums\ClientType::PUBLIC)
+        // if($invoice->client?->type == \App\Enums\ClientType::PUBLIC)
         //     $total = $invoice->no_vat_total + $withholdingAmount;
         // else
             $total = $invoice->total + $withholdingAmount;
@@ -276,7 +276,7 @@
         use App\Models\BankAccount;
         // $totalPay = $invoice->total - $withholdingAmount;
         $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
-        if($invoice->client->type == \App\Enums\ClientType::PUBLIC && $notRound)
+        if($invoice->client?->type == \App\Enums\ClientType::PUBLIC && $notRound)
             $totalPay = $invoice->no_vat_total + $withholdingAmount;
         else
             $totalPay = $invoice->total + $withholdingAmount;

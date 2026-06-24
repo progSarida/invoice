@@ -336,13 +336,13 @@ Log::info("Recupero dati beni e servizi.");
     {
 Log::info("Recupero dati pagamento.");
         $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
-        $total = ($invoice->client->type->value == 'public' && $notRound) ? $invoice->no_vat_total : $invoice->total ;
+        $total = ($invoice->client?->type?->value == 'public' && $notRound) ? $invoice->no_vat_total : $invoice->total ;
         return [
             [
-                'CondizioniPagamento' => $this->mapPaymentTypeToCondizioniPagamento($invoice->payment_type->value ?? 'TP02'),
+                'CondizioniPagamento' => $this->mapPaymentTypeToCondizioniPagamento($invoice->payment_type?->value ?? 'TP02'),
                 'DettaglioPagamento' => [
                     [
-                        'ModalitaPagamento' => $invoice->payment_type->getCode() ?? 'MP05',
+                        'ModalitaPagamento' => $invoice->payment_type?->getCode() ?? 'MP05',
                         'DataScadenzaPagamento' => $invoice->invoice_date->addDays($invoice->payment_days ?? 30)->format('Y-m-d'),
                         'ImportoPagamento' => sprintf("%.2f", (float) ($total ?? 0.00)),
                         'IBAN' => $invoice->bankAccount->iban ?? null,
