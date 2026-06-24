@@ -63,10 +63,10 @@ class Client extends Model
     }
 
     public function isPublic(){
-        return $this->type === 'public';
+        return $this->type === ClientType::PUBLIC;
     }
 
     public function isPrivate(){
-        return $this->type === 'private';
+        return $this->type === ClientType::PRIVATE;
     }
 }
