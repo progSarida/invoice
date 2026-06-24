@@ -1304,7 +1304,7 @@ class NewInvoiceResource extends Resource
 
                     Section::make('Dati per il pagamento')->columns(4)
                         ->collapsed(false)
-                        ->columns(12)
+                        ->columns(24)
                         ->schema([
                             Forms\Components\Select::make('bank_account_id')->label('IBAN')
                                 ->relationship(
@@ -1317,7 +1317,7 @@ class NewInvoiceResource extends Resource
                                 )
                                 ->searchable()
                                 ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
-                                ->columnSpan(5)
+                                ->columnSpan(9)
                                 ->preload(),
                             Forms\Components\Select::make('payment_mode')->label('Modalità')
                                 // ->options(PaymentType::class)
@@ -1340,11 +1340,11 @@ class NewInvoiceResource extends Resource
                                 )
                                 ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->default(PaymentMode::TP02->value)
-                                ->columnSpan(2),
+                                ->columnSpan(4),
                             Forms\Components\TextInput::make('rate_number')
                                 ->label('Rate')
                                 ->extraInputAttributes(['class' => 'text-right'])
-                                ->columnSpan(1)
+                                ->columnSpan(2)
                                 ->default(1)
                                 ->required(fn(Get $get): bool => $get('payment_mode') != PaymentMode::TP02->value)
                                 ->disabled(fn(Get $get): bool => $get('payment_mode') == PaymentMode::TP02->value)
@@ -1361,7 +1361,7 @@ class NewInvoiceResource extends Resource
                                 )
                                 ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->default('mp05')
-                                ->columnSpan(3),
+                                ->columnSpan(7),
                             Forms\Components\Select::make('payment_days')
                                 ->label('Giorni')
                                 ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
@@ -1372,7 +1372,7 @@ class NewInvoiceResource extends Resource
                                     120 => '120',
                                 ])
                                 ->default(30)
-                                ->columnSpan(1),
+                                ->columnSpan(2),
                                 ]),
 
                         Section::make('Stato SDI')->columns(2)
