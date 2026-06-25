@@ -1991,7 +1991,7 @@ class NewInvoiceResource extends Resource
                     ->columns(2)
                     ->form([
                         TextInput::make('number_from')
-                            ->label('Numero Fattura da')
+                            ->label('Numero Documento da')
                             ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
                             ->afterStateUpdated(function ($state, Set $set) {
                                 if ($state) {
@@ -1999,7 +1999,7 @@ class NewInvoiceResource extends Resource
                                 }
                             }),
                         TextInput::make('number_to')
-                            ->label('Numero Fattura a'),
+                            ->label('Numero Documento a'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         // Modifichiamo la query per applicare i filtri in cascata senza interrompere l'esecuzione
@@ -2018,7 +2018,7 @@ class NewInvoiceResource extends Resource
                     ->columns(2)
                     ->form([
                         DatePicker::make('date_from')
-                            ->label('Data fattura da')
+                            ->label('Data documento da')
                             ->extraInputAttributes(['class' => 'text-center'])
                             ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
                             ->afterStateUpdated(function ($state, Set $set) {
@@ -2027,7 +2027,7 @@ class NewInvoiceResource extends Resource
                                 }
                             }),
                         DatePicker::make('date_to')
-                            ->label('Data fattura a')
+                            ->label('Data documento a')
                             ->extraInputAttributes(['class' => 'text-center']),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
@@ -2158,7 +2158,7 @@ class NewInvoiceResource extends Resource
 
                 // Riga 5
                 SelectFilter::make('invoice_year_from')
-                    ->label('Anno fattura da')
+                    ->label('Anno documento da')
                     ->attribute(null)
                     ->selectablePlaceholder(false)
                     ->options(function () {
@@ -2204,7 +2204,7 @@ class NewInvoiceResource extends Resource
                     })
                     ->columnSpan(2),
                 SelectFilter::make('invoice_year_to')
-                    ->label('Anno fattura a')
+                    ->label('Anno documento a')
                     ->attribute(null)
                     ->options(function () {
                         $tenant = Filament::getTenant();

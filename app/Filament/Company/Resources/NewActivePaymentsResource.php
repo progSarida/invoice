@@ -644,7 +644,7 @@ class NewActivePaymentsResource extends Resource
                                     Filter::make('invoice_number')
                     ->form([
                 TextInput::make('number')
-                            ->label('Numero Fattura'),
+                            ->label('Numero Documento'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         if (filled($data['number'])) {
@@ -730,7 +730,7 @@ class NewActivePaymentsResource extends Resource
                     })
                     ->columnSpan(2),
                 SelectFilter::make('invoice_year')
-                    ->label('Anno Fattura')
+                    ->label('Anno Documento')
                     ->attribute(null)
                     ->options(function () {
                         $tenant = Filament::getTenant();

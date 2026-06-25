@@ -695,7 +695,7 @@ class PassiveInvoiceResource extends Resource
                     ->columns(2)
                     ->form([
                         DatePicker::make('invoice_from_date')
-                            ->label('Data fattura da')
+                            ->label('Data documento da')
                             ->extraInputAttributes(['class' => 'text-center'])
                             ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
                             ->afterStateUpdated(function ($state, Set $set) {
@@ -708,7 +708,7 @@ class PassiveInvoiceResource extends Resource
                         DatePicker::make('invoice_to_date')
                             ->extraInputAttributes(['class' => 'text-center'])
                             ->default(now()->year . '-12-31')
-                            ->label('Data fattura a')
+                            ->label('Data documento a')
                             ->columnSpan(1),
                     ])
                     ->query(function (Builder $query, array $data) {
@@ -721,13 +721,13 @@ class PassiveInvoiceResource extends Resource
                     })
                     ->indicateUsing(function (array $data): ?string {
                         if ($data['invoice_from_date'] && $data['invoice_to_date']) {
-                            return "Data fattura dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['invoice_to_date'])->format('d/m/Y');
+                            return "Data documento dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['invoice_to_date'])->format('d/m/Y');
                         }
                         if ($data['invoice_from_date']) {
-                            return "Data fattura dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y');
+                            return "Data documento dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y');
                         }
                         if ($data['invoice_to_date']) {
-                            return "Data fattura al " . Carbon::parse($data['invoice_to_date'])->format('d/m/Y');
+                            return "Data documento al " . Carbon::parse($data['invoice_to_date'])->format('d/m/Y');
                         }
                         return null;
                     }),
