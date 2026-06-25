@@ -228,7 +228,7 @@
         // if($invoice->client?->type == \App\Enums\ClientType::PUBLIC)
         //     $total = $invoice->no_vat_total + $withholdingAmount;
         // else
-            $total = $invoice->total + $withholdingAmount;
+            $total = $invoice->total - $withholdingAmount;
     @endphp
     <table class="total">
         @php
@@ -274,12 +274,12 @@
     {{-- Pagamento --}}
     @php
         use App\Models\BankAccount;
-        // $totalPay = $invoice->total - $withholdingAmount;
-        $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
-        if($invoice->client?->type == \App\Enums\ClientType::PUBLIC && $notRound)
-            $totalPay = $invoice->no_vat_total + $withholdingAmount;
-        else
-            $totalPay = $invoice->total + $withholdingAmount;
+        $totalPay = $invoice->total - $withholdingAmount;
+        // $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+        // if($invoice->client?->type == \App\Enums\ClientType::PUBLIC && $notRound)
+        //    $totalPay = $invoice->no_vat_total + $withholdingAmount;
+        // else
+        //    $totalPay = $invoice->total + $withholdingAmount;
         // $totalPay = $invoice->total;
     @endphp
     <table>

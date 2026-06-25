@@ -78,11 +78,18 @@ class NewInvoiceExporterSimple extends Exporter
             ExportColumn::make('receive')
                 ->label('Totale a doversi')
                 ->formatStateUsing(function ($record) {
-                    $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
-                    if($record->client?->type?->value == 'public' && $notRound)
-                        $output = (float) $record->no_vat_total - (float) $record->total_notes;
-                    else
-                        $output = (float) $record->total - (float) $record->total_notes;
+                    // VECCHIO CALCOLO
+                    // $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
+                    // if($record->client?->type?->value == 'public' && $notRound)
+                    //     $output = (float) $record->no_vat_total - (float) $record->total_notes;
+                    // else
+                    //     $output = (float) $record->total - (float) $record->total_notes;
+
+                    // NUOVO CALCOLO USANDO is_total_with_vat
+                    $newNoVatTotal = $record->no_vat_total - $record->creditNotes?->sum('no_vat_total');
+                    $newVat = $record->vat - $record->creditNotes?->sum('vat');
+                    $output = $record->is_total_with_vat ? $newNoVatTotal + $newVat : $newNoVatTotal;
+
                     if($record->docType?->name === 'TD04'){ $output = (float) 0.00;}
                     return (float) number_format($output, 2, '.', '');
                 }),
@@ -96,11 +103,19 @@ class NewInvoiceExporterSimple extends Exporter
             ExportColumn::make('residue')
                 ->label('Residuo')
                 ->formatStateUsing(function ($record) {
-                    $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
-                    if($record->client?->type?->value == 'public' && $notRound)
-                        $output = (float) $record->no_vat_total - ($record->total_notes + $record->total_payment);
-                    else
-                        $output = (float) $record->total - ($record->total_notes + $record->total_payment);
+                    // VECCHIO CALCOLO
+                    // $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
+                    // if($record->client?->type?->value == 'public' && $notRound)
+                    //     $output = (float) $record->no_vat_total - ($record->total_notes + $record->total_payment);
+                    // else
+                    //     $output = (float) $record->total - ($record->total_notes + $record->total_payment);
+
+                    // NUOVO CALCOLO USANDO is_total_with_vat
+                    $newNoVatTotal = $record->no_vat_total - $record->creditNotes?->sum('no_vat_total');
+                    $newVat = $record->vat - $record->creditNotes?->sum('vat');
+                    $temp = $newNoVatTotal- $record->total_payment;
+                    $output = $record->is_total_with_vat ? $temp + $newVat : $temp;
+                    
                     if($record->docType?->name === 'TD04'){ $output = (float) 0.00;}
                     return (float) number_format($output, 2, '.', '');
                 }),

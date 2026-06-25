@@ -70,6 +70,7 @@ class Invoice extends Model
         'rate_number',
         'payment_type',
         'payment_days',
+        'is_total_with_vat',
         'service_code',
         'sdi_status',
         'sdi_code',
@@ -95,6 +96,7 @@ class Invoice extends Model
         'payment_type' => PaymentType::class,
         'last_payment_date' => 'date',
         'payment_mode' => PaymentMode::class,
+        'is_total_with_vat' => 'boolean',
         'sdi_status' => SdiStatus::class,
         'timing_type' => TimingType::class
     ];
@@ -201,28 +203,41 @@ class Invoice extends Model
     // Calcola il residuo da mostrare in tabella
     public function getResidue()
     {
-        $total = floatval($this->total ?? 0);
-        $no_vat_total = floatval($this->no_vat_total ?? 0);
-        $totalPayment = floatval($this->total_payment ?? 0);
-        $totalNotes = floatval($this->total_notes ?? 0);
-        $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
-        if($this->client?->type?->value == 'public' && $notRound)
-            return $no_vat_total - ($totalPayment + $totalNotes);
-        else
-            return $total - ($totalPayment + $totalNotes);
+        // VECCHIO CALCOLO
+        // $total = floatval($this->total ?? 0);
+        // $no_vat_total = floatval($this->no_vat_total ?? 0);
+        // $totalPayment = floatval($this->total_payment ?? 0);
+        // $totalNotes = floatval($this->total_notes ?? 0);
+        // $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
+        // if($this->client?->type?->value == 'public' && $notRound)
+        //     return $no_vat_total - ($totalPayment + $totalNotes);
+        // else
+        //     return $total - ($totalPayment + $totalNotes);
+        
+        // NUOVO CALCOLO USANDO is_total_with_vat
+        $newNoVatTotal = $this->no_vat_total - $this->creditNotes?->sum('no_vat_total');
+        $newVat = $this->vat - $this->creditNotes?->sum('vat');
+        $temp = $newNoVatTotal- $this->total_payment;
+        return $this->is_total_with_vat ? $temp + $newVat : $temp;
     }
 
     // Calcola il totale a doversi da mostrare in tabella
     public function getOwned()
     {
-        $total = floatval($this->total ?? 0);
-        $no_vat_total = floatval($this->no_vat_total ?? 0);
-        $totalNotes = floatval($this->total_notes ?? 0);
-        $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
-        if($this->client?->type?->value == 'public' && $notRound)
-            return $no_vat_total - $totalNotes;
-        else
-            return $total - $totalNotes;
+        // VECCHIO CALCOLO
+        // $total = floatval($this->total ?? 0);
+        // $no_vat_total = floatval($this->no_vat_total ?? 0);
+        // $totalNotes = floatval($this->total_notes ?? 0);
+        // $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
+        // if($this->client?->type?->value == 'public' && $notRound)
+        //     return $no_vat_total - $totalNotes;
+        // else
+        //     return $total - $totalNotes;
+        
+        // NUOVO CALCOLO USANDO is_total_with_vat
+        $newNoVatTotal = $this->no_vat_total - $this->creditNotes?->sum('no_vat_total');
+        $newVat = $this->vat - $this->creditNotes?->sum('vat');
+        return $this->is_total_with_vat ? $newNoVatTotal + $newVat : $newNoVatTotal;
     }
 
     // controlla se la fattura ha la voce dell'imposta di bollo
@@ -320,12 +335,12 @@ class Invoice extends Model
     // Aggiorna il totale della note di credito riferite alla fattura
     public function updateTotalNotes(): void
     {
-        $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
-        if($this->client?->type?->value == 'public' && $notRound)
-            $total = $this->creditNotes()->sum('no_vat_total');
-        else
-            $total = $this->creditNotes()->sum('total');
-        // $total = $this->creditNotes()->sum('total');
+        // $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
+        // if($this->client?->type?->value == 'public' && $notRound)
+        //     $total = $this->creditNotes()->sum('no_vat_total');
+        // else
+        //     $total = $this->creditNotes()->sum('total');
+        $total = $this->creditNotes()->sum('total');
         $this->total_notes = $total;
         $this->save();
     }
@@ -462,13 +477,14 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
 
         foreach ($items as $item) {
             $rate = $item->vat_code_type->value;
-            $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
+            // $notRound = BankAccount::find($this->bank_account_id)?->name != 'Giroconto';
             if (!isset($vats[$rate])) {
                 $vats[$rate] = [
                     'norm' => $item->vat_code_type->getRate() == '0'
                                 // ? 'ART. 15 DPR 633/72'
                                 ? $item->vat_code_type->getNorm()
-                                : (($this->client?->type?->value == 'public' && $notRound)
+                                // : (($this->client?->type?->value == 'public' && $notRound)                          // VECCHIO CONTROLLO
+                                : ((!$this->in_total_with_vat)                                                      // NUOVO CONTROLLO USANDO is_total_with_vat
                                     ? 'S (scissione dei pagamenti)'
                                     : (($this->company->fiscalProfile->tax_regime->value == 'rf16' || $this->company->fiscalProfile->tax_regime->value == 'rf17')
                                         ? 'D (esigibilità differita)'
@@ -735,14 +751,24 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
 
         $contract = $invoice->contract;
         if (!$contract) return;
-        $notRound = BankAccount::find($invoice->bank_account_id)?->name != 'Giroconto';
 
-        $query = Invoice::where('contract_id', $contract->id)                               // calcolo il totale fatturato
-            ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
-        if($contract->client?->type == ClientType::PUBLIC && $notRound)
-            $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
-        else
-            $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
+        // $notRound = BankAccount::find($invoice->bank_account_id)?->name != 'Giroconto';
+        // $query = Invoice::where('contract_id', $contract->id)                               // calcolo il totale fatturato
+        //     ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
+        // if($contract->client?->type == ClientType::PUBLIC && $notRound)
+        //     $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
+        // else
+        //     $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
+
+        $imponibile = Invoice::where('contract_id', $invoice->id)                            // calcolo il totale imponibile fatturato
+            ->selectRaw('SUM(CASE WHEN parent_id IS NULL THEN no_vat_total ELSE -no_vat_total END) as total')
+            ->value('total') ?? 0;
+
+        $iva = Invoice::where('contract_id', $invoice->id)                                   // calcolo il totale iva fatturato
+            ->selectRaw('SUM(CASE WHEN parent_id IS NULL THEN vat ELSE -vat END) as total')
+            ->value('total') ?? 0;
+
+        $totalInvoiced = $imponibile + $iva;  
 
         $limit = $contract->amount;
 

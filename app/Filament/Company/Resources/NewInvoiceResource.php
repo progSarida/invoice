@@ -47,6 +47,7 @@ use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\CreditNot
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\InvoiceItemsRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\ActivePaymentsRelationManager;
 use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\SdiNotificationsRelationManager;
+use App\Models\BankAccount;
 use App\Models\ReversalMotivationType;
 use App\Models\SocialContribution;
 use App\Models\Withholding;
@@ -256,6 +257,10 @@ class NewInvoiceResource extends Resource
                                             }
                                         }
                                     }
+                                    if(!$clientId || Client::find($clientId)?->isPublic())
+                                        $set('is_total_with_vat', false);
+                                    else
+                                        $set('is_total_with_vat', true);
                                 })
                                 ->searchable()
                                 ->live()
@@ -1315,9 +1320,16 @@ class NewInvoiceResource extends Resource
                                 ->getOptionLabelFromRecordUsing(
                                     fn (Model $record) => "{$record->name} $record->iban"
                                 )
+                                ->afterStateUpdated( function(Set $set, $state){
+                                    $bankAccount = BankAccount::find($state);
+                                    if($bankAccount->name == 'Giroconto'){
+                                        $set('is_total_with_vat', true);
+                                    }
+                                })
+                                ->live()
                                 ->searchable()
                                 ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
-                                ->columnSpan(9)
+                                ->columnSpan(10)
                                 ->preload(),
                             Forms\Components\Select::make('payment_mode')->label('Modalità')
                                 // ->options(PaymentType::class)
@@ -1340,15 +1352,18 @@ class NewInvoiceResource extends Resource
                                 )
                                 ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->default(PaymentMode::TP02->value)
-                                ->columnSpan(4),
+                                ->columnSpan(6),
                             Forms\Components\TextInput::make('rate_number')
                                 ->label('Rate')
                                 ->extraInputAttributes(['class' => 'text-right'])
-                                ->columnSpan(2)
+                                ->columnSpan(3)
                                 ->default(1)
                                 ->required(fn(Get $get): bool => $get('payment_mode') != PaymentMode::TP02->value)
                                 ->disabled(fn(Get $get): bool => $get('payment_mode') == PaymentMode::TP02->value)
                                 ->dehydrated(),
+                            Forms\Components\Checkbox::make('is_total_with_vat')
+                                ->label('Includi IVA')
+                                ->columnSpan(3),
                             Forms\Components\Select::make('payment_type')->label('Tipo')
                                 // ->options(PaymentType::class)
                                 ->options(
@@ -1361,7 +1376,7 @@ class NewInvoiceResource extends Resource
                                 )
                                 ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
                                 ->default('mp05')
-                                ->columnSpan(7),
+                                ->columnSpan(8),
                             Forms\Components\Select::make('payment_days')
                                 ->label('Giorni')
                                 ->required(fn(Get $get) => DocType::find($get('doc_type_id'))?->name !== 'TD99')
@@ -1371,8 +1386,9 @@ class NewInvoiceResource extends Resource
                                     90 => '90',
                                     120 => '120',
                                 ])
+                                ->extraInputAttributes(['class' => 'text-right'])
                                 ->default(30)
-                                ->columnSpan(2),
+                                ->columnSpan(3),
                                 ]),
 
                         Section::make('Stato SDI')->columns(2)
@@ -1913,6 +1929,41 @@ class NewInvoiceResource extends Resource
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}"
                     )
+                    ->getSearchResultsUsing(function (string $search) {
+                        // Rimuovi spazi multipli e trim
+                        $search = trim(preg_replace('/\s+/', ' ', $search));
+
+                        // Query base con le stesse condizioni del relationship
+                        $query = NewContract::query();
+
+                        // Cerca separatori (spazio, virgola, slash, trattino)
+                        $parts = preg_split('/[\s,\/\-]+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+
+                        // Un solo valore: cerca SOLO match esatto in number o year
+                        $value = $parts[0];
+                        $query->where(function ($q) use ($value) {
+                            $q->where('office_code', 'LIKE', "%{$value}%")
+                                ->orWhere('cig_code', 'LIKE', "%{$value}%")
+                                ->orWhere('cup_code', 'LIKE', "%{$value}%");
+                        });
+
+                        return $query
+                            ->limit(70)
+                            ->get()
+                            ->mapWithKeys(function ($record) {
+                                $label = "{$record->office_name} ({$record->office_code})\nTIPO: {$record->payment_type->getLabel()} - CIG: {$record->cig_code}";
+
+                                return [$record->id => $label];
+                            })
+                            ->toArray();
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (! $data['value']) { return null; }
+                        $contract = NewContract::find($data['value']);
+                        if (! $contract) { return null; }
+                        $label = "{$contract->office_name} ({$contract->office_code}) CIG: {$contract->cig_code}";
+                        return "Contratto: {$label}";
+                    })
                     ->searchable()
                     ->columnSpan(4)
                     ->preload()

@@ -182,7 +182,6 @@ class InvoiceResource extends Resource
                                         }
                                 )
                                 ->getOptionLabelFromRecordUsing(
-
                                     function (Model $record) {
                                         $return = "Fattura n. {$record->getInvoiceNumber()}";
                                         if($record->client?->type->isPrivate())

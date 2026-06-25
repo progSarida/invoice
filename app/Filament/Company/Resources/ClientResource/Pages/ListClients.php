@@ -208,8 +208,9 @@ class ListClients extends ListRecords
                         $param[$index]['num_doc'] = $invoice->invoiceNumber();
                         $param[$index]['data_doc'] = \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y');
                         $param[$index]['desc'] = $invoice->description;
-                        $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
-                        $amount = ($invoice->client?->type?->value == 'public' && $notRound) ? $invoice->no_vat_total : $invoice->total;
+                        // $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+                        // $amount = ($invoice->client?->type?->value == 'public' && $notRound) ? $invoice->no_vat_total : $invoice->total;
+                        $amount = $invoice->is_total_with_vat ? $invoice->total : $invoice->no_vat_total;
                         switch($invoice->docType->name) {
                             case 'TD02':                                                                                // acconti/anticipi su fattura
                                 // $saldo -= $amount;

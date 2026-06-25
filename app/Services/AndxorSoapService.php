@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\ClientSubType;
 use App\Enums\FundType;
+use App\Enums\PaymentReasonType;
 use Exception;
 use Illuminate\Support\Str;
 use SoapFault;
@@ -335,8 +336,12 @@ Log::info("Recupero dati beni e servizi.");
     private function getDatiPagamento(Invoice $invoice): ?array
     {
 Log::info("Recupero dati pagamento.");
-        $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
-        $total = ($invoice->client?->type?->value == 'public' && $notRound) ? $invoice->no_vat_total : $invoice->total ;
+        // VECCHIO CALCOLO
+        // $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+        // $total = ($invoice->client?->type?->value == 'public' && $notRound) ? $invoice->no_vat_total : $invoice->total ;
+
+        // NUOCO CALCOLO USANDO is_total_with_vat
+        $total = $invoice->is_total_with_vat ? $invoice->total : $invoice->no_vat_total ;
         return [
             [
                 'CondizioniPagamento' => $this->mapPaymentTypeToCondizioniPagamento($invoice->payment_type?->value ?? 'TP02'),
@@ -1478,7 +1483,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                         : null;
 
                     $reason = isset($withholding['CausalePagamento']) && is_string($withholding['CausalePagamento'])
-                        ? collect(WithholdingType::cases())
+                        ? collect(PaymentReasonType::cases())
                             ->first(fn($case) => $case->getCode() === $withholding['CausalePagamento'])
                             ?->getDescription() ?? null
                         : null;
@@ -1489,7 +1494,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                         'description' => $description . ' - ' . $reason,
                         'quantity' => null,
                         'unit_price' => null,
-                        'total_price' => isset($withholding['ImportoRitenuta']) ? $withholding['ImportoRitenuta'] * -1 : null,
+                        'total_price' => isset($withholding['ImportoRitenuta']) ? ((float) $withholding['ImportoRitenuta']) * -1 : null,
                         'vat_rate' => $withholding['AliquotaRitenuta'] ?? null
                     ];
 

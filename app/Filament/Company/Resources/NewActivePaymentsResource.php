@@ -184,10 +184,19 @@ class NewActivePaymentsResource extends Resource
                     ->afterStateUpdated(function(Set $set, $state) {
                         if ($state) {
                             $invoice = Invoice::find($state);
-                            $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
-                            $amount = ($invoice->client?->type == ClientType::PUBLIC && $notRound)
-                                        ? $invoice->no_vat_total - ($invoice->total_payment + $invoice->total_notes)
-                                        : $invoice->total - ($invoice->total_payment + $invoice->total_notes);
+
+                            // VECCHIO CALCOLO
+                            // $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+                            // $amount = ($invoice->client?->type == ClientType::PUBLIC && $notRound)
+                            //             ? $invoice->no_vat_total - ($invoice->total_payment + $invoice->total_notes)
+                            //             : $invoice->total - ($invoice->total_payment + $invoice->total_notes);
+
+                            // NUOVO CALCOLO USANDO is_total_with_vat
+                            $newNoVatTotal = $invoice->no_vat_total - $invoice->creditNotes?->sum('no_vat_total');
+                            $newVat = $invoice->vat - $invoice->creditNotes?->sum('vat');
+                            $temp = $newNoVatTotal- $invoice->total_payment;
+                            $amount = $invoice->is_total_with_vat ? $temp + $newVat : $temp;
+
                             if ($invoice) {
                                 $set('bank_account_id', $invoice->bank_account_id);
                                 $set('amount', number_format($amount, 2, ",", "."));
@@ -250,22 +259,33 @@ class NewActivePaymentsResource extends Resource
                         $formatted = number_format($amount, 2, ',', '.');
                         $component->state($formatted);
                         $newTotalPayment = $amount + $invoice->total_payment;
-                        $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
-                        $compare = ($invoice->client?->type?->value == 'public' && $notRound)
-                            ? $invoice->no_vat_total
-                            : $invoice->total;
-                        if($amount != $compare){
-                            Notification::make()
-                                ->title("Attenzione! L'importo del pagamento è diverso dal totale della fattura " . $invoice->getNewInvoiceNumber())
-                                ->danger()
-                                ->duration(5000)
-                                ->send();
-                        }
-                        if($newTotalPayment > ($compare - $invoice->total_notes)){
+
+                        // VECCHIO CALCOLO CONTROLLO
+                        // $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+                        // $compare = ($invoice->client?->type?->value == 'public' && $notRound)
+                        //     ? $invoice->no_vat_total
+                        //     : $invoice->total;
+
+                        // NUOVO CALCOLO CONTROLLO USANDO is_total_with_vat
+                        $newNoVatTotal = $invoice->no_vat_total - $invoice->creditNotes?->sum('no_vat_total');
+                        $newVat = $invoice->vat - $invoice->creditNotes?->sum('vat');
+                        $temp = $newNoVatTotal- $invoice->total_payment;
+                        $compare = $invoice->is_total_with_vat ? $temp + $newVat : $temp;
+                        $comparePayment = $invoice->is_total_with_vat ? $newNoVatTotal + $newVat : $newNoVatTotal;
+
+                        // if($newTotalPayment > ($compare - $invoice->total_notes)){
+                        if($newTotalPayment > $comparePayment){
                             Notification::make()
                                 ->title('Attenzione! Con questo inserimento il totale dei pagamenti della fattura ' . $invoice->getNewInvoiceNumber() . ' eccederebbe il dovuto.')
                                 ->danger()
                                 ->duration(6000)
+                                ->send();
+                        }
+                        else if($amount != $compare){
+                            Notification::make()
+                                ->title("Attenzione! L'importo del pagamento è diverso dal residuo del dovuto della fattura " . $invoice->getNewInvoiceNumber())
+                                ->danger()
+                                ->duration(5000)
                                 ->send();
                         }
                     })

@@ -429,14 +429,28 @@ class NewContractResource extends Resource
                 TextColumn::make('invoiced')
                     ->label('Fatturato')
                     ->sortable()
+                    // VECCHIO CALCOLO
+                    // ->state(function ($record) {
+                    //     $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
+                    //     $query = Invoice::where('contract_id', $record->id)                                 // calcolo il totale fatturato
+                    //         ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
+                    //     if($record->client?->type == ClientType::PUBLIC && $notRound)
+                    //         $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
+                    //     else
+                    //         $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
+                    //     return number_format($totalInvoiced, 2, ',', '.') . " €";
+                    // })
+                    // NUOVO CALCOLO 
                     ->state(function ($record) {
-                        $notRound = BankAccount::find($record?->bank_account_id)?->name != 'Giroconto';
-                        $query = Invoice::where('contract_id', $record->id)                                 // calcolo il totale fatturato
-                            ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
-                        if($record->client?->type == ClientType::PUBLIC && $notRound)
-                            $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
-                        else
-                            $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
+                        $imponibile = Invoice::where('contract_id', $record->id)                            // calcolo il totale imponibile fatturato
+                            ->selectRaw('SUM(CASE WHEN parent_id IS NULL THEN no_vat_total ELSE -no_vat_total END) as total')
+                            ->value('total') ?? 0;
+
+                        $iva = Invoice::where('contract_id', $record->id)                                   // calcolo il totale iva fatturato
+                            ->selectRaw('SUM(CASE WHEN parent_id IS NULL THEN vat ELSE -vat END) as total')
+                            ->value('total') ?? 0;
+ 
+                        $totalInvoiced = $imponibile + $iva;                                                // calcolo il totale
                         return number_format($totalInvoiced, 2, ',', '.') . " €";
                     })
                     ->toggleable(isToggledHiddenByDefault: true),

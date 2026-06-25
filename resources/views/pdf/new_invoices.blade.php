@@ -296,12 +296,19 @@
                 @php
                     $payments = $invoice->activePayments?->sum('amount') ?? 0;
 
-                    $notes = $invoice->client?->type == App\Enums\ClientType::PUBLIC ? $invoice->creditNotes?->sum('no_vat_total') ?? 0 : $invoice->creditNotes?->sum('total') ?? 0;
+                    // VECCHIO CALCOLO
+                    // $notes = $invoice->client?->type == App\Enums\ClientType::PUBLIC ? $invoice->creditNotes?->sum('no_vat_total') ?? 0 : $invoice->creditNotes?->sum('total') ?? 0;
+
+                    // NUOVO CALCOLO USANDO is_total_with_vat
+                    $newNoVatTotal = $invoice->no_vat_total - $invoice->creditNotes?->sum('no_vat_total');
+                    $newVat = $invoice->vat - $invoice->creditNotes?->sum('vat');
+                    $notes = $newNoVatTotal + $newVat;
                     $n[] = $notes;
+                    $temp = $newNoVatTotal- $invoice->total_payment;
+	                $residue = $invoice->is_total_with_vat ? $temp + $newVat : $temp;
 
-                    $total = $invoice->client?->type == App\Enums\ClientType::PUBLIC ? $invoice->no_vat_total : $invoice->total;
-
-                    $residue = $total - $payments - $notes;
+                    // $total = $invoice->client?->type == App\Enums\ClientType::PUBLIC ? $invoice->no_vat_total : $invoice->total;
+                    // $residue = $total - $payments - $notes;
 
                     if($invoice->docType?->name == 'TD04') $residue = 0.0;
 

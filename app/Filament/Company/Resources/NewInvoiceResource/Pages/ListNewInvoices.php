@@ -857,11 +857,13 @@ class ListNewInvoices extends ListRecords
                 $contract->last_invoice_number = $lastInvoice?->number;                         // numero ultima fattura
                 $contract->last_invoice_sectional_id = $lastInvoice?->sectional_id;             // sezionario ultima fattura
                 $contract->last_invoice_year = $lastInvoice?->year;                             // anno ultima fattura
-                $notRound = BankAccount::find($lastInvoice?->bank_account_id)?->name != 'Giroconto';
-                if($contract->client?->type?->value == 'public' && $notRound)
-                    $contract->last_invoice_total = $lastInvoice?->no_vat_total;                // totale senza iva ultima fattura
-                else
+
+                // $notRound = BankAccount::find($lastInvoice?->bank_account_id)?->name != 'Giroconto';
+                // if($contract->client?->type?->value == 'public' && $notRound)
+                //     $contract->last_invoice_total = $lastInvoice?->no_vat_total;                // totale senza iva ultima fattura
+                // else
                     $contract->last_invoice_total = $lastInvoice?->total;                       // totale ultima fattura
+
                 $contract->last_invoice_notes = $lastInvoice?->total_notes;                     // totale note di credito su ultima fattura
 
                 $activeContracts->push($contract);                                              // aggiungo alla collezione dei contratti validi
@@ -894,14 +896,24 @@ class ListNewInvoices extends ListRecords
                 ->where('flow', 'out')
                 ->orderBy('invoice_date', 'desc')
                 ->first();
-            $notRound = BankAccount::find($lastInvoice?->bank_account_id)?->name != 'Giroconto';
 
-            $query = Invoice::where('contract_id', $contract->id)                               // calcolo il totale fatturato
-                ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
-            if($contract->client?->type == ClientType::PUBLIC && $notRound)
-                $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
-            else
-                $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
+            // $notRound = BankAccount::find($lastInvoice?->bank_account_id)?->name != 'Giroconto';
+            // $query = Invoice::where('contract_id', $contract->id)                               // calcolo il totale fatturato
+            //     ->where('flow', 'out');                                                         // non necessario perchè le invoice legate ai NewContract sono tutte con flow = 'out'
+            // if($contract->client?->type == ClientType::PUBLIC && $notRound)
+            //     $totalInvoiced = $query->sum('no_vat_total') ?? 0;                              // se contratto con PA sommo il totale senza iva
+            // else
+            //     $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
+
+            $imponibile = Invoice::where('contract_id', $contract->id)                            // calcolo il totale imponibile fatturato
+                ->selectRaw('SUM(CASE WHEN parent_id IS NULL THEN no_vat_total ELSE -no_vat_total END) as total')
+                ->value('total') ?? 0;
+
+            $iva = Invoice::where('contract_id', $contract->id)                                   // calcolo il totale iva fatturato
+                ->selectRaw('SUM(CASE WHEN parent_id IS NULL THEN vat ELSE -vat END) as total')
+                ->value('total') ?? 0;
+
+            $totalInvoiced = $imponibile + $iva;
 
             if ($contract->amount > $totalInvoiced) {                                           // verifico se il contratto soddisfa la condizione
                                                                                                 // aggiungo i dati calcolati al contratto
@@ -911,9 +923,9 @@ class ListNewInvoices extends ListRecords
                 $contract->last_invoice_sectional_id = $lastInvoice?->sectional_id;             // sezionario ultima fattura
                 $contract->last_invoice_year = $lastInvoice?->year;                             // anno ultima fattura
 
-                if($contract->client?->type?->value == 'public' && $notRound)
-                    $contract->last_invoice_total = $lastInvoice?->no_vat_total;                // totale senza iva ultima fattura
-                else
+                // if($contract->client?->type?->value == 'public' && $notRound)
+                //     $contract->last_invoice_total = $lastInvoice?->no_vat_total;                // totale senza iva ultima fattura
+                // else
                     $contract->last_invoice_total = $lastInvoice?->total;                       // totale ultima fattura
                 $contract->last_invoice_notes = $lastInvoice?->total_notes;                     // totale note di credito su ultima fattura
 

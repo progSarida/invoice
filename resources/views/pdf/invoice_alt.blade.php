@@ -62,7 +62,8 @@
     use App\Enums\ClientType;
     use App\Models\BankAccount;
     $notRound = BankAccount::find($invoice->bank_account_id)?->name != 'Giroconto';
-    $split = $invoice->client?->type == ClientType::PUBLIC && $notRound;
+    // $split = $invoice->client?->type == ClientType::PUBLIC && $notRound;
+    $split = !$invoice->is_total_with_vat;
 
     $fullTotal = 0;
     $vattedTotal = 0;
@@ -402,12 +403,19 @@
         </tr>
         @php
             $split = false;
-            if($invoice->client?->type == \App\Enums\ClientType::PUBLIC && $notRound){
-                $totalPay = $invoice->no_vat_total;
-                $split = true;
+            // if($invoice->client?->type == \App\Enums\ClientType::PUBLIC && $notRound){
+            //    $totalPay = $invoice->no_vat_total;
+            //    $split = true;
+            // }
+            // else{
+            //    $totalPay = $invoice->total;
+            // }
+            if($invoice->is_total_with_vat){
+                $totalPay = $invoice->total;
             }
             else{
-                $totalPay = $invoice->total;
+                $totalPay = $invoice->no_vat_total;
+                $split = true;
             }
         @endphp
         {{-- @if($fullTotal != $noVattedTotal) --}}

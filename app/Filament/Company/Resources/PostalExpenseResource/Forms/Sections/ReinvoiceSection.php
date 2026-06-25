@@ -114,12 +114,18 @@ class ReinvoiceSection
                     if ($invoice) {
                         $set('reinvoice_number', $invoice->number);
                         $set('reinvoice_date', $invoice->invoice_date->format('Y-m-d'));
-                        $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
-                        if($invoice->client?->type == ClientType::PUBLIC && $notRound){
-                            $invoiceTot = $invoice->no_vat_total;
-                        } else {
-                            $invoiceTot = $invoice->total;
-                        }
+
+                        // VECCHIO CALCOLO
+                        // $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+                        // if($invoice->client?->type == ClientType::PUBLIC && $notRound){
+                        //     $invoiceTot = $invoice->no_vat_total;
+                        // } else {
+                        //     $invoiceTot = $invoice->total;
+                        // }
+
+                        // NUOVO CALCOLO 
+                        $invoiceTot = $invoice->total;
+
                         $notifyAmount = (float) str_replace(['.', ','], ['', '.'], $get('notify_amount'));
                         // $expenseAmount = (float) str_replace(['.', ','], ['', '.'], $get('notify_expense_amount'));
                         $markAmount = (float) str_replace(['.', ','], ['', '.'], $get('mark_expense_amount'));
