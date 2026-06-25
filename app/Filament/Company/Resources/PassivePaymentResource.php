@@ -22,6 +22,7 @@ use App\Models\PassiveInvoice;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Facades\Auth;
@@ -50,7 +51,7 @@ class PassivePaymentResource extends Resource
                     ->label('Fattura validata da pagare')
                     ->relationship(name: 'passiveInvoice', titleAttribute: 'id')
                     ->searchable()
-                    ->hintIcon('heroicon-o-information-circle', tooltip: "Digitare 'Tutte' nella ricerca per mostrare tutte fatture non pagate")
+                    ->hintIcon('heroicon-o-information-circle', tooltip: "Ricerca su fornitore, numero, importo o data fattura; aggiungere alla ricerca 'pagate' per ricercare tra le fatture pagate. Digitare 'tutte' per mostrare tutte le fatture non pagate.")
                     ->getSearchResultsUsing(function (string $search, ?Model $record) {
                         $search = trim(preg_replace('/\s+/', ' ', $search));
                         $terms = explode(' ', $search);
@@ -58,15 +59,32 @@ class PassivePaymentResource extends Resource
                             $q->whereHas('docGroup', fn ($qGroup) => $qGroup->where('name', 'Autofatture'));
                         };
 
-                        if(str_contains(strtolower($search), "tutte")){
-                            $list = PassiveInvoice::query()
+                        if(str_contains(strtolower($search), "pagate")){
+                            $terms = array_filter($terms, function($term) {
+                                $termLower = strtolower(trim($term));
+                                // Ritorna true solo se la parola NON è "pagate" (o "pagato", "pagati", ecc.)
+                                return !in_array($termLower, ['pagate', 'pagate', 'pagato', 'pagati', 'pagata']);
+                            });
+                            $terms = array_values($terms);
+                            $query = PassiveInvoice::query()
+                                ->where(function ($query) use ($record) {
+                                    // Continua a mostrare le fatture non pagate...
+                                    $query->whereRaw('(total_payment + total_note) >= total')
+                                    // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
+                                    ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
+                                });
+                        } else {
+                            $query = PassiveInvoice::query()
                                 ->where(function ($query) use ($record) {
                                     // Continua a mostrare le fatture non pagate...
                                     $query->whereRaw('(total_payment + total_note) < total')
                                     // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
                                     ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
-                                })
-                                ->where('doc_type', '!=', 'TD04')
+                                });
+                        }
+
+                        if(str_contains(strtolower($search), "tutte")){
+                            $list = $query->where('doc_type', '!=', 'TD04')
                                 ->whereDoesntHave('docType', $filterGroup)
                                 ->whereHas('piValidation', fn($sub) => $sub->where('pi_validation_status', 'ok'))
                                 ->with(['supplier'])
@@ -76,14 +94,7 @@ class PassivePaymentResource extends Resource
                                 ->mapWithKeys(fn (PassiveInvoice $i) => [$i->id => static::getPassiveInvoiceLabel($i)]) // Usa una funzione helper
                                 ->toArray();
                         } else {
-                            $list = PassiveInvoice::query()
-                                ->where(function ($query) use ($record) {
-                                    // Continua a mostrare le fatture non pagate...
-                                    $query->whereRaw('(total_payment + total_note) < total')
-                                    // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
-                                    ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
-                                })
-                                ->where('doc_type', '!=', 'TD04')
+                            $list = $query->where('doc_type', '!=', 'TD04')
                                 ->whereDoesntHave('docType', $filterGroup)
                                 ->whereHas('piValidation', fn($sub) => $sub->where('pi_validation_status', 'ok'))
                                 ->where(function ($mainQuery) use ($terms) {
@@ -112,7 +123,14 @@ class PassivePaymentResource extends Resource
                     ->afterStateUpdated(function ($state, Set $set) {
                         $passiveInvoice = PassiveInvoice::find($state);
                         if ($passiveInvoice) {
-                            $set('amount', number_format($passiveInvoice->total - ($passiveInvoice->total_payment + $passiveInvoice->total_note), 2, ",", "."));
+                            $amount = $passiveInvoice->total - ($passiveInvoice->total_payment + $passiveInvoice->total_note);
+                            if($amount <= 0)
+                                Notification::make()
+                                    ->title('Attenzione! La fattura selezionata è già stata pagata')
+                                    ->danger()
+                                    ->duration(6000)
+                                    ->send();
+                            $set('amount', number_format($amount, 2, ",", "."));
                             $set('bank', $passiveInvoice->bank);
                             $set('iban', $passiveInvoice->iban);
                             $set('payment_type', $passiveInvoice->payment_type);

@@ -65,7 +65,8 @@ class NewActivePaymentsResource extends Resource
                 Forms\Components\Select::make('invoice_id')
                     ->label('Fattura')
                     ->placeholder('Seleziona una fattura...')
-                    ->hintIcon('heroicon-o-information-circle', tooltip: "Digitare 'Tutte' nella ricerca per mostrare tutte fatture non pagate, oppure inserire direttamente numero e anno, oppure il nome del cliente.")
+                    // ->hintIcon('heroicon-o-information-circle', tooltip: "Digitare 'Tutte' nella ricerca per mostrare tutte fatture non pagate, oppure inserire direttamente numero e anno, oppure il nome del cliente.")
+                    ->hintIcon('heroicon-o-information-circle', tooltip: "Ricerca su cliente, numero o anno fattura; aggiungere alla ricerca 'pagate' per ricercare tra le fatture pagate. Digitare 'tutte' per mostrare tutte le fatture non pagate.")
                     ->getSearchResultsUsing(function (string $search, $record) {
                         // Rimuovi spazi multipli e trim
                         $search = trim(preg_replace('/\s+/', ' ', $search));
@@ -76,7 +77,7 @@ class NewActivePaymentsResource extends Resource
                             ->whereNotNull('flow')                                      // solo le fatture nuove
                             ->where('sdi_status', '!=', 'da_inviare')                   // solo le fatture inviate allo sdi
                             ->whereNull('parent_id')                                    // escludo le note di credito
-                            ->with(['client', 'sectional'])
+                            ->with(['client', 'sectional']);
                             // ->where(function ($q) {
                             //     $q->whereHas('client', function ($clientQuery) {
                             //         $clientQuery->where('type', ClientType::PUBLIC);
@@ -89,7 +90,28 @@ class NewActivePaymentsResource extends Resource
                             //         ->whereColumn('total_payment', '<', 'total');       // solo no pagate (verso privati)
                             //     });
                             // });
-                            ->where(function ($q) {
+
+                        if(str_contains(strtolower($search), "pagate")){
+                            $query->where(function ($q) {
+                                // Caso: Pubblica Amministrazione
+                                $q->where(function ($publicQuery) {
+                                    $publicQuery->whereHas('client', function ($clientQuery) {
+                                        $clientQuery->where('type', ClientType::PUBLIC);
+                                    })
+                                    // Verifica se pagamenti + note di credito sono inferiori al totale imponibile
+                                    ->whereRaw('(total_payment + total_notes) >= no_vat_total');
+                                })
+                                // Caso: Privati
+                                ->orWhere(function ($privateQuery) {
+                                    $privateQuery->whereHas('client', function ($clientQuery) {
+                                        $clientQuery->where('type', ClientType::PRIVATE);
+                                    })
+                                    // Verifica se pagamenti + note di credito sono inferiori al totale ivato
+                                    ->whereRaw('(total_payment + total_notes) >= total');
+                                });
+                            });
+                        } else {
+                            $query->where(function ($q) {
                                 // Caso: Pubblica Amministrazione
                                 $q->where(function ($publicQuery) {
                                     $publicQuery->whereHas('client', function ($clientQuery) {
@@ -107,10 +129,20 @@ class NewActivePaymentsResource extends Resource
                                     ->whereRaw('(total_payment + total_notes) < total');
                                 });
                             });
+                        }
 
                         if(!str_contains(strtolower($search), "tutte")){                // filtro con la ricerca
                             // Cerco separatori (spazio, virgola, slash, trattino)
                             $parts = preg_split('/[\s,\/\-]+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+
+                            // rimuovo 'pagat*'
+                            $parts = array_filter($parts, function($word) {
+                                // Ritorna false se la parola è "pagate", "pagato", "pagati", "pagata"
+                                return !preg_match('/^pagat[eoi]a?$/i', trim($word));
+                            });
+
+                            // resetto gli indico dell'array
+                            $parts = array_values($parts);
 
                             if (count($parts) >= 2) {
                                 // Due o più valori: prendo i primi due e convertili a integer
@@ -196,6 +228,13 @@ class NewActivePaymentsResource extends Resource
                             $newVat = $invoice->vat - $invoice->creditNotes?->sum('vat');
                             $temp = $newNoVatTotal- $invoice->total_payment;
                             $amount = $invoice->is_total_with_vat ? $temp + $newVat : $temp;
+
+                            if($amount <= 0)
+                                Notification::make()
+                                    ->title('Attenzione! La fattura selezionata è già stata pagata')
+                                    ->danger()
+                                    ->duration(6000)
+                                    ->send();
 
                             if ($invoice) {
                                 $set('bank_account_id', $invoice->bank_account_id);
