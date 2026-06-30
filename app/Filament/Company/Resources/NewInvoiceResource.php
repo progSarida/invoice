@@ -1649,11 +1649,15 @@ class NewInvoiceResource extends Resource
                         Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
                             ->using(function ($query) {
-                                $sum = 0;
-                                $records = $query->get();
+                                // Eseguiamo la query forzando i modelli Invoice ed eager-caricando docType
+                                $records = Invoice::query()
+                                    ->with('docType')
+                                    ->whereIn('id', $query->pluck('id'))
+                                    ->get();
 
+                                $sum = 0;
                                 foreach ($records as $record) {
-                                    if ($record->parent_id) {
+                                    if ($record->docType?->name == 'TD04') {
                                         $sum -= $record->no_vat_total;
                                     } else {
                                         $sum += $record->no_vat_total;
@@ -1674,14 +1678,18 @@ class NewInvoiceResource extends Resource
                         Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
                             ->using(function ($query) {
-                                $sum = 0;
-                                $records = $query->get();
+                                // Eseguiamo la query forzando i modelli Invoice ed eager-caricando docType
+                                $records = Invoice::query()
+                                    ->with('docType')
+                                    ->whereIn('id', $query->pluck('id'))
+                                    ->get();
 
+                                $sum = 0;
                                 foreach ($records as $record) {
-                                    if ($record->parent_id) {
-                                        $sum -= $record->vat;
+                                    if ($record->docType?->name == 'TD04') {
+                                        $sum -= $record->no_vat_total;
                                     } else {
-                                        $sum += $record->vat;
+                                        $sum += $record->no_vat_total;
                                     }
                                 }
 
@@ -1698,14 +1706,18 @@ class NewInvoiceResource extends Resource
                         Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
                             ->using(function ($query) {
-                                $sum = 0;
-                                $records = $query->get();
+                                // Eseguiamo la query forzando i modelli Invoice ed eager-caricando docType
+                                $records = Invoice::query()
+                                    ->with('docType')
+                                    ->whereIn('id', $query->pluck('id'))
+                                    ->get();
 
+                                $sum = 0;
                                 foreach ($records as $record) {
-                                    if ($record->parent_id) {
-                                        $sum -= $record->total;
+                                    if ($record->docType?->name == 'TD04') {
+                                        $sum -= $record->no_vat_total;
                                     } else {
-                                        $sum += $record->total;
+                                        $sum += $record->no_vat_total;
                                     }
                                 }
 
@@ -1727,7 +1739,7 @@ class NewInvoiceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('tot_own')->label('Totale a doversi')
                     ->money('EUR')
-                    ->state(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getOwned())
+                    ->state(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getOwned())
                     ->sortable()
                     ->alignRight()
                     ->summarize([
@@ -1738,7 +1750,7 @@ class NewInvoiceResource extends Resource
                                 return Invoice::query()
                                     ->whereIn('id', $query->pluck('id'))
                                     ->get()
-                                    ->sum(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getOwned());
+                                    ->sum(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getOwned());
                             })
                             ->money('EUR', true, 'it_IT'),
                     ])
@@ -1755,7 +1767,7 @@ class NewInvoiceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('tot_res')->label('Residuo')
                     ->money('EUR')
-                    ->state(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getResidue())
+                    ->state(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getResidue())
                     ->sortable()
                     ->alignRight()
                     ->summarize([
@@ -1766,7 +1778,7 @@ class NewInvoiceResource extends Resource
                                 return Invoice::query()
                                     ->whereIn('id', $query->pluck('id'))
                                     ->get()
-                                    ->sum(fn (Invoice $invoice) => $invoice->parent_id ? 0.00 : $invoice->getResidue());
+                                    ->sum(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getResidue());
                             })
                             ->money('EUR', true, 'it_IT'),
                     ])
