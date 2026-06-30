@@ -89,6 +89,12 @@ class NewInvoiceResource extends Resource
             ->schema([
                 // Grid::make('GRID')->columnSpan(2)->schema([
 
+                    Toggle::make('level')
+                        ->label('Quadratura saldi')
+                        ->dehydrated(false)
+                        ->hidden(false)
+                        ->live(),
+
                     Section::make('Opzioni')
                     // ->collapsible()
                     ->columns(12)
@@ -277,7 +283,7 @@ class NewInvoiceResource extends Resource
                                 ),
 
                             Forms\Components\Select::make('tax_type')->label('Entrata')
-                                ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic())
+                                ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic() && !$get('level'))
                                 ->columnSpan(2)
                                 // ->options(TaxType::class)
                                 ->options(function (Get $get) {
@@ -552,7 +558,7 @@ class NewInvoiceResource extends Resource
                                         $set('contract_detail_id', null);
                                     }
                                 })
-                                ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic())
+                                ->required(fn(Get $get): bool => filled($get('client_id')) && Client::find($get('client_id'))->isPublic() && !$get('level'))
                                 ->searchable()
                                 ->live()
                                 ->preload()
@@ -2847,7 +2853,10 @@ class NewInvoiceResource extends Resource
 
             $docType = DocType::with('docGroup')->find($docTypeId);
 
-            if ($docType?->docGroup?->name === 'Note di variazione') {
+            if($docType->name == 'TD99'){
+                $set('description', '(ab01) Quadratura saldi per €');
+                return;
+            } else if ($docType?->docGroup?->name === 'Note di variazione') {
                 if($new === 'new_doc'){
                     $set('description', '');
                 }
