@@ -223,7 +223,7 @@ class InvoiceItemsRelationManager extends RelationManager
                         $vatAmount = $amount * $rate;
                         $total = $amount + $vatAmount;
 
-                        $set('amount', number_format($state, 2, ',', '.'));
+                        $set('amount', number_format($amount, 2, ',', '.'));
                         $set('vat_amount', number_format($vatAmount, 2, ',', '.'));
                         $set('total', number_format($total, 2, ',', '.'));
                     })
