@@ -35,6 +35,12 @@ class ActivePaymentsRelationManager extends RelationManager
 
     protected static ?string $title = 'Pagamenti';
 
+    public function isReadOnly(): bool
+    {
+        // Abilita le azioni di modifica solo quando siamo nella pagina View
+        return false; // sempre abilitato (anche su Edit)
+    }
+
     public function form(Form $form): Form
     {
         return $form
