@@ -405,6 +405,7 @@ class PassiveInvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('5s')
             ->defaultSort('invoice_date', 'desc')
             ->columns([
                 TextColumn::make('docType.description')
