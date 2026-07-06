@@ -190,7 +190,7 @@ class ListNewInvoices extends ListRecords
                                 ->get();
 // dd($list);
                     foreach($list as $el){
-                        if($maxItems < $el->invoice_items_count) $maxItems = $el->invoice_items_count; 
+                        if($maxItems < $el->invoice_items_count) $maxItems = $el->invoice_items_count;
                     }
 // dd($maxItems);
                     return [ 'max_items' => (int) $maxItems, ];
@@ -229,7 +229,7 @@ class ListNewInvoices extends ListRecords
                         ->statePath('columnMap'),
                     ...$action->getExporter()::getOptionsFormComponents(),
                 ]),
-    
+
             ExportAction::make('esporta_s')
                 ->icon('phosphor-export')
                 ->label('Esporta (Semplice)')
@@ -564,7 +564,7 @@ class ListNewInvoices extends ListRecords
                         \App\Jobs\UpdateMultipleInvoicesSdiStatusJob::dispatch(
                             $data['password'],
                             Filament::getTenant()->id,
-                            auth()->id()
+                            Auth::user()->id,
                         );
 
                         Notification::make()
