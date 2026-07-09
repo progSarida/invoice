@@ -1583,7 +1583,7 @@ class NewInvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->poll('10s')
+            ->poll('20s')
             ->query(Invoice::newInvoices())
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Id')

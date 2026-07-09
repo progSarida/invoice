@@ -69,7 +69,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>Partitario</h1>
+            <h1>Partitario {{ $filters['type'] == 'accrual' ? ' (Competenza)' : ' (Esercizio)' }}</h1>
             <p>{{ $company->name }}</p>
             @if (!empty($filters['from_date']) || !empty($filters['to_date']))
                 <p>Da data: {{ $filters['from_date'] ? \Carbon\Carbon::parse($filters['from_date'])->format('d/m/Y') : 'N/D' }} - A data: {{ $filters['to_date'] ? \Carbon\Carbon::parse($filters['to_date'])->format('d/m/Y') : 'N/D' }}</p>

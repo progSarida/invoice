@@ -697,8 +697,8 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
         return null;
     }
 
-    public function invoiceNumber(){
-
+    public function invoiceNumber()
+    {
         if($this->art_73) {
             $number = "";
             $date = $this->invoice_date;
@@ -709,7 +709,7 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
             $number = $number.$this->number;
             return $number."/".$date;
         }
-        else if(!$this->number || !$this->sectional_id || !$this->year)
+        else if($this->number === null || !$this->sectional_id || !$this->year)
             return null;
         else{
             $number = "";
@@ -721,7 +721,6 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
             $number = $number.$this->number;
             return $number."/".$sectional."/".$this->year;
         }
-
     }
 
     private static function checkContractValidity($invoice)
