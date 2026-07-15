@@ -54,10 +54,18 @@ class NewInvoiceExporterSimple extends Exporter
                 ->label('Imponibile')
                 ->formatStateUsing(function ($state, $record) {
                     $output = (float) $record->invoiceItems()->whereNull('postal_expense_id')->where('vat_code_type', '!=', 'vc06a')->sum('amount');
+                    if($record->parent_id) $output = $output * -1; 
+                    else $output = $output * 1;
                     return (float) number_format($output, 2, '.', '');
                 }),
             ExportColumn::make('vat')
-                ->label('IVA'),
+                ->label('IVA')
+                ->formatStateUsing(function ($state, $record) {
+                    $output = (float) $state;
+                    if($record->parent_id) $output = $output * -1; 
+                    else $output = $output * 1;
+                    return (float) number_format($output, 2, '.', '');
+                }),
             ExportColumn::make('art_15')
                 ->label('Rimb. Art. 15')
                 ->formatStateUsing(function ($record) {
@@ -72,7 +80,13 @@ class NewInvoiceExporterSimple extends Exporter
                     else { return 0.00; }
                 }),
             ExportColumn::make('total')
-                ->label('Totale'),
+                ->label('Totale')
+                ->formatStateUsing(function ($state, $record) {
+                    $output = (float) $state;
+                    if($record->parent_id) $output = $output * -1; 
+                    else $output = $output * 1;
+                    return (float) number_format($output, 2, '.', '');
+                }),
             ExportColumn::make('total_notes')
                 ->label('Totale note di credito'),
             ExportColumn::make('receive')

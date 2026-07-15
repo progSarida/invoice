@@ -18,12 +18,17 @@ use App\Filament\Company\Resources\ClientResource;
 use App\Filament\Exports\ClientExporter;
 use App\Models\BankAccount;
 use App\Models\Client;
+use App\Models\Company;
+use App\Models\DocType;
 use App\Models\ManageType;
 use DateTime;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
@@ -79,7 +84,7 @@ class ListClients extends ListRecords
                 ->tooltip('Stampa partitario clienti')
                 // ->color('primary')
                 ->color(Color::rgb('rgb(255, 0, 0)'))
-                ->modalWidth('5xl')
+                ->modalWidth('7xl')
                 ->modalHeading('Stampa partitario')
                 ->form([
                     \Filament\Forms\Components\Grid::make(12)
@@ -161,13 +166,50 @@ class ListClients extends ListRecords
                                     'accrual' => 'Competenza',
                                     'year' => 'Esercizio',
                                 ])
+                                ->live()
                                 ->default('accrual')
                                 ->inline()
-                                ->columnSpan(5),
+                                ->columnSpan(5)
+                                // Quando cambia il tipo, aggiorniamo dinamicamente la selezione di docTypes
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    $names = $state === 'accrual' ? ['TD00', 'TD04', 'TD05'] : ['TD00'];
+                                    
+                                    $defaultDocTypes = \Filament\Facades\Filament::getTenant()
+                                        ->docTypes()
+                                        ->whereNotIn('name', $names)
+                                        ->pluck('name')
+                                        ->toArray();
+                                        
+                                    $set('docTypes', $defaultDocTypes);
+                                }),
                             Checkbox::make('prec_residue')
                                 ->label('Con residuo precedente')
                                 ->columnSpan(4)
                                 ->default(true),
+                            Section::make('Documenti da inserire')
+                                ->description(fn($get) => $get('type') === 'accrual' ? 'Le note di credito non sono selezionabili perchè saranno recuperate anche al di fuori del periodo indicato a partire dalle fatture' : '' )
+                                ->columns(24)
+                                ->collapsed()
+                                ->schema([
+                                    CheckboxList::make('docTypes')
+                                        ->label('')
+                                        ->required()
+                                        // ->options(DocType::pluck('description', 'name')->toArray())
+                                        ->options(Filament::getTenant()->docTypes()->pluck('description', 'name')->toArray())
+                                        ->columns(2)
+                                        ->disableOptionWhen(fn (string $value, $get): bool => $get('type') === 'accrual' && $value === 'TD04')
+                                        ->dehydrated(true)
+                                        ->columnSpan(['sm' => 'full', 'md' => 24])
+                                        ->default(function($record, $get) {
+                                            $names = $get('type') === 'accrual' ? ['TD00', 'TD04', 'TD05'] : ['TD00'];
+                                            return Filament::getTenant()->docTypes()->whereNotIn('name', $names)->pluck('name')->toArray();
+                                        })
+                                        ->gridDirection('row'),
+                                ])
+                                ->columnSpanFull(),
+                            Placeholder::make('last')
+                                ->label('')
+                                ->columnSpan(9),
                             Select::make('output_format')
                                 ->label('Formato di output')
                                 ->options([
@@ -191,7 +233,7 @@ class ListClients extends ListRecords
         ];
     }
 
-    private function printLedger($data)
+    private function printLedger(array $data)
     {
         // dd($data);
         $input = [];
@@ -200,6 +242,7 @@ class ListClients extends ListRecords
         $input['to_date'] = $toDate = $data['to_date'] ?? null;
         $input['type'] = $type = $data['type'];
         $input['prec_residue'] = $precResidue = $data['prec_residue'];
+        $input['docTypes'] = $docTypes = $data['docTypes'];
         $input['output_format'] = $outputFormat = $data['output_format'] ?? 'pdf';
 
         $residue = $this->getPrecResidue($input);                                                            // residuo precedente
@@ -245,13 +288,13 @@ class ListClients extends ListRecords
         $tenant = \Filament\Facades\Filament::getTenant();
 
         if ($outputFormat === 'excel') {
-            return $this->generateExcelOutput($data, $residue, $param, $tenant);
+            return $this->generateExcelOutput($data, $residue, $param);
         } else {
             return $this->generatePdfOutput($data, $residue, $param, $tenant);
         }
     }
 
-    private function createAccrualLedgerOld($input): array
+    private function createAccrualLedgerOld(array $input): array
     {
         $invoices = \Filament\Facades\Filament::getTenant()
             ->invoices()
@@ -365,7 +408,7 @@ class ListClients extends ListRecords
         return $param;
     }
 
-    private function createAccrualLedger($input): array
+    private function createAccrualLedgerOk(array $input): array
     {
         $param = [];
         $index = 0;
@@ -375,7 +418,7 @@ class ListClients extends ListRecords
         $invoices = $tenant
             ->invoices()
             ->with('docType')
-            ->whereNull('parent_id')
+            // ->whereNull('parent_id')
             ->whereHas('docType', fn($q) => $q->whereIn('name', ['TD01', 'TD99']))
             ->when($input['client_id'], fn($q) => $q->where('client_id', $input['client_id']))
             ->when($input['from_date'], fn($q) => $q->where('invoice_date', '>=', $input['from_date']))
@@ -455,7 +498,132 @@ class ListClients extends ListRecords
         return $param;
     }
 
-    private function createYearLedger($input): array
+    private function createAccrualLedger(array $input): array
+    {
+        $param = [];
+        $tenant = \Filament\Facades\Filament::getTenant();
+
+        // 1. Recupero fatture filtrate per i tipi di documento selezionati
+        $invoices = $tenant
+            ->invoices()
+            ->with(['docType', 'client', 'creditNotes', 'activePayments']) // Eager loading per evitare query N+1
+            ->when($input['docTypes'], function($q) use ($input) {
+                $q->whereHas('docType', fn($subQ) => $subQ->whereIn('name', $input['docTypes']));
+            })
+            ->when($input['client_id'], fn($q) => $q->where('client_id', $input['client_id']))
+            ->when($input['from_date'], fn($q) => $q->where('invoice_date', '>=', $input['from_date']))
+            ->when($input['to_date'], fn($q) => $q->where('invoice_date', '<=', $input['to_date']))
+            ->orderBy('invoices.year', 'asc')
+            ->orderBy('invoices.sectional_id', 'asc')
+            ->orderBy('invoices.number', 'asc')
+            ->get();
+
+        foreach ($invoices as $invoice) {
+            $amount = $invoice->is_total_with_vat ? $invoice->total : $invoice->no_vat_total;
+
+            // Prepariamo i dati comuni della riga
+            $row = [
+                'order' => \Carbon\Carbon::parse($invoice->invoice_date)->valueOf(),
+                'reg' => \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y'),
+                'cliente' => [
+                    'nome' => $invoice->client->denomination,
+                    'pi' => $invoice->client->vat_code,
+                    'cf' => $invoice->client->tax_code,
+                ],
+                'num_doc' => $invoice->invoiceNumber(),
+                'data_doc' => \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y'),
+                'desc' => '',
+                'dare' => 0,
+                'avere' => 0,
+            ];
+
+            // Gestione dinamica della descrizione e degli importi in base al tipo di documento
+            // (Puoi estendere questo switch con altri codici se necessario)
+            switch ($invoice->docType->name) {
+                case 'TD01':
+                    $row['desc'] = $invoice->is_total_with_vat ? 'FT. VENDITA' : 'FT. VENDITA IVA SOSPESA';
+                    $row['dare'] = $amount ?? 0;
+                    break;
+                case 'TD99': 
+                    $row['desc'] = 'QUADRATURA';
+                    $row['dare'] = $amount ?? 0;
+                    break;
+                default:
+                    break;
+            }
+
+            $param[] = $row;
+
+            // 2. Note di credito collegate
+            if ($invoice->creditNotes) {
+                foreach ($invoice->creditNotes as $note) {
+                    $noteAmount = $note->is_total_with_vat ? $note->total : $note->no_vat_total;
+                    
+                    $param[] = [
+                        'order' => \Carbon\Carbon::parse($note->invoice_date)->valueOf(),
+                        'reg' => \Carbon\Carbon::parse($note->invoice_date)->format('d/m/Y'),
+                        'cliente' => [
+                            'nome' => $note->client->denomination,
+                            'pi' => $note->client->vat_code,
+                            'cf' => $note->client->tax_code,
+                        ],
+                        'num_doc' => $note->invoiceNumber(),
+                        'data_doc' => \Carbon\Carbon::parse($note->invoice_date)->format('d/m/Y'),
+                        'desc' => $invoice->is_total_with_vat ? 'FT. VENDITA N. ACCREDITO' : 'N.C. VENDITA IVA SOSPESA',
+                        'dare' => 0,
+                        'avere' => $noteAmount ?? 0,
+                    ];
+                }
+            }
+
+            // 3. Note di DEBITO collegate
+            if ($invoice->debitNotes) {
+                foreach ($invoice->debitNotes as $note) {
+                    $noteAmount = $note->is_total_with_vat ? $note->total : $note->no_vat_total;
+                    
+                    $param[] = [
+                        'order' => \Carbon\Carbon::parse($note->invoice_date)->valueOf(),
+                        'reg' => \Carbon\Carbon::parse($note->invoice_date)->format('d/m/Y'),
+                        'cliente' => [
+                            'nome' => $note->client->denomination,
+                            'pi' => $note->client->vat_code,
+                            'cf' => $note->client->tax_code,
+                        ],
+                        'num_doc' => $note->invoiceNumber(),
+                        'data_doc' => \Carbon\Carbon::parse($note->invoice_date)->format('d/m/Y'),
+                        'desc' => $invoice->is_total_with_vat ? 'FT. VENDITA N. DEBITO' : 'N.D. VENDITA IVA SOSPESA',
+                        'dare' => $noteAmount ?? 0,
+                        'avere' => 0,
+                    ];
+                }
+            }
+
+            // 4. Pagamenti collegati
+            if ($invoice->activePayments) {
+                foreach ($invoice->activePayments as $payment) {
+                    $param[] = [
+                        'order' => \Carbon\Carbon::parse($payment->payment_date)->valueOf(),
+                        'reg' => \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y'),
+                        'cliente' => [
+                            'nome' => $payment->invoice->client->denomination,
+                            'pi' => $payment->invoice->client->vat_code,
+                            'cf' => $payment->invoice->client->tax_code,
+                        ],
+                        'num_doc' => $payment->invoice->invoiceNumber(),
+                        'data_doc' => $payment->invoice->invoice_date->format('d/m/Y'),
+                        'desc' => ($invoice->is_total_with_vat ? 'INCASSO' : 'INCASSO IVA SOSPESA') . 
+                                    ' | FAT ' . $payment->invoice->invoiceNumber(). ' ' . \Carbon\Carbon::parse($payment->invoice->invoice_date)->format('d/m/Y'),
+                        'dare' => 0,
+                        'avere' => $payment->amount ?? 0,
+                    ];
+                }
+            }
+        }
+
+        return $param;
+    }
+
+    private function createYearLedgerOk(array $input): array
     {
         $param = [];
         $index = 0;
@@ -531,7 +699,105 @@ class ListClients extends ListRecords
         return $param;
     }
 
-    private function getPrecResidue($data)
+    private function createYearLedger(array $input): array
+    {
+        $param = [];
+        $index = 0;
+        $tenant = \Filament\Facades\Filament::getTenant();
+
+        // 1. Fatture e note di credito con invoice_date nel periodo
+        $invoices = $tenant
+            ->invoices()
+            ->with(['docType', 'invoice', 'client'])
+            ->when($input['docTypes'], function($q) use ($input) {
+                $q->whereHas('docType', fn($subQ) => $subQ->whereIn('name', $input['docTypes']));
+            })
+            ->when($input['client_id'], fn($q) => $q->where('client_id', $input['client_id']))
+            ->when($input['from_date'], fn($q) => $q->where('invoice_date', '>=', $input['from_date']))
+            ->when($input['to_date'], fn($q) => $q->where('invoice_date', '<=', $input['to_date']))
+            ->orderBy('invoices.year', 'asc')
+            ->orderBy('invoices.sectional_id', 'asc')
+            ->orderBy('invoices.number', 'asc')
+            ->get();
+
+        foreach ($invoices as $invoice) {
+            $amount = $invoice->is_total_with_vat ? $invoice->total : $invoice->no_vat_total;
+
+            $row = [
+                'order' => \Carbon\Carbon::parse($invoice->invoice_date)->valueOf(),
+                'reg' => \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y'),
+                'cliente' => [
+                    'nome' => $invoice->client->denomination,
+                    'pi' => $invoice->client->vat_code,
+                    'cf' => $invoice->client->tax_code,
+                ],
+                'num_doc' => $invoice->invoiceNumber(),
+                'data_doc' => \Carbon\Carbon::parse($invoice->invoice_date)->format('d/m/Y'),
+                'desc' => '',
+                'dare' => 0,
+                'avere' => 0,
+            ];
+
+            switch ($invoice->docType->name) {
+                case 'TD01':
+                    $row['desc'] = $invoice->is_total_with_vat ? 'FT. VENDITA' : 'FT. VENDITA IVA SOSPESA';
+                    $row['dare'] = $amount ?? 0;
+                    break;
+                case 'TD04':
+                    $row['desc'] = $invoice->is_total_with_vat ? 'FT. VENDITA N. ACCREDITO' : 'N.C. VENDITA IVA SOSPESA';
+                    $row['avere'] = $amount ?? 0;
+                    break;
+                case 'TD05':
+                    $row['desc'] = $invoice->is_total_with_vat ? 'FT. VENDITA N. DEBITO' : 'N.D. VENDITA IVA SOSPESA';
+                    $row['dare'] = $amount ?? 0;
+                    break;
+                case 'TD99': 
+                    $row['desc'] = 'QUADRATURA';
+                    $row['dare'] = $amount ?? 0;
+                    break;
+                default:
+                    // Gestione dinamica nel caso in cui arrivino codici documento extra (es: TD24, TD02)
+                    $row['desc'] = 'Doc. ' . $invoice->docType->name . '<br>Doc. orig. ' . $invoice->invoiceNumber();
+                    $row['dare'] = $amount ?? 0;
+                    break;
+            }
+
+            $param[] = $row;
+        }
+
+        // 2. Pagamenti con payment_date nel periodo, INDIPENDENTEMENTE dalla data della fattura collegata
+        $payments = \App\Models\ActivePayments::query()
+            ->where('company_id', $tenant->id)
+            ->with('invoice.client')
+            ->whereHas('invoice', function ($q) use ($input) {
+                $q->when($input['client_id'], fn($qq) => $qq->where('client_id', $input['client_id']));
+            })
+            ->when($input['from_date'], fn($q) => $q->where('payment_date', '>=', $input['from_date']))
+            ->when($input['to_date'], fn($q) => $q->where('payment_date', '<=', $input['to_date']))
+            ->get();
+
+        foreach ($payments as $payment) {
+            $param[] = [
+                'order' => \Carbon\Carbon::parse($payment->payment_date)->valueOf(),
+                'reg' => \Carbon\Carbon::parse($payment->created_at)->format('d/m/Y'),
+                'cliente' => [
+                    'nome' => $payment->invoice->client->denomination,
+                    'pi' => $payment->invoice->client->vat_code,
+                    'cf' => $payment->invoice->client->tax_code,
+                ],
+                'num_doc' => $payment->invoice->invoiceNumber(),
+                'data_doc' => $payment->invoice->invoice_date->format('d/m/Y'),
+                'desc' => ($invoice->is_total_with_vat ? 'INCASSO' : 'INCASSO IVA SOSPESA') . 
+                                    ' | FAT ' . $payment->invoice->invoiceNumber(). ' ' . \Carbon\Carbon::parse($payment->invoice->invoice_date)->format('d/m/Y'),
+                'dare' => 0,
+                'avere' => $payment->amount ?? 0,
+            ];
+        }
+
+        return $param;
+    }
+
+    private function getPrecResidue(array $data)
     {
         $type = $data['type'] ?? 'accrual';
         $historicResidue = 0;
@@ -659,16 +925,16 @@ class ListClients extends ListRecords
         return $param;
     }
 
-    private function generatePdfOutput($data, $residue, $param, $tenant)
+    private function generatePdfOutput(array $data, float $residue, array $param, Company $tenant)
     {
-        $clientName = $data['client_id'] ? Client::find($data['client_id'])->denomination : '';
-        $type = $data['type'] === 'accrual' ? 'Competenza' : 'Esercizio';
-        $span = '_';
+        $clientName = $data['client_id'] ? '_' . Client::find($data['client_id'])->denomination : '';
+        $type = $data['type'] === 'accrual' ? '_Competenza' : '_Esercizio';
+        $span = '';
         $from_formatted = $data['from_date'] ? (new DateTime($data['from_date']))->format('d-m-Y') : null;
         $to_formatted = $data['to_date'] ? (new DateTime($data['to_date']))->format('d-m-Y') : null;
-        if ($data['from_date'] && $data['to_date']) $span .= "Dal {$from_formatted} al {$to_formatted}";
-        else if ($data['from_date']) $span .= "Dal {$from_formatted}";
-        else if ($data['to_date']) $span .= "Fino al {$to_formatted}";
+        if ($data['from_date'] && $data['to_date']) $span .= "_Dal {$from_formatted} al {$to_formatted}";
+        else if ($data['from_date']) $span .= "_Dal {$from_formatted}";
+        else if ($data['to_date']) $span .= "_Fino al {$to_formatted}";
         return response()->streamDownload(function () use ($data, $residue, $param, $tenant) {
             echo Pdf::loadHTML(
                 Blade::render('pdf.ledger', [
@@ -680,11 +946,11 @@ class ListClients extends ListRecords
             )
                 ->setPaper('A4', 'portrait')
                 ->stream();
-        }, "Partitario_{$clientName}_{$type}{$span}.pdf");
+        }, "Partitario{$clientName}{$type}{$span}.pdf");
     }
 
     // Metodo per generare output Excel
-    protected function generateExcelOutput($data, $residue, $param, $tenant)
+    protected function generateExcelOutput(array $data, float $residue, array $param)
     {
         // Prepara i dati per Excel
         $excelData = [];
@@ -735,14 +1001,14 @@ class ListClients extends ListRecords
             ];
         }
 
-        $clientName = $data['client_id'] ? Client::find($data['client_id'])->denomination : '';
-        $type = $data['type'] === 'accrual' ? 'Competenza' : 'Esercizio';
-        $span = '_';
+        $clientName = $data['client_id'] ? '_' . Client::find($data['client_id'])->denomination : '';
+        $type = $data['type'] === 'accrual' ? '_Competenza' : '_Esercizio';
+        $span = '';
         $from_formatted = $data['from_date'] ? (new DateTime($data['from_date']))->format('d-m-Y') : null;
         $to_formatted = $data['to_date'] ? (new DateTime($data['to_date']))->format('d-m-Y') : null;
-        if ($data['from_date'] && $data['to_date']) $span .= "Dal {$from_formatted} al {$to_formatted}";
-        else if ($data['from_date']) $span .= "Dal {$from_formatted}";
-        else if ($data['to_date']) $span .= "Fino al {$to_formatted}";
+        if ($data['from_date'] && $data['to_date']) $span .= "_Dal {$from_formatted} al {$to_formatted}";
+        else if ($data['from_date']) $span .= "_Dal {$from_formatted}";
+        else if ($data['to_date']) $span .= "_Fino al {$to_formatted}";
 
         return response()->streamDownload(function () use ($excelData) {
             // Crea un nuovo spreadsheet
@@ -784,7 +1050,7 @@ class ListClients extends ListRecords
             // Crea il writer e salva
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
             $writer->save('php://output');
-        }, "Partitario_{$clientName}_{$type}{$span}.xlsx", [
+        }, "Partitario{$clientName}{$type}{$span}.xlsx", [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment; filename="Partitario_{$clientName}_{$type}{$span}.xlsx"'
         ]);

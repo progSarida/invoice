@@ -52,6 +52,14 @@ class PassiveInvoice extends Model
         return $this->belongsTo(PassiveInvoice::class, 'parent_id', 'id');
     }
 
+    public function creditNotes(){
+        return $this->hasMany(PassiveInvoice::class, 'parent_id', 'id')->where('doc_type', 'TD04');
+    }
+
+    public function debitNotes(){
+        return $this->hasMany(PassiveInvoice::class, 'parent_id', 'id')->where('doc_type', 'TD05');
+    }
+
     public function passiveItems(){
         return $this->hasMany(PassiveItem::class,'passive_invoice_id','id');
     }

@@ -304,6 +304,7 @@
                     $newVat = $invoice->vat - $invoice->creditNotes?->sum('vat');
                     $notes = $newNoVatTotal + $newVat;
                     $n[] = $notes;
+                    $total = $invoice->is_total_with_vat ? $newNoVatTotal + $newVat : $newNoVatTotal;
                     $temp = $newNoVatTotal- $invoice->total_payment;
 	                $residue = $invoice->is_total_with_vat ? $temp + $newVat : $temp;
 

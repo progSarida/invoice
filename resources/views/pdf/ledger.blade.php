@@ -71,12 +71,20 @@
         <div class="header">
             <h1>Partitario {{ $filters['type'] == 'accrual' ? ' (Competenza)' : ' (Esercizio)' }}</h1>
             <p>{{ $company->name }}</p>
-            @if (!empty($filters['from_date']) || !empty($filters['to_date']))
-                <p>Da data: {{ $filters['from_date'] ? \Carbon\Carbon::parse($filters['from_date'])->format('d/m/Y') : 'N/D' }} - A data: {{ $filters['to_date'] ? \Carbon\Carbon::parse($filters['to_date'])->format('d/m/Y') : 'N/D' }}</p>
+            @if (!empty($filters['from_date']) && !empty($filters['to_date']))
+                <p>Dal {{ \Carbon\Carbon::parse($filters['from_date'])->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($filters['to_date'])->format('d/m/Y') }}</p>
+            @elseif (!empty($filters['from_date']))
+                <p>Dal {{ \Carbon\Carbon::parse($filters['from_date'])->format('d/m/Y') }}</p>
+            @elseif (!empty($filters['to_date']))
+                <p>Fino al {{ \Carbon\Carbon::parse($filters['to_date'])->format('d/m/Y') }}</p>
             @endif
             @if (!empty($filters['client_id']) && !empty($data[0]['cliente']))
                 <p>Cliente: {{ $data[0]['cliente']['nome'] }}</p>
                 <p>Partita iva: {{ $data[0]['cliente']['pi'] }} - Codice fiscale: {{ $data[0]['cliente']['cf'] }}</p>
+            @endif
+            @if (!empty($filters['supplier_id']) && !empty($data[0]['fornitore']))
+                <p>Fornitore: {{ $data[0]['fornitore']['nome'] }}</p>
+                <p>Partita iva: {{ $data[0]['fornitore']['pi'] }} - Codice fiscale: {{ $data[0]['fornitore']['cf'] }}</p>
             @endif
             <!-- @if ($filters['prec_residue'] && isset($residue))
                 <p>Residuo Precedente: € {{ number_format($residue, 2, ',', '.') }}</p>
@@ -94,9 +102,9 @@
                     <tr>
                         <th>Data Reg.</th>
                         {{-- <th>Cliente</th> --}}
+                        <th>Descrizione causale</th>
                         <th>N. Doc.</th>
                         <th>Data Doc.</th>
-                        <th>Descrizione</th>
                         <th class="text-right">Dare</th>
                         <th class="text-right">Avere</th>
                         <th class="text-right">Saldo</th>
@@ -111,9 +119,9 @@
                         <tr>
                             <td>{{ $item['reg'] }}</td>
                             {{-- <td>{{ $item['cliente'] }}</td> --}}
+                            <td>{!! $item['desc'] !!}</td>
                             <td>{{ $item['num_doc'] }}</td>
                             <td>{{ $item['data_doc'] }}</td>
-                            <td>{!! $item['desc'] !!}</td>
                             <td class="text-right">{{ $item['dare'] == 0 ? '' : '€ ' . number_format($item['dare'], 2, ',', '.') }}</td>
                             <td class="text-right">{{ $item['avere'] == 0 ? '' : '€ ' . number_format($item['avere'], 2, ',', '.') }}</td>
                             <td class="text-right">€ {{ number_format($item['saldo'], 2, ',', '.') }}</td>
@@ -140,5 +148,6 @@
             <p>Saldo Finale: € {{ number_format($data[count($data) - 1]['saldo'] ?? 0, 2, ',', '.') }}</p>
         </div> --}}
     </div>
+    <p> <b>#</b> voce inserita per gestione fatture da estero</p>
 </body>
 </html>

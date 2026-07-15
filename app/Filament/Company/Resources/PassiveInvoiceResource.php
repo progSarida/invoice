@@ -12,6 +12,7 @@ use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\Passi
 use App\Filament\Exports\PassiveInvoiceExporter;
 use App\Models\DocType;
 use App\Models\PassiveInvoice;
+use App\Models\PiValidation;
 use App\Models\Supplier;
 use App\Services\CurrencyService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -22,6 +23,7 @@ use Filament\Forms\Components\Actions\Action as ActionsAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -792,6 +794,28 @@ class PassiveInvoiceResource extends Resource
                     ->url(fn($record): ?string => $record?->xml_path ? Storage::temporaryUrl($record?->xml_path,now()->addMinutes(1)) : null)
                     ->openUrlInNewTab()
                     ->visible(fn($record) => $record && $record?->xml_path),
+                Action::make('validate')
+                    ->label('Valida fattura')
+                    ->icon('fluentui-checkmark-starburst-20-o')
+                    ->requiresConfirmation()
+                    ->visible(fn (PassiveInvoice $record) => !$record?->pi_validation_id && auth()->user()->can('update', $record))
+                    ->form([
+                        Select::make('pi_validation_id')
+                            ->label('')
+                            ->placeholder('Da validare')
+                            ->options(
+                                PiValidation::orderBy('order', 'asc')
+                                    ->pluck('name', 'id')
+                                    ->toArray()
+                            )
+                            ->default(fn (PassiveInvoice $record) => $record->pi_validation_id),
+                    ])
+                    ->action(function (PassiveInvoice $record, array $data) {
+                        $record->update([
+                            'pi_validation_id' => $data['pi_validation_id'],
+                        ]);
+                    })
+                    ->color(Color::rgb('rgb(51, 204, 51)')),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

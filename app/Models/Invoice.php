@@ -159,7 +159,13 @@ class Invoice extends Model
     }
 
     public function creditNotes(){
-        return $this->hasMany(Invoice::class, 'parent_id', 'id');
+        $docId = DocType::where('name', 'TD04')->first()->id;
+        return $this->hasMany(Invoice::class, 'parent_id', 'id')->where('doc_type_id', $docId);
+    }
+
+    public function debitNotes(){
+        $docId = DocType::where('name', 'TD05')->first()->id;
+        return $this->hasMany(Invoice::class, 'parent_id', 'id')->where('doc_type_id', $docId);
     }
 
     public function contractDetail(){

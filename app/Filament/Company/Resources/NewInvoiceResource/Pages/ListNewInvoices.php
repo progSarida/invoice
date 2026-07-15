@@ -195,6 +195,7 @@ class ListNewInvoices extends ListRecords
 // dd($maxItems);
                     return [ 'max_items' => (int) $maxItems, ];
                 })
+                ->modalHeading('Esporta fatture')
                 ->modalWidth(MaxWidth::FitContent)
                 ->keyBindings(['alt+e'])
                 ->form(fn (ExportAction $action): array => [
@@ -235,6 +236,7 @@ class ListNewInvoices extends ListRecords
                 ->label('Esporta (Semplice)')
                 ->color(Color::rgb('rgb(0, 153, 0)'))
                 ->exporter(NewInvoiceExporterSimple::class)
+                ->modalHeading('Esporta fatture')
                 ->modalWidth(MaxWidth::FiveExtraLarge)
                 ->keyBindings(['alt+shift+e'])
                 // Posizionamento checkbox campi da esportare su due colonne
