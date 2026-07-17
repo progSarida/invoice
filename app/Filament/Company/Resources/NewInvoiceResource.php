@@ -1076,6 +1076,7 @@ class NewInvoiceResource extends Resource
                                     $inconsistentInvoicePrec = Invoice::where('sectional_id', $sectionalId)
                                         ->whereRaw('(YEAR(invoice_date) * 1000 + number) < ?', [$currentWeight])
                                         ->where('invoice_date', '>', $state)
+                                        ->whereNotIn('sdi_status', [SdiStatus::PREAVVISO, SdiStatus::QUADRATURA])
                                         ->first();
 
                                     if ($inconsistentInvoicePrec) {
@@ -1102,6 +1103,7 @@ class NewInvoiceResource extends Resource
                                     $inconsistentInvoiceSucc = Invoice::where('sectional_id', $sectionalId)
                                         ->whereRaw('(YEAR(invoice_date) * 1000 + number) > ?', [$currentWeight])
                                         ->where('invoice_date', '<', $state)
+                                        ->whereNotIn('sdi_status', [SdiStatus::PREAVVISO, SdiStatus::QUADRATURA])
                                         ->first();
 
                                     if ($inconsistentInvoiceSucc) {
