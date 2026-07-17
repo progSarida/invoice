@@ -261,7 +261,7 @@ Log::info('Commit');
 
                 Actions\Action::make('converti_in_fattura')
                     // ->hidden(fn(Invoice $record) => !is_null($record->parent_id))
-                    ->hidden(fn(Invoice $record) => $record->parent_id || $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA)
+                    ->hidden(fn(Invoice $record) => $record->parent_id || ($record->sdi_status !== SdiStatus::PREAVVISO && $record->sdi_status !== SdiStatus::QUADRATURA))
                     ->label('Converti in fattura')
                     ->icon('heroicon-o-document-duplicate')
                     ->color('warning')
