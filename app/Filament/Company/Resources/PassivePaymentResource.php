@@ -178,6 +178,27 @@ class PassivePaymentResource extends Resource
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
                     ->date()
+                    ->afterStateUpdated(function ($state, Set $set) {
+                        if (!$state) {
+                            return;
+                        }
+
+                        $currentMonth = now()->month;
+                        $date = \Carbon\Carbon::parse($state);
+                        $selectedYear = \Carbon\Carbon::parse($state)->year;
+                        $currentYear = now()->year;
+
+                        if ($currentMonth !== 1 && $date->year !== $currentYear) {
+                            $corrected = $date->copy()->setYear($currentYear);
+                            $set('invoice_date', $corrected->format('Y-m-d'));
+
+                            Notification::make()
+                                ->title('Anno corretto automaticamente')
+                                ->body("Hai inserito una data del {$selectedYear}, ma l'anno corrente è il {$currentYear}.")
+                                ->warning()
+                                ->send();
+                        }
+                    })
                     ->columnSpan(2),
                 // Forms\Components\Placeholder::make('')
                 //     ->content('')

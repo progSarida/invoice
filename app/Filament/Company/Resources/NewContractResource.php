@@ -34,7 +34,11 @@ use Filament\Forms\Components\Actions\Action;
 use App\Filament\Company\Resources\NewContractResource\Pages;
 use App\Filament\Company\Resources\NewContractResource\RelationManagers\ContractDetailsRelationManager;
 use App\Models\BankAccount;
+use App\Services\InvoiceEmailService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -319,6 +323,7 @@ class NewContractResource extends Resource
                 Forms\Components\TextInput::make('courtesy_address')
                     ->label('Indirizzo email di invio fattura di cortesia')
                     ->required()
+                    ->live()
                     ->visible(fn(Get $get) => $get('courtesy'))
                     ->email()
                     ->columnSpan(4),
@@ -344,6 +349,70 @@ class NewContractResource extends Resource
                 //         return sprintf('%s_CONTRATTO_%s_%s.%s', $client, $taxTypes, $cig, $extension);
                 //     })
                 //     ->columnSpan(5),
+
+                Forms\Components\Actions::make([
+                    Forms\Components\Actions\Action::make('courtesy_test')
+                        ->label('Test parametri')
+                        ->icon('heroicon-s-cog')
+                        ->visible(fn($record, Get $get): bool => $record && $get('courtesy_address') !== null)
+                        ->requiresConfirmation()
+                        ->modalHeading('Test parametri email di cortesia')
+                        ->modalDescription(fn (Get $get) => "Verrà inviata una email di TEST (con allegato) a {$get('courtesy_address')}. Continuare?")
+                        ->action(function (Get $get, $record) {
+                            $email = $get('courtesy_address');
+
+                            try {
+                                $emailService = app(InvoiceEmailService::class);
+                                $emailService->setAccountFromCompany(Filament::getTenant());
+                                $account = $emailService->getAccount();
+
+                                $mailerName = 'courtesy_test_' . uniqid();
+                                $config = $account->out_mail_server == 'smtp-pc.aruba.it'
+                                    ? $account->getSmtpMailerConfigSarida()
+                                    : $account->getSmtpMailerConfig();
+
+                                Config::set("mail.mailers.{$mailerName}", $config);
+                                Mail::purge($mailerName);
+
+                                Mail::mailer($mailerName)->raw(
+                                    "Questa è una email di TEST per verificare la corretta configurazione dell'invio delle fatture di cortesia.\n\n" .
+                                    "Non si tratta di una comunicazione reale relativa a fatture o pagamenti e quindi può essere ignorata.",
+                                    function ($message) use ($email, $account) {
+                                        $message->to($email)
+                                            ->subject('TEST invio - nessuna azione richiesta')
+                                            ->from($account->getFromAddress(), $account->getFromName())
+                                            ->attachData(
+                                                "Questo e' un allegato di prova.\nGenerato il " . now()->format('d/m/Y H:i:s'),
+                                                'test-allegato.txt',
+                                                ['mime' => 'text/plain']
+                                            );
+                                    }
+                                );
+
+                                Notification::make()
+                                    ->title('Email di test inviata con successo')
+                                    ->body("Inviata a {$email}")
+                                    ->success()
+                                    ->send();
+
+                            } catch (\Throwable $e) {
+                                Log::error('Errore test invio email di cortesia', [
+                                    'contract_id' => $record->id,
+                                    'recipient' => $email,
+                                    'error' => $e->getMessage(),
+                                ]);
+
+                                Notification::make()
+                                    ->title('Errore invio email di test')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+                            }
+                        })
+                        ->color('primary'),
+                ])
+                ->columnSpan(2),
 
                 Placeholder::make('')
                     ->content('')

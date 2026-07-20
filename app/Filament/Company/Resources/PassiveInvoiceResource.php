@@ -162,7 +162,44 @@ class PassiveInvoiceResource extends Resource
                                 ->required()
                                 ->extraInputAttributes(['class' => 'text-center'])
                                 ->columnSpan(2)
-                                //  ->disabled()
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(function ($state, Set $set) {
+                                    if (!$state) {
+                                        return;
+                                    }
+
+                                    $currentMonth = now()->month;
+                                    $date = \Carbon\Carbon::parse($state);
+                                    $selectedYear = \Carbon\Carbon::parse($state)->year;
+                                    $currentYear = now()->year;
+
+                                    if ($currentMonth !== 1 && $date->year !== $currentYear) {
+                                        $corrected = $date->copy()->setYear($currentYear);
+                                        $set('invoice_date', $corrected->format('Y-m-d'));
+
+                                        Notification::make()
+                                            ->title('Anno corretto automaticamente')
+                                            ->body("Hai inserito una data del {$selectedYear}, ma l'anno corrente è il {$currentYear}.")
+                                            ->warning()
+                                            ->send();
+                                    }
+                                })
+                                // ->rules([
+                                //     fn (): \Closure => function (string $attribute, $value, \Closure $fail) {
+                                //         if (!$value) {
+                                //             return;
+                                //         }
+
+                                //         $currentMonth = now()->month;
+                                //         $selectedYear = \Carbon\Carbon::parse($value)->year;
+                                //         $currentYear = now()->year;
+
+                                //         if ($currentMonth !== 1 && $selectedYear !== $currentYear) {
+                                //             $fail("La data deve essere dell'anno corrente ({$currentYear}).");
+                                //         }
+                                //     },
+                                // ])
+                                // ->disabled()
                                 ,
 
                             Forms\Components\Select::make('parent_id')
@@ -796,7 +833,7 @@ class PassiveInvoiceResource extends Resource
                     ->visible(fn($record) => $record && $record?->xml_path),
                 Action::make('validate')
                     ->label('Valida fattura')
-                    ->icon('fluentui-checkmark-starburst-20-o')
+                    // ->icon('fluentui-checkmark-starburst-20-o')
                     ->requiresConfirmation()
                     ->visible(fn (PassiveInvoice $record) => !$record?->pi_validation_id && auth()->user()->can('update', $record))
                     ->form([
@@ -815,7 +852,7 @@ class PassiveInvoiceResource extends Resource
                             'pi_validation_id' => $data['pi_validation_id'],
                         ]);
                     })
-                    ->color(Color::rgb('rgb(51, 204, 51)')),
+                    ->color('primary'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -341,8 +341,28 @@ class NewActivePaymentsResource extends Resource
                     ->required()
                     ->debounce(500)
                     ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                        if (!$state) {
+                            return;
+                        }
+
                         $invoice = Invoice::find($get('invoice_id'));
                         $paymentDate = $get('payment_date');
+
+                        $currentMonth = now()->month;
+                        $date = \Carbon\Carbon::parse($state);
+                        $selectedYear = \Carbon\Carbon::parse($state)->year;
+                        $currentYear = now()->year;
+
+                        if ($currentMonth !== 1 && $date->year !== $currentYear) {
+                            $corrected = $date->copy()->setYear($currentYear);
+                            $set('invoice_date', $corrected->format('Y-m-d'));
+
+                            Notification::make()
+                                ->title('Anno corretto automaticamente')
+                                ->body("Hai inserito una data del {$selectedYear}, ma l'anno corrente è il {$currentYear}.")
+                                ->warning()
+                                ->send();
+                        }
 
                         if ($paymentDate && $invoice && ($paymentDate < $invoice->invoice_date)) {
                             Notification::make('date')
