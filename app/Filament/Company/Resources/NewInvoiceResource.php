@@ -89,11 +89,11 @@ class NewInvoiceResource extends Resource
             ->schema([
                 // Grid::make('GRID')->columnSpan(2)->schema([
 
-                    // Toggle::make('level')
-                    //     ->label('Quadratura saldi')
-                    //     ->dehydrated(false)
-                    //     ->hidden(false)
-                    //     ->live(),
+                    Toggle::make('level')
+                        ->label('Quadratura saldi')
+                        ->dehydrated(false)
+                        ->hidden(false)
+                        ->live(),
 
                     Section::make('Opzioni')
                     // ->collapsible()
