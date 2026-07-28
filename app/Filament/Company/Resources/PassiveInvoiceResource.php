@@ -445,7 +445,7 @@ class PassiveInvoiceResource extends Resource
     {
         return $table
             ->poll('5s')
-            ->defaultSort('invoice_date', 'desc')
+            ->defaultSort(fn (Builder $query) => $query->orderBy('invoice_date', 'desc')->orderBy('id', 'desc'))
             ->columns([
                 TextColumn::make('docType.description')
                     ->label('Tipo documento')
