@@ -31,6 +31,7 @@ use App\Enums\ReversalGroupType;
 use Filament\Facades\Filament;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Toggle;
@@ -56,6 +57,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use ZipArchive;
@@ -1643,64 +1645,127 @@ class NewInvoiceResource extends Resource
                     ->color('black')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                // Tables\Columns\TextColumn::make('no_vat_total')->label('Imponibile')
+                //     ->money('EUR')
+                //     ->sortable()
+                //     // ->state(fn (Invoice $invoice) => $invoice->getTaxable())
+                //     ->alignRight()
+                //     ->summarize([
+                //         Tables\Columns\Summarizers\Summarizer::make()
+                //             ->label('')
+                //             ->using(function ($query) {
+                //                 // Eseguiamo la query forzando i modelli Invoice ed eager-caricando docType
+                //                 $records = Invoice::query()
+                //                     ->with('docType')
+                //                     ->whereIn('id', $query->pluck('id'))
+                //                     ->get();
+
+                //                 $sum = 0;
+                //                 foreach ($records as $record) {
+                //                     if ($record->docType?->name == 'TD04') {
+                //                         $sum -= $record->no_vat_total;
+                //                     } else {
+                //                         $sum += $record->no_vat_total;
+                //                     }
+                //                 }
+
+                //                 return $sum;
+                //             })
+                //             ->money('EUR', true, 'it_IT'),
+                //     ])
+                //     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('no_vat_total')->label('Imponibile')
                     ->money('EUR')
                     ->sortable()
-                    // ->state(fn (Invoice $invoice) => $invoice->getTaxable())
                     ->alignRight()
                     ->summarize([
                         Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
-                            ->using(function ($query) {
-                                // Eseguiamo la query forzando i modelli Invoice ed eager-caricando docType
-                                $records = Invoice::query()
-                                    ->with('docType')
-                                    ->whereIn('id', $query->pluck('id'))
-                                    ->get();
-
-                                $sum = 0;
-                                foreach ($records as $record) {
-                                    if ($record->docType?->name == 'TD04') {
-                                        $sum -= $record->no_vat_total;
-                                    } else {
-                                        $sum += $record->no_vat_total;
-                                    }
-                                }
-
-                                return $sum;
+                            ->using(function (QueryBuilder $query) {
+                                return (clone $query)
+                                    ->reorder()
+                                    ->join('doc_types', 'invoices.doc_type_id', '=', 'doc_types.id')
+                                    ->select(DB::raw("SUM(CASE WHEN doc_types.name = 'TD04' THEN -invoices.no_vat_total ELSE invoices.no_vat_total END) as tot"))
+                                    ->value('tot');
                             })
                             ->money('EUR', true, 'it_IT'),
                     ])
                     ->toggleable(isToggledHiddenByDefault: false),
+                // Tables\Columns\TextColumn::make('vat')->label('IVA')
+                //     ->money('EUR')
+                //     // ->state(fn (Invoice $invoice) => $invoice->getVat())
+                //     ->sortable()
+                //     ->alignRight()
+                //     ->summarize([
+                //         Tables\Columns\Summarizers\Summarizer::make()
+                //             ->label('')
+                //             ->using(function ($query) {
+                //                 // Eseguiamo la query forzando i modelli Invoice ed eager-caricando docType
+                //                 $records = Invoice::query()
+                //                     ->with('docType')
+                //                     ->whereIn('id', $query->pluck('id'))
+                //                     ->get();
+
+                //                 $sum = 0;
+                //                 foreach ($records as $record) {
+                //                     if ($record->docType?->name == 'TD04') {
+                //                         $sum -= $record->no_vat_total;
+                //                     } else {
+                //                         $sum += $record->no_vat_total;
+                //                     }
+                //                 }
+
+                //                 return $sum;
+                //             })
+                //             ->money('EUR', true, 'it_IT'),
+                //     ])
+                //     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('vat')->label('IVA')
                     ->money('EUR')
-                    // ->state(fn (Invoice $invoice) => $invoice->getVat())
                     ->sortable()
                     ->alignRight()
                     ->summarize([
                         Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
-                            ->using(function ($query) {
-                                // Eseguiamo la query forzando i modelli Invoice ed eager-caricando docType
-                                $records = Invoice::query()
-                                    ->with('docType')
-                                    ->whereIn('id', $query->pluck('id'))
-                                    ->get();
-
-                                $sum = 0;
-                                foreach ($records as $record) {
-                                    if ($record->docType?->name == 'TD04') {
-                                        $sum -= $record->no_vat_total;
-                                    } else {
-                                        $sum += $record->no_vat_total;
-                                    }
-                                }
-
-                                return $sum;
+                            ->using(function (QueryBuilder $query) {
+                                return (clone $query)
+                                    ->reorder()
+                                    ->join('doc_types', 'invoices.doc_type_id', '=', 'doc_types.id')
+                                    ->select(DB::raw("SUM(CASE WHEN doc_types.name = 'TD04' THEN -invoices.vat ELSE invoices.vat END) as tot"))
+                                    ->value('tot');
                             })
                             ->money('EUR', true, 'it_IT'),
                     ])
                     ->toggleable(isToggledHiddenByDefault: false),
+                // Tables\Columns\TextColumn::make('total')->label('Totale')
+                //     ->money('EUR')
+                //     ->sortable()
+                //     ->alignRight()
+                //     ->summarize([
+                //         Tables\Columns\Summarizers\Summarizer::make()
+                //             ->label('')
+                //             ->using(function ($query) {
+                //                 // Eseguiamo la query forzando i modelli Invoice ed eager-caricando docType
+                //                 $records = Invoice::query()
+                //                     ->with('docType')
+                //                     ->whereIn('id', $query->pluck('id'))
+                //                     ->get();
+
+                //                 $sum = 0;
+                //                 foreach ($records as $record) {
+                //                     if ($record->docType?->name == 'TD04') {
+                //                         $sum -= $record->no_vat_total;
+                //                     } else {
+                //                         $sum += $record->no_vat_total;
+                //                     }
+                //                 }
+
+                //                 return $sum;
+                //             })
+                //             ->money('EUR', true, 'it_IT'),
+                //     ])
+                //     // ->tooltip(fn (Invoice $record) => $record->total . " - " . "(" . $record->total_payment . " + " . $record->total_notes . ")" . " = " . $record->total-($record->total_payment+$record->total_notes))
+                //     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total')->label('Totale')
                     ->money('EUR')
                     ->sortable()
@@ -1708,27 +1773,15 @@ class NewInvoiceResource extends Resource
                     ->summarize([
                         Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
-                            ->using(function ($query) {
-                                // Eseguiamo la query forzando i modelli Invoice ed eager-caricando docType
-                                $records = Invoice::query()
-                                    ->with('docType')
-                                    ->whereIn('id', $query->pluck('id'))
-                                    ->get();
-
-                                $sum = 0;
-                                foreach ($records as $record) {
-                                    if ($record->docType?->name == 'TD04') {
-                                        $sum -= $record->no_vat_total;
-                                    } else {
-                                        $sum += $record->no_vat_total;
-                                    }
-                                }
-
-                                return $sum;
+                            ->using(function (QueryBuilder $query) {
+                                return (clone $query)
+                                    ->reorder()
+                                    ->join('doc_types', 'invoices.doc_type_id', '=', 'doc_types.id')
+                                    ->select(DB::raw("SUM(CASE WHEN doc_types.name = 'TD04' THEN -invoices.total ELSE invoices.total END) as tot"))
+                                    ->value('tot');
                             })
                             ->money('EUR', true, 'it_IT'),
                     ])
-                    // ->tooltip(fn (Invoice $record) => $record->total . " - " . "(" . $record->total_payment . " + " . $record->total_notes . ")" . " = " . $record->total-($record->total_payment+$record->total_notes))
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('total_notes')->label('Note di credito')
                     ->money('EUR')
@@ -1740,6 +1793,24 @@ class NewInvoiceResource extends Resource
                             ->money('EUR', true, 'it_IT'),
                     ])
                     ->toggleable(isToggledHiddenByDefault: false),
+                // Tables\Columns\TextColumn::make('tot_own')->label('Totale a doversi')
+                //     ->money('EUR')
+                //     ->state(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getOwned())
+                //     ->sortable()
+                //     ->alignRight()
+                //     ->summarize([
+                //         Tables\Columns\Summarizers\Summarizer::make()
+                //             ->label('')
+                //             ->using(function ($query) {
+                //                 // Forza il recupero come Collection di modelli Invoice
+                //                 return Invoice::query()
+                //                     ->whereIn('id', $query->pluck('id'))
+                //                     ->get()
+                //                     ->sum(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getOwned());
+                //             })
+                //             ->money('EUR', true, 'it_IT'),
+                //     ])
+                //     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('tot_own')->label('Totale a doversi')
                     ->money('EUR')
                     ->state(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getOwned())
@@ -1748,12 +1819,33 @@ class NewInvoiceResource extends Resource
                     ->summarize([
                         Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
-                            ->using(function ($query) {
-                                // Forza il recupero come Collection di modelli Invoice
-                                return Invoice::query()
-                                    ->whereIn('id', $query->pluck('id'))
-                                    ->get()
-                                    ->sum(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getOwned());
+                            ->using(function (QueryBuilder $query) {
+                                return (clone $query)
+                                    ->reorder()
+                                    ->join('doc_types', 'invoices.doc_type_id', '=', 'doc_types.id')
+                                    ->leftJoinSub(
+                                        \App\Models\Invoice::query()
+                                            ->join('doc_types as cn_doc_types', 'invoices.doc_type_id', '=', 'cn_doc_types.id')
+                                            ->where('cn_doc_types.name', 'TD04')
+                                            ->whereNotNull('invoices.parent_id')
+                                            ->selectRaw('invoices.parent_id, SUM(invoices.no_vat_total) as cn_no_vat, SUM(invoices.vat) as cn_vat')
+                                            ->groupBy('invoices.parent_id'),
+                                        'credit_notes',
+                                        'credit_notes.parent_id', '=', 'invoices.id'
+                                    )
+                                    ->select(DB::raw("
+                                        SUM(
+                                            CASE WHEN doc_types.name = 'TD04' THEN 0
+                                            ELSE
+                                                CASE WHEN invoices.is_total_with_vat
+                                                    THEN (invoices.no_vat_total - COALESCE(credit_notes.cn_no_vat, 0))
+                                                    + (invoices.vat - COALESCE(credit_notes.cn_vat, 0))
+                                                    ELSE (invoices.no_vat_total - COALESCE(credit_notes.cn_no_vat, 0))
+                                                END
+                                            END
+                                        ) as tot
+                                    "))
+                                    ->value('tot');
                             })
                             ->money('EUR', true, 'it_IT'),
                     ])
@@ -1768,6 +1860,24 @@ class NewInvoiceResource extends Resource
                             ->money('EUR', true, 'it_IT'),
                     ])
                     ->toggleable(isToggledHiddenByDefault: false),
+                // Tables\Columns\TextColumn::make('tot_res')->label('Residuo')
+                //     ->money('EUR')
+                //     ->state(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getResidue())
+                //     ->sortable()
+                //     ->alignRight()
+                //     ->summarize([
+                //         Tables\Columns\Summarizers\Summarizer::make()
+                //             ->label('')
+                //             ->using(function ($query) {
+                //                 // Forza il recupero come Collection di modelli Invoice
+                //                 return Invoice::query()
+                //                     ->whereIn('id', $query->pluck('id'))
+                //                     ->get()
+                //                     ->sum(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getResidue());
+                //             })
+                //             ->money('EUR', true, 'it_IT'),
+                //     ])
+                //     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('tot_res')->label('Residuo')
                     ->money('EUR')
                     ->state(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getResidue())
@@ -1776,12 +1886,33 @@ class NewInvoiceResource extends Resource
                     ->summarize([
                         Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
-                            ->using(function ($query) {
-                                // Forza il recupero come Collection di modelli Invoice
-                                return Invoice::query()
-                                    ->whereIn('id', $query->pluck('id'))
-                                    ->get()
-                                    ->sum(fn (Invoice $invoice) => $invoice->docType?->name == 'TD04' ? 0.00 : $invoice->getResidue());
+                            ->using(function (QueryBuilder $query) {
+                                return (clone $query)
+                                    ->reorder()
+                                    ->join('doc_types', 'invoices.doc_type_id', '=', 'doc_types.id')
+                                    ->leftJoinSub(
+                                        \App\Models\Invoice::query()
+                                            ->join('doc_types as cn_doc_types', 'invoices.doc_type_id', '=', 'cn_doc_types.id')
+                                            ->where('cn_doc_types.name', 'TD04')
+                                            ->whereNotNull('invoices.parent_id')
+                                            ->selectRaw('invoices.parent_id, SUM(invoices.no_vat_total) as cn_no_vat, SUM(invoices.vat) as cn_vat')
+                                            ->groupBy('invoices.parent_id'),
+                                        'credit_notes',
+                                        'credit_notes.parent_id', '=', 'invoices.id'
+                                    )
+                                    ->select(DB::raw("
+                                        SUM(
+                                            CASE WHEN doc_types.name = 'TD04' THEN 0
+                                            ELSE
+                                                CASE WHEN invoices.is_total_with_vat
+                                                    THEN (invoices.no_vat_total - COALESCE(credit_notes.cn_no_vat, 0) - invoices.total_payment)
+                                                    + (invoices.vat - COALESCE(credit_notes.cn_vat, 0))
+                                                    ELSE (invoices.no_vat_total - COALESCE(credit_notes.cn_no_vat, 0) - invoices.total_payment)
+                                                END
+                                            END
+                                        ) as tot
+                                    "))
+                                    ->value('tot');
                             })
                             ->money('EUR', true, 'it_IT'),
                     ])

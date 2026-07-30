@@ -765,11 +765,11 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
         // else
         //     $totalInvoiced = $query->sum('total') ?? 0;                                     // se contratto con privato sommo il totale con iva
 
-        $imponibile = Invoice::where('contract_id', $invoice->id)                            // calcolo il totale imponibile fatturato
+        $imponibile = Invoice::where('contract_id', $invoice->contract_id)                     // calcolo il totale imponibile fatturato
             ->selectRaw('SUM(CASE WHEN parent_id IS NULL THEN no_vat_total ELSE -no_vat_total END) as total')
             ->value('total') ?? 0;
 
-        $iva = Invoice::where('contract_id', $invoice->id)                                   // calcolo il totale iva fatturato
+        $iva = Invoice::where('contract_id', $invoice->contract_id)                            // calcolo il totale iva fatturato
             ->selectRaw('SUM(CASE WHEN parent_id IS NULL THEN vat ELSE -vat END) as total')
             ->value('total') ?? 0;
 
