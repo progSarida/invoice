@@ -840,7 +840,7 @@ Log::info('===== FINE AZIONE NOTA CREDITO =====');
 
                 $parent = $invoice->parent ?: Invoice::find($invoice->parent_id);
                 if ($parent) {
-                    $description .= ' su ' . lcfirst($parent->docType->description);
+                    $description .= ' della ' . lcfirst($parent->docType->description);
                     $description .= ' n.ro ' . $parent->getNewInvoiceNumber();
                     $description .= ' del ' . \Carbon\Carbon::parse($parent->invoice_date)->format('d/m/Y');
 
