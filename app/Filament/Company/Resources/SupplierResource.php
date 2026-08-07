@@ -55,9 +55,6 @@ class SupplierResource extends Resource
                 TextInput::make('vat_code')
                     ->label('Partita IVA')
                     ->columnSpan(1),
-                Toggle::make('notify_expense')
-                    ->label('Spese notifica')
-                    ->columnSpan(1),
                 TextInput::make('address')
                     ->label('Indirizzo')
                     ->columnSpan(3),
@@ -181,6 +178,18 @@ class SupplierResource extends Resource
                     ->columnSpan(3),
                 Placeholder::make('')
                     ->columnSpan(1),
+                Toggle::make('notify_expense')
+                    ->label('Fornitore di servizi di postalizzazione/notifica')
+                    ->columnSpan(2),
+                Toggle::make('auto_payment')
+                    ->label('Pagamento automatico con carta di credito')
+                    ->live()
+                    ->columnSpan(2),
+                TextInput::make('card_expiration_date')
+                    ->placeholder('mm/AA')
+                    ->label('Data scadenza carta')
+                    ->columnSpan(1)
+                    ->visible(fn (Get $get) => $get('auto_payment') === true),
             ]);
     }
 
@@ -188,7 +197,7 @@ class SupplierResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('denomination')->label('Denominazione')
+                Tables\Columns\TextColumn::make('denomination')->label('🔍 Denominazione')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('full_address')
@@ -203,22 +212,22 @@ class SupplierResource extends Resource
                         return !empty($parts) ? implode(' ', $parts) : 'N/D';
                     }),
                 TextColumn::make('zip_code')
-                    ->label('Cap')
+                    ->label('🔍 Cap')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tax_code')->label('Codice fiscale')
+                Tables\Columns\TextColumn::make('tax_code')->label('🔍 Codice fiscale')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('vat_code')->label('Partita Iva')
+                Tables\Columns\TextColumn::make('vat_code')->label('🔍 Partita Iva')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('phone')->label('Telefono')
+                Tables\Columns\TextColumn::make('phone')->label('🔍 Telefono')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email')->label('Email')
+                Tables\Columns\TextColumn::make('email')->label('🔍 Email')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Data creazione')
@@ -230,7 +239,21 @@ class SupplierResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
+            ->filters([// Filtro per postalizzazione/notifica
+                Tables\Filters\TernaryFilter::make('notify_expense')
+                    ->label('Servizi di postalizzazione/notifica')
+                    ->placeholder('Tutti')
+                    ->trueLabel('Solo abilitati')
+                    ->falseLabel('Solo disabilitati'),
+
+                // Filtro per pagamento automatico
+                Tables\Filters\TernaryFilter::make('auto_payment')
+                    ->label('Pagamento automatico con carta')
+                    ->placeholder('Tutti')
+                    ->trueLabel('Solo abilitati')
+                    ->falseLabel('Solo disabilitati'),
+
+                // Filtro data creazione
                 Filter::make('create_date_range')
                     ->form([
                         DatePicker::make('create_from_date')

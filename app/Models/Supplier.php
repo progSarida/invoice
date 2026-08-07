@@ -27,10 +27,14 @@ class Supplier extends Model
         'email',
         'pec',
         'notify_expense',
+        'auto_payment',
+        'card_expiration_date',
     ];
 
     protected $casts = [
-        //
+        'notify_expense' => 'boolean',
+        'auto_payment' => 'boolean',
+        'card_expiration_date' => 'string',
     ];
 
     public function company(){
