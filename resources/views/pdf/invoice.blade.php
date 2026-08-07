@@ -274,7 +274,7 @@
     {{-- Pagamento --}}
     @php
         use App\Models\BankAccount;
-        $totalPay = $invoice->total - $withholdingAmount;
+        $totalPay = ( $invoice->is_total_with_vat ? $invoice->total : $invoice->no_vat_total ) - $withholdingAmount;
         // $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
         // if($invoice->client?->type == \App\Enums\ClientType::PUBLIC && $notRound)
         //    $totalPay = $invoice->no_vat_total + $withholdingAmount;
