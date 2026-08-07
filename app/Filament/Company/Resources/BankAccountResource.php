@@ -97,19 +97,19 @@ class BankAccountResource extends Resource
             ->defaultSort('position', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('position')
-                    ->label('Posizione')
+                    ->label('🔍 Posizione')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Denominazione')
+                    ->label('🔍 Denominazione')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('holder')
-                    ->label('Intestatario')
+                    ->label('🔍 Intestatario')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('iban')
-                    ->label('IBAN')
+                    ->label('🔍 IBAN')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('number')
-                    ->label('N. conto')
+                    ->label('🔍 N. conto')
                     ->searchable(),
                 // Tables\Columns\TextColumn::make('bic')
                 //     ->label('BIC')

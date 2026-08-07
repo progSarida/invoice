@@ -537,7 +537,7 @@ class CompanyResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->label('Nome')
+                Tables\Columns\TextColumn::make('name')->label('🔍 Nome')
                     ->searchable(),
                 // Tables\Columns\TextColumn::make('vat_number')->label('Partita Iva')
                 //     ->searchable(),

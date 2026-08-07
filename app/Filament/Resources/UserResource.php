@@ -64,9 +64,9 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->label('Nome')
+                Tables\Columns\TextColumn::make('name')->label('🔍 Nome')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')->label('Email')
+                Tables\Columns\TextColumn::make('email')->label('🔍 Email')
                     ->searchable(),
                 // Tables\Columns\ToggleColumn::make('is_admin')
                 //     ->label('Admin')

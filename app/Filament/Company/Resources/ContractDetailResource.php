@@ -40,7 +40,7 @@ class ContractDetailResource extends Resource
         return $form
             ->columns(6)
             ->schema([
-                Forms\Components\Select::make('contract_type')->label('Tipo atto')
+                Forms\Components\Select::make('contract_type')->label('🔍 Tipo atto')
                     ->required()
                     ->live(onBlur: true)
                     ->options(ContractType::class)

@@ -59,7 +59,7 @@ class AttachmentResource extends Resource
                     ->label('Cliente')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('contract')
-                    ->label('Contratto')
+                    ->label('🔍 Contratto')
                     ->sortable()
                     ->searchable(
                         query: function ($query, $search) {

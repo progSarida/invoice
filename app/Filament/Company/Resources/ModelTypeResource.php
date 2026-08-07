@@ -48,9 +48,9 @@ class ModelTypeResource extends Resource
                 Tables\Columns\TextColumn::make('order')->label('Posizione')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('name')->label('Nome')
+                Tables\Columns\TextColumn::make('name')->label('🔍 Nome')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('description')->label('Descrizione')
+                Tables\Columns\TextColumn::make('description')->label('🔍 Descrizione')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Creato il')
                     ->dateTime()

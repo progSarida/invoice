@@ -1590,9 +1590,9 @@ class NewInvoiceResource extends Resource
             ->poll('20s')
             ->query(Invoice::newInvoices())
             ->columns([
-                Tables\Columns\TextColumn::make('id')->label('Id')
+                Tables\Columns\TextColumn::make('id')->label('🔍 Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('docType.description')->label('Tipo')
+                Tables\Columns\TextColumn::make('docType.description')->label('🔍 Tipo')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('number')->label('Numero')
@@ -1609,7 +1609,7 @@ class NewInvoiceResource extends Resource
                     ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('description')->label('Descrizione')
+                Tables\Columns\TextColumn::make('description')->label('🔍 Descrizione')
                     ->limit(30)
                     ->tooltip(fn ($record) => $record->description)
                     ->searchable()
@@ -1625,7 +1625,7 @@ class NewInvoiceResource extends Resource
                     })
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('parent_id')->label('Id fattura stornata')
+                Tables\Columns\TextColumn::make('parent_id')->label('🔍 Id fattura stornata')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('contract.cig_code')->label('CIG')
                     ->numeric()
@@ -1639,7 +1639,7 @@ class NewInvoiceResource extends Resource
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
+                Tables\Columns\TextColumn::make('tax_type')->label('🔍 Entrata')
                     ->searchable()
                     // ->badge()
                     ->color('black')

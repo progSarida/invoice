@@ -55,12 +55,12 @@ class ProvinceResource extends Resource
                 // Tables\Columns\TextColumn::make('region_id')
                 //     ->numeric()
                 //     ->sortable(),
-                Tables\Columns\TextColumn::make('name')->label('Provincia')
+                Tables\Columns\TextColumn::make('name')->label('🔍 Provincia')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('code')->label('Sigla')
+                Tables\Columns\TextColumn::make('code')->label('🔍 Sigla')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('region.name')->label('Regione')
+                Tables\Columns\TextColumn::make('region.name')->label('🔍 Regione')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

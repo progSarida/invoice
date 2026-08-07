@@ -78,39 +78,39 @@ class StateResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->label('Stato')
+                Tables\Columns\TextColumn::make('name')->label('🔍 Stato')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('alpha2')->label('Codice Alpha-2')
+                Tables\Columns\TextColumn::make('alpha2')->label('🔍 Codice Alpha-2')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('alpha3')->label('Codice Alpha-3')
+                Tables\Columns\TextColumn::make('alpha3')->label('🔍 Codice Alpha-3')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('country_code')->label('Codice Stato')
+                Tables\Columns\TextColumn::make('country_code')->label('🔍 Codice Stato')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('iso_3166_2')->label('Codice ISO 3166-2')
+                Tables\Columns\TextColumn::make('iso_3166_2')->label('🔍 Codice ISO 3166-2')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('region')->label('Regione')
+                Tables\Columns\TextColumn::make('region')->label('🔍 Regione')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('sub_region')->label('Sub-Regione')
+                Tables\Columns\TextColumn::make('sub_region')->label('🔍 Sub-Regione')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('intermediate_region')->label('Regione intermedia')
+                Tables\Columns\TextColumn::make('intermediate_region')->label('🔍 Regione intermedia')
                     ->searchable()
                     ->sortable(),
-                    Tables\Columns\TextColumn::make('region_code')->label('Codice Regione')
+                    Tables\Columns\TextColumn::make('region_code')->label('🔍 Codice Regione')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('sub_region_code')->label('Codice Sub-Regione')
+                Tables\Columns\TextColumn::make('sub_region_code')->label('🔍 Codice Sub-Regione')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('intermediate_region_code')->label('Codice Regione intermedia')
+                Tables\Columns\TextColumn::make('intermediate_region_code')->label('🔍 Codice Regione intermedia')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

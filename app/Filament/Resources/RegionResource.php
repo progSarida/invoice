@@ -41,7 +41,7 @@ class RegionResource extends Resource
                 // Tables\Columns\TextColumn::make('id')->label('Id')
                 //     ->searchable()
                 //     ->sortable(),
-                Tables\Columns\TextColumn::make('name')->label('Regione')
+                Tables\Columns\TextColumn::make('name')->label('🔍 Regione')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

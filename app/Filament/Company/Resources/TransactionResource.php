@@ -229,16 +229,16 @@ class TransactionResource extends Resource
                 TextColumn::make('date')->label('Data')
                     ->date('d/m/Y')
                     ->sortable(),
-                TextColumn::make('instrument.name')->label('Conto')
+                TextColumn::make('instrument.name')->label('🔍 Conto')
                     ->searchable(),
-                TextColumn::make('description')->label('Descrizione')
+                TextColumn::make('description')->label('🔍 Descrizione')
                     ->searchable(),
                 // TextColumn::make('client.denomination')->label('Cliente')
                 //     ->searchable(),
                 // TextColumn::make('supplier.denomination')->label('Fornitore')
                 //     ->searchable(),
                 TextColumn::make('counterpart')
-                    ->label('Controparte')
+                    ->label('🔍 Controparte')
                     ->formatStateUsing(function ($record) {
                         if ($record->client) { return $record->client->denomination; }
                         if ($record->supplier) { return $record->supplier->denomination; }

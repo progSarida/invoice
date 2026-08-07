@@ -243,37 +243,37 @@ class ClientResource extends Resource
         return $table
             ->defaultSort('denomination', 'asc')
             ->columns([
-                Tables\Columns\TextColumn::make('subtype')->label('Sottotipo')
+                Tables\Columns\TextColumn::make('subtype')->label('🔍 Sottotipo')
                     // ->badge()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('denomination')->label('Denominazione')
+                Tables\Columns\TextColumn::make('denomination')->label('🔍 Denominazione')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('address')->label('Indirizzo')
+                Tables\Columns\TextColumn::make('address')->label('🔍 Indirizzo')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('city.name')->label('Città')
+                Tables\Columns\TextColumn::make('city.name')->label('🔍 Città')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('zip_code')->label('Cap')
+                Tables\Columns\TextColumn::make('zip_code')->label('🔍 Cap')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tax_code')->label('Codice fiscale')
+                Tables\Columns\TextColumn::make('tax_code')->label('🔍 Codice fiscale')
                     // ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('vat_code')->label('Partita Iva')
+                Tables\Columns\TextColumn::make('vat_code')->label('🔍 Partita Iva')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email')->label('Email')
+                Tables\Columns\TextColumn::make('email')->label('🔍 Email')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('ipa_code')->label('Codice cliente (SDI)')
+                Tables\Columns\TextColumn::make('ipa_code')->label('🔍 Codice cliente (SDI)')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')->label('Data creazione')

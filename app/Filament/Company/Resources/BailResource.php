@@ -691,15 +691,15 @@ class BailResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('client.denomination')
-                    ->label('Cliente')
+                    ->label('🔍 Cliente')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('cig_code')
-                    ->label('CIG')
+                    ->label('🔍 CIG')
                     ->searchable()
                     ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
                 Tables\Columns\TextColumn::make('tax_types') // MODIFICA: Rinominato da 'tax_type' a 'tax_types'
-                    ->label('Tipo Entrata')
+                    ->label('🔍 Tipo Entrata')
                     ->badge() // MODIFICA: Aggiunto per visualizzare come badge
                     ->color(fn (string $state): string => match ($state) { // MODIFICA: Aggiunto colori personalizzati
                         'CDS' => 'info',
@@ -718,18 +718,18 @@ class BailResource extends Resource
                         $query->whereJsonContains('tax_types', $search);
                     }),
                 Tables\Columns\TextColumn::make('insurance.name')
-                    ->label('Compagnia')
+                    ->label('🔍 Compagnia')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('bail_type')
-                    ->label('Tipo')
+                    ->label('🔍 Tipo')
                     ->formatStateUsing(fn ($state) => $state?->getLabel() ?? 'N/A'),
                 Tables\Columns\TextColumn::make('bill_number')
-                    ->label('Numero Polizza')
+                    ->label('🔍 Numero Polizza')
                     ->searchable()
                     ->formatStateUsing(fn ($state) => $state ?? 'N/A'),
                 Tables\Columns\TextColumn::make('lastDetail.premium')
-                    ->label('Premio')
+                    ->label('🔍 Premio')
                     ->searchable()
                     ->money('EUR', true, 'it_IT'),
                 Tables\Columns\TextColumn::make('lastDetail.bill_deadline')

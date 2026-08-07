@@ -234,6 +234,8 @@ class SupplierResource extends Resource
                     ->date('d/m/Y H:m:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('card_expiration_date')
+                    ->label('Data scadenza carta'),
                 Tables\Columns\TextColumn::make('updated_at')->label('Data aggiornamento')
                     ->date('d/m/Y H:m:s')
                     ->sortable()

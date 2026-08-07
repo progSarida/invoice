@@ -448,13 +448,13 @@ class PassiveInvoiceResource extends Resource
             ->defaultSort(fn (Builder $query) => $query->orderBy('invoice_date', 'desc')->orderBy('id', 'desc'))
             ->columns([
                 TextColumn::make('docType.description')
-                    ->label('Tipo documento')
+                    ->label('🔍 Tipo documento')
                     ->searchable()
                     ->limit(30)
                     ->tooltip(fn ($record) => $record?->docType->description)
                     ->sortable(),
                 TextColumn::make('number')
-                    ->label('Numero')
+                    ->label('🔍 Numero')
                     ->alignRight()
                     ->searchable()
                     ->sortable(),
@@ -463,13 +463,13 @@ class PassiveInvoiceResource extends Resource
                     ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('supplier.denomination')
-                    ->label('Fornitore')
+                    ->label('🔍 Fornitore')
                     ->searchable()
                     ->limit(30)
                     ->tooltip(fn ($record) => $record?->supplier->denomination)
                     ->sortable(),
                 TextColumn::make('description')
-                    ->label('Descrizione')
+                    ->label('🔍 Descrizione')
                     ->searchable()
                     ->wrap()
                     ->limit(25)

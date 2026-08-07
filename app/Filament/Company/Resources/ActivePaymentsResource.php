@@ -111,10 +111,10 @@ class ActivePaymentsResource extends Resource
         return $table
             ->query(ActivePayments::oldActivePayments())
             ->columns([
-                Tables\Columns\TextColumn::make('id')->label('Id')
+                Tables\Columns\TextColumn::make('id')->label('🔍 Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_formatted')
-                    ->label('Fattura')
+                    ->label('🔍 Fattura')
                     ->getStateUsing(function ($record) {
                         $invoice = $record->invoice;
                         if (!$invoice) {
@@ -126,7 +126,7 @@ class ActivePaymentsResource extends Resource
                     })
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('amount')->label('Importo')
+                Tables\Columns\TextColumn::make('amount')->label('🔍 Importo')
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('payment_date')

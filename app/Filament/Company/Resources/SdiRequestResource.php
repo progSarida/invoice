@@ -68,7 +68,7 @@ class SdiRequestResource extends Resource
 
             // Riferimento fattura (usa il numero della fattura invece dell'ID)
             TextColumn::make('invoice_number') // Assumendo che Invoice abbia 'number'
-                ->label('Numero Fattura')
+                ->label('🔍 Numero Fattura')
                 ->getStateUsing(function (SdiRequest $record): string {
                     // Verifichiamo che la relazione esista per evitare errori su record null
                     return $record->invoice ? $record->invoice->getNewInvoiceNumber() : '';

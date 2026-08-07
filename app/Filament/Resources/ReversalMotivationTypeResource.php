@@ -56,14 +56,14 @@ class ReversalMotivationTypeResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('order')->label('Posizione')
                     ->sortable(),
-                TextColumn::make('reversal_group_type')->label('Gruppo annullamento')
+                TextColumn::make('reversal_group_type')->label('🔍 Gruppo annullamento')
                     ->searchable()
                     ->color('black')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                TextColumn::make('name')->label('Nome')
+                TextColumn::make('name')->label('🔍 Nome')
                     ->searchable(),
-                TextColumn::make('description')->label('Descrizione')
+                TextColumn::make('description')->label('🔍 Descrizione')
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()

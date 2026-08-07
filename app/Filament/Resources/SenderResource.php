@@ -74,10 +74,10 @@ class SenderResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('public_name')
-                    ->label('Nome')
+                    ->label('🔍 Nome')
                     ->searchable(),
                 TextColumn::make('address')
-                    ->label('Indirizzo')
+                    ->label('🔍 Indirizzo')
                     ->searchable(),
             ])
             ->filters([

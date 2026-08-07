@@ -461,10 +461,10 @@ class NewActivePaymentsResource extends Resource
         return $table
             ->query(ActivePayments::newActivePayments())
             ->columns([
-                Tables\Columns\TextColumn::make('id')->label('Id')
+                Tables\Columns\TextColumn::make('id')->label('🔍 Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_formatted')
-                    ->label('Fattura')
+                    ->label('🔍 Fattura')
                     ->getStateUsing(function ($record) {
                         $invoice = $record->invoice;
                         if (!$invoice) {
@@ -497,7 +497,7 @@ class NewActivePaymentsResource extends Resource
                             ->orderBy('invoices.year', $direction)
                             ->orderBy('invoices.number', $direction);
                     }),
-                Tables\Columns\TextColumn::make('amount')->label('Importo')
+                Tables\Columns\TextColumn::make('amount')->label('🔍 Importo')
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     ->alignRight()
                     ->summarize([
@@ -506,7 +506,7 @@ class NewActivePaymentsResource extends Resource
                             ->money('EUR', true, 'it_IT'),
                     ])
                     ->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('client')->label('Cliente')
+                Tables\Columns\TextColumn::make('client')->label('🔍 Cliente')
                     // ->numeric()
                     ->sortable()
                     ->searchable(query: function (Builder $query, string $search): Builder {

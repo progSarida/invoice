@@ -99,16 +99,16 @@ class TemplateResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('modelType.name')
-                    ->label('Tipo modello')
+                    ->label('🔍 Tipo modello')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('modelSubType.name')
-                    ->label('Sottotipo modello')
+                    ->label('🔍 Sottotipo modello')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
-                    ->label('Descrizione')
+                    ->label('🔍 Descrizione')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('filename')
-                    ->label('Nome file')
+                    ->label('🔍 Nome file')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('upload_date')
                     ->label('Data caricamento')
@@ -116,7 +116,7 @@ class TemplateResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('path')
-                    ->label('Percorso')
+                    ->label('🔍 Percorso')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 // Tables\Columns\IconColumn::make('current')

@@ -444,11 +444,11 @@ class NewContractResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('client.denomination')
-                    ->label('Cliente')
+                    ->label('🔍 Cliente')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tax_types')
-                    ->label('Entrate')
+                    ->label('🔍 Entrate')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'CDS' => 'info',
@@ -468,7 +468,7 @@ class NewContractResource extends Resource
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('accrual_types')
-                    ->label('Gestioni')
+                    ->label('🔍 Gestioni')
                     ->badge()
                     ->color('primary')
                     ->separator(', ')
@@ -478,7 +478,7 @@ class NewContractResource extends Resource
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('payment_type')
-                    ->label('Remunerazione')
+                    ->label('🔍 Remunerazione')
                     ->searchable()
                     ->color('black')
                     ->sortable(),

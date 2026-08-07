@@ -54,12 +54,12 @@ class DocTypeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('docGroup.name')
-                    ->label('Gruppo documenti')
+                    ->label('🔍 Gruppo documenti')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('name')->label('Nome')
+                TextColumn::make('name')->label('🔍 Nome')
                     ->searchable(),
-                TextColumn::make('description')->label('Descrizione')
+                TextColumn::make('description')->label('🔍 Descrizione')
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()

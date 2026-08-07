@@ -86,19 +86,19 @@ class ContractResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('client.denomination')->label('Cliente')
+                Tables\Columns\TextColumn::make('client.denomination')->label('🔍 Cliente')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
+                Tables\Columns\TextColumn::make('tax_type')->label('🔍 Entrata')
                     ->searchable()
                     // ->badge()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('type')->label('Tipo')
+                Tables\Columns\TextColumn::make('type')->label('🔍 Tipo')
                     // ->badge()
                     ->color('black')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('number')->label('Numero')
+                Tables\Columns\TextColumn::make('number')->label('🔍 Numero')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('contract_date')->label('Data contratto')

@@ -47,16 +47,16 @@ class CityResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->label('Comune')
+                Tables\Columns\TextColumn::make('name')->label('🔍 Comune')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('province.code')->label('Provincia')
+                Tables\Columns\TextColumn::make('province.code')->label('🔍 Provincia')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('zip_code')->label('CAP')
+                Tables\Columns\TextColumn::make('zip_code')->label('🔍 CAP')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('code')->label('Codice Catastale')
+                Tables\Columns\TextColumn::make('code')->label('🔍 Codice Catastale')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

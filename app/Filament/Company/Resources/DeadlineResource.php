@@ -90,7 +90,7 @@ class DeadlineResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('description')
-                    ->label('Descrizione')
+                    ->label('🔍 Descrizione')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('date')
@@ -98,7 +98,7 @@ class DeadlineResource extends Resource
                     ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('amount')
-                    ->label('Totale')
+                    ->label('🔍 Totale')
                     ->money('EUR')
                     ->searchable()
                     ->sortable(),

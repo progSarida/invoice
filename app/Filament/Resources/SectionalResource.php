@@ -119,9 +119,9 @@ class SectionalResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('description')->label('Descrizione')
+                Tables\Columns\TextColumn::make('description')->label('🔍 Descrizione')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('client_type')->label('Tipo')
+                Tables\Columns\TextColumn::make('client_type')->label('🔍 Tipo')
                     ->searchable(),
                 // Tables\Columns\TextColumn::make('docType')
                 //     ->label('Tipo documento')
@@ -130,17 +130,17 @@ class SectionalResource extends Resource
                 //     )
                 //     ->searchable(),
                 Tables\Columns\TextColumn::make('docTypes')
-                    ->label('Tipi documento')
+                    ->label('🔍 Tipi documento')
                     ->formatStateUsing(fn($state, $record) =>
                         $record->docTypes->pluck('name')->implode(', ') ?: '-'
                     )
                     ->searchable(),
-                Tables\Columns\TextColumn::make('progressive')->label('Numero successivo')
+                Tables\Columns\TextColumn::make('progressive')->label('🔍 Numero successivo')
                     ->formatStateUsing(function ( Sectional $sectional) {
                         return $sectional->getNumber();
                     })
                     ->searchable(),
-                Tables\Columns\TextColumn::make('numeration_type')->label('Tipo numerazione')
+                Tables\Columns\TextColumn::make('numeration_type')->label('🔍 Tipo numerazione')
                     ->searchable(),
             ])
             ->filters([

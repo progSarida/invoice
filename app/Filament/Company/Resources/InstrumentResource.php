@@ -51,9 +51,9 @@ class InstrumentResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('order')->label('Posizione')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('name')->label('Nome')
+                Tables\Columns\TextColumn::make('name')->label('🔍 Nome')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('description')->label('Descrizione')
+                Tables\Columns\TextColumn::make('description')->label('🔍 Descrizione')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

@@ -388,9 +388,9 @@ class InvoiceResource extends Resource
         return $table
             ->query(Invoice::oldInvoices())
             ->columns([
-                Tables\Columns\TextColumn::make('id')->label('Id')
+                Tables\Columns\TextColumn::make('id')->label('🔍 Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('invoice_type')->label('Tipo')
+                Tables\Columns\TextColumn::make('invoice_type')->label('🔍 Tipo')
                     ->searchable()
                     // ->badge()
                     ->color('black')
@@ -405,7 +405,7 @@ class InvoiceResource extends Resource
                             ->orderBy('section', $direction)
                             ->orderBy('number', $direction);
                     }),
-                Tables\Columns\TextColumn::make('description')->label('Descrizione')
+                Tables\Columns\TextColumn::make('description')->label('🔍 Descrizione')
                     ->searchable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('invoice_date')->label('Data')
                     ->date()
@@ -422,7 +422,7 @@ class InvoiceResource extends Resource
                     })
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('parent_id')->label('Id fattura stornata')
+                Tables\Columns\TextColumn::make('parent_id')->label('🔍 Id fattura stornata')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('tender.cig_code')->label('CIG')
                     ->numeric()
@@ -436,7 +436,7 @@ class InvoiceResource extends Resource
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
+                Tables\Columns\TextColumn::make('tax_type')->label('🔍 Entrata')
                     ->searchable()
                     // ->badge()
                     ->color('black')
@@ -458,7 +458,7 @@ class InvoiceResource extends Resource
                     ->sortable()
                     ->alignRight()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('sdi_status')->label('Status')
+                Tables\Columns\TextColumn::make('sdi_status')->label('🔍 Status')
                     ->searchable()
                     // ->badge()
                     ->color('black')

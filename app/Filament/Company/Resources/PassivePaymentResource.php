@@ -288,22 +288,22 @@ class PassivePaymentResource extends Resource
         return $table
             ->defaultSort('payment_date', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('id')->label('Id')
+                Tables\Columns\TextColumn::make('id')->label('🔍 Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('passiveInvoice.supplier.denomination')
-                    ->label('Fornitore')
+                    ->label('🔍 Fornitore')
                     ->limit(45)
                     ->tooltip(fn($record) => $record->passiveInvoice->supplier->denomination)
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('passiveInvoice.docType.description')
-                    ->label('Tipo documento')
+                    ->label('🔍 Tipo documento')
                     ->limit(45)
                     ->tooltip(fn($record) => DocType::where('name', $record->passiveInvoice->doc_type)->first()->description)
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('passiveInvoice.number')
-                    ->label('Fattura')
+                    ->label('🔍 Fattura')
                     ->getStateUsing(function ($record) {
                         $invoice = $record->passiveInvoice;
                         if (!$invoice) {
@@ -314,7 +314,7 @@ class PassivePaymentResource extends Resource
                     ->alignRight()
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('amount')->label('Importo')
+                Tables\Columns\TextColumn::make('amount')->label('🔍 Importo')
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     ->sortable()
                     ->alignRight()
@@ -325,7 +325,7 @@ class PassivePaymentResource extends Resource
                     ])
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('payment_date')
-                    ->label('Data pag.')
+                    ->label('🔍 Data pag.')
                     ->getStateUsing(function ($record) {
                         return $record->payment_date
                             ? Carbon::parse($record->payment_date)->format('d/m/Y')
@@ -344,7 +344,7 @@ class PassivePaymentResource extends Resource
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('registration_date')
-                    ->label('Data reg.')
+                    ->label('🔍 Data reg.')
                     ->getStateUsing(function ($record) {
                         return $record->registration_date
                             ? Carbon::parse($record->registration_date)->format('d/m/Y')
@@ -364,7 +364,7 @@ class PassivePaymentResource extends Resource
                     })
                     ->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('registrationUser.name')
-                    ->label('Registrato da')
+                    ->label('🔍 Registrato da')
                     ->getStateUsing(fn ($record) => optional($record->registrationUser)->name ?? 'Nessun utente')
                     ->sortable()
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
