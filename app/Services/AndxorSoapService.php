@@ -265,7 +265,7 @@ Log::info("Recupero dati contratto.");
 Log::info("Dati contratto recuperati.");
         return $invoice->contract ? array_filter([
             array_filter([
-                'IdDocumento' => $invoice->contract?->lastDetail?->number && preg_match('/^[A-Za-z0-9]{1,20}$/', $invoice->contract?->lastDetail?->number) ? $invoice->contract?->lastDetail?->number : null,
+                'IdDocumento' => $invoice->contract?->lastDetail?->number && preg_match('/^[A-Za-z0-9.]{1,20}$/', $invoice->contract?->lastDetail?->number) ? $invoice->contract?->lastDetail?->number : null,
                 'Data' => $invoice->contract?->lastDetail?->date ?? null,
                 'CodiceCUP' => $invoice->contract?->cup_code && preg_match('/^[A-Za-z0-9]{1,15}$/', $invoice->contract?->cup_code) ? $invoice->contract?->cup_code : null,
                 'CodiceCIG' => $cig && preg_match('/^[A-Za-z0-9]{1,15}$/', $cig) ? $cig : null,
