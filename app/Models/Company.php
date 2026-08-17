@@ -99,6 +99,21 @@ class Company extends Model
         return $this->hasOne(StampDuty::class);
     }
 
+    public function settings()
+    {
+        return $this->hasOne(CompanySetting::class);
+    }
+
+    /**
+     * Tolleranza sul residuo delle fatture passive.
+     * Torna 0 se l'azienda non ha ancora la riga dei parametri, così i punti
+     * che la usano si comportano come prima dell'introduzione del parametro.
+     */
+    public function getPassivePaymentToleranceAttribute(): float
+    {
+        return (float) ($this->settings?->passive_payment_tolerance ?? 0);
+    }
+
     public function sectionals()
     {
         return $this->hasMany(Sectional::class);

@@ -734,14 +734,23 @@ class PassiveInvoiceResource extends Resource
                         if (!isset($data['value'])) {
                             return $query;
                         }
+                        $tolerance = PassiveInvoice::paymentTolerance();                                        // tolleranza sul residuo dell'azienda di sessione
                         $query->where('doc_type', '!=', 'TD04');                                                // escludo le note di credito
-                        return $query->when($data['value'] === 'si', function ($q) {
-                                return $q->whereRaw(" (total_payment + total_note) >= total ");
-                            })->when($data['value'] === 'par', function ($q) {
-                                return $q->whereRaw(" (total_payment + total_note) < total and total_payment != 0.00 ");
-                            })->when($data['value'] === 'no', function ($q) {
-                                return $q->whereRaw(" (total_payment + total_note) = 0.00 ");
-                            });
+                        return $query->when($data['value'] === 'si', fn ($q) => $q->paid($tolerance))
+                                    ->when($data['value'] === 'par', fn ($q) => $q->partiallyPaid($tolerance))
+                                    ->when($data['value'] === 'no', fn ($q) => $q->notPaid());
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (! isset($data['value'])) {
+                            return null;
+                        }
+                        $labels = ['si' => 'Totale', 'par' => 'Parziale', 'no' => 'Nessuno'];
+                        $indicator = 'Pagamento: ' . ($labels[$data['value']] ?? $data['value']);
+                        $tolerance = PassiveInvoice::paymentTolerance();
+                        if ($tolerance > 0 && $data['value'] !== 'no') {
+                            $indicator .= ' (tolleranza ' . number_format($tolerance, 2, ',', '.') . ' €)';
+                        }
+                        return $indicator;
                     })
                     ->preload(),
                 Filter::make('invoice_date_range')

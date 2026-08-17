@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
@@ -115,6 +116,82 @@ class PassiveInvoice extends Model
         return $query->whereDoesntHave('passiveItems', function ($q) {
             $q->where('description', 'like', '%Ritenuta persone%');
         });
+    }
+
+    /**
+     * Tolleranza sul residuo configurata per l'azienda di sessione.
+     * Fuori dal contesto del tenant (code, comandi artisan, export) non c'è
+     * azienda di sessione e torna 0, quindi gli scope restano espliciti e
+     * si comportano come se la tolleranza non fosse impostata.
+     */
+    public static function paymentTolerance(): float
+    {
+        return (float) (Filament::getTenant()?->passive_payment_tolerance ?? 0);
+    }
+
+    /**
+     * Residuo tra il dovuto e quanto già coperto da pagamenti e note di credito.
+     */
+    public function getResidualAttribute(): float
+    {
+        return (float) $this->total - ((float) $this->total_payment + (float) $this->total_note);
+    }
+
+    /**
+     * La fattura è coperta, tenendo conto della tolleranza sul residuo.
+     * La tolleranza si applica solo se sulla fattura risultano pagamenti.
+     */
+    public function isPaid(?float $tolerance = null): bool
+    {
+        $tolerance = ((float) $this->total_payment) != 0.00 ? (float) ($tolerance ?? 0) : 0.00;
+
+        return $this->residual <= $tolerance;
+    }
+
+    /**
+     * Scope per fatture passive coperte da pagamenti e note di credito.
+     * La tolleranza sul residuo si applica solo alle fatture con pagamenti:
+     * una fattura senza pagamenti non è mai considerata pagata per tolleranza.
+     */
+    public function scopePaid($query, ?float $tolerance = null)
+    {
+        $tolerance = (float) ($tolerance ?? 0);
+
+        return $query->whereRaw(
+            '(total_payment + total_note) >= total - (CASE WHEN total_payment != 0.00 THEN ? ELSE 0 END)',
+            [$tolerance]
+        );
+    }
+
+    /**
+     * Scope per fatture passive non coperte: è l'esatto complemento di scopePaid().
+     */
+    public function scopeUnpaid($query, ?float $tolerance = null)
+    {
+        $tolerance = (float) ($tolerance ?? 0);
+
+        return $query->whereRaw(
+            '(total_payment + total_note) < total - (CASE WHEN total_payment != 0.00 THEN ? ELSE 0 END)',
+            [$tolerance]
+        );
+    }
+
+    /**
+     * Scope per fatture passive pagate solo in parte: hanno pagamenti,
+     * ma il residuo supera la tolleranza.
+     */
+    public function scopePartiallyPaid($query, ?float $tolerance = null)
+    {
+        return $query->unpaid($tolerance)->whereRaw('total_payment != 0.00');
+    }
+
+    /**
+     * Scope per fatture passive su cui non è stato imputato nulla.
+     * Non è influenzato dalla tolleranza, perché senza pagamenti non si applica.
+     */
+    public function scopeNotPaid($query)
+    {
+        return $query->whereRaw('(total_payment + total_note) = 0.00');
     }
 
     // Aggiorna il totale della fattura poassiva

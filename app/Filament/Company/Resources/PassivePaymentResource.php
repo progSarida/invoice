@@ -66,18 +66,20 @@ class PassivePaymentResource extends Resource
                                 return !in_array($termLower, ['pagate', 'pagate', 'pagato', 'pagati', 'pagata']);
                             });
                             $terms = array_values($terms);
+                            $tolerance = PassiveInvoice::paymentTolerance();                            // tolleranza sul residuo dell'azienda di sessione
                             $query = PassiveInvoice::query()
-                                ->where(function ($query) use ($record) {
+                                ->where(function ($query) use ($record, $tolerance) {
                                     // Continua a mostrare le fatture non pagate...
-                                    $query->whereRaw('(total_payment + total_note) >= total')
+                                    $query->paid($tolerance)
                                     // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
                                     ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
                                 });
                         } else {
+                            $tolerance = PassiveInvoice::paymentTolerance();                            // tolleranza sul residuo dell'azienda di sessione
                             $query = PassiveInvoice::query()
-                                ->where(function ($query) use ($record) {
+                                ->where(function ($query) use ($record, $tolerance) {
                                     // Continua a mostrare le fatture non pagate...
-                                    $query->whereRaw('(total_payment + total_note) < total')
+                                    $query->unpaid($tolerance)
                                     // ...OPPURE la fattura che è già associata a questo pagamento (se siamo in edit)
                                     ->when($record, fn($q) => $q->orWhere('id', $record->passive_invoice_id));
                                 });
@@ -123,8 +125,8 @@ class PassivePaymentResource extends Resource
                     ->afterStateUpdated(function ($state, Set $set) {
                         $passiveInvoice = PassiveInvoice::find($state);
                         if ($passiveInvoice) {
-                            $amount = $passiveInvoice->total - ($passiveInvoice->total_payment + $passiveInvoice->total_note);
-                            if($amount <= 0)
+                            $amount = $passiveInvoice->residual;
+                            if($passiveInvoice->isPaid(PassiveInvoice::paymentTolerance()))
                                 Notification::make()
                                     ->title('Attenzione! La fattura selezionata è già stata pagata')
                                     ->danger()
@@ -630,7 +632,7 @@ class PassivePaymentResource extends Resource
         $total = number_format($record->total, 2, ',', '.') . '€';
         $number = $record->number ?? 'S.N.';
 
-        $residuo = $record->total - ($record->total_payment + $record->total_note);
+        $residuo = $record->residual;
         $add = ($residuo > 0 && ($record->total_payment > 0 || $record->total_note > 0))
             ? " [" . number_format($residuo, 2, ",", ".") . "€]"
             : '';

@@ -828,6 +828,33 @@ class EditCompanyProfile extends EditTenantProfile
                                     ])
                                     ->columns(12),
                             ]),
+
+                        Tabs\Tab::make('Parametri')
+                            ->schema([
+                                Section::make("Parametri di funzionamento validi per questa azienda")
+                                    ->relationship('settings')
+                                    ->extraAttributes(['style' => 'font-weight: normal;'])
+                                    ->schema([
+                                        Placeholder::make('')
+                                            ->content("Fatture passive")
+                                            ->columnSpan(12)->extraAttributes(['style' => 'font-weight: bold; font-size: 1.25rem;']),
+                                        TextInput::make('passive_payment_tolerance')
+                                            ->label('Tolleranza sul residuo')
+                                            ->helperText("Una fattura passiva è considerata pagata quando il residuo tra dovuto e pagato non supera questo importo. Lascia 0 per richiedere il pagamento esatto.")
+                                            ->suffix('€')
+                                            ->afterStateUpdated(function ($state, $component) {
+                                                $float = CurrencyService::parseNumber($state);
+                                                $formatted = number_format($float, 2, ',', '.');
+                                                $component->state($formatted);
+                                            })
+                                            ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
+                                            ->dehydrated(true)
+                                            ->default('0,00')
+                                            ->columnSpan(3),
+                                    ])
+                                    ->columns(12),
+                            ]),
                     ])
                     ->columnSpan(12),
             ]);

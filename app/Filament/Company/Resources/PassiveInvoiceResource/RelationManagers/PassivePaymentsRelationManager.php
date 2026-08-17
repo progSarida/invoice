@@ -68,11 +68,8 @@ class PassivePaymentsRelationManager extends RelationManager
                         $passiveInvoice = $livewire->ownerRecord;
 
                         if ($passiveInvoice) {
-                            // Calcola il residuo con la stessa logica usata nell'afterStateUpdated della risorsa
-                            $residual = $passiveInvoice->total - ($passiveInvoice->total_payment + $passiveInvoice->total_note);
-
-                            // Restituisce il valore formattato con la virgola, pronto per il TextInput
-                            return $residual;
+                            // Restituisce il residuo, pronto per il TextInput
+                            return $passiveInvoice->residual;
                         }
 
                         return null;
