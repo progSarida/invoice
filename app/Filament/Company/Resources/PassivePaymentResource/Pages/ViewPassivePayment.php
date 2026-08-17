@@ -54,7 +54,18 @@ class ViewPassivePayment extends ViewRecord
                 ->action(function () use ($nextDPayment) {
                     $this->redirect(PassivePaymentResource::getUrl('view', ['record' => $nextDPayment->id]));
                 }),
-            Actions\EditAction::make(),
+            // Porta alla creazione di un nuovo pagamento
+            Actions\Action::make('new_payment')
+                ->label('Nuovo')
+                ->visible(fn (): bool => PassivePaymentResource::canCreate())
+                ->url(PassivePaymentResource::getUrl('create')),
+            Actions\ActionGroup::make([
+                Actions\EditAction::make(),
+            ])
+            ->label('Operazioni')
+            ->icon('heroicon-m-ellipsis-vertical')
+            ->color('info')
+            ->button(),
         ];
     }
 }
