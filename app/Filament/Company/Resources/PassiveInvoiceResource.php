@@ -435,6 +435,11 @@ class PassiveInvoiceResource extends Resource
                                     ->extraAttributes(['style' => 'line-height:1.8'])
                                     ->columnSpanFull(),
                             ]),
+                        DatePicker::make('created_at')
+                            ->label('Data inserimento')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->columnSpan(1)
+                            ->disabled(),
                 // ]),
 
             // ])->columns(5);
@@ -508,6 +513,15 @@ class PassiveInvoiceResource extends Resource
                             ->label('')
                             ->money('EUR', true, 'it_IT'),
                     ]),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Data inserimento')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('updated_at')
+                //     ->date('d/m/Y')
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filtersFormWidth('4xl')
             ->filtersFormColumns(4)
@@ -740,7 +754,7 @@ class PassiveInvoiceResource extends Resource
                             ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
                             ->afterStateUpdated(function ($state, Set $set) {
                                 if ($state) {
-                                    $set('invoice_to_date', $state);
+                                    // $set('invoice_to_date', $state);
                                 }
                             })
                             ->default(now()->year . '-01-01')
@@ -781,7 +795,7 @@ class PassiveInvoiceResource extends Resource
                             ->live(debounce: 1000)
                             ->afterStateUpdated(function ($state, Set $set) {
                                 if ($state) {
-                                    $set('payment_to_date', $state);
+                                    // $set('payment_to_date', $state);
                                 }
                             })
                             ->columnSpan(1),
@@ -807,6 +821,47 @@ class PassiveInvoiceResource extends Resource
                         }
                         if ($data['payment_to_date']) {
                             return "Data ultimo pagamento al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
+                        }
+                        return null;
+                    }),
+                Filter::make('create_date_range')
+                    ->columnSpan(2)
+                    ->columns(2)
+                    ->form([
+                        DatePicker::make('create_from_date')
+                            ->label('Data inserimento da')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    // $set('create_to_date', $state);
+                                }
+                            })
+                            ->default(now()->year . '-01-01')
+                            ->columnSpan(1),
+                        DatePicker::make('create_to_date')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->default(now()->year . '-12-31')
+                            ->label('Data inserimento a')
+                            ->columnSpan(1),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['create_from_date'])) {
+                            $query->whereDate('created_at', '>=', $data['create_from_date']);
+                        }
+                        if (! empty($data['create_to_date'])) {
+                            $query->whereDate('created_at', '<=', $data['create_to_date']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['create_from_date'] && $data['create_to_date']) {
+                            return "Data inserimento dal " . Carbon::parse($data['create_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['create_to_date'])->format('d/m/Y');
+                        }
+                        if ($data['create_from_date']) {
+                            return "Data inserimento dal " . Carbon::parse($data['create_from_date'])->format('d/m/Y');
+                        }
+                        if ($data['create_to_date']) {
+                            return "Data inserimento al " . Carbon::parse($data['create_to_date'])->format('d/m/Y');
                         }
                         return null;
                     }),
