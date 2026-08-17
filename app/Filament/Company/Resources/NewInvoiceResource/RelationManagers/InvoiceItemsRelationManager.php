@@ -295,7 +295,9 @@ class InvoiceItemsRelationManager extends RelationManager
                 $query->selectRaw('invoice_items.*, COALESCE(amount, total) as display_total')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('description')->label('Elemento'),
+                Tables\Columns\TextColumn::make('description')->label('Elemento')
+                    ->limit(50)
+                    ->tooltip(fn ($state) => strlen($state) > 50 ? $state : null),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
                     // ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     // ->numeric()
