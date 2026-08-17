@@ -9,6 +9,7 @@ use App\Models\PiValidation;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Colors\Color;
 use Illuminate\Contracts\Support\Htmlable;
@@ -127,6 +128,24 @@ class EditPassiveInvoice extends EditRecord
                     ->modalDescription('Sei sicuro di voler annullare la validazione di questa fattura?') 
                     ->visible(fn ($record) => $record?->pi_validation_id)
                     ->action(function (PassiveInvoice $record) {
+                        // Con pagamenti già imputati la fattura non può tornare "Da validare":
+                        // resterebbero pagamenti su una fattura in uno stato che non ne consente l'inserimento
+                        $paymentsCount = $record->passivePayments()->count();
+
+                        if ($paymentsCount > 0) {
+                            Notification::make()
+                                ->title('Annullamento validazione non consentito')
+                                ->body($paymentsCount === 1
+                                    ? "Alla fattura è associato 1 pagamento. Per annullare la validazione è necessario prima eliminare il pagamento."
+                                    : "Alla fattura sono associati {$paymentsCount} pagamenti. Per annullare la validazione è necessario prima eliminarli."
+                                )
+                                ->danger()
+                                ->duration(8000)
+                                ->send();
+
+                            return;
+                        }
+
                         $record->update([ 'pi_validation_id' => null ]);
                     })
                     ->color('danger'),
