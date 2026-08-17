@@ -785,45 +785,6 @@ class PassiveInvoiceResource extends Resource
                         }
                         return null;
                     }),
-                Filter::make('payment_date_range')
-                    ->columnSpan(2)
-                    ->columns(2)
-                    ->form([
-                        DatePicker::make('payment_from_date')
-                            ->label('Data ultimo pagamento da')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->live(debounce: 1000)
-                            ->afterStateUpdated(function ($state, Set $set) {
-                                if ($state) {
-                                    // $set('payment_to_date', $state);
-                                }
-                            })
-                            ->columnSpan(1),
-                        DatePicker::make('payment_to_date')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->label('Data ultimo pagamento a')
-                            ->columnSpan(1),
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        if (! empty($data['payment_from_date'])) {
-                            $query->whereDate('last_payment_date', '>=', $data['payment_from_date']);
-                        }
-                        if (! empty($data['payment_to_date'])) {
-                            $query->whereDate('last_payment_date', '<=', $data['payment_to_date']);
-                        }
-                    })
-                    ->indicateUsing(function (array $data): ?string {
-                        if ($data['payment_from_date'] && $data['payment_to_date']) {
-                            return "Data ultimo pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
-                        }
-                        if ($data['payment_from_date']) {
-                            return "Data ultimo pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y');
-                        }
-                        if ($data['payment_to_date']) {
-                            return "Data ultimo pagamento al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
-                        }
-                        return null;
-                    }),
                 Filter::make('create_date_range')
                     ->columnSpan(2)
                     ->columns(2)
@@ -864,6 +825,58 @@ class PassiveInvoiceResource extends Resource
                             return "Data inserimento al " . Carbon::parse($data['create_to_date'])->format('d/m/Y');
                         }
                         return null;
+                    }),
+                Filter::make('payment_date_range')
+                    ->columnSpan(2)
+                    ->columns(2)
+                    ->form([
+                        DatePicker::make('payment_from_date')
+                            ->label('Data ultimo pagamento da')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->live(debounce: 1000)
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    // $set('payment_to_date', $state);
+                                }
+                            })
+                            ->columnSpan(1),
+                        DatePicker::make('payment_to_date')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->label('Data ultimo pagamento a')
+                            ->columnSpan(1),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['payment_from_date'])) {
+                            $query->whereDate('last_payment_date', '>=', $data['payment_from_date']);
+                        }
+                        if (! empty($data['payment_to_date'])) {
+                            $query->whereDate('last_payment_date', '<=', $data['payment_to_date']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['payment_from_date'] && $data['payment_to_date']) {
+                            return "Data ultimo pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
+                        }
+                        if ($data['payment_from_date']) {
+                            return "Data ultimo pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y');
+                        }
+                        if ($data['payment_to_date']) {
+                            return "Data ultimo pagamento al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
+                        }
+                        return null;
+                    }),
+                SelectFilter::make('withholdings')
+                    ->label('Ritenuta d\'acconto')
+                    ->options([
+                        'yes' => 'Con ritenuta',
+                        'no' => 'Senza ritenuta',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (! isset($data['value'])) {
+                            return $query;
+                        }
+                        return $query->when($data['value'] === 'yes', fn ($q) => $q->withholdings())
+                                    ->when($data['value'] === 'no', fn ($q) => $q->withoutWithholdings());
                     }),
             ])
             ->persistFiltersInSession()

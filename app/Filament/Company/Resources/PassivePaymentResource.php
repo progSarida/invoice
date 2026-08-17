@@ -577,6 +577,21 @@ class PassivePaymentResource extends Resource
                         }
                         return null;
                     }),
+                SelectFilter::make('withholdings')
+                    ->label('Ritenuta d\'acconto')
+                    ->options([
+                        'yes' => 'Con ritenuta',
+                        'no' => 'Senza ritenuta',
+                    ])
+                    ->columnSpan(4)
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (! isset($data['value'])) {
+                            return $query;
+                        }
+                        // Entro nella relazione passiveInvoice e applico gli scope della fattura
+                        return $query->when($data['value'] === 'yes', fn ($q) => $q->whereHas('passiveInvoice', fn (Builder $inner) => $inner->withholdings()))
+                                    ->when($data['value'] === 'no', fn ($q) => $q->whereHas('passiveInvoice', fn (Builder $inner) => $inner->withoutWithholdings()));
+                    }),
             ])
             ->persistFiltersInSession()
             ->actions([

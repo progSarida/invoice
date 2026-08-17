@@ -97,6 +97,26 @@ class PassiveInvoice extends Model
 
     }
 
+    /**
+     * Scope per fatture passive con ritenuta d'acconto
+     */
+    public function scopeWithholdings($query)
+    {
+        return $query->whereHas('passiveItems', function ($q) {
+            $q->where('description', 'like', '%Ritenuta persone%');
+        });
+    }
+
+    /**
+     * Scope per fatture passive senza ritenuta d'acconto
+     */
+    public function scopeWithoutWithholdings($query)
+    {
+        return $query->whereDoesntHave('passiveItems', function ($q) {
+            $q->where('description', 'like', '%Ritenuta persone%');
+        });
+    }
+
     // Aggiorna il totale della fattura poassiva
     public function updateTotal(): void
     {
