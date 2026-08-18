@@ -149,7 +149,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 
         if ($this->isSuperAdmin() || $this->hasAdminAccess())
             $destinationPanelId = 'admin';
-        if ($this->hasCompanyAccess())
+        else if ($this->hasCompanyAccess())
             $destinationPanelId = 'company';
 
         if (!$destinationPanelId)
