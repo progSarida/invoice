@@ -122,10 +122,10 @@ class ActivePayments extends Model
             // $payment->registration_date = now()->toDateString();
             // $payment->registration_user_id = Auth::id();
             $updatedInvoice = false;
+            $invoice = $payment->invoice;
 
             if ($payment->isDirty('amount') && $payment->invoice) {
                 $originalAmount = $payment->getOriginal('amount');
-                $invoice = $payment->invoice;
                 $invoice->total_payment = $invoice->total_payment - $originalAmount + $payment->amount;
                 $invoice->save();
                 // $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
