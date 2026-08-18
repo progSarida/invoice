@@ -61,6 +61,7 @@ class ActivePaymentsResource extends Resource
                     ->label('Importo')
                     ->required()
                     ->disabled(fn ($get) => $get('validated'))
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
                     ->rules(['numeric', 'min:0'])
@@ -79,6 +80,7 @@ class ActivePaymentsResource extends Resource
                     ->label('Validato')
                     ->live()
                     ->default(false)
+                    ->visible(fn ($record) => $record?->amount !== null)
                     ->columnSpan(2),
                 DatePicker::make('registration_date')
                     ->label('Data registrazione')

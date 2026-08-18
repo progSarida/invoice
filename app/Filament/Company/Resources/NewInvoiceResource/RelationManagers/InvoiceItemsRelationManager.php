@@ -97,6 +97,7 @@ class InvoiceItemsRelationManager extends RelationManager
                             ->live(onBlur: true)
                             ->required(fn(Get $get) => $get('measure_unit') || $get('unit_price'))
                             ->numeric()
+                            ->extraInputAttributes(['class' => 'text-right'])
                             // ->live(debounce: 500)
                             // ->debounce(3000)
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
@@ -145,12 +146,14 @@ class InvoiceItemsRelationManager extends RelationManager
                                 'regex:/^[a-zA-Z0-9]{1,10}$/',
                             ])
                             ->required(fn(Get $get) => $get('quantity') || $get('unit_price'))
+                            ->extraInputAttributes(['class' => 'text-right'])
                             ->columnSpan(4)
                             ->maxLength(255),
                         Forms\Components\TextInput::make('unit_price')->label('Prezzo unitario')
                             ->live(onBlur: true)
                             ->required(fn(Get $get) => $get('quantity') || $get('measure_unit'))
                             ->columnSpan(4)
+                            ->extraInputAttributes(['class' => 'text-right'])
                             // ->live(debounce: 500)
                             // ->debounce(3000)
                             ->afterStateUpdated(function (Get $get, Set $set, $state) {
@@ -200,6 +203,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->columnSpan(4)
                     ->prefix('€')
                     ->maxLength(255)
+                    ->extraInputAttributes(['class' => 'text-right'])
                     // ->live(debounce: 500)
                     // ->debounce(3000)
                     ->afterStateUpdated(function (Get $get, Set $set, $state) {
@@ -235,6 +239,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->label('Aliquota IVA')
                     ->required()
                     ->columnSpan(8)
+                    ->extraInputAttributes(['class' => 'text-right'])
                     // ->options(VatCodeType::class)
                     ->options(
                         collect(VatCodeType::cases())
@@ -266,6 +271,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     // ->numeric()
                     ->prefix('€')
                     ->columnSpan(4)
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->formatStateUsing(function (Get $get, Set $set) {
                         $rate = VatCodeType::tryFrom($get('vat_code_type'))?->getRate() / 100 ?? 0;
                         $amount = CurrencyService::parseNumber($get('amount')) * $rate;

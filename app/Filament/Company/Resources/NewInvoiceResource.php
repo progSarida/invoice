@@ -52,6 +52,7 @@ use App\Models\BankAccount;
 use App\Models\ReversalMotivationType;
 use App\Models\SocialContribution;
 use App\Models\Withholding;
+use App\Services\CurrencyService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Support\Enums\MaxWidth;
@@ -2504,31 +2505,40 @@ class NewInvoiceResource extends Resource
                     ->form([
                         Toggle::make('filter_residue')
                             ->label("Ignora 'Dovuto' inferiore a")
+                            ->live()
                             ->columnSpan(12),
                         TextInput::make('ignore_limit')
                             ->label('Importo')
-                            ->numeric()
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn ($state, $component) => $component->state(
+                                number_format(CurrencyService::parseNumber($state) ?? 0, 2, ',', '.')
+                            ))
+                            ->formatStateUsing(fn ($state): ?string => $state === null ? null : number_format(CurrencyService::parseNumber($state) ?? 0, 2, ',', '.'))
+                            ->extraInputAttributes(['class' => 'text-right'])
+                            ->suffix('€')
                             ->columnSpan(6)
-                            ->disabled(fn (Get $get) => $get('ignore_limit'))
+                            ->disabled(fn (Get $get) => $get('filter_residue') == false)
                             ->default(5),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         if($data['filter_residue']){
-                            $limit = $data['ignore_limit'];
-                            if (blank($limit)) {
+                            $limit = CurrencyService::parseNumber($data['ignore_limit']);
+                            if ($limit === null) {
                                 return $query;
                             }
                             return $query->where(function (Builder $q) use ($limit) {
                                 $q->where(function ($q2) use ($limit) {
                                     $q2->whereHas('client', function ($c) {
-                                        $c->where('type', 'public');
+                                        $c->where('is_total_with_vat', false);
                                     })
+                                    ->whereNull('parent_id')
                                     ->whereRaw('(COALESCE(no_vat_total, 0) - (COALESCE(total_payment, 0) + COALESCE(total_notes, 0))) > ?', $limit);
                                 })
                                 ->orWhere(function ($q3) use ($limit) {
                                     $q3->whereHas('client', function ($c) {
-                                        $c->where('type', '!=', 'public');
+                                        $c->where('is_total_with_vat', true);
                                     })
+                                    ->whereNull('parent_id')
                                     ->whereRaw('(COALESCE(total, 0) - (COALESCE(total_payment, 0) + COALESCE(total_notes, 0))) > ?', $limit);
                                 });
                             });
@@ -2537,7 +2547,7 @@ class NewInvoiceResource extends Resource
                     })
                     ->indicateUsing(function (array $data): ?string {
                         if($data['filter_residue']){
-                            return "Ignora documenti con residuo minore di " . number_format($data['ignore_limit'], 2, ',', '.') . " €";
+                            return "Ignora documenti con residuo minore di " . number_format(CurrencyService::parseNumber($data['ignore_limit']) ?? 0, 2, ',', '.') . " €";
                         }
                         else {
                             return null;

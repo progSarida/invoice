@@ -96,6 +96,7 @@ class ActivePaymentsRelationManager extends RelationManager
                     })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
+                    ->extraInputAttributes(['class' => 'text-right'])
                     ->suffix('€')
                     ->columnSpan(2),
                 DatePicker::make('payment_date')
@@ -110,6 +111,7 @@ class ActivePaymentsRelationManager extends RelationManager
                 Toggle::make('validated')
                     ->label('Validato')
                     ->live()
+                    ->visible(fn ($record) => $record?->amount !== null)
                     ->default(false)
                     ->columnSpan(2),
                 Select::make('bank_account_id')
