@@ -143,7 +143,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         return false;
     }
 
-    public function loginRedirectOld(): ?Response
+    public function loginRedirect(): ?Response
     {
         $destinationPanelId = null;
 
@@ -156,25 +156,6 @@ class User extends Authenticatable implements FilamentUser, HasTenants
             return abort(403, 'Accesso non autorizzato a nessun pannello.');
 
         return redirect()->to(Filament::getPanel($destinationPanelId)->getUrl());
-    }
-
-    public function loginRedirect(): ?Response
-    {
-        // 'company' ha la precedenza: ci finisce chiunque sia autorizzato alle aziende
-        if ($this->hasCompanyAccess()) {
-            $url = Filament::getPanel('company')->getUrl();
-
-            if ($url) {
-                return redirect()->to($url);
-            }
-            // niente tenant disponibile -> si prova comunque l'admin sotto
-        }
-
-        if ($this->isSuperAdmin() || $this->hasAdminAccess()) {
-            return redirect()->to(Filament::getPanel('admin')->getUrl());
-        }
-
-        return abort(403, 'Accesso non autorizzato a nessun pannello.');
     }
 
     public function companies(): BelongsToMany
