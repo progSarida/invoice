@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
@@ -26,7 +27,10 @@ class PassiveInvoice extends Model
         'payment_deadline',
         'bank',
         'iban',
+        'user_id',
         'pi_validation_id',
+        'pi_validation_date',
+        'pi_validation_user_id',
         'filename',
         'xml_path',
         'pdf_path',
@@ -35,6 +39,7 @@ class PassiveInvoice extends Model
 
     protected $casts = [
         'invoice_date' => 'date',
+        'pi_validation_date' => 'date',
     ];
 
     public function company(){
@@ -73,11 +78,24 @@ class PassiveInvoice extends Model
         return $this->belongsTo(PiValidation::class);
     }
 
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+
+    public function piValidationUser(){
+        return $this->belongsTo(User::class, 'pi_validation_user_id');
+    }
+
     protected static function booted()
     {
         static::creating(function ($invoice) {
             $invoice->total_payment = 0.00;
             $invoice->total_note = 0.00;
+            $invoice->user_id = Auth::id();                                                 // registro l'utente che crea la fattura passiva
+            if ($invoice->pi_validation_id) {                                               // fattura creata già in uno stato di validazione
+                $invoice->pi_validation_date = today();
+                $invoice->pi_validation_user_id = Auth::id();
+            }
         });
 
         static::created(function ($invoice) {
@@ -85,7 +103,10 @@ class PassiveInvoice extends Model
         });
 
         static::updating(function ($invoice) {
-            //
+            if ($invoice->isDirty('pi_validation_id')) {                                    // registro chi e quando cambia lo stato di validazione
+                $invoice->pi_validation_date = $invoice->pi_validation_id ? today() : null;
+                $invoice->pi_validation_user_id = $invoice->pi_validation_id ? Auth::id() : null;
+            }
         });
 
         static::saved(function ($invoice) {

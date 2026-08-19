@@ -450,6 +450,7 @@ class PassiveInvoiceResource extends Resource
     {
         return $table
             ->poll('5s')
+            ->modifyQueryUsing(fn ($query) => $query->with(['user', 'piValidationUser']))
             ->defaultSort(fn (Builder $query) => $query->orderBy('invoice_date', 'desc')->orderBy('id', 'desc'))
             ->columns([
                 TextColumn::make('docType.description')
@@ -503,6 +504,15 @@ class PassiveInvoiceResource extends Resource
                     ->default(PiValidationStatus::NO_STATUS)
                     ->tooltip(fn ($record): string => $record?->piValidation ? $record?->piValidation->name : 'Non validata')
                     ->sortable(),
+                TextColumn::make('pi_validation_date')
+                    ->label('Data validazione')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('piValidationUser.name')
+                    ->label('Validata da')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total_payment')
                     ->label('Pagato')
                     ->money('EUR')
@@ -518,12 +528,16 @@ class PassiveInvoiceResource extends Resource
                     ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('user.name')
+                    ->label('Registrata da')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 // Tables\Columns\TextColumn::make('updated_at')
                 //     ->date('d/m/Y')
                 //     ->sortable()
                 //     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filtersFormWidth('4xl')
+            ->filtersFormWidth('6xl')
             ->filtersFormColumns(4)
             ->filters([
                 SelectFilter::make('supplier_id')
@@ -531,7 +545,7 @@ class PassiveInvoiceResource extends Resource
                     // ->multiple()
                     ->searchable()
                     // ->preload()
-                    ->columnSpanFull()
+                    ->columnSpan(3)
                     ->options(function () {
                         $suppliers = Supplier::select('suppliers.id', 'suppliers.denomination')
                             ->join('passive_invoices', 'suppliers.id', '=', 'passive_invoices.supplier_id')
@@ -542,6 +556,19 @@ class PassiveInvoiceResource extends Resource
                         return $suppliers;
                     })
                     ->getOptionLabelUsing(fn ($record) => $record?->description),
+                SelectFilter::make('withholdings')
+                    ->label('Ritenuta d\'acconto')
+                    ->options([
+                        'yes' => 'Con ritenuta',
+                        'no' => 'Senza ritenuta',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (! isset($data['value'])) {
+                            return $query;
+                        }
+                        return $query->when($data['value'] === 'yes', fn ($q) => $q->withholdings())
+                                    ->when($data['value'] === 'no', fn ($q) => $q->withoutWithholdings());
+                    }),
                 SelectFilter::make('doc_type')
                     ->label('Seleziona tipo documento')
                     ->options(function () {
@@ -794,47 +821,6 @@ class PassiveInvoiceResource extends Resource
                         }
                         return null;
                     }),
-                Filter::make('create_date_range')
-                    ->columnSpan(2)
-                    ->columns(2)
-                    ->form([
-                        DatePicker::make('create_from_date')
-                            ->label('Data inserimento da')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
-                            ->afterStateUpdated(function ($state, Set $set) {
-                                if ($state) {
-                                    // $set('create_to_date', $state);
-                                }
-                            })
-                            ->default(now()->year . '-01-01')
-                            ->columnSpan(1),
-                        DatePicker::make('create_to_date')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->default(now()->year . '-12-31')
-                            ->label('Data inserimento a')
-                            ->columnSpan(1),
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        if (! empty($data['create_from_date'])) {
-                            $query->whereDate('created_at', '>=', $data['create_from_date']);
-                        }
-                        if (! empty($data['create_to_date'])) {
-                            $query->whereDate('created_at', '<=', $data['create_to_date']);
-                        }
-                    })
-                    ->indicateUsing(function (array $data): ?string {
-                        if ($data['create_from_date'] && $data['create_to_date']) {
-                            return "Data inserimento dal " . Carbon::parse($data['create_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['create_to_date'])->format('d/m/Y');
-                        }
-                        if ($data['create_from_date']) {
-                            return "Data inserimento dal " . Carbon::parse($data['create_from_date'])->format('d/m/Y');
-                        }
-                        if ($data['create_to_date']) {
-                            return "Data inserimento al " . Carbon::parse($data['create_to_date'])->format('d/m/Y');
-                        }
-                        return null;
-                    }),
                 Filter::make('payment_date_range')
                     ->columnSpan(2)
                     ->columns(2)
@@ -874,19 +860,88 @@ class PassiveInvoiceResource extends Resource
                         }
                         return null;
                     }),
-                SelectFilter::make('withholdings')
-                    ->label('Ritenuta d\'acconto')
-                    ->options([
-                        'yes' => 'Con ritenuta',
-                        'no' => 'Senza ritenuta',
+                Filter::make('create_date_range')
+                    ->columnSpan(2)
+                    ->columns(2)
+                    ->form([
+                        DatePicker::make('create_from_date')
+                            ->label('Data registrazione da')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    // $set('create_to_date', $state);
+                                }
+                            })
+                            ->default(now()->year . '-01-01')
+                            ->columnSpan(1),
+                        DatePicker::make('create_to_date')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->default(now()->year . '-12-31')
+                            ->label('Data registrazione a')
+                            ->columnSpan(1),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (! empty($data['create_from_date'])) {
+                            $query->whereDate('created_at', '>=', $data['create_from_date']);
+                        }
+                        if (! empty($data['create_to_date'])) {
+                            $query->whereDate('created_at', '<=', $data['create_to_date']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['create_from_date'] && $data['create_to_date']) {
+                            return "Data registrazione dal " . Carbon::parse($data['create_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['create_to_date'])->format('d/m/Y');
+                        }
+                        if ($data['create_from_date']) {
+                            return "Data registrazione dal " . Carbon::parse($data['create_from_date'])->format('d/m/Y');
+                        }
+                        if ($data['create_to_date']) {
+                            return "Data registrazione al " . Carbon::parse($data['create_to_date'])->format('d/m/Y');
+                        }
+                        return null;
+                    }),
+                SelectFilter::make('user_id')
+                    ->label('Inserite da')
+                    ->placeholder('Tutti gli utenti')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->preload(),
+                Filter::make('dateValidation')
+                    ->columns(2)
+                    ->form([
+                        DatePicker::make('date_from')
+                            ->label('Data validazione da')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    // $set('date_to', $state);
+                                }
+                            }),
+                        DatePicker::make('date_to')
+                            ->label('Data validazione a')
+                            ->extraInputAttributes(['class' => 'text-center']),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        if (! isset($data['value'])) {
-                            return $query;
-                        }
-                        return $query->when($data['value'] === 'yes', fn ($q) => $q->withholdings())
-                                    ->when($data['value'] === 'no', fn ($q) => $q->withoutWithholdings());
-                    }),
+                        // Modifichiamo la query per applicare i filtri in cascata senza interrompere l'esecuzione
+                        return $query
+                            ->when(
+                                filled($data['date_from']),
+                                fn (Builder $query) => $query->whereDate('pi_validation_date', '>=', $data['date_from'])
+                            )
+                            ->when(
+                                filled($data['date_to']),
+                                fn (Builder $query) => $query->whereDate('pi_validation_date', '<=', $data['date_to'])
+                            );
+                    })
+                    ->columnSpan(2),
+                SelectFilter::make('pi_validation_user_id')
+                    ->label('Validate da')
+                    ->placeholder('Tutti gli utenti')
+                    ->relationship('piValidationUser', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->persistFiltersInSession()
             ->actions([

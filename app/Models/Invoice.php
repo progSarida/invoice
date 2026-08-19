@@ -77,7 +77,8 @@ class Invoice extends Model
         'sdi_date',
         'sdi_info',
         'pdf_path',
-        'xml_path'
+        'xml_path',
+        'user_id'
     ];
 
     protected $casts = [
@@ -103,6 +104,10 @@ class Invoice extends Model
 
     public function company(){
         return $this->belongsTo(Company::class);
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 
     public function client(){
@@ -361,8 +366,8 @@ class Invoice extends Model
     {
         static::creating(function ($invoice) {
             // $invoice->contract_detail_id = $invoice->updatedContract()?->id; // Cristallizza nella fattura lo stato dei dettagli del contratto
-            $invoice->flow = 'out';                                         // Indica che la fattura è in uscita (attiva)
-            // $invoice->user_id = Auth::id();                                 // Registro l'utente che crea la fattura
+            $invoice->flow = 'out';                                         // Indica che la fattura è stata creata col nuovo programma
+            $invoice->user_id = Auth::id();                                 // Registro l'utente che crea la fattura
             if ($invoice->docType?->name == 'TD00') {
                 $invoice->sdi_status = SdiStatus::PREAVVISO;
             }

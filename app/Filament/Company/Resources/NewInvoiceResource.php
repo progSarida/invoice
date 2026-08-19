@@ -1939,6 +1939,9 @@ class NewInvoiceResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('user.name')->label('Registrata da')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('id', 'desc')
             ->filters([
@@ -2581,6 +2584,43 @@ class NewInvoiceResource extends Resource
                 //         };
                 //     })
                 //     ->columnSpan(2),
+                
+                Filter::make('dateRegistration')
+                    ->columns(2)
+                    ->form([
+                        DatePicker::make('date_from')
+                            ->label('Data registrazione da')
+                            ->extraInputAttributes(['class' => 'text-center'])
+                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if ($state) {
+                                    // $set('date_to', $state);
+                                }
+                            }),
+                        DatePicker::make('date_to')
+                            ->label('Data registrazione a')
+                            ->extraInputAttributes(['class' => 'text-center']),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        // Modifichiamo la query per applicare i filtri in cascata senza interrompere l'esecuzione
+                        return $query
+                            ->when(
+                                filled($data['date_from']),
+                                fn (Builder $query) => $query->whereDate('created_at', '>=', $data['date_from'])
+                            )
+                            ->when(
+                                filled($data['date_to']),
+                                fn (Builder $query) => $query->whereDate('created_at', '<=', $data['date_to'])
+                            );
+                    })
+                    ->columnSpan(6),
+                SelectFilter::make('user_id')
+                    ->label('Registrate da')
+                    ->placeholder('Tutti gli utenti')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->columnSpan(3),
             ],layout: FiltersLayout::Dropdown)->filtersFormColumns(12)->filtersFormWidth(MaxWidth::SevenExtraLarge)
             // ],layout: FiltersLayout::Modal)->filtersFormColumns(12)->filtersFormWidth(MaxWidth::SevenExtraLarge)
             // ])->filtersFormColumns(12)
