@@ -380,7 +380,7 @@ class Invoice extends Model
         static::created(function ($invoice) {
             if ($invoice->invoice) {
 
-                $items = $invoice->invoice->invoiceItems;                   // Creo le voci della nota di credito copiando quelle della fattura parent
+                $items = $invoice->invoice->invoiceItems()->where('auto', false)->get();    // Creo le voci della nota di credito copiando solo le voci manuali
                 foreach($items as $item){
                     $newItem = $item->replicate();
                     $newItem->invoice_id = $invoice->id;
@@ -402,6 +402,11 @@ class Invoice extends Model
                     //     $newItem->is_with_vat = $item->is_with_vat ?? null;
                     // }
                     $newItem->save();
+                }
+
+                if (isset($newItem)) {                                      // Rigenero le voci automatiche (bollo, riepiloghi IVA, casse previdenziali, ritenute)
+                    $newItem->checkStampDuty();
+                    $newItem->autoInsert();
                 }
 
                 $invoice->invoice->updateTotalNotes();                      // Tiene aggiornato il totale delle note di credito della fattura parent (nel caso di nota di credito) se creata una nuova

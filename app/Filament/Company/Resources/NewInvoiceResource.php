@@ -1313,7 +1313,7 @@ class NewInvoiceResource extends Resource
                                     },
                                 ])
                                 ->columnSpanFull(),
-                            Forms\Components\Textarea::make('free_description')->label('Descrizione libera')
+                            Forms\Components\Textarea::make('free_description')->label('Note interne operatore (non verranno mostrate in fattura)')
                                 // ->required()
                                 ->columnSpanFull(),
                         ]),

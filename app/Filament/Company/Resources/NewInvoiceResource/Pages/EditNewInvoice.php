@@ -222,8 +222,6 @@ Log::info('Inizio copia voci');
 
                                         $newItem->calculateTotal();
                                         $newItem->save();
-                                        $newItem->checkStampDuty();                                         // operazioni per inserimenti bollo e riepiloghi
-                                        $newItem->autoInsert();
 
                                     }
                                     // if ($key === $lastKey) {
@@ -232,6 +230,11 @@ Log::info('Inizio copia voci');
                                     //     $newItem->autoInsert();                                             // crea voci fattura di ritenute, riepiloghi e casse previdenziali
                                     //     $newInvoice->updateTotal();                                         // aggiorno i totali della nuova fattura
                                     // }
+                                }
+
+                                if (isset($newItem)) {                                                      // operazioni per inserimenti bollo e riepiloghi (una sola volta, sull'insieme delle voci copiate)
+                                    $newItem->checkStampDuty();
+                                    $newItem->autoInsert();
                                 }
                             } else {
                                 // Se non si duplicano le voci, aggiorno comunque i totali e verifico l'imposta di bollo

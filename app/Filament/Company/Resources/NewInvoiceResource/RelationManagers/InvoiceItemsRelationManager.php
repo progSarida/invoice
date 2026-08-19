@@ -38,7 +38,7 @@ class InvoiceItemsRelationManager extends RelationManager
             ->schema([
                 Forms\Components\Select::make('invoice_element_id')
                     ->label('Elemento')
-                    ->required()
+                    ->required(fn() => !is_null($this->getOwnerRecord()->flow) || !is_null($this->getOwnerRecord()->invoice?->flow)) // per permettere modifica di voci di fatture vecchie o di note di credito legate a fatture vecchie
                     ->live()
                     ->options(InvoiceElement::pluck('name', 'id'))
                     ->searchable()
@@ -579,7 +579,7 @@ class InvoiceItemsRelationManager extends RelationManager
                     }),
                 Tables\Actions\DeleteAction::make()
                     // ->visible(fn ($record) => $record->vat_code_type !== VatCodeType::VC06A && $record->auto !== true)
-                    ->visible(fn ($record) => $record->invoice_element_id || $record->postal_expense_id)
+                    ->visible(fn ($record) => (Auth::user()->isSuperAdmin() && !$record->auto) || $record->invoice_element_id || $record->postal_expense_id)
                     ->using(function (InvoiceItem $record): InvoiceItem {
                         $invoice = $record->invoice;
 

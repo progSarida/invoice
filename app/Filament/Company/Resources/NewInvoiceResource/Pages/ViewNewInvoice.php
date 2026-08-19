@@ -394,7 +394,10 @@ Log::info("Id voce copiata: {$item->id}");
 
                                     $newItem->calculateTotal();
                                     $newItem->save();
-                                    $newItem->checkStampDuty();                                         // operazioni per inserimenti bollo e riepiloghi
+                                }
+
+                                if (isset($newItem)) {                                                      // operazioni per inserimenti bollo e riepiloghi (una sola volta, sull'insieme delle voci copiate)
+                                    $newItem->checkStampDuty();
                                 }
 Log::info('Copia voci');
                             }

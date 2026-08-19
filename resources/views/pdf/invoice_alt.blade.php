@@ -216,9 +216,9 @@
             {{-- <td colspan="5" class='description'>({{ substr($invoice->budget_year, -2) }}) {{ $invoice->description }}</td> --}}
             <td colspan="5" class='description'>{{ $invoice->description }}</td>
         </tr>
-        <tr>
+        <!-- <tr>
             <td colspan="5" class='free_description'>{{ $invoice->free_description }}</td>
-        </tr>
+        </tr> -->
         {{-- Voci fattura inserite dall'operatore --}}
         @foreach($invoice->invoiceItems as $item)
             @php
