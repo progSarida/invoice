@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\RelationManagers;
 
+use App\Models\ActivePayments;
 use App\Models\BankAccount;
 use App\Models\Invoice;
 use App\Services\CurrencyService;
@@ -15,6 +16,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -73,6 +77,10 @@ class ActivePaymentsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()
+                    ->validationMessages([
+                        'required' => 'L\'importo è obbligatorio.',
+                    ])
+                    ->live(onBlur: true)
                     ->disabled(fn ($get) => $get('validated'))
                     // ->afterStateUpdated(function ($state, $component) {
                     //     if(str_contains($state, ',')){                                  // Se contiene una virgola
@@ -89,10 +97,51 @@ class ActivePaymentsRelationManager extends RelationManager
                     // })
                     // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     // ->dehydrateStateUsing(fn ($state): ?float => is_string($state) ? (float) str_replace(',', '.', str_replace('.', '', $state)) : $state)
-                    ->afterStateUpdated(function ($state, $component) {
-                        $float = CurrencyService::parseNumber($state);
-                        $formatted = number_format($float, 2, ',', '.');
+                    ->afterStateUpdated(function ($state, Get $get, $component) {
+                        if (!$get('invoice_id')) return;
+                        $invoice = Invoice::find($get('invoice_id'));
+                        $amount = CurrencyService::parseNumber($state);
+                        $formatted = number_format($amount, 2, ',', '.');
                         $component->state($formatted);
+                        $newTotalPayment = $amount + $invoice->total_payment;
+
+                        // VECCHIO CALCOLO CONTROLLO
+                        // $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
+                        // $compare = ($invoice->client?->type?->value == 'public' && $notRound)
+                        //     ? $invoice->no_vat_total
+                        //     : $invoice->total;
+
+                        // NUOVO CALCOLO CONTROLLO USANDO is_total_with_vat
+                        $newNoVatTotal = $invoice->no_vat_total - $invoice->creditNotes?->sum('no_vat_total');
+                        $newVat = $invoice->vat - $invoice->creditNotes?->sum('vat');
+                        $temp = $newNoVatTotal- $invoice->total_payment;
+                        $compare = $invoice->is_total_with_vat ? $temp + $newVat : $temp;
+                        $comparePayment = $invoice->is_total_with_vat ? $newNoVatTotal + $newVat : $newNoVatTotal;
+
+                        // if($newTotalPayment > ($compare - $invoice->total_notes)){
+                        if($newTotalPayment > $comparePayment){
+                            Notification::make()
+                                ->title('Attenzione! Con questo inserimento il totale dei pagamenti della fattura ' . $invoice->getNewInvoiceNumber() . ' eccederebbe il dovuto.')
+                                ->danger()
+                                ->duration(6000)
+                                ->send();
+                        }
+                        else if($amount != $compare){
+                            Notification::make()
+                                ->title("Attenzione! L'importo del pagamento è diverso dal residuo del dovuto della fattura " . $invoice->getNewInvoiceNumber())
+                                ->danger()
+                                ->duration(5000)
+                                ->send();
+                        }
+                    })
+                    ->default(function ($livewire) {
+                        $invoice = $livewire->getOwnerRecord();
+                        $newNoVatTotal = $invoice->no_vat_total - $invoice->creditNotes?->sum('no_vat_total');
+                        $newVat = $invoice->vat - $invoice->creditNotes?->sum('vat');
+                        $temp = $newNoVatTotal- $invoice->total_payment;
+                        $amount = $invoice->is_total_with_vat ? $temp + $newVat : $temp;
+
+                        return $amount;
                     })
                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
@@ -101,6 +150,52 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->columnSpan(2),
                 DatePicker::make('payment_date')
                     ->label('Data pagamento')
+                    ->required()
+                    ->validationMessages([
+                        'required' => 'La data è obbligatoria.',
+                    ])
+                    ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                        if (!$state) {
+                            return;
+                        }
+
+                        $invoice = Invoice::find($get('invoice_id'));
+                        $paymentDate = $get('payment_date');
+
+                        $currentMonth = now()->month;
+                        $date = \Carbon\Carbon::parse($state);
+                        $selectedYear = \Carbon\Carbon::parse($state)->year;
+                        $currentYear = now()->year;
+
+                        if ($currentMonth !== 1 && $date->year !== $currentYear) {
+                            $corrected = $date->copy()->setYear($currentYear);
+                            $set('invoice_date', $corrected->format('Y-m-d'));
+
+                            Notification::make()
+                                ->title('Anno corretto automaticamente')
+                                ->body("Hai inserito una data del {$selectedYear}, ma l'anno corrente è il {$currentYear}.")
+                                ->warning()
+                                ->send();
+                        }
+
+                        if ($paymentDate && $invoice && ($paymentDate < $invoice->invoice_date)) {
+                            Notification::make('date')
+                                ->title('Attenzione! La data del pagamento è inferiore alla data della fattura.')
+                                ->danger()
+                                ->duration(6000)
+                                // ->persistent()
+                                ->send();
+                        }
+
+                        if ($paymentDate && $paymentDate > today()) {
+                            Notification::make('today')
+                                ->title('Attenzione! La data del pagamento è successiva alla data di oggi.')
+                                ->warning()
+                                ->duration(6000)
+                                // ->persistent()
+                                ->send();
+                        }
+                    })
                     ->extraInputAttributes(['class' => 'text-center'])
                     ->disabled(fn ($get) => $get('validated'))
                     ->date()
@@ -112,6 +207,16 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->label('Validato')
                     ->live()
                     ->visible(fn ($record) => $record?->amount !== null)
+                    ->afterStateUpdated(function (Set $set, bool $state) {
+                        if ($state) {
+                            $set('validation_date', now()->format('Y-m-d'));
+                            $set('validation_user_id', Auth::id());
+                        } else {
+                            // Per "annullare" la validazione quando il toggle viene disattivato
+                            $set('validation_date', null);
+                            $set('validation_user_id', null);
+                        }
+                    })
                     ->default(false)
                     ->columnSpan(2),
                 Select::make('bank_account_id')
@@ -127,11 +232,18 @@ class ActivePaymentsRelationManager extends RelationManager
                     })
                     ->searchable()
                     ->required()
+                    ->validationMessages([
+                        'required' => 'Il conto è obbligatorio.',
+                    ])
                     ->default(function ($livewire) {
                         return $livewire->getOwnerRecord()->bank_account_id;
                     })
                     ->columnSpan(5)
                     ->preload(),
+                Forms\Components\Textarea::make('description')->label('Descrizione')
+                    ->columnSpan(7),
+                Forms\Components\Textarea::make('note')->label('Note')
+                    ->columnSpanFull(),
                 Section::make('Dati registrazione/validazione')
                         // ->collapsible()
                         ->columns(12)
@@ -231,7 +343,10 @@ class ActivePaymentsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->modalHeading('Crea nuovo pagamento')
-                    ->visible(fn ($livewire) => $livewire->getOwnerRecord()?->docType?->name !== 'TD00' && $livewire->getOwnerRecord()?->docType?->name !== 'TD04')
+                    ->visible(fn ($livewire) => $livewire->getOwnerRecord()?->docType?->name !== 'TD00'
+                        && $livewire->getOwnerRecord()?->docType?->name !== 'TD04'
+                        && !$livewire->getOwnerRecord()?->isPaid() 
+                        && Auth::user()?->can('create', ActivePayments::class))
                     ->after(fn () => $this->dispatch('refreshEditPage'))
                     ->modalWidth('6xl'),
             ])

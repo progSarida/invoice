@@ -227,6 +227,12 @@ class Invoice extends Model
         return $this->is_total_with_vat ? $temp + $newVat : $temp;
     }
 
+    // Controlla se la fattura è pagata: il residuo è coperto da pagamenti e note di credito
+    public function isPaid(float $tolerance = 0.0): bool
+    {
+        return round($this->getResidue(), 2) <= round($tolerance, 2);
+    }
+
     // Calcola il totale a doversi da mostrare in tabella
     public function getOwned()
     {

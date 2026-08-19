@@ -2225,17 +2225,17 @@ class NewInvoiceResource extends Resource
                             ->when($data['value'] === 'si', function ($q) {
                                 return $q->whereRaw("
                                     CASE
-                                        WHEN (SELECT type FROM clients WHERE clients.id = invoices.client_id) = 'public'
-                                        THEN no_vat_total - (total_payment + total_notes) <= 0
-                                        ELSE total - (total_payment + total_notes) <= 0
+                                        WHEN invoices.is_total_with_vat
+                                        THEN total - (total_payment + total_notes) <= 0
+                                        ELSE no_vat_total - (total_payment + total_notes) <= 0
                                     END
                                 ");
                             })->when($data['value'] === 'no', function ($q) {
                                 return $q->whereRaw("
                                     CASE
-                                        WHEN (SELECT type FROM clients WHERE clients.id = invoices.client_id) = 'public'
-                                        THEN no_vat_total - (total_payment + total_notes) > 0
-                                        ELSE total - (total_payment + total_notes) > 0
+                                        WHEN invoices.is_total_with_vat
+                                        THEN total - (total_payment + total_notes) > 0
+                                        ELSE no_vat_total - (total_payment + total_notes) > 0
                                     END
                                 ");
                             });
@@ -2527,19 +2527,17 @@ class NewInvoiceResource extends Resource
                                 return $query;
                             }
                             return $query->where(function (Builder $q) use ($limit) {
+                                // Caso: totale della fattura al netto dell'IVA
                                 $q->where(function ($q2) use ($limit) {
-                                    $q2->whereHas('client', function ($c) {
-                                        $c->where('is_total_with_vat', false);
-                                    })
-                                    ->whereNull('parent_id')
-                                    ->whereRaw('(COALESCE(no_vat_total, 0) - (COALESCE(total_payment, 0) + COALESCE(total_notes, 0))) > ?', $limit);
+                                    $q2->where('is_total_with_vat', false)
+                                        ->whereNull('parent_id')
+                                        ->whereRaw('(COALESCE(no_vat_total, 0) - (COALESCE(total_payment, 0) + COALESCE(total_notes, 0))) > ?', $limit);
                                 })
+                                // Caso: totale della fattura comprensivo di IVA
                                 ->orWhere(function ($q3) use ($limit) {
-                                    $q3->whereHas('client', function ($c) {
-                                        $c->where('is_total_with_vat', true);
-                                    })
-                                    ->whereNull('parent_id')
-                                    ->whereRaw('(COALESCE(total, 0) - (COALESCE(total_payment, 0) + COALESCE(total_notes, 0))) > ?', $limit);
+                                    $q3->where('is_total_with_vat', true)
+                                        ->whereNull('parent_id')
+                                        ->whereRaw('(COALESCE(total, 0) - (COALESCE(total_payment, 0) + COALESCE(total_notes, 0))) > ?', $limit);
                                 });
                             });
                         }

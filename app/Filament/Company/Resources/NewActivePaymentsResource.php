@@ -90,43 +90,36 @@ class NewActivePaymentsResource extends Resource
                             //         ->whereColumn('total_payment', '<', 'total');       // solo no pagate (verso privati)
                             //     });
                             // });
+                            
 
                         if(str_contains(strtolower($search), "pagate")){
                             $query->where(function ($q) {
-                                // Caso: Pubblica Amministrazione
-                                $q->where(function ($publicQuery) {
-                                    $publicQuery->whereHas('client', function ($clientQuery) {
-                                        $clientQuery->where('type', ClientType::PUBLIC);
-                                    })
-                                    // Verifica se pagamenti + note di credito sono inferiori al totale imponibile
-                                    ->whereRaw('(total_payment + total_notes) >= no_vat_total');
+                                // Caso: totale della fattura comprensivo di IVA
+                                $q->where(function ($vatQuery) {
+                                    $vatQuery->where('is_total_with_vat', true)
+                                        // Verifica se pagamenti + note di credito coprono il totale ivato
+                                        ->whereRaw('(total_payment + total_notes) >= total');
                                 })
-                                // Caso: Privati
-                                ->orWhere(function ($privateQuery) {
-                                    $privateQuery->whereHas('client', function ($clientQuery) {
-                                        $clientQuery->where('type', ClientType::PRIVATE);
-                                    })
-                                    // Verifica se pagamenti + note di credito sono inferiori al totale ivato
-                                    ->whereRaw('(total_payment + total_notes) >= total');
+                                // Caso: totale della fattura al netto dell'IVA
+                                ->orWhere(function ($noVatQuery) {
+                                    $noVatQuery->where('is_total_with_vat', false)
+                                        // Verifica se pagamenti + note di credito coprono il totale imponibile
+                                        ->whereRaw('(total_payment + total_notes) >= no_vat_total');
                                 });
                             });
                         } else {
                             $query->where(function ($q) {
-                                // Caso: Pubblica Amministrazione
-                                $q->where(function ($publicQuery) {
-                                    $publicQuery->whereHas('client', function ($clientQuery) {
-                                        $clientQuery->where('type', ClientType::PUBLIC);
-                                    })
-                                    // Verifica se pagamenti + note di credito sono inferiori al totale imponibile
-                                    ->whereRaw('(total_payment + total_notes) < no_vat_total');
+                                // Caso: totale della fattura comprensivo di IVA
+                                $q->where(function ($vatQuery) {
+                                    $vatQuery->where('is_total_with_vat', true)
+                                        // Verifica se pagamenti + note di credito sono inferiori al totale ivato
+                                        ->whereRaw('(total_payment + total_notes) < total');
                                 })
-                                // Caso: Privati
-                                ->orWhere(function ($privateQuery) {
-                                    $privateQuery->whereHas('client', function ($clientQuery) {
-                                        $clientQuery->where('type', ClientType::PRIVATE);
-                                    })
-                                    // Verifica se pagamenti + note di credito sono inferiori al totale ivato
-                                    ->whereRaw('(total_payment + total_notes) < total');
+                                // Caso: totale della fattura al netto dell'IVA
+                                ->orWhere(function ($noVatQuery) {
+                                    $noVatQuery->where('is_total_with_vat', false)
+                                        // Verifica se pagamenti + note di credito sono inferiori al totale imponibile
+                                        ->whereRaw('(total_payment + total_notes) < no_vat_total');
                                 });
                             });
                         }
@@ -217,6 +210,15 @@ class NewActivePaymentsResource extends Resource
                         if ($state) {
                             $invoice = Invoice::find($state);
 
+                            if($invoice->isPaid()){
+                                Notification::make()
+                                    ->title('Attenzione! La fattura selezionata è già stata pagata')
+                                    ->danger()
+                                    ->duration(6000)
+                                    ->send();
+                                return;
+                            }
+
                             // VECCHIO CALCOLO
                             // $notRound = BankAccount::find($invoice?->bank_account_id)?->name != 'Giroconto';
                             // $amount = ($invoice->client?->type == ClientType::PUBLIC && $notRound)
@@ -229,13 +231,6 @@ class NewActivePaymentsResource extends Resource
                             $temp = $newNoVatTotal- $invoice->total_payment;
                             $amount = $invoice->is_total_with_vat ? $temp + $newVat : $temp;
 
-                            if($amount <= 0)
-                                Notification::make()
-                                    ->title('Attenzione! La fattura selezionata è già stata pagata')
-                                    ->danger()
-                                    ->duration(6000)
-                                    ->send();
-
                             if ($invoice) {
                                 $set('bank_account_id', $invoice->bank_account_id);
                                 $set('amount', number_format($amount, 2, ",", "."));
@@ -243,6 +238,9 @@ class NewActivePaymentsResource extends Resource
                         }
                     })
                     ->required()
+                    ->validationMessages([
+                        'required' => 'La fattura è obbligatoria.',
+                    ])
                     ->disabled(fn ($get) => $get('validated'))
                     ->searchable()
                     ->live()
@@ -251,6 +249,9 @@ class NewActivePaymentsResource extends Resource
                 Forms\Components\TextInput::make('amount')
                     ->label('Importo')
                     ->required()
+                    ->validationMessages([
+                        'required' => 'L\'importo è obbligatorio.',
+                    ])
                     ->live(onBlur: true)
                     // ->debounce(2000)
                     ->extraInputAttributes(['class' => 'text-right'])
@@ -339,6 +340,9 @@ class NewActivePaymentsResource extends Resource
                     ->disabled(fn ($get) => $get('validated'))
                     ->reactive()
                     ->required()
+                    ->validationMessages([
+                        'required' => 'La data è obbligatoria.',
+                    ])
                     ->debounce(500)
                     ->afterStateUpdated(function ($state, Get $get, Set $set) {
                         if (!$state) {
@@ -391,6 +395,7 @@ class NewActivePaymentsResource extends Resource
                     ->label('Validato')
                     ->live()
                     ->default(false)
+                    ->visible(fn ($record) => $record?->amount !== null)
                     ->afterStateUpdated(function (Set $set, bool $state) {
                         if ($state) {
                             $set('validation_date', now()->format('Y-m-d'));
@@ -414,6 +419,9 @@ class NewActivePaymentsResource extends Resource
                     ->disabled(fn ($get) => $get('validated'))
                     ->searchable()
                     ->required()
+                    ->validationMessages([
+                        'required' => 'Il conto è obbligatorio.',
+                    ])
                     ->columnSpan(5)
                     ->preload(),
                 // Forms\Components\Placeholder::make('')

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\Pages;
 
-use App\Enums\ClientType;
 use App\Enums\ContractType;
 use App\Jobs\CheckInvoicingContractsJob;
 use Carbon\Carbon;
@@ -1214,10 +1213,11 @@ Log::info("Da fatturare: {$toInvoice}");
                         });
 
                         foreach ($byTipoFattura as $tipo_fattura => $invoicesGroup) {
-                            $total = $invoicesGroup->sum(function ($invoice) use ($contract) {
-                                return $contract->client && $contract->client?->type === ClientType::PUBLIC
-                                    ? ($invoice->no_vat_total ?? 0)
-                                    : ($invoice->total ?? 0);
+                            $total = $invoicesGroup->sum(function ($invoice) {
+                                // Il totale di riferimento dipende dal flag della fattura, non dal tipo di cliente
+                                return $invoice->is_total_with_vat
+                                    ? ($invoice->total ?? 0)
+                                    : ($invoice->no_vat_total ?? 0);
                             });
                             $accredito = $invoicesGroup->sum('total_payment');
                             $nota_credito = $invoicesGroup->sum('total_notes');
