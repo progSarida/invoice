@@ -26,6 +26,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Resources\Resource;
 use Filament\Notifications\Notification;
 use Filament\Tables;
@@ -241,7 +242,7 @@ class NewActivePaymentsResource extends Resource
                     ->validationMessages([
                         'required' => 'La fattura è obbligatoria.',
                     ])
-                    ->disabled(fn ($get) => $get('validated'))
+                    ->disabled(fn ($get, $livewire) => $livewire instanceof ViewRecord || $get('validated'))
                     ->searchable()
                     ->live()
                     ->preload()
@@ -255,7 +256,7 @@ class NewActivePaymentsResource extends Resource
                     ->live(onBlur: true)
                     // ->debounce(2000)
                     ->extraInputAttributes(['class' => 'text-right'])
-                    ->disabled(fn ($get) => !$get('invoice_id') || $get('validated'))
+                    ->disabled(fn ($get, $livewire) => $livewire instanceof ViewRecord || !$get('invoice_id') || $get('validated'))
                     // ->afterStateUpdated(function ($state, Get $get, $component) {
                     //     if (!$get('invoice_id')) return;
                     //     $invoice = Invoice::find($get('invoice_id'));
@@ -337,7 +338,7 @@ class NewActivePaymentsResource extends Resource
                 Forms\Components\DatePicker::make('payment_date')
                     ->label('Data pagamento')
                     ->extraInputAttributes(['class' => 'text-center'])
-                    ->disabled(fn ($get) => $get('validated'))
+                    ->disabled(fn ($get, $livewire) => $livewire instanceof ViewRecord || $get('validated'))
                     ->reactive()
                     ->required()
                     ->validationMessages([
@@ -395,7 +396,7 @@ class NewActivePaymentsResource extends Resource
                     ->label('Validato')
                     ->live()
                     ->default(false)
-                    ->visible(fn ($record) => $record?->amount !== null)
+                    ->visible(fn ($record) => $record?->amount !== null && auth()->user()->can('update', $record))
                     ->afterStateUpdated(function (Set $set, bool $state) {
                         if ($state) {
                             $set('validation_date', now()->format('Y-m-d'));
@@ -416,7 +417,7 @@ class NewActivePaymentsResource extends Resource
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->name} - $record->iban"
                     )
-                    ->disabled(fn ($get) => $get('validated'))
+                    ->disabled(fn ($get, $livewire) => $livewire instanceof ViewRecord || $get('validated'))
                     ->searchable()
                     ->required()
                     ->validationMessages([
@@ -427,8 +428,10 @@ class NewActivePaymentsResource extends Resource
                 // Forms\Components\Placeholder::make('')
                 //     ->columnSpan(7),
                 Forms\Components\Textarea::make('description')->label('Descrizione')
+                    ->disabled(fn ($livewire) => $livewire instanceof ViewRecord)
                     ->columnSpan(7),
                 Forms\Components\Textarea::make('note')->label('Note')
+                    ->disabled(fn ($livewire) => $livewire instanceof ViewRecord)
                     ->columnSpanFull(),
                 Section::make('Dati registrazione/validazione')
                         // ->collapsible()
@@ -564,6 +567,7 @@ class NewActivePaymentsResource extends Resource
 
                 //         $record->save();
                 //     }),
+                
                 Tables\Columns\IconColumn::make('validated')
                     ->label('Validato')
                     ->boolean()
@@ -605,6 +609,30 @@ class NewActivePaymentsResource extends Resource
                                 $record->save();
                             })
                     ),
+
+                // Tables\Columns\ToggleColumn::make('validated')
+                //     ->label('Validato')
+                //     ->sortable()
+                //     ->tooltip(fn (\App\Models\ActivePayments $record) => !auth()->user()->can('update', $record)
+                //         ? '' : ($record->validated
+                //         ? 'Annulla validazione pagamento.'
+                //         : 'Valida pagamento.')
+                //     )
+                //     ->disabled(function (\App\Models\ActivePayments $record) {
+                //         // Disabilita se l'utente NON può aggiornare il record
+                //         return !auth()->user()->can('update', $record);
+                //     })
+                //     ->afterStateUpdated(function (\App\Models\ActivePayments $record, bool $state) {
+                //         if ($state) {
+                //             $record->validation_date = now();
+                //             $record->validation_user_id = Auth::user()->id;
+                //         } else {
+                //             $record->validation_date = null;
+                //             $record->validation_user_id = null;
+                //         }
+
+                //         $record->save();
+                //     }),
             ])
             ->filters([
                 SelectFilter::make('invoice_client_type')

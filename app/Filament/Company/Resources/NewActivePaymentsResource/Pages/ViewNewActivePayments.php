@@ -54,7 +54,9 @@ class ViewNewActivePayments extends ViewRecord
                 ->action(function () use ($nextDPayment) {
                     $this->redirect(NewActivePaymentsResource::getUrl('view', ['record' => $nextDPayment->id]));
                 }),
-            Actions\EditAction::make(),
+            Actions\EditAction::make()
+                // Segue lo stato del toggle 'Validato' nel form (live), non solo il valore salvato
+                ->visible(fn () => ! data_get($this->data, 'validated', $this->record->validated)),
         ];
     }
 }

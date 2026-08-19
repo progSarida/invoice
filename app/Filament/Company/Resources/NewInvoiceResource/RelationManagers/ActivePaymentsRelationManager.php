@@ -353,6 +353,7 @@ class ActivePaymentsRelationManager extends RelationManager
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->modalHeading('Modifica pagamento')
+                    ->visible(fn ($record) => !$record->validated)
                     ->modalWidth('6xl'),
                 Tables\Actions\DeleteAction::make(),
             ])
