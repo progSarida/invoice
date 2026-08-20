@@ -310,6 +310,7 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->sortable(),
                 Tables\Columns\ToggleColumn::make('validated')
                     ->label('Validato')
+                    ->disabled(fn ($record) => !Auth::user()?->can('update', $record))
                     ->sortable()->afterStateUpdated(function (\App\Models\ActivePayments $record, bool $state) {
                         if ($state) {
                             $record->validation_date = now();
@@ -351,9 +352,13 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->modalWidth('6xl'),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->modalHeading('Visualizza pagamento')
+                    ->visible(fn ($record) => $record->validated || !Auth::user()?->can('update', ActivePayments::class))
+                    ->modalWidth('6xl'),
                 Tables\Actions\EditAction::make()
                     ->modalHeading('Modifica pagamento')
-                    ->visible(fn ($record) => !$record->validated)
+                    ->visible(fn ($record) => !$record->validated && Auth::user()?->can('update', ActivePayments::class))
                     ->modalWidth('6xl'),
                 Tables\Actions\DeleteAction::make(),
             ])

@@ -4,6 +4,7 @@ namespace App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers
 
 use App\Enums\PaymentType;
 use App\Enums\PiValidationStatus;
+use App\Models\PassivePayment;
 use App\Services\CurrencyService;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
@@ -210,16 +211,18 @@ class PassivePaymentsRelationManager extends RelationManager
                 Tables\Columns\ToggleColumn::make('validated')
                     ->label('Validato')
                     ->sortable()
-                    ->visible(fn($record) => $record)
-                    ->afterStateUpdated(function (Set $set, bool $state) {
+                    ->disabled(fn ($record) => !Auth::user()?->can('update', $record))
+                    ->afterStateUpdated(function (PassivePayment $record, bool $state) {
                         if ($state) {
-                            $set('validation_date', today());
-                            $set('validation_user_id', Auth::id());
+                            $record->validation_date = today();
+                            $record->validation_user_id = Auth::id();
                         } else {
                             // Per "annullare" la validazione quando il toggle viene disattivato
-                            $set('validation_date', null);
-                            $set('validation_user_id', null);
+                            $record->validation_date = null;
+                            $record->validation_user_id = null;
                         }
+
+                        $record->save();
                     }),
             ])
             ->filters([
@@ -233,13 +236,19 @@ class PassivePaymentsRelationManager extends RelationManager
 
                         if (!$piValidation) { return false; }
 
-                        return $piValidation->pi_validation_status === PiValidationStatus::OK;
+                        return $piValidation->pi_validation_status === PiValidationStatus::OK && Auth::user()?->can('create', PassivePayment::class);
                     })
                     ->after(fn () => $this->dispatch('refreshEditPage'))
                     ->modalWidth('6xl'),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->modalHeading('Visualizza pagamento')
+                    ->visible(fn ($record) => $record->validated || !Auth::user()?->can('update', PassivePayment::class))
+                    ->modalWidth('6xl'),
                 Tables\Actions\EditAction::make()
+                    ->modalHeading('Modifica pagamento')
+                    ->visible(fn ($record) => !$record->validated && Auth::user()?->can('update', PassivePayment::class))
                     ->modalWidth('6xl'),
                 Tables\Actions\DeleteAction::make(),
             ])
