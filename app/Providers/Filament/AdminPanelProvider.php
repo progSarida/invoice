@@ -15,6 +15,7 @@ use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
 use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -83,6 +84,7 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Passa alle aziende')
+                    ->visible(fn (): bool => Auth::user()->hasCompanyAccess())
                     ->url('/company')
                     ->icon('tabler-briefcase-f'),
                 MenuItem::make()
