@@ -111,6 +111,27 @@ class NewContract extends Model
         return $this->invoices->sum('no_vat_total');
     }
 
+    /**
+     * Motivo per cui il contratto non è eliminabile, oppure null se lo è.
+     */
+    public function getDeletionBlockReason(): ?string
+    {
+        $count = $this->invoices_count ?? $this->invoices()->count();
+
+        if ($count === 0) {
+            return null;
+        }
+
+        return $count === 1
+            ? 'Il contratto è collegato a 1 fattura: eliminarlo lascerebbe la fattura senza contratto di riferimento.'
+            : "Il contratto è collegato a {$count} fatture: eliminarlo le lascerebbe senza contratto di riferimento.";
+    }
+
+    public function isDeletable(): bool
+    {
+        return is_null($this->getDeletionBlockReason());
+    }
+
     protected static function booted()
     {
         static::creating(function ($contract) {
@@ -130,7 +151,11 @@ class NewContract extends Model
         });
 
         static::deleting(function ($contract) {
-            //
+            // Rete di sicurezza: nessun contratto con fatture collegate può essere eliminato,
+            // anche se la cancellazione arriva da un punto diverso dal pannello.
+            if ($contract->invoices()->exists()) {
+                return false;
+            }
         });
 
     }

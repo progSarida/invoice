@@ -29,6 +29,7 @@ use Filament\Notifications\Notification;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Company\Resources\NewContractResource\Pages;
@@ -638,12 +639,52 @@ class NewContractResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn (): bool => Auth::user()->isManager()),
+                    ->visible(fn (): bool => Auth::user()->isManager())
+                    // Se il contratto ha fatture collegate il modale spiega il motivo
+                    // e non espone il pulsante di conferma.
+                    ->modalHeading(fn (NewContract $record) => $record->isDeletable()
+                        ? 'Conferma eliminazione contratto'
+                        : 'Contratto non eliminabile')
+                    ->modalDescription(fn (NewContract $record) => $record->getDeletionBlockReason()
+                        ?? 'Sei sicuro di voler eliminare questo contratto? Questa azione non può essere annullata.')
+                    ->modalSubmitAction(fn (NewContract $record) => $record->isDeletable() ? null : false)
+                    ->modalCancelActionLabel(fn (NewContract $record) => $record->isDeletable() ? 'Annulla' : 'Chiudi')
+                    ->before(function (NewContract $record, Tables\Actions\DeleteAction $action) {
+                        $reason = $record->getDeletionBlockReason();
+
+                        if ($reason) {
+                            Notification::make()
+                                ->title('Eliminazione non consentita')
+                                ->body($reason)
+                                ->danger()
+                                ->persistent()
+                                ->send();
+
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn (): bool => Auth::user()->isManager()),
+                        ->visible(fn (): bool => Auth::user()->isManager())
+                        ->before(function (Collection $records, Tables\Actions\DeleteBulkAction $action) {
+                            $blocked = $records->loadCount('invoices')
+                                ->filter(fn (NewContract $contract) => $contract->invoices_count > 0);
+
+                            if ($blocked->isNotEmpty()) {
+                                Notification::make()
+                                    ->title('Eliminazione non consentita')
+                                    ->body('I seguenti contratti hanno fatture collegate: '
+                                        . $blocked->map(fn (NewContract $contract) => "#{$contract->id} ({$contract->invoices_count})")->implode(', ')
+                                        . '. Deselezionali per procedere con gli altri.')
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        }),
                 ]),
             ])
             ->defaultSort('start_validity_date', 'desc');
