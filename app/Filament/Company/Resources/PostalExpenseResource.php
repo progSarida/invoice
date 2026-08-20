@@ -86,7 +86,7 @@ class PostalExpenseResource extends Resource
                     // ->badge()
                     ->label('Entrata'),
                 Tables\Columns\TextColumn::make('manage_year')
-                    ->label('Anno')
+                    ->label('🔍 Anno')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('actType.name')
                     // ->badge()

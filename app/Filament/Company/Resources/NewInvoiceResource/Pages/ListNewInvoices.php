@@ -38,6 +38,20 @@ class ListNewInvoices extends ListRecords
 {
     protected static string $resource = NewInvoiceResource::class;
 
+    /**
+     * Il numero di righe per pagina non viene mantenuto in sessione:
+     * ad ogni accesso si riparte dal valore di default della tabella.
+     */
+    public function getDefaultTableRecordsPerPageSelectOption(): int | string
+    {
+        return $this->getTable()->getDefaultPaginationPageOption();
+    }
+
+    public function updatedTableRecordsPerPage(): void
+    {
+        $this->resetPage();
+    }
+
     protected function getDefaultTableFilters(): array
     {
         return [

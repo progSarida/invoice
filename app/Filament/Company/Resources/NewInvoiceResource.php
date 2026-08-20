@@ -1592,9 +1592,8 @@ class NewInvoiceResource extends Resource
             ->query(Invoice::newInvoices())
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('🔍 Id')
-                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('docType.description')->label('🔍 Tipo')
-                    ->searchable()
+                    ->sortable()->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('docType.description')->label('Tipo')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('number')->label('Numero')
                     ->formatStateUsing(function ( Invoice $invoice) {
@@ -1626,8 +1625,8 @@ class NewInvoiceResource extends Resource
                     })
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('parent_id')->label('🔍 Id fattura stornata')
-                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('parent_id')->label('Id fattura stornata')
+                    ->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('contract.cig_code')->label('CIG')
                     ->numeric()
                     ->sortable()
@@ -1640,8 +1639,7 @@ class NewInvoiceResource extends Resource
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('tax_type')->label('🔍 Entrata')
-                    ->searchable()
+                Tables\Columns\TextColumn::make('tax_type')->label('Entrata')
                     // ->badge()
                     ->color('black')
                     ->sortable()

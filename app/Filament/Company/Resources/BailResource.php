@@ -718,11 +718,10 @@ class BailResource extends Resource
                         $query->whereJsonContains('tax_types', $search);
                     }),
                 Tables\Columns\TextColumn::make('insurance.name')
-                    ->label('🔍 Compagnia')
-                    ->searchable()
+                    ->label('Compagnia')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('bail_type')
-                    ->label('🔍 Tipo')
+                    ->label('Tipo')
                     ->formatStateUsing(fn ($state) => $state?->getLabel() ?? 'N/A'),
                 Tables\Columns\TextColumn::make('bill_number')
                     ->label('🔍 Numero Polizza')

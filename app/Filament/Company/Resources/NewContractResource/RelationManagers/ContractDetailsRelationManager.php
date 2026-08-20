@@ -41,6 +41,7 @@ class ContractDetailsRelationManager extends RelationManager
                     ->columnSpan(2),
                 TextInput::make('number')->label('Numero atto')
                     ->required()
+                    ->hintIcon('heroicon-o-information-circle', tooltip: 'Sono ammesse lettere, numeri e il punto')
                     ->live(onBlur: true)
                     ->extraInputAttributes(['class' => 'text-right'])
                     ->afterStateUpdated(fn (Get $get, Set $set) => static::updateInvoiceDescription($get, $set))

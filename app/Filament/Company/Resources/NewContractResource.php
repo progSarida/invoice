@@ -444,8 +444,7 @@ class NewContractResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('client.denomination')
-                    ->label('🔍 Cliente')
-                    ->searchable()
+                    ->label('Cliente')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('tax_types')
                     ->label('🔍 Entrate')
@@ -468,18 +467,13 @@ class NewContractResource extends Resource
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('accrual_types')
-                    ->label('🔍 Gestioni')
+                    ->label('Gestioni')
                     ->badge()
                     ->color('primary')
                     ->separator(', ')
-                    ->searchable(query: function (Builder $query, string $search) {
-                        $accrualTypeIds = AccrualType::where('name', 'like', "%{$search}%")->pluck('id')->toArray();
-                        $query->whereJsonContains('accrual_types', $accrualTypeIds);
-                    })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('payment_type')
-                    ->label('🔍 Remunerazione')
-                    ->searchable()
+                    ->label('Remunerazione')
                     ->color('black')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_validity_date')
