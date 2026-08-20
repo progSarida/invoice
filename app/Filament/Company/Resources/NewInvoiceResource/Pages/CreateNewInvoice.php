@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Company\Resources\NewInvoiceResource;
+use App\Filament\Company\Resources\NewInvoiceResource\RelationManagers\InvoiceItemsRelationManager;
 use App\Models\NewContract;
 use Illuminate\Validation\ValidationException;
 
@@ -21,6 +22,33 @@ class CreateNewInvoice extends CreateRecord
     public function getTitle(): string
     {
         return "Nuova fattura";
+    }
+
+    /**
+     * Dopo la creazione porto l'utente dove può proseguire il lavoro: se può modificare
+     * la fattura lo mando sulla scheda delle voci, altrimenti sulla sola consultazione.
+     */
+    protected function getRedirectUrl(): string
+    {
+        $resource = static::getResource();
+        $record = $this->getRecord();
+
+        if ($resource::canEdit($record)) {
+            $parameters = ['record' => $record];
+
+            $manager = array_search(InvoiceItemsRelationManager::class, $resource::getRelations(), true);
+            if ($manager !== false) {                                   // apro direttamente la scheda delle voci fattura
+                $parameters['activeRelationManager'] = $manager;
+            }
+
+            return $resource::getUrl('edit', $parameters);
+        }
+
+        if ($resource::canView($record)) {
+            return $resource::getUrl('view', ['record' => $record]);
+        }
+
+        return $resource::getUrl('index');
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
