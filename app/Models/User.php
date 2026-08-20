@@ -143,20 +143,11 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         return false;
     }
 
-    /**
-     * Vero solo per chi ha ESCLUSIVAMENTE permessi di amministrazione (10001):
-     * esclude il super_admin (10000) e chiunque abbia anche accessi lato azienda.
-     */
-    public function hasOnlyAdminAccess(): bool
-    {
-        return $this->hasAdminAccess() && ! $this->hasCompanyAccess();
-    }
-
     public function loginRedirect(): ?Response
     {
         $destinationPanelId = null;
 
-        if ($this->hasOnlyAdminAccess())
+        if ($this->isSuperAdmin() || $this->hasAdminAccess())
             $destinationPanelId = 'admin';
         else if ($this->hasCompanyAccess())
             $destinationPanelId = 'company';
