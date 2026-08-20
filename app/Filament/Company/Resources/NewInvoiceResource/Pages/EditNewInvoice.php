@@ -896,7 +896,7 @@ Log::info('Commit');
                 ->visible(function (Invoice $record) {
                     $toSend = $record->sdi_status == SdiStatus::DA_INVIARE;
                     $last = false;
-                    if ($record->art73) {
+                    if ($record->art_73) {
                         $maxNumber = Invoice::where('invoice_date', $record->invoice_date)
                             ->where('art_73', true)
                             ->where('company_id', Filament::getTenant()->id)
