@@ -639,7 +639,7 @@ class PassiveInvoiceResource extends Resource
                     ->columns(2)
                     ->form([
                         TextInput::make('total_from')
-                            ->label('Totale da')
+                            ->label('Dovuto da')
                             ->extraInputAttributes(['class' => 'text-right'])
                             ->live(onBlur: true)
                             ->afterStateUpdated(function ($state, $component) {
@@ -664,7 +664,7 @@ class PassiveInvoiceResource extends Resource
                             ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                             ->columnSpan(1),
                         TextInput::make('total_to')
-                            ->label('Totale a')
+                            ->label('Dovuto a')
                             ->extraInputAttributes(['class' => 'text-right'])
                             ->live(onBlur: true)
                             ->afterStateUpdated(function ($state, $component) {
@@ -706,13 +706,13 @@ class PassiveInvoiceResource extends Resource
                         })
                         ->indicateUsing(function (array $data): ?string {
                             if ($data['total_from'] && $data['total_to']) {
-                                return "Totale da " . $data['total_from'] . "€ a " . $data['total_to'] . "€";
+                                return "Dovuto da " . $data['total_from'] . "€ a " . $data['total_to'] . "€";
                             }
                             if ($data['total_from']) {
-                                return "Totale da " . $data['total_from'] . "€";
+                                return "Dovuto da " . $data['total_from'] . "€";
                             }
                             if ($data['total_to']) {
-                                return "Totale a " . $data['total_to'] . "€";
+                                return "Dovuto a " . $data['total_to'] . "€";
                             }
                             return null;
                         }),

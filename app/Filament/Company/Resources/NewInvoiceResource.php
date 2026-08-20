@@ -2477,28 +2477,88 @@ class NewInvoiceResource extends Resource
                     ->form([
                         TextInput::make('total_from')
                             ->label('Totale da')
+                            ->extraInputAttributes(['class' => 'text-right'])
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, $component) {
+                                if($state === null) {
+                                    $component->state(null);
+                                    return;
+                                }
+                                $float = CurrencyService::parseNumber($state);
+                                $formatted = number_format($float, 2, ',', '.');
+                                $component->state($formatted);
+                            })
+                            ->formatStateUsing(function ($state) {
+                                if (blank($state)) return null;
+
+                                // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
+                                $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
+                                // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
+                                $floatValue = floatval($state);
+
+                                return number_format($floatValue, 2, ',', '.');
+                            })
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                             ->columnSpan(1),
                         TextInput::make('total_to')
                             ->label('Totale a')
+                            ->extraInputAttributes(['class' => 'text-right'])
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, $component) {
+                                if($state === null) {
+                                    $component->state(null);
+                                    return;
+                                }
+                                $float = CurrencyService::parseNumber($state);
+                                $formatted = number_format($float, 2, ',', '.');
+                                $component->state($formatted);
+                            })
+                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
+                            ->formatStateUsing(function ($state) {
+                                if (blank($state)) return null;
+
+                                // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
+                                $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
+                                // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
+                                $floatValue = floatval($state);
+
+                                return number_format($floatValue, 2, ',', '.');
+                            })
+                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                             ->columnSpan(1),
                     ])
-                    ->query(function (Builder $query, array $data) {
-                        if (! empty($data['total_from'])) {
-                            $query->where('total', '>=', $data['total_from']);
+                    ->query(function (Builder $query, array $data): Builder {
+                        $from = ! empty($data['total_from']) ? $data['total_from'] : null;
+                        $to = ! empty($data['total_to']) ? $data['total_to'] : null;
+
+                        if ($from === null && $to === null) {
+                            return $query;
                         }
-                        if (! empty($data['total_to'])) {
-                            $query->where('total', '<=', $data['total_to']);
-                        }
+
+                        return $query->where(function (Builder $q) use ($from, $to) {
+                            // Caso: totale della fattura comprensivo di IVA
+                            $q->where(function (Builder $q2) use ($from, $to) {
+                                $q2->where('is_total_with_vat', true)
+                                    ->when($from !== null, fn (Builder $q3) => $q3->where('total', '>=', $from))
+                                    ->when($to !== null, fn (Builder $q3) => $q3->where('total', '<=', $to));
+                            })
+                            // Caso: totale della fattura al netto dell'IVA
+                            ->orWhere(function (Builder $q2) use ($from, $to) {
+                                $q2->where('is_total_with_vat', false)
+                                    ->when($from !== null, fn (Builder $q3) => $q3->where('no_vat_total', '>=', $from))
+                                    ->when($to !== null, fn (Builder $q3) => $q3->where('no_vat_total', '<=', $to));
+                            });
+                        });
                     })
                     ->indicateUsing(function (array $data): ?string {
                         if ($data['total_from'] && $data['total_to']) {
-                            return "Importo da " . number_format($data['total_from'], 2, ',', '.') . " fino a " . number_format($data['total_to'], 2, ',', '.');
+                            return "Totale da " . $data['total_from'] . "€ fino a " . $data['total_to'] . '€';
                         }
                         if ($data['total_from']) {
-                            return "Importo da " . number_format($data['total_from'], 2, ',', '.');
+                            return "Totale da " . $data['total_from'] . '€';
                         }
                         if ($data['total_to']) {
-                            return "Importo fino a " . number_format($data['total_to'], 2, ',', '.');
+                            return "Totale fino a " . $data['total_to'] . '€';
                         }
                         return null;
                     })
