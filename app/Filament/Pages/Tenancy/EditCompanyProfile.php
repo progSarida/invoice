@@ -605,17 +605,23 @@ class EditCompanyProfile extends EditTenantProfile
                             ->columns(12),
                         Tabs\Tab::make('Documenti')
                             ->schema([
-                                Repeater::make('doc_types_order')
-                                    ->label('Ordine di visualizzazione')
-                                    ->helperText("Trascina le righe per definire l'ordine con cui i documenti selezionati vengono proposti nelle select del programma.")
+                                Section::make('Ordine di visualizzazione')
+                                    ->description("Trascina le righe per definire l'ordine con cui i documenti selezionati vengono proposti nelle select del programma.")
                                     ->schema([
-                                        Hidden::make('doc_type_id'),
+                                        Repeater::make('doc_types_order')
+                                            ->label('')
+                                            ->schema([
+                                                Hidden::make('doc_type_id'),
+                                            ])
+                                            ->itemLabel(fn (array $state): ?string => $docTypeLabels[$state['doc_type_id'] ?? ''] ?? null)
+                                            ->addable(false)
+                                            ->deletable(false)
+                                            ->reorderable()
+                                            ->extraAttributes(['class' => 'compact-repeater'])   // righe di sola intestazione, senza corpo vuoto
+                                            ->columnSpan(12),
                                     ])
-                                    ->itemLabel(fn (array $state): ?string => $docTypeLabels[$state['doc_type_id'] ?? ''] ?? null)
-                                    ->addable(false)
-                                    ->deletable(false)
-                                    ->reorderable()
                                     ->visible(fn (Get $get): bool => filled($get('docTypes')))
+                                    ->columns(12)
                                     ->columnSpan(12),
                                 Section::make('Documenti gestiti')
                                     ->description('Seleziona i documenti che il programma gestisce per questa azienda.')

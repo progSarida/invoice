@@ -106,6 +106,10 @@ class CompanyPanelProvider extends PanelProvider
                 PanelsRenderHook::TOPBAR_END,
                 fn (): string => view('filament.topbar.ticket-button')->render()
             )
+            ->renderHook(
+                PanelsRenderHook::STYLES_AFTER,
+                fn (): string => view('filament.styles.compact-repeater')->render()
+            )
             ->globalSearchKeyBindings(['f9']);
     }
 }
