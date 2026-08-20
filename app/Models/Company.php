@@ -162,7 +162,10 @@ class Company extends Model
     public function docTypes(): BelongsToMany
     {
         return $this->belongsToMany(DocType::class, 'company_docs', 'company_id', 'doc_type_id')
-                    ->withTimestamps();
+                    ->withPivot('order')
+                    ->withTimestamps()
+                    ->orderBy('company_docs.order')                  // ordinamento definito in Dati azienda > Documenti
+                    ->orderBy('doc_types.name');
     }
 
     public function newContracts()

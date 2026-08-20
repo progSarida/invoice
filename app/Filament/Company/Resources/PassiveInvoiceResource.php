@@ -571,15 +571,7 @@ class PassiveInvoiceResource extends Resource
                     }),
                 SelectFilter::make('doc_type')
                     ->label('Seleziona tipo documento')
-                    ->options(function () {
-                        $actualTypes = PassiveInvoice::select('passive_invoices.doc_type', 'doc_types.description')
-                            ->leftJoin('doc_types', 'passive_invoices.doc_type', '=', 'doc_types.name')
-                            ->distinct()
-                            ->get()
-                            ->pluck('description', 'doc_type')
-                            ->toArray();
-                        return $actualTypes;
-                    })
+                    ->options(fn () => PassiveInvoice::docTypeOptions('desc'))               // tipi documento più presenti in cima
                     ->multiple()
                     ->searchable()
                     ->columnSpan(3)
@@ -605,15 +597,7 @@ class PassiveInvoiceResource extends Resource
                     ->searchable()
                     ->preload()
                     ->columnSpanFull()
-                    ->options(function () {
-                        $actualTypes = PassiveInvoice::select('passive_invoices.doc_type', 'doc_types.description')
-                            ->leftJoin('doc_types', 'passive_invoices.doc_type', '=', 'doc_types.name')
-                            ->distinct()
-                            ->get()
-                            ->pluck('description', 'doc_type')
-                            ->toArray();
-                        return $actualTypes;
-                    })
+                    ->options(fn () => PassiveInvoice::docTypeOptions('asc'))                // tipi documento meno presenti in cima
                     ->getOptionLabelUsing(fn ($record) => $record?->description)
                     ->default(function() {
                         // $excludedGroups = ['Note di variazione', 'Autofatture'];

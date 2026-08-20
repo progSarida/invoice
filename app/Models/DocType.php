@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -22,19 +23,32 @@ class DocType extends Model
     public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_docs', 'doc_type_id', 'company_id')
+                    ->withPivot('order')
                     ->withTimestamps();
+    }
+
+    /**
+     * Tipi documento di un'azienda, nell'ordine definito in Dati azienda > Documenti.
+     * Senza azienda restituisce tutti i tipi documento, senza ordinamento specifico.
+     */
+    protected static function optionsQuery($companyId = null): Builder
+    {
+        $query = self::query()->with('docGroup');
+
+        if ($companyId) {
+            $query->join('company_docs', 'company_docs.doc_type_id', '=', 'doc_types.id')
+                ->where('company_docs.company_id', $companyId)
+                ->select('doc_types.*')
+                ->orderBy('company_docs.order')
+                ->orderBy('doc_types.name');
+        }
+
+        return $query;
     }
 
     public static function groupedOptions($companyId = null): array
     {
-        $query = self::query();
-        if ($companyId) {
-            $query->whereHas('companies', function ($q) use ($companyId) {
-                $q->where('company_id', $companyId);
-            });
-        }
-
-        return $query->with('docGroup')
+        return self::optionsQuery($companyId)
             ->get()
             ->groupBy(fn($docType) => $docType->docGroup ? $docType->docGroup->name : 'Senza gruppo')
             ->mapWithKeys(function ($grouped, $groupName) {
@@ -49,14 +63,7 @@ class DocType extends Model
 
     public static function flatOptions($companyId = null): array
     {
-        $query = self::query();
-        if ($companyId) {
-            $query->whereHas('companies', function ($q) use ($companyId) {
-                $q->where('company_id', $companyId);
-            });
-        }
-
-        return $query->with('docGroup')
+        return self::optionsQuery($companyId)
             ->get()
             ->mapWithKeys(function ($docType) {
                 $groupName = $docType->docGroup ? $docType->docGroup->name : 'Senza gruppo';

@@ -151,6 +151,26 @@ class PassiveInvoice extends Model
     }
 
     /**
+     * Tipi documento effettivamente presenti nelle fatture passive dell'azienda di
+     * sessione, come opzioni codice => descrizione, ordinati per numero di fatture.
+     *
+     * @param  string  $direction  'desc' per i tipi più usati in cima, 'asc' per i meno usati
+     * @return array<string, ?string>
+     */
+    public static function docTypeOptions(string $direction = 'desc'): array
+    {
+        return self::select('passive_invoices.doc_type', 'doc_types.description')
+            ->selectRaw('COUNT(passive_invoices.id) as invoices_count')
+            ->leftJoin('doc_types', 'passive_invoices.doc_type', '=', 'doc_types.name')
+            ->where('passive_invoices.company_id', Filament::getTenant()?->id)
+            ->groupBy('passive_invoices.doc_type', 'doc_types.description')
+            ->orderBy('invoices_count', $direction)
+            ->get()
+            ->pluck('description', 'doc_type')
+            ->toArray();
+    }
+
+    /**
      * Residuo tra il dovuto e quanto già coperto da pagamenti e note di credito.
      */
     public function getResidualAttribute(): float

@@ -33,10 +33,12 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Pages\Tenancy\EditTenantProfile;
 use Filament\Support\Enums\MaxWidth;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 
 class EditCompanyProfile extends EditTenantProfile
@@ -52,10 +54,76 @@ class EditCompanyProfile extends EditTenantProfile
         return MaxWidth::Full;
     }
 
+    /**
+     * Allinea la lista ordinabile alla selezione dei documenti: le posizioni già definite
+     * vengono mantenute, i documenti appena spuntati finiscono in coda.
+     *
+     * @param  array<int, mixed>|null  $selected
+     */
+    public static function syncDocTypesOrder(?array $selected, Get $get, Set $set): void
+    {
+        $selected = array_map('strval', array_filter((array) $selected, fn ($id) => filled($id)));
+
+        $ordered = [];
+        foreach ((array) $get('doc_types_order') as $item) {                                // documenti già ordinati e ancora selezionati
+            $id = filled($item['doc_type_id'] ?? null) ? (string) $item['doc_type_id'] : null;
+            if ($id !== null && in_array($id, $selected, true)) {
+                $ordered[$id] = $id;
+            }
+        }
+        foreach ($selected as $id) {                                                        // documenti appena aggiunti
+            $ordered[$id] ??= $id;
+        }
+
+        $set('doc_types_order', collect($ordered)
+            ->mapWithKeys(fn ($id) => ['doc-' . $id => ['doc_type_id' => (string) $id]])
+            ->all());
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['doc_types_order'] = $this->tenant                                            // già ordinati dalla relazione
+            ->docTypes()
+            ->get()
+            ->mapWithKeys(fn ($docType) => ['doc-' . $docType->id => ['doc_type_id' => (string) $docType->id]])
+            ->all();
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function handleRecordUpdate(Model $record, array $data): Model
+    {
+        $order = $data['doc_types_order'] ?? null;
+        unset($data['doc_types_order']);                                                    // non è una colonna di companies
+
+        $record->update($data);
+
+        if (is_array($order)) {                                                             // la sync della CheckboxList è già avvenuta in getState()
+            $position = 1;
+            foreach ($order as $item) {
+                $docTypeId = $item['doc_type_id'] ?? null;
+                if (blank($docTypeId)) {
+                    continue;
+                }
+                $record->docTypes()->updateExistingPivot($docTypeId, ['order' => $position++]);
+            }
+        }
+
+        return $record;
+    }
+
     public function form(Form $form): Form
     {
         $company = filament()->getTenant();
         $italyId = State::where('name', 'Italy')->first()->id;
+        $docTypeLabels = DocType::flatOptions();
         return $form
             ->columns(12)
             ->extraAttributes(['class' => 'w-full'])
@@ -537,11 +605,33 @@ class EditCompanyProfile extends EditTenantProfile
                             ->columns(12),
                         Tabs\Tab::make('Documenti')
                             ->schema([
-                                CheckboxList::make('docTypes')
-                                    ->label('')
-                                    ->relationship('docTypes', 'id')
-                                    ->options(fn () => DocType::flatOptions())
-                                    ->bulkToggleable()
+                                Repeater::make('doc_types_order')
+                                    ->label('Ordine di visualizzazione')
+                                    ->helperText("Trascina le righe per definire l'ordine con cui i documenti selezionati vengono proposti nelle select del programma.")
+                                    ->schema([
+                                        Hidden::make('doc_type_id'),
+                                    ])
+                                    ->itemLabel(fn (array $state): ?string => $docTypeLabels[$state['doc_type_id'] ?? ''] ?? null)
+                                    ->addable(false)
+                                    ->deletable(false)
+                                    ->reorderable()
+                                    ->visible(fn (Get $get): bool => filled($get('docTypes')))
+                                    ->columnSpan(12),
+                                Section::make('Documenti gestiti')
+                                    ->description('Seleziona i documenti che il programma gestisce per questa azienda.')
+                                    ->collapsible()
+                                    ->collapsed(fn (Get $get): bool => filled($get('docTypes')))    // aperta finché non c'è nulla di selezionato
+                                    ->schema([
+                                        CheckboxList::make('docTypes')
+                                            ->label('')
+                                            ->relationship('docTypes', 'id')
+                                            ->options($docTypeLabels)
+                                            ->bulkToggleable()
+                                            ->live()
+                                            ->afterStateUpdated(fn (?array $state, Get $get, Set $set) => static::syncDocTypesOrder($state, $get, $set))
+                                            ->columnSpan(12),
+                                    ])
+                                    ->columns(12)
                                     ->columnSpan(12),
                             ])
                             ->columns(12),
