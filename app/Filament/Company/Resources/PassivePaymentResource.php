@@ -514,6 +514,7 @@ class PassivePaymentResource extends Resource
                     ->form([
                         DatePicker::make('payment_from_date')
                             ->label('Pagamento da')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->default(now()->year . '-01-01')
                             ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
                             ->afterStateUpdated(function ($state, Set $set) {
@@ -524,6 +525,7 @@ class PassivePaymentResource extends Resource
                             ->columnSpan(1),
                         DatePicker::make('payment_to_date')
                             ->label('Pagamento a')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->default(now()->year . '-12-31')
                             ->columnSpan(1),
                     ])
@@ -553,9 +555,11 @@ class PassivePaymentResource extends Resource
                     ->form([
                         DatePicker::make('registration_from_date')
                             ->label('Registrazione da')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->columnSpan(1),
                         DatePicker::make('registration_to_date')
                             ->label('Registrazione a')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->columnSpan(1),
                     ])
                     ->columnSpan(6)

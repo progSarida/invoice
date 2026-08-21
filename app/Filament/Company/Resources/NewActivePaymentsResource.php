@@ -753,6 +753,7 @@ class NewActivePaymentsResource extends Resource
                     ->form([
                         DatePicker::make('payment_from_date')
                             ->label('Pagamento da')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
                             ->afterStateUpdated(function ($state, Set $set) {
                                 if ($state) {
@@ -762,6 +763,7 @@ class NewActivePaymentsResource extends Resource
                             ->columnSpan(1),
                         DatePicker::make('payment_to_date')
                             ->label('Pagamento a')
+                            ->extraInputAttributes(['class' => 'text-center'])
                             ->columnSpan(1),
                     ])
                     ->query(function (Builder $query, array $data) {
