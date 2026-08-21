@@ -167,10 +167,13 @@ class EditPassiveInvoice extends EditRecord
     protected function getFormActions(): array
     {
         return [
-            $this->getSaveFormAction()->color('success'),
+            $this->getSaveFormAction()
+                ->visible(fn($record) => !$record->downloaded)
+                ->color('success'),
             $this->getCancelFormAction(),
             $this->getResetFormAction(),
             $this->getDeleteFormAction()
+                ->visible(fn($record) => !$record->downloaded)
                 ->extraAttributes([
                     'class' => ' md:ml-auto md:w-auto ',
                 ]),
@@ -181,10 +184,30 @@ class EditPassiveInvoice extends EditRecord
     {
         return Actions\DeleteAction::make('delete')
                 ->requiresConfirmation()
-                ->modalHeading('Conferma eliminazione documento')
-                ->modalDescription('Sei sicuro di voler eliminare questo documento? Questa azione non può essere annullata.')
+                // Se la fattura non è eliminabile (origine SdI, validazione o elementi
+                // collegati) il modale spiega il motivo e non espone il pulsante di conferma.
+                ->modalHeading(fn () => $this->getRecord()->isDeletable()
+                    ? 'Conferma eliminazione documento'
+                    : 'Documento non eliminabile')
+                ->modalDescription(fn () => $this->getRecord()->getDeletionBlockReason()
+                    ?? 'Sei sicuro di voler eliminare questo documento? Questa azione non può essere annullata.')
+                ->modalSubmitAction(fn () => $this->getRecord()->isDeletable() ? null : false)
                 ->modalSubmitActionLabel('Elimina')
-                ->modalCancelActionLabel('Annulla');
+                ->modalCancelActionLabel(fn () => $this->getRecord()->isDeletable() ? 'Annulla' : 'Chiudi')
+                ->before(function (Actions\DeleteAction $action) {
+                    $reason = $this->getRecord()->getDeletionBlockReason();
+
+                    if ($reason) {
+                        Notification::make()
+                            ->title('Eliminazione non consentita')
+                            ->body($reason)
+                            ->danger()
+                            ->persistent()
+                            ->send();
+
+                        $action->cancel();
+                    }
+                });
     }
 
     protected function getCancelFormAction(): Actions\Action

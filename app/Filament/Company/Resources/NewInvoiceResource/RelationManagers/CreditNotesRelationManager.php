@@ -1098,11 +1098,11 @@ class CreditNotesRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->modalWidth('7xl'),
-                Tables\Actions\DeleteAction::make(),
+                // Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

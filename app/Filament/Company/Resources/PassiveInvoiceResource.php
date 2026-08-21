@@ -41,6 +41,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
 
@@ -365,6 +366,43 @@ class PassiveInvoiceResource extends Resource
                                     ,
                             ]),
 
+                        Section::make('Totali')
+                            ->collapsed(false)
+                            ->columns(6)
+                            ->schema([
+                                // Valori di sola lettura: rispecchiano il documento salvato, come le omonime colonne in tabella
+                                Forms\Components\TextInput::make('total')
+                                    ->label('Dovuto')
+                                    ->extraInputAttributes(['class' => 'text-right'])
+                                    ->formatStateUsing(fn ($state): ?string => number_format((float) $state, 2, ',', '.'))
+                                    ->suffix('€')
+                                    ->columnSpan(2)
+                                    ->disabled()
+                                    ->dehydrated(false),
+
+                                Forms\Components\TextInput::make('total_notes_payment')
+                                    ->label('Note di variazione e pagamenti')
+                                    ->extraInputAttributes(['class' => 'text-right'])
+                                    ->formatStateUsing(fn (?PassiveInvoice $record): ?string => $record
+                                        ? number_format($record->getNotesTotal() + (float) $record->total_payment, 2, ',', '.')
+                                        : 0.00)
+                                    ->suffix('€')
+                                    ->columnSpan(2)
+                                    ->disabled()
+                                    ->dehydrated(false),
+
+                                Forms\Components\TextInput::make('residue')
+                                    ->label('Residuo')
+                                    ->extraInputAttributes(['class' => 'text-right'])
+                                    ->formatStateUsing(fn (?PassiveInvoice $record): ?string => $record
+                                        ? number_format($record->getResidue(), 2, ',', '.')
+                                        : 0.00)
+                                    ->suffix('€')
+                                    ->columnSpan(2)
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ]),
+
 
                     Section::make('Descrizione')
                         ->collapsible()
@@ -499,6 +537,19 @@ class PassiveInvoiceResource extends Resource
                 //     ->label('Stato')
                 //     // ->tooltip(fn ($state): string => $state)
                 //     ->sortable(),
+                // Calcolate sui documenti collegati, non su colonne del database: non sono ordinabili,
+                // ma il totale di colonna viene ricavato in query dalle note collegate alle fatture filtrate
+                TextColumn::make('total_notes')
+                    ->label('Note di variazione')
+                    ->money('EUR')
+                    ->alignRight()
+                    ->state(fn (PassiveInvoice $record): float => $record->getNotesTotal())
+                    ->summarize([
+                        Tables\Columns\Summarizers\Summarizer::make()
+                            ->label('')
+                            ->using(fn (QueryBuilder $query): float => static::sumVariationNotes($query))
+                            ->money('EUR', true, 'it_IT'),
+                    ]),
                 Tables\Columns\IconColumn::make('piValidation.pi_validation_status')
                     ->label('Validazione')
                     ->default(PiValidationStatus::NO_STATUS)
@@ -521,6 +572,24 @@ class PassiveInvoiceResource extends Resource
                     ->summarize([
                         Tables\Columns\Summarizers\Sum::make()
                             ->label('')
+                            ->money('EUR', true, 'it_IT'),
+                    ]),
+                TextColumn::make('residue')
+                    ->label('Residuo')
+                    ->money('EUR')
+                    ->alignRight()
+                    ->state(fn (PassiveInvoice $record): float => $record->getResidue())
+                    ->summarize([
+                        Tables\Columns\Summarizers\Summarizer::make()
+                            ->label('')
+                            ->using(function (QueryBuilder $query): float {
+                                $amounts = (clone $query)
+                                    ->reorder()
+                                    ->selectRaw('COALESCE(SUM(passive_invoices.total), 0) - COALESCE(SUM(passive_invoices.total_payment), 0) as amount')
+                                    ->value('amount');
+
+                                return (float) $amounts - static::sumVariationNotes($query);
+                            })
                             ->money('EUR', true, 'it_IT'),
                     ]),
                 Tables\Columns\TextColumn::make('created_at')
@@ -1163,6 +1232,18 @@ class PassiveInvoiceResource extends Resource
                         // ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
+    }
+
+    /**
+     * Somma delle note di variazione (credito e debito) collegate alle fatture
+     * attualmente filtrate in tabella, usata dai totali di colonna.
+     */
+    protected static function sumVariationNotes(QueryBuilder $query): float
+    {
+        return (float) PassiveInvoice::query()
+            ->whereIn('doc_type', ['TD04', 'TD05'])
+            ->whereIn('parent_id', (clone $query)->reorder()->select('passive_invoices.id'))
+            ->sum('total');
     }
 
     public static function getRelations(): array

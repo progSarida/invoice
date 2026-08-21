@@ -21,6 +21,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class Invoice extends Model
 {
@@ -126,6 +127,10 @@ class Invoice extends Model
         return $this->hasMany(SdiNotification::class);
     }
 
+    public function sdiRequests(){
+        return $this->hasMany(SdiRequest::class);
+    }
+
     public function lastSdiNotification()
     {
         return $this->hasOne(SdiNotification::class)->latestOfMany('date');
@@ -161,6 +166,11 @@ class Invoice extends Model
 
     public function contract(){
         return $this->belongsTo(NewContract::class,'contract_id');
+    }
+
+    // Tutti i documenti figli (note di credito, note di debito, ...) senza filtro sul tipo documento
+    public function children(){
+        return $this->hasMany(Invoice::class, 'parent_id', 'id');
     }
 
     public function creditNotes(){
@@ -362,6 +372,71 @@ class Invoice extends Model
         $this->save();
     }
 
+    /**
+     * Relazioni che impediscono l'eliminazione del documento, con le etichette
+     * (singolare, plurale) usate nel messaggio mostrato all'utente.
+     * Le voci (invoiceItems) non sono incluse: sono parte del documento e vengono
+     * eliminate in cascata dal database.
+     */
+    /** Cache per singola istanza dei collegamenti bloccanti già calcolati */
+    protected ?array $deletionBlockers = null;
+
+    protected const DELETION_BLOCKING_RELATIONS = [
+        'children' => ['documento collegato', 'documenti collegati'],
+        'activePayments' => ['pagamento registrato', 'pagamenti registrati'],
+        'sdiNotifications' => ['notifica SdI', 'notifiche SdI'],
+        'sdiRequests' => ['richiesta SdI', 'richieste SdI'],
+        'postalExpenses' => ['spesa postale rifatturata', 'spese postali rifatturate'],
+    ];
+
+    /**
+     * Elenco descrittivo dei collegamenti che bloccano l'eliminazione del documento.
+     * Usa i conteggi già caricati (loadCount/withCount) se disponibili.
+     */
+    public function getDeletionBlockers(): array
+    {
+        // I callback del modale interrogano il record più volte per singolo render
+        if (!is_null($this->deletionBlockers)) {
+            return $this->deletionBlockers;
+        }
+
+        $blockers = [];
+
+        foreach (static::DELETION_BLOCKING_RELATIONS as $relation => [$singular, $plural]) {
+            $countAttribute = Str::snake($relation) . '_count';
+            $count = (int) ($this->$countAttribute ?? $this->$relation()->count());
+
+            if ($count > 0) {
+                $blockers[] = $count . ' ' . ($count === 1 ? $singular : $plural);
+            }
+        }
+
+        return $this->deletionBlockers = $blockers;
+    }
+
+    /**
+     * Motivo per cui il documento non è eliminabile, oppure null se lo è.
+     */
+    public function getDeletionBlockReason(): ?string
+    {
+        $blockers = $this->getDeletionBlockers();
+
+        if (empty($blockers)) {
+            return null;
+        }
+
+        $last = array_pop($blockers);
+        $list = empty($blockers) ? $last : implode(', ', $blockers) . ' e ' . $last;
+
+        return "Il documento non può essere eliminato perché è collegato a: {$list}."
+            . ' Elimina prima gli elementi collegati.';
+    }
+
+    public function isDeletable(): bool
+    {
+        return is_null($this->getDeletionBlockReason());
+    }
+
     protected static function booted()
     {
         static::creating(function ($invoice) {
@@ -463,6 +538,15 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
         static::saving(function ($invoice) {
             if(empty($invoice->tax_type))
                 $invoice->tax_type = '';
+        });
+
+        static::deleting(function ($invoice) {
+            // Rete di sicurezza: nessun documento con elementi collegati può essere eliminato,
+            // anche se la cancellazione arriva da un punto diverso dal pannello.
+            // Le voci non bloccano: le elimina il database in cascata.
+            if (!$invoice->isDeletable()) {
+                return false;
+            }
         });
 
         static::deleted(function ($invoice) {

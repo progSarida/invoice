@@ -6,6 +6,7 @@ use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class PassiveInvoice extends Model
 {
@@ -13,6 +14,7 @@ class PassiveInvoice extends Model
         'company_id',
         'supplier_id',
         'parent_id',
+        'downloaded',
         'doc_type',
         'invoice_date',
         'number',
@@ -40,6 +42,7 @@ class PassiveInvoice extends Model
     protected $casts = [
         'invoice_date' => 'date',
         'pi_validation_date' => 'date',
+        'downloaded' => 'boolean',
     ];
 
     public function company(){
@@ -74,6 +77,20 @@ class PassiveInvoice extends Model
         return $this->hasMany(PassivePayment::class);
     }
 
+    // Tutti i documenti figli (note di credito, note di debito, ...) senza filtro sul tipo documento
+    public function children(){
+        return $this->hasMany(PassiveInvoice::class, 'parent_id', 'id');
+    }
+
+    // Note di variazione (credito e debito) collegate al documento
+    public function variationNotes(){
+        return $this->hasMany(PassiveInvoice::class, 'parent_id', 'id')->whereIn('doc_type', ['TD04', 'TD05']);
+    }
+
+    public function postalExpenses(){
+        return $this->hasMany(PostalExpense::class, 'passive_invoice_id', 'id');
+    }
+
     public function piValidation(){
         return $this->belongsTo(PiValidation::class);
     }
@@ -84,6 +101,77 @@ class PassiveInvoice extends Model
 
     public function piValidationUser(){
         return $this->belongsTo(User::class, 'pi_validation_user_id');
+    }
+
+    /**
+     * Relazioni che impediscono l'eliminazione del documento, con le etichette
+     * (singolare, plurale) usate nel messaggio mostrato all'utente.
+     * Le voci (passiveItems) non sono incluse: sono parte del documento e vengono
+     * eliminate in cascata dal database.
+     */
+    protected const DELETION_BLOCKING_RELATIONS = [
+        'children' => ['documento collegato', 'documenti collegati'],
+        'passivePayments' => ['pagamento registrato', 'pagamenti registrati'],
+        'postalExpenses' => ['spesa postale collegata', 'spese postali collegate'],
+    ];
+
+    /** Cache per singola istanza dei collegamenti bloccanti già calcolati */
+    protected ?array $deletionBlockers = null;
+
+    /**
+     * Elenco descrittivo dei collegamenti che bloccano l'eliminazione del documento.
+     * Usa i conteggi già caricati (loadCount/withCount) se disponibili.
+     */
+    public function getDeletionBlockers(): array
+    {
+        // I callback del modale interrogano il record più volte per singolo render
+        if (!is_null($this->deletionBlockers)) {
+            return $this->deletionBlockers;
+        }
+
+        $blockers = [];
+
+        foreach (static::DELETION_BLOCKING_RELATIONS as $relation => [$singular, $plural]) {
+            $countAttribute = Str::snake($relation) . '_count';
+            $count = (int) ($this->$countAttribute ?? $this->$relation()->count());
+
+            if ($count > 0) {
+                $blockers[] = $count . ' ' . ($count === 1 ? $singular : $plural);
+            }
+        }
+
+        return $this->deletionBlockers = $blockers;
+    }
+
+    /**
+     * Motivo per cui la fattura passiva non è eliminabile, oppure null se lo è.
+     */
+    public function getDeletionBlockReason(): ?string
+    {
+        if ($this->downloaded) {                                                        // origine SdI: condizione non rimuovibile
+            return 'La fattura è stata scaricata dallo SdI: si possono eliminare solo le fatture passive inserite manualmente.';
+        }
+
+        if ($this->pi_validation_id) {
+            return 'La fattura è validata: annulla prima la validazione per poterla eliminare.';
+        }
+
+        $blockers = $this->getDeletionBlockers();
+
+        if (empty($blockers)) {
+            return null;
+        }
+
+        $last = array_pop($blockers);
+        $list = empty($blockers) ? $last : implode(', ', $blockers) . ' e ' . $last;
+
+        return "Il documento non può essere eliminato perché è collegato a: {$list}."
+            . ' Elimina prima gli elementi collegati.';
+    }
+
+    public function isDeletable(): bool
+    {
+        return is_null($this->getDeletionBlockReason());
     }
 
     protected static function booted()
@@ -114,7 +202,13 @@ class PassiveInvoice extends Model
         });
 
         static::deleting(function ($invoice) {
-            //
+            // Rete di sicurezza: fatture scaricate dallo SdI, validate o con elementi
+            // collegati non possono essere eliminate, anche se la cancellazione arriva
+            // da un punto diverso dal pannello.
+            // Le voci non bloccano: le elimina il database in cascata.
+            if (!$invoice->isDeletable()) {
+                return false;
+            }
         });
 
     }
@@ -168,6 +262,38 @@ class PassiveInvoice extends Model
             ->get()
             ->pluck('description', 'doc_type')
             ->toArray();
+    }
+
+    /**
+     * Somma delle note di variazione (credito e debito) effettivamente collegate al documento.
+     */
+    public function getNotesTotal(): float
+    {
+        return (float) $this->variationNotes()->sum('total');
+    }
+
+    /**
+     * Somma delle sole note di credito (TD04) collegate al documento.
+     */
+    public function getCreditNotesTotal(): float
+    {
+        return (float) $this->creditNotes()->sum('total');
+    }
+
+    /**
+     * Somma delle sole note di debito (TD05) collegate al documento.
+     */
+    public function getDebitNotesTotal(): float
+    {
+        return (float) $this->debitNotes()->sum('total');
+    }
+
+    /**
+     * Residuo calcolato sulle note di variazione collegate: dovuto meno note e pagamenti.
+     */
+    public function getResidue(): float
+    {
+        return (float) $this->total - $this->getNotesTotal() - (float) $this->total_payment;
     }
 
     /**

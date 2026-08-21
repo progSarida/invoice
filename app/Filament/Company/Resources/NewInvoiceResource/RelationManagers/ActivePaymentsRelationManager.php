@@ -360,7 +360,8 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->modalHeading('Modifica pagamento')
                     ->visible(fn ($record) => !$record->validated && Auth::user()?->can('update', ActivePayments::class))
                     ->modalWidth('6xl'),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn ($record) => !$record->validated && Auth::user()?->can('delete', ActivePayments::class)),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

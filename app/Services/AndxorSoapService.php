@@ -1212,6 +1212,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                 'company_id' => Filament::getTenant()->id,
                 'supplier_id' => $supplier->id,
                 'parent_id' => $parentPassiveInvoice?->id,
+                'downloaded' => true,                                                                                   // fattura scaricata dallo SdI: non eliminabile
                 'doc_type' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['TipoDocumento'] ?? null,
                 'invoice_date' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Data'] ?? null,
                 'number' => $xml['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Numero'] ?? null,
