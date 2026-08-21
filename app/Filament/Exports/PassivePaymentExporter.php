@@ -29,6 +29,8 @@ class PassivePaymentExporter extends Exporter
             ExportColumn::make('payment_date')
                 ->label('Data pagamento')
                 ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : 'N/D'),
+            ExportColumn::make('note')
+                ->label('Note'),
             ExportColumn::make('bank')
                 ->label('Istituto finanziario'),
             ExportColumn::make('iban')

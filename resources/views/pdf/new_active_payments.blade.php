@@ -12,16 +12,20 @@
             border: 2px solid black;
         }
         th, td {
-            border-top: 1px dashed black;
-            border-bottom: 1px dashed black;
-            border-left: none;
-            border-right: none;
+            border: none;
             padding: 4px;
             text-align: left;
         }
         thead th {
             border-top: 2px solid black;
             border-bottom: 2px solid black;
+        }
+        /* Il tratteggio separa i blocchi di record, non le righe dello stesso record */
+        tbody tr.record-start td {
+            border-top: 1px dashed black;
+        }
+        tbody tr.record-detail td {
+            padding-top: 0;
         }
         tbody tr:last-child td {
             border-bottom: 2px solid black;
@@ -153,7 +157,7 @@
                     $payments = $payment->invoice->activePayments?->sum('amount') ?? 0;
                     $residue = $payment->invoice->total - ($notes + $payments);
                 @endphp
-                <tr>
+                <tr class="record-start">
                     <td>{{ $payment->invoice->getNewInvoiceNumber() }} ({{$payment->invoice->docType->name}})</td>
                     <td>{{ $payment->invoice->client->city->code }}</td>
                     <td>{{ $payment->invoice->client->denomination }}</td>
@@ -163,6 +167,12 @@
                     <td>{{ euroFormat($payment->amount) }}</td>
                     <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
                     <td>{{ euroFormat($residue) }}</td>
+                </tr>
+                <tr class="record-detail">
+                    <td colspan="9"><strong>Descrizione:</strong> {{ $payment->description }}</td>
+                </tr>
+                <tr class="record-detail">
+                    <td colspan="9"><strong>Note:</strong> {{ $payment->note }}</td>
                 </tr>
             @endforeach
         </tbody>

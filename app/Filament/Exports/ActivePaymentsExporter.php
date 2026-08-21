@@ -30,6 +30,10 @@ class ActivePaymentsExporter extends Exporter
             ExportColumn::make('payment_date')
                 ->label('Data pagamento')
                 ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : 'N/D'),
+            ExportColumn::make('description')
+                ->label('Descrizione'),
+            ExportColumn::make('note')
+                ->label('Note'),
             ExportColumn::make('registration_date')
                 ->label('Data registrazione')
                 ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d/m/Y') : 'N/D'),
