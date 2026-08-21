@@ -160,16 +160,15 @@ class ActivePaymentsRelationManager extends RelationManager
                         }
 
                         $invoice = Invoice::find($get('invoice_id'));
-                        $paymentDate = $get('payment_date');
 
                         $currentMonth = now()->month;
-                        $date = \Carbon\Carbon::parse($state);
-                        $selectedYear = \Carbon\Carbon::parse($state)->year;
+                        $date = \Carbon\Carbon::parse($state)->startOfDay();
+                        $selectedYear = $date->year;
                         $currentYear = now()->year;
 
                         if ($currentMonth !== 1 && $date->year !== $currentYear) {
-                            $corrected = $date->copy()->setYear($currentYear);
-                            $set('payment_date', $corrected->format('Y-m-d'));
+                            $date = $date->copy()->setYear($currentYear);       // i controlli seguenti usano la data corretta
+                            $set('payment_date', $date->format('Y-m-d'));
 
                             Notification::make()
                                 ->title('Anno corretto automaticamente')
@@ -178,7 +177,11 @@ class ActivePaymentsRelationManager extends RelationManager
                                 ->send();
                         }
 
-                        if ($paymentDate && $invoice && ($paymentDate < $invoice->invoice_date)) {
+                        // Confronto fra oggetti Carbon: con una stringa da una parte e un Carbon
+                        // dall'altra PHP considera sempre maggiore l'oggetto, senza guardare la data
+                        $paymentDate = $date;
+
+                        if ($invoice && $paymentDate->lt($invoice->invoice_date->copy()->startOfDay())) {
                             Notification::make('date')
                                 ->title('Attenzione! La data del pagamento è inferiore alla data della fattura.')
                                 ->danger()
@@ -187,7 +190,7 @@ class ActivePaymentsRelationManager extends RelationManager
                                 ->send();
                         }
 
-                        if ($paymentDate && $paymentDate > today()) {
+                        if ($paymentDate->gt(today())) {
                             Notification::make('today')
                                 ->title('Attenzione! La data del pagamento è successiva alla data di oggi.')
                                 ->warning()
