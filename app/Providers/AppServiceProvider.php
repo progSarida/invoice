@@ -7,6 +7,7 @@ use Filament\Forms\Components\FileUpload;
 use Illuminate\Support\ServiceProvider;
 use Filament\Http\Responses\Auth\LogoutResponse;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Number;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // L'helper Number ha una lingua propria, fissata a 'en' dal framework: senza questa riga
+        // i conteggi in calce alle tabelle di Filament separano le migliaia con la virgola
+        Number::useLocale(Config::get('app.locale'));
+
         FileUpload::configureUsing(function (FileUpload $component): void {
 
                 $diskName = $component->getDiskName() ?? Config::get('filesystems.default');

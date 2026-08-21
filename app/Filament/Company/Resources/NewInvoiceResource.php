@@ -2189,6 +2189,7 @@ class NewInvoiceResource extends Resource
                     ->form([
                         TextInput::make('number_from')
                             ->label('Numero Documento da')
+                            ->extraInputAttributes(['class' => 'text-right'])
                             ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
                             ->afterStateUpdated(function ($state, Set $set) {
                                 if ($state) {
@@ -2196,6 +2197,7 @@ class NewInvoiceResource extends Resource
                                 }
                             }),
                         TextInput::make('number_to')
+                            ->extraInputAttributes(['class' => 'text-right'])
                             ->label('Numero Documento a'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
