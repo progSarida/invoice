@@ -360,7 +360,7 @@ class NewActivePaymentsResource extends Resource
 
                         if ($currentMonth !== 1 && $date->year !== $currentYear) {
                             $corrected = $date->copy()->setYear($currentYear);
-                            $set('invoice_date', $corrected->format('Y-m-d'));
+                            $set('payment_date', $corrected->format('Y-m-d'));
 
                             Notification::make()
                                 ->title('Anno corretto automaticamente')
