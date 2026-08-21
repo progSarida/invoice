@@ -1235,15 +1235,17 @@ class PassiveInvoiceResource extends Resource
     }
 
     /**
-     * Somma delle note di variazione (credito e debito) collegate alle fatture
-     * attualmente filtrate in tabella, usata dai totali di colonna.
+     * Totale delle note di variazione collegate alle fatture attualmente filtrate
+     * in tabella, usato dai totali di colonna: le note di debito aumentano il
+     * dovuto, quindi vanno sottratte a quelle di credito.
      */
     protected static function sumVariationNotes(QueryBuilder $query): float
     {
         return (float) PassiveInvoice::query()
-            ->whereIn('doc_type', ['TD04', 'TD05'])
             ->whereIn('parent_id', (clone $query)->reorder()->select('passive_invoices.id'))
-            ->sum('total');
+            ->selectRaw("COALESCE(SUM(CASE WHEN doc_type = 'TD04' THEN total ELSE 0 END), 0)
+                       - COALESCE(SUM(CASE WHEN doc_type = 'TD05' THEN total ELSE 0 END), 0) as amount")
+            ->value('amount');
     }
 
     public static function getRelations(): array

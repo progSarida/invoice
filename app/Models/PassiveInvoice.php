@@ -265,11 +265,12 @@ class PassiveInvoice extends Model
     }
 
     /**
-     * Somma delle note di variazione (credito e debito) effettivamente collegate al documento.
+     * Totale delle note di variazione collegate al documento: le note di debito
+     * aumentano il dovuto, quindi vanno sottratte a quelle di credito.
      */
     public function getNotesTotal(): float
     {
-        return (float) $this->variationNotes()->sum('total');
+        return $this->getCreditNotesTotal() - $this->getDebitNotesTotal();
     }
 
     /**
