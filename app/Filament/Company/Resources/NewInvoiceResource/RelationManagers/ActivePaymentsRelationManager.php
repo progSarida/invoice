@@ -286,10 +286,12 @@ class ActivePaymentsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('id')->label('Id')
                     ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('amount')->label('Importo')
+                    ->alignRight()
                     ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.') . ' €')
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('payment_date')
                     ->label('Data pagamento')
+                    ->alignCenter()
                     ->getStateUsing(function ($record) {
                         return $record->payment_date
                             ? Carbon::parse($record->payment_date)->format('d/m/Y')
@@ -298,6 +300,7 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->sortable(),
                 Tables\Columns\TextColumn::make('registration_date')
                     ->label('Data registrazione')
+                    ->alignCenter()
                     ->getStateUsing(function ($record) {
                         return $record->registration_date
                             ? Carbon::parse($record->registration_date)->format('d/m/Y')
