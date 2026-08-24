@@ -487,7 +487,7 @@ class PassiveInvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->poll('5s')
+            ->poll('30s')
             ->modifyQueryUsing(fn ($query) => $query->with(['user', 'piValidationUser']))
             ->defaultSort(fn (Builder $query) => $query->orderBy('invoice_date', 'desc')->orderBy('id', 'desc'))
             ->columns([

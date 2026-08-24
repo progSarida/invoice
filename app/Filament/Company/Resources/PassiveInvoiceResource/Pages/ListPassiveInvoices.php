@@ -9,8 +9,8 @@ use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Notifications\Notification;
-use App\Services\AndxorSoapService;
 use Filament\Actions\ExportAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\MaxWidth;
@@ -86,44 +86,18 @@ class ListPassiveInvoices extends ListRecords
             Actions\Action::make('passiveList')
                 ->label('Scarica fatture passive')
                 ->action(function (array $data) {
-                    $soapService = app(AndxorSoapService::class);
-                    try {
-                        $response = $soapService->downloadPassive($data);
-                        // $response = $soapService->downloadPassive(['password' => 'W3iDWc3Q9w.3AUgd2zpz4']);
+                    // Dispatch del job in background
+                    \App\Jobs\DownloadPassiveInvoicesJob::dispatch(
+                        $data,
+                        Filament::getTenant()->id,
+                        auth()->id()
+                    );
 
-                        if (!$response instanceof \App\Models\PassiveDownload) {
-                            throw new \Exception($response->getMessage());
-                        }
-
-                        $title = 'Fatture passive scaricate con successo.';
-                        $msg = '';
-                        if ($response->new_suppliers == 1) {
-                            $msg .= 'Inserito ' . $response->new_suppliers . ' nuovo fornitore.<br> ';
-                        } elseif ($response->new_suppliers > 1) {
-                            $msg .= 'Inseriti ' . $response->new_suppliers . ' nuovi fornitori.<br> ';
-                        }
-                        if ($response->new_invoices == 1) {
-                            $msg .= 'Scaricata ' . $response->new_invoices . ' nuova fattura passiva.';
-                        } elseif ($response->new_invoices > 1) {
-                            $msg .= 'Scaricate ' . $response->new_invoices . ' nuove fatture passive.';
-                        }
-                        if (empty($msg)) {
-                            $title = 'Procedura completata.';
-                            $msg = 'Nessuna nuova fattura o fornitore scaricato.';
-                        }
-
-                        Notification::make()
-                            ->title($title)
-                            ->body($msg)
-                            ->success()
-                            ->send();
-                    } catch (\Exception $e) {
-                        Notification::make()
-                            ->title('Errore')
-                            ->body($e->getMessage())
-                            ->danger()
-                            ->send();
-                    }
+                    Notification::make()
+                        ->title('Scarico in elaborazione')
+                        ->body('Lo scarico delle fatture passive è stato messo in coda. Riceverai una notifica al termine.')
+                        ->info()
+                        ->send();
                 })
                 ->form([
                     // Inserire filtri per gestire input opzionali

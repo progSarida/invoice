@@ -10,8 +10,6 @@ use App\Filament\Company\Resources\NewInvoiceResource;
 use App\Models\DocType;
 use App\Models\Invoice;
 use App\Models\ReversalMotivationType;
-use App\Models\SdiRequest;
-use App\Services\AndxorSoapService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Filament\Actions;
@@ -195,29 +193,19 @@ class ViewNewInvoice extends ViewRecord
                     ->icon('tabler-refresh')
                     ->visible(fn($record) => $record->sdi_status != SdiStatus::DA_INVIARE && !($record->docType->name == 'TD00' || $record->docType->name == 'TD99'))
                     ->action(function (Invoice $record, array $data) {
-                        $soapService = app(AndxorSoapService::class);
-                        try {
-                            $response = $soapService->updateStatus($record, $data['password']);
+                        // Dispatch del job in background
+                        \App\Jobs\UpdateInvoiceSdiStatusJob::dispatch(
+                            $record,
+                            $data['password'],
+                            \Filament\Facades\Filament::getTenant()->id,
+                            auth()->id()
+                        );
 
-                            SdiRequest::create([
-                                'company_id' => \Filament\Facades\Filament::getTenant()->id,
-                                'request_date' => today()->format('Y-m-d'),
-                                'sdi_request_type' => 'single',
-                                'invoice_id' => $record->id
-                            ]);
-
-                            Notification::make()
-                                ->title('Stato fattura aggiornato con successo')
-                                // ->body('Progressivo: ' . $response->ProgressivoInvio)
-                                ->success()
-                                ->send();
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->title('Errore')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
+                        Notification::make()
+                            ->title('Aggiornamento in elaborazione')
+                            ->body("L'aggiornamento dello stato per la fattura {$record->getNewInvoiceNumber()} è stato messo in coda. Riceverai una notifica al termine.")
+                            ->info()
+                            ->send();
                     })
                     ->disabled(function (Invoice $record) {
                         // return $record->service_code != null;

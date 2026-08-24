@@ -33,6 +33,33 @@ class AndxorSoapService
 {
     protected $client;
 
+    /**
+     * Azienda su cui operare quando non è disponibile il tenant di Filament
+     * (tipicamente durante l'esecuzione di un job in coda, dove non esiste
+     * il contesto del pannello). Se resta null si usa il tenant di sessione.
+     */
+    protected ?Company $company = null;
+
+    /**
+     * Imposta esplicitamente l'azienda su cui operare e restituisce il service,
+     * così da poterlo concatenare alla risoluzione dal container.
+     */
+    public function forCompany(Company $company): static
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    /**
+     * Azienda corrente: quella impostata esplicitamente oppure, in mancanza,
+     * il tenant del pannello Filament.
+     */
+    protected function tenant(): ?Company
+    {
+        return $this->company ?? Filament::getTenant();
+    }
+
     public function __construct()
     {
         $wsdl = config('services.andxor.wsdl_url');
@@ -114,7 +141,7 @@ class AndxorSoapService
     private function getAutenticazione(?Invoice $invoice, string $password): ?array
     {
 Log::info("Recupero dati di autenticazione.");
-        $entity = $invoice ? $invoice->company : Filament::getTenant();
+        $entity = $invoice ? $invoice->company : $this->tenant();
 
         $state = State::find($entity->state_id);
         $alpha2 = ($state && preg_match('/^[A-Z]{2}$/', $state->alpha2)) ? $state->alpha2 : 'IT';
@@ -891,7 +918,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
         }
 
         SdiRequest::create([
-            'company_id' => Filament::getTenant()->id,
+            'company_id' => $this->tenant()->id,
             'request_date' => today()->format('Y-m-d'),
             'sdi_request_type' => 'mass',
             'invoice_id' => null
@@ -1139,7 +1166,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
     {
         try {
             $data = [
-                'company_id'            => Filament::getTenant()->id,
+                'company_id'            => $this->tenant()->id,
 
                 'denomination'          => Str::limit($cedente['DatiAnagrafici']['Anagrafica']['Denominazione'] ??
                                             trim(($cedente['DatiAnagrafici']['Anagrafica']['Cognome'] ?? '') . ' ' . ($cedente['DatiAnagrafici']['Anagrafica']['Nome'] ?? '')), 255),
@@ -1209,7 +1236,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
         }
 
         $data = [
-                'company_id' => Filament::getTenant()->id,
+                'company_id' => $this->tenant()->id,
                 'supplier_id' => $supplier->id,
                 'parent_id' => $parentPassiveInvoice?->id,
                 'downloaded' => true,                                                                                   // fattura scaricata dallo SdI: non eliminabile
@@ -1259,7 +1286,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
             if($array){
                 foreach ($details as $detail) {
                     $data = [
-                        'company_id' => Filament::getTenant()->id,
+                        'company_id' => $this->tenant()->id,
                         'passive_invoice_id' => $param['passive_invoice']->id,
                         'description' => $detail['Descrizione'] ?? null,
                         'quantity' => $detail['Quantita'] ?? null,
@@ -1274,7 +1301,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
             }
             else{
                 $data = [
-                    'company_id' => Filament::getTenant()->id,
+                    'company_id' => $this->tenant()->id,
                     'passive_invoice_id' => $param['passive_invoice']->id,
                     'description' => $details['Descrizione'] ?? null,
                     'quantity' => $details['Quantita'] ?? null,
@@ -1328,7 +1355,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                         }
                     }
                     $data = [
-                        'company_id' => Filament::getTenant()->id,
+                        'company_id' => $this->tenant()->id,
                         'passive_invoice_id' => $param['passive_invoice']->id,
                         'description' => 'Riepilogo - ' . ($resume['Natura'] ?? '*') . ' - ' . $collectability . ' - ' . ($resume['RiferimentoNormativo'] ?? '*'),
                         'quantity' => null,
@@ -1358,7 +1385,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                     }
                 }
                 $data = [
-                    'company_id' => Filament::getTenant()->id,
+                    'company_id' => $this->tenant()->id,
                     'passive_invoice_id' => $param['passive_invoice']->id,
                     'description' => 'Riepilogo - ' . ($resumes['Natura'] ?? '*') . ' - ' . $collectability . ' - ' . ($resumes['RiferimentoNormativo'] ?? '*'),
                     'quantity' => null,
@@ -1406,7 +1433,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                     // $description = $fundType?->getDescription() ?? null;
 
                     $data = [
-                        'company_id' => Filament::getTenant()->id,
+                        'company_id' => $this->tenant()->id,
                         'passive_invoice_id' => $param['passive_invoice']->id,
                         'description' => 'Cassa prev. - ' . $description,
                         'quantity' => null,
@@ -1436,7 +1463,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                 // $description = $fundType?->getDescription() ?? null;
 
                 $data = [
-                    'company_id' => Filament::getTenant()->id,
+                    'company_id' => $this->tenant()->id,
                     'passive_invoice_id' => $param['passive_invoice']->id,
                     'description' => 'Cassa prev. - ' . $description,
                     'quantity' => null,
@@ -1490,7 +1517,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                         : null;
 
                     $data = [
-                        'company_id' => Filament::getTenant()->id,
+                        'company_id' => $this->tenant()->id,
                         'passive_invoice_id' => $param['passive_invoice']->id,
                         'description' => $description . ' - ' . $reason,
                         'quantity' => null,
@@ -1520,7 +1547,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
                     : null;
 
                 $data = [
-                    'company_id' => Filament::getTenant()->id,
+                    'company_id' => $this->tenant()->id,
                     'passive_invoice_id' => $param['passive_invoice']->id,
                     'description' => $description . ' - ' . $reason,
                     'quantity' => null,
@@ -1750,7 +1777,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
 
                         if(!$passiveInvoice->parent_id){                                                            // se non è una nota di credito creo la scadenza
                             $deadline = Deadline::create([
-                                'company_id' => Filament::getTenant()->id,
+                                'company_id' => $this->tenant()->id,
                                 'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
                                 'note' => null,
                                 'date' => $passiveInvoice->payment_deadline,
@@ -1827,7 +1854,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
 
                         if(!$passiveInvoice->parent_id){                                                            // se non è una nota di credito creo la scadenza
                             $deadline = Deadline::create([
-                                'company_id' => Filament::getTenant()->id,
+                                'company_id' => $this->tenant()->id,
                                 'description' => 'Fattura numero ' . $passiveInvoice->number . ' da ' . $passiveInvoice->supplier->denomination,
                                 'note' => null,
                                 'date' => $passiveInvoice->payment_deadline,
@@ -1840,7 +1867,7 @@ Log::info('Update fattura ' . $el->getNewInvoiceNumber() . '--------------------
             }
 
             $download = PassiveDownload::create([
-                'company_id' => Filament::getTenant()->id,
+                'company_id' => $this->tenant()->id,
                 'date' => date('Y-m-d', strtotime('-1 day')),
                 'new_suppliers' => $supplierNumber,
                 'new_invoices' => $invoiceNumber
