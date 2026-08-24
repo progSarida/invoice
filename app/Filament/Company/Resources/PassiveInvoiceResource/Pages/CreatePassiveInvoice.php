@@ -3,17 +3,17 @@
 namespace App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 
 use App\Filament\Company\Resources\PassiveInvoiceResource;
-use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassiveItemsRelationManager;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreatePassiveInvoice extends CreateRecord
 {
     protected static string $resource = PassiveInvoiceResource::class;
+    protected static bool $canCreateAnother = false;                                            // Elimina il pulsante 'Salva & nuovo'
 
     /**
      * Dopo la creazione porto l'utente dove può proseguire il lavoro: se può modificare
-     * la fattura lo mando sulla scheda delle voci, altrimenti sulla sola consultazione.
+     * la fattura lo mando in modifica, altrimenti sulla sola consultazione.
      */
     protected function getRedirectUrl(): string
     {
@@ -21,14 +21,7 @@ class CreatePassiveInvoice extends CreateRecord
         $record = $this->getRecord();
 
         if ($resource::canEdit($record)) {
-            $parameters = ['record' => $record];
-
-            $manager = array_search(PassiveItemsRelationManager::class, $resource::getRelations(), true);
-            if ($manager !== false) {                                   // apro direttamente la scheda delle voci fattura
-                $parameters['activeRelationManager'] = $manager;
-            }
-
-            return $resource::getUrl('edit', $parameters);
+            return $resource::getUrl('edit', ['record' => $record]);
         }
 
         if ($resource::canView($record)) {

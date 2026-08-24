@@ -9,6 +9,14 @@ use App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassiveItemsRelationManager;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\PassivePaymentsRelationManager;
+use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers\VariationNotesRelationManager;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\AttachmentsSection;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\DescriptionSection;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\DocumentSection;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\PaymentDataSection;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\ReferencesSection;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\SdiStatusSection;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\TotalsSection;
 use App\Filament\Exports\PassiveInvoiceExporter;
 use App\Models\DocType;
 use App\Models\PassiveInvoice;
@@ -21,6 +29,7 @@ use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action as ActionsAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -64,423 +73,71 @@ class PassiveInvoiceResource extends Resource
         return $form
             // ->disabled()
             ->schema([
-                // Grid::make('GRID')->columnSpan(2)->schema([
 
-                    Placeholder::make('pi_validation')
-                        ->label('')
-                        // ->visible(fn($record) => $record && filled($record->pi_validation_id))
-                        ->visible(fn($record) => $record )
-                        ->content(function ($record) {
-                            if (!$record?->pi_validation_id) {
-                                return 'Nessuna validazione selezionata';
-                            }
+                Placeholder::make('pi_validation')                                                          //
+                    ->label('')                                                                             //
+                    // ->visible(fn($record) => $record && filled($record->pi_validation_id))               //
+                    ->visible(fn($record) => $record )                                                      //
+                    ->content(function ($record) {                                                          //
+                        if (!$record?->pi_validation_id) {                                                  //
+                            return 'Nessuna validazione selezionata';                                       //
+                        }                                                                                   //
+                                                                                                            //
+                        return optional($record?->piValidation)->name;                                      //
+                    })                                                                                      //
+                    ->extraAttributes(function ($record) {                                                  //
+                        $statusEnum = $record?->piValidation?->pi_validation_status;                        //
+                                                                                                            //
+                        $color = $statusEnum?->getColor() ?? 'gray';                                        //
+                                                                                                            //
+                        $bgColorClass = "bg-{$color}-100";                                                  // Validazione
+                                                                                                            //
+                        $borderColorClass = "border-{$color}-400";                                          //
+                                                                                                            //
+                        $baseClasses = 'text-lg font-semibold border pb-1 pt-2';                            //
+                                                                                                            //
+                        $customClasses = [                                                                  //
+                            'rounded-lg', // Arrotondamento angoli                                          //
+                                                                                                            //
+                            'text-center', // Testo centrato                                                //
+                                                                                                            //
+                            $bgColorClass, // Colore di sfondo dinamico                                     //
+                            $borderColorClass,                                                              //
+                            'text-gray-900', // Assicura che il testo sia leggibile su sfondi chiari        //
+                        ];                                                                                  //
+                                                                                                            //
+                        return [                                                                            //
+                            'class' => $baseClasses . ' ' . implode(' ', $customClasses),                   //
+                        ];
+                    })
+                    ->columnSpan('full'),
 
-                            return optional($record?->piValidation)->name;
-                        })
-                        ->extraAttributes(function ($record) {
-                            $statusEnum = $record?->piValidation?->pi_validation_status;
+                ReferencesSection::make(),                                                                  // Riferimenti (fornitore, fattura stornata)
+                DocumentSection::make(),                                                                    // Dati documento
 
-                            $color = $statusEnum?->getColor() ?? 'gray';
+                Livewire::make(                                                                             // 
+                    PassiveItemsRelationManager::class,                                                     // 
+                    fn (?PassiveInvoice $record, $livewire) => [                                            // 
+                        'ownerRecord' => $record,                                                           // 
+                        'pageClass'   => $livewire::class,                                                  // Voci documento
+                    ],                                                                                      // 
+                )                                                                                           // 
+                ->visible(fn (?PassiveInvoice $record) => $record !== null)                                 // 
+                ->key('rm-invoice-items')                                                                   // 
+                ->columnSpanFull(),                                                                         // 
 
-                            $bgColorClass = "bg-{$color}-100";
+                DescriptionSection::make(),                                                                 // Descrizione
+                TotalsSection::make(),                                                                      // Totali
+                PaymentDataSection::make(),                                                                 // Dati pagamento
+                SdiStatusSection::make(),                                                                   // Stato SDI
+                AttachmentsSection::make(),                                                                 // Allegati
 
-                            $borderColorClass = "border-{$color}-400";
+                DatePicker::make('created_at')                                                              //
+                    ->label('Data inserimento')                                                             //
+                    ->extraInputAttributes(['class' => 'text-center'])                                      // Data inserimento
+                    ->columnSpan(1)                                                                         //
+                    ->disabled(),                                                                           //
 
-                            $baseClasses = 'text-lg font-semibold border pb-1 pt-2';
-
-                            $customClasses = [
-                                'rounded-lg', // Arrotondamento angoli
-
-                                'text-center', // Testo centrato
-
-                                $bgColorClass, // Colore di sfondo dinamico
-                                $borderColorClass,
-                                'text-gray-900', // Assicura che il testo sia leggibile su sfondi chiari
-                            ];
-
-                            return [
-                                'class' => $baseClasses . ' ' . implode(' ', $customClasses),
-                            ];
-                        })
-                        ->columnSpan('full'),
-
-                    Section::make('Riferimenti')
-                        ->collapsible(false)
-                        ->columns(6)
-                        ->schema([
-
-                            Forms\Components\Select::make('supplier_id')->label('Fornitore')
-                                ->hintAction(
-                                    ActionsAction::make('Nuovo')
-                                        ->icon('ri-user-2-line')
-                                        ->form(fn(Form $form) => SupplierResource::modalForm($form))
-                                        ->modalWidth('7xl')
-                                        ->modalHeading('')
-                                        ->action(fn (array $data, Supplier $supplier, Set $set) => PassiveInvoiceResource::saveSupplier($data, $supplier, $set))
-                                        ->hidden(fn ($livewire) => $livewire instanceof \App\Filament\Company\Resources\PassiveInvoiceResource\Pages\EditPassiveInvoice)
-                                )
-                                ->required()
-                                ->columnSpan(3)
-                                ->relationship('supplier', 'denomination')
-                                //  ->disabled()
-                                ,
-
-                            Forms\Components\Select::make('parent_id')
-                                ->label('Fattura')
-                                ->columnSpan(3)
-                                ->relationship('parent', 'denomination')
-                                ->getOptionLabelFromRecordUsing(
-                                    fn (Model $record) => $record?->number
-                                )
-                                ->visible(fn (Get $get) => !is_null($get('parent_id')))
-                                //  ->disabled()
-                                ,
-                        ]),
-
-                        Section::make('')
-                        ->columns(12)
-                        ->schema([
-                            Forms\Components\Select::make('doc_type')
-                                ->label('Tipo documento')
-                                ->required()
-                                ->columnSpan(7)
-                                ->options(function (Get $get) {
-                                    $docs = DocType::select('doc_types.name', 'doc_types.description')
-                                        ->get();
-                                    return $docs->pluck('description', 'name')->toArray();
-                                })
-                                //  ->disabled()
-                                ,
-                            Forms\Components\TextInput::make('number')
-                                ->label('Numero')
-                                ->required()
-                                ->extraInputAttributes(['class' => 'text-right'])
-                                ->columnSpan(3)
-                                //  ->disabled()
-                                ,
-                            Forms\Components\DatePicker::make('invoice_date')
-                                ->label('Data')
-                                ->required()
-                                ->extraInputAttributes(['class' => 'text-center'])
-                                ->columnSpan(2)
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(function ($state, Set $set) {
-                                    if (!$state) {
-                                        return;
-                                    }
-
-                                    $currentMonth = now()->month;
-                                    $date = \Carbon\Carbon::parse($state);
-                                    $selectedYear = \Carbon\Carbon::parse($state)->year;
-                                    $currentYear = now()->year;
-
-                                    if ($currentMonth !== 1 && $date->year !== $currentYear) {
-                                        $corrected = $date->copy()->setYear($currentYear);
-                                        $set('invoice_date', $corrected->format('Y-m-d'));
-
-                                        Notification::make()
-                                            ->title('Anno corretto automaticamente')
-                                            ->body("Hai inserito una data del {$selectedYear}, ma l'anno corrente è il {$currentYear}.")
-                                            ->warning()
-                                            ->send();
-                                    }
-                                })
-                                // ->rules([
-                                //     fn (): \Closure => function (string $attribute, $value, \Closure $fail) {
-                                //         if (!$value) {
-                                //             return;
-                                //         }
-
-                                //         $currentMonth = now()->month;
-                                //         $selectedYear = \Carbon\Carbon::parse($value)->year;
-                                //         $currentYear = now()->year;
-
-                                //         if ($currentMonth !== 1 && $selectedYear !== $currentYear) {
-                                //             $fail("La data deve essere dell'anno corrente ({$currentYear}).");
-                                //         }
-                                //     },
-                                // ])
-                                // ->disabled()
-                                ,
-
-                            Forms\Components\Select::make('parent_id')
-                                ->label('Fattura stornata')
-                                ->visible(
-                                    function (Get $get, $record) {
-                                        $doc_type = $get('doc_type');
-// dd($record, $docTypeId);
-                                        if (!filled($doc_type)) {
-                                            return false;
-                                        }
-
-                                        $docType = DocType::with('docGroup')->where('name', $doc_type)->first();
-
-                                        return $docType?->docGroup?->name === 'Note di variazione' || $record?->parent_id;
-                                        // return true;
-                                    }
-                                )
-                                ->live()
-                                ->relationship(
-                                    name: 'parent',
-                                    modifyQueryUsing:
-                                        function (Builder $query, Get $get){
-                                            $query->whereHas('docType.docGroup', function ($query) {
-                                                    $query->whereIn('name', ['Fatture', 'Autofatture']);
-                                                })
-                                                ->where('supplier_id',$get('supplier_id'))
-                                                ->orderBy('number','desc');
-                                        }
-                                )
-                                ->getOptionLabelFromRecordUsing(
-                                    function (Model $record) {
-                                        $return = "Fattura n. {$record?->number} del {$record?->invoice_date->format('d/m/Y')} ";
-                                        return $return;
-                                    }
-                                )
-                                ->columnSpan(12),
-
-                            Forms\Components\FileUpload::make('pdf_path')->label('File PDF')
-                                ->required(fn ($record) => !$record?->pdf_path)
-                                ->dehydrated(fn ($record) => !$record?->pdf_path)
-                                // ->disk('public')
-                                ->directory('passive_invoices/pdf_files')
-                                // ->visibility('public')
-                                ->acceptedFileTypes(['application/pdf'])
-                                ->maxSize(10240)
-                                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get) {
-                                    $supplierId = $get('supplier_id') ?? 'unknown';
-                                    $number = $get('number') ?? 'unknown';
-                                    $invoiceDate = $get('invoice_date') ?? 'unknown';
-                                    $extension = $file->getClientOriginalExtension();
-                                    return sprintf('PDF_FAT_PASS_%s_%s_%s.%s', $supplierId, $number, $invoiceDate, $extension);
-                                })
-                                ->columnSpan(4),
-                            Forms\Components\Actions::make([
-                                Forms\Components\Actions\Action::make('view_pdf')
-                                    ->label('Visualizza pdf')
-                                    ->icon('heroicon-o-eye')
-                                    // ->url(fn($record): ?string => $record && $record->pdf_path ? Storage::url($record->pdf_path) : null)
-                                    ->url(fn($record): ?string => $record?->pdf_path ? Storage::temporaryUrl($record?->pdf_path,now()->addMinutes(1)) : null)
-                                    ->openUrlInNewTab()
-                                    ->visible(fn($record): bool => $record && $record?->pdf_path)
-                                    ->color('primary'),
-                            ])
-                            ->columnSpan(2),
-
-                            Forms\Components\FileUpload::make('xml_path')->label('File XML')
-                                // ->required(fn ($record) => !$record?->xml_path)
-                                ->dehydrated(fn ($record) => !$record?->xml_path)
-                                // ->disk('public')
-                                ->directory('passive_invoices/xml_files')
-                                // ->visibility('public')
-                                ->acceptedFileTypes([
-                                    'application/xml',
-                                    'text/xml',
-                                    'application/x-xml'
-                                ])
-                                ->maxSize(10240)
-                                ->getUploadedFileNameForStorageUsing(function (UploadedFile $file, Get $get) {
-                                    $supplierId = $get('supplier_id') ?? 'unknown';
-                                    $number = $get('number') ?? 'unknown';
-                                    $invoiceDate = $get('invoice_date') ?? 'unknown';
-                                    $extension = $file->getClientOriginalExtension();
-                                    return sprintf('XML_FAT_PASS_%s_%s_%s.%s', $supplierId, $number, $invoiceDate, $extension);
-                                })
-                                ->columnSpan(4),
-                            Forms\Components\Actions::make([
-                                Forms\Components\Actions\Action::make('view_xml')
-                                    ->label('Visualizza xml')
-                                    ->icon('heroicon-o-eye')
-                                    // ->url(fn($record): ?string => $record && $record->xml_path ? Storage::url($record->xml_path) : null)
-                                    ->url(fn($record): ?string => $record?->xml_path ? Storage::temporaryUrl($record?->xml_path,now()->addMinutes(1)) : null)
-                                    ->openUrlInNewTab()
-                                    ->visible(fn($record): bool => $record && $record?->xml_path)
-                                    ->color('primary'),
-                            ])
-                            ->columnSpan(2),
-                        ]),
-
-                        Section::make('Dati per il pagamento')
-                            ->collapsed(false)
-                            ->columns(6)
-                            ->schema([
-                                Forms\Components\Select::make('payment_mode')
-                                    ->label('Condizioni di pagamento')
-                                    ->columnSpan(2)
-                                    ->options(
-                                        collect(PaymentMode::cases())
-                                            ->sortBy(fn (PaymentMode $type) => $type->getOrder())
-                                            ->mapWithKeys(fn (PaymentMode $type) => [
-                                                $type->getCode() => $type->getLabel()
-                                            ])
-                                            ->toArray()
-                                    )
-                                    //  ->disabled()
-                                    ,
-                                Forms\Components\Select::make('payment_type')
-                                    ->label('Metodo di pagamento')
-                                    ->columnSpan(2)
-                                    ->options(
-                                        collect(PaymentType::cases())
-                                            ->sortBy(fn (PaymentType $type) => $type->getOrder())
-                                            ->mapWithKeys(fn (PaymentType $type) => [
-                                                $type->getCode() => $type->getLabel()
-                                            ])
-                                            ->toArray()
-                                    )
-                                    //  ->disabled()
-                                    ,
-                                Forms\Components\DatePicker::make('payment_deadline')
-                                    ->label('Scadenza pagamento')
-                                    ->extraInputAttributes(['class' => 'text-center'])
-                                    ->columnSpan(2)
-                                    //  ->disabled()
-                                    ,
-
-                                Forms\Components\DatePicker::make('last_payment_date')
-                                    ->label('Data ultimo pagamento')
-                                    ->extraInputAttributes(['class' => 'text-center'])
-                                    ->columnSpan(2)
-                                     ->disabled()
-                                    ,
-
-                                Forms\Components\TextInput::make('total_payment')
-                                    ->label('Totale pagato')
-                                    ->extraInputAttributes(['class' => 'text-right'])
-                                    ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : number_format(0, 2, ',', '.'))
-                                    ->columnSpan(2)
-                                    // ->visible(fn (Get $get) => !is_null($get('bank')))
-                                     ->disabled()
-                                    ,
-
-                                Forms\Components\TextInput::make('bank')
-                                    ->label('Istituto finanziario')
-                                    ->columnSpan(3)
-                                    //  ->disabled()
-                                    ,
-                                Forms\Components\TextInput::make('iban')
-                                    ->label('IBAN')
-                                    ->columnSpan(3)
-                                    // ->visible(fn (Get $get) => !is_null($get('iban')))
-                                    //  ->disabled()
-                                    ,
-                            ]),
-
-                        Section::make('Totali')
-                            ->collapsed(false)
-                            ->columns(6)
-                            ->schema([
-                                // Valori di sola lettura: rispecchiano il documento salvato, come le omonime colonne in tabella
-                                Forms\Components\TextInput::make('total')
-                                    ->label('Dovuto')
-                                    ->extraInputAttributes(['class' => 'text-right'])
-                                    ->formatStateUsing(fn ($state): ?string => number_format((float) $state, 2, ',', '.'))
-                                    ->suffix('€')
-                                    ->columnSpan(2)
-                                    ->disabled()
-                                    ->dehydrated(false),
-
-                                Forms\Components\TextInput::make('total_notes_payment')
-                                    ->label('Note di variazione e pagamenti')
-                                    ->extraInputAttributes(['class' => 'text-right'])
-                                    ->formatStateUsing(fn (?PassiveInvoice $record): ?string => $record
-                                        ? number_format($record->getNotesTotal() + (float) $record->total_payment, 2, ',', '.')
-                                        : 0.00)
-                                    ->suffix('€')
-                                    ->columnSpan(2)
-                                    ->disabled()
-                                    ->dehydrated(false),
-
-                                Forms\Components\TextInput::make('residue')
-                                    ->label('Residuo')
-                                    ->extraInputAttributes(['class' => 'text-right'])
-                                    ->formatStateUsing(fn (?PassiveInvoice $record): ?string => $record
-                                        ? number_format($record->getResidue(), 2, ',', '.')
-                                        : 0.00)
-                                    ->suffix('€')
-                                    ->columnSpan(2)
-                                    ->disabled()
-                                    ->dehydrated(false),
-                            ]),
-
-
-                    Section::make('Descrizione')
-                        ->collapsible()
-                        ->schema([
-                            Forms\Components\Textarea::make('description')
-                                ->label('')
-                                ->columnSpanFull()
-                                //  ->disabled()
-                                ,
-                        ]),
-                // ]),
-                // Grid::make('GRID')->columnSpan(3)->schema([
-                    Section::make('Status SDI')
-                            ->collapsed(false)
-                            ->columns(6)
-                            ->schema([
-                                Forms\Components\TextInput::make('sdi_status')
-                                    ->label('Status')
-                                    ->columnSpan(3)
-                                    //  ->disabled()
-                                    ,
-                                Forms\Components\TextInput::make('sdi_code')
-                                    ->label('Codice SDI')
-                                    ->columnSpan(3)
-                                    //  ->disabled()
-                                    ,
-                            ]),
-                    Section::make('Allegati')
-                            ->collapsed(false)
-                            ->columns(6)
-                            ->schema([
-                                Placeholder::make('attachments')
-                                    ->key('attachments_list')
-                                    ->label('')
-                                    ->content(function ($record) {
-                                        if (!$record || !$record->attachments_path) {
-                                            return 'Nessun allegato.';
-                                        }
-
-                                        $disk = config('filesystems.default');
-
-                                        // Usa allFiles per prendere anche file in sottocartelle
-                                        $files = Storage::disk($disk)->allFiles($record->attachments_path);
-
-                                        if (empty($files)) {
-                                            return 'Nessuna cartella allegati trovata.';
-                                        }
-
-                                        return new \Illuminate\Support\HtmlString(
-                                            collect($files)
-                                                ->sort()
-                                                ->map(function ($file) use ($disk) {
-                                                    $name = basename($file);
-
-                                                    $url = Storage::temporaryUrl($file, now()->addMinutes(5));
-
-                                                    return <<<HTML
-                                                    <div class="flex items-center gap-3 py-1">
-                                                        <a href="{$url}" target="_blank" download class="text-primary-600 hover:underline font-medium">
-                                                            {$name}
-                                                        </a>
-                                                    </div>
-                                                    HTML;
-                                                })
-                                                ->implode('')
-                                        );
-                                    })
-                                    ->extraAttributes(['style' => 'line-height:1.8'])
-                                    ->columnSpanFull(),
-                            ]),
-                        DatePicker::make('created_at')
-                            ->label('Data inserimento')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->columnSpan(1)
-                            ->disabled(),
-                // ]),
-
-            // ])->columns(5);
             ]);
     }
 
@@ -520,13 +177,21 @@ class PassiveInvoiceResource extends Resource
                     ->tooltip(fn ($record) => $record?->description)
                     ->sortable(),
                 TextColumn::make('total')
-                    ->label('Dovuto')
+                    ->label('Totale')
                     ->money('EUR')
                     ->sortable()
                     ->alignRight()
+                    // L'elenco contiene anche le note come righe a sé: nel totale di colonna le note
+                    // di credito vanno sottratte, mentre quelle di debito si sommano come le fatture.
                     ->summarize([
-                        Tables\Columns\Summarizers\Sum::make()
+                        Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
+                            ->using(fn (QueryBuilder $query): float => (float) (clone $query)
+                                ->reorder()
+                                ->selectRaw("COALESCE(SUM(CASE WHEN passive_invoices.doc_type = 'TD04'
+                                                              THEN -passive_invoices.total
+                                                              ELSE passive_invoices.total END), 0) as amount")
+                                ->value('amount'))
                             ->money('EUR', true, 'it_IT'),
                     ]),
                 TextColumn::make('payment_deadline')
@@ -540,14 +205,14 @@ class PassiveInvoiceResource extends Resource
                 // Calcolate sui documenti collegati, non su colonne del database: non sono ordinabili,
                 // ma il totale di colonna viene ricavato in query dalle note collegate alle fatture filtrate
                 TextColumn::make('total_notes')
-                    ->label('Note di variazione')
+                    ->label('Note di credito')
                     ->money('EUR')
                     ->alignRight()
-                    ->state(fn (PassiveInvoice $record): float => $record->getNotesTotal())
+                    ->state(fn (PassiveInvoice $record): float => $record->getCreditNotesTotal())
                     ->summarize([
                         Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
-                            ->using(fn (QueryBuilder $query): float => static::sumVariationNotes($query))
+                            ->using(fn (QueryBuilder $query): float => static::sumCreditNotes($query))
                             ->money('EUR', true, 'it_IT'),
                     ]),
                 Tables\Columns\IconColumn::make('piValidation.pi_validation_status')
@@ -578,18 +243,28 @@ class PassiveInvoiceResource extends Resource
                     ->label('Residuo')
                     ->money('EUR')
                     ->alignRight()
-                    ->state(fn (PassiveInvoice $record): float => $record->getResidue())
+                    // Una nota di credito non ha un residuo proprio: rettifica una fattura, ed è su
+                    // quella che il residuo viene calcolato.
+                    ->state(fn (PassiveInvoice $record): float => $record->doc_type === 'TD04' ? 0.00 : $record->getResidue())
+                    // Il totale è la somma dei valori di riga: per ogni documento total meno i
+                    // pagamenti meno le note collegate, e zero per le note di credito. Ripete in
+                    // SQL quello che getResidue() calcola sul singolo record.
                     ->summarize([
                         Tables\Columns\Summarizers\Summarizer::make()
                             ->label('')
-                            ->using(function (QueryBuilder $query): float {
-                                $amounts = (clone $query)
-                                    ->reorder()
-                                    ->selectRaw('COALESCE(SUM(passive_invoices.total), 0) - COALESCE(SUM(passive_invoices.total_payment), 0) as amount')
-                                    ->value('amount');
-
-                                return (float) $amounts - static::sumVariationNotes($query);
-                            })
+                            ->using(fn (QueryBuilder $query): float => (float) (clone $query)
+                                ->reorder()
+                                ->selectRaw("COALESCE(SUM(
+                                        CASE WHEN passive_invoices.doc_type = 'TD04' THEN 0
+                                             ELSE COALESCE(passive_invoices.total, 0)
+                                                  - COALESCE(passive_invoices.total_payment, 0)
+                                                  - COALESCE((SELECT SUM(CASE WHEN n.doc_type = 'TD04' THEN n.total
+                                                                              WHEN n.doc_type = 'TD05' THEN -n.total
+                                                                              ELSE 0 END)
+                                                              FROM passive_invoices n
+                                                              WHERE n.parent_id = passive_invoices.id), 0)
+                                        END), 0) as amount")
+                                ->value('amount'))
                             ->money('EUR', true, 'it_IT'),
                     ]),
                 Tables\Columns\TextColumn::make('created_at')
@@ -1235,24 +910,24 @@ class PassiveInvoiceResource extends Resource
     }
 
     /**
-     * Totale delle note di variazione collegate alle fatture attualmente filtrate
-     * in tabella, usato dai totali di colonna: le note di debito aumentano il
-     * dovuto, quindi vanno sottratte a quelle di credito.
+     * Totale delle sole note di credito collegate alle fatture attualmente filtrate
+     * in tabella, usato dal totale della relativa colonna. Le note di debito non
+     * rientrano nel conteggio: si comportano come fatture.
      */
-    protected static function sumVariationNotes(QueryBuilder $query): float
+    protected static function sumCreditNotes(QueryBuilder $query): float
     {
         return (float) PassiveInvoice::query()
             ->whereIn('parent_id', (clone $query)->reorder()->select('passive_invoices.id'))
-            ->selectRaw("COALESCE(SUM(CASE WHEN doc_type = 'TD04' THEN total ELSE 0 END), 0)
-                       - COALESCE(SUM(CASE WHEN doc_type = 'TD05' THEN total ELSE 0 END), 0) as amount")
-            ->value('amount');
+            ->where('doc_type', 'TD04')
+            ->sum('total');
     }
 
     public static function getRelations(): array
     {
         return [
-            PassiveItemsRelationManager::class,
-            PassivePaymentsRelationManager::class
+            // PassiveItemsRelationManager::class,
+            VariationNotesRelationManager::class,
+            PassivePaymentsRelationManager::class,
         ];
     }
 

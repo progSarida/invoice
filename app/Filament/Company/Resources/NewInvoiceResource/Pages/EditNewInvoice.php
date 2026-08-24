@@ -889,6 +889,8 @@ Log::info('Commit');
             $this->getSaveFormAction()
                 ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE || $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA)
                 ->color('success'),
+            $this->getSaveAndCreateAnotherFormAction()
+                ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE || $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA),
             $this->getCancelFormAction(),
             $this->getResetFormAction(),
             $this->getDeleteFormAction()
@@ -916,6 +918,24 @@ Log::info('Commit');
                     'class' => ' md:ml-auto md:w-auto ',
                 ]),
         ];
+    }
+
+    /**
+     * Salva il documento senza il rimando all'elenco e apre la creazione di uno nuovo.
+     * Se la validazione fallisce, save() interrompe l'azione e il redirect non avviene.
+     */
+    protected function getSaveAndCreateAnotherFormAction(): Actions\Action
+    {
+        return Actions\Action::make('saveAndCreateAnother')
+            ->label('Salva & nuovo')
+            ->color('gray')
+            ->keyBindings(['mod+shift+s'])
+            ->authorize('create')
+            ->action(function () {
+                $this->save(shouldRedirect: false);
+
+                $this->redirect($this->getResource()::getUrl('create'));
+            });
     }
 
     protected function getDeleteFormAction()

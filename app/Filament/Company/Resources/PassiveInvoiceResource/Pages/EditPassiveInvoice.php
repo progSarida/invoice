@@ -170,6 +170,8 @@ class EditPassiveInvoice extends EditRecord
             $this->getSaveFormAction()
                 ->visible(fn($record) => !$record->downloaded)
                 ->color('success'),
+            $this->getSaveAndCreateAnotherFormAction()
+                ->visible(fn($record) => !$record->downloaded),
             $this->getCancelFormAction(),
             $this->getResetFormAction(),
             $this->getDeleteFormAction()
@@ -178,6 +180,24 @@ class EditPassiveInvoice extends EditRecord
                     'class' => ' md:ml-auto md:w-auto ',
                 ]),
         ];
+    }
+
+    /**
+     * Salva il documento senza il rimando all'elenco e apre la creazione di uno nuovo.
+     * Se la validazione fallisce, save() interrompe l'azione e il redirect non avviene.
+     */
+    protected function getSaveAndCreateAnotherFormAction(): Actions\Action
+    {
+        return Actions\Action::make('saveAndCreateAnother')
+            ->label('Salva & nuovo')
+            ->color('gray')
+            ->keyBindings(['mod+shift+s'])
+            ->authorize('create')
+            ->action(function () {
+                $this->save(shouldRedirect: false);
+
+                $this->redirect($this->getResource()::getUrl('create'));
+            });
     }
 
     protected function getDeleteFormAction()

@@ -15,9 +15,6 @@ use Filament\Tables\Table;
 use App\Models\InvoiceItem;
 use App\Models\InvoiceElement;
 use App\Models\PostalExpense;
-// use Illuminate\Database\Eloquent\Model;
-// use Illuminate\Database\Eloquent\Builder;
-// use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,11 +22,11 @@ class InvoiceItemsRelationManager extends RelationManager
 {
     protected static string $relationship = 'invoiceItems';
 
-    protected static ?string $pluralModelLabel = 'Voci in fattura';
+    protected static ?string $pluralModelLabel = 'Voci documento';
 
-    protected static ?string $modelLabel = 'Voce in fattura';
+    protected static ?string $modelLabel = 'Voce documento';
 
-    protected static ?string $title = 'Voci in fattura';
+    protected static ?string $title = 'Voci documento';
 
     public function form(Form $form): Form
     {
