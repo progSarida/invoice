@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PaymentStatus;
+use App\Enums\PaymentType;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ class ActivePayments extends Model
         'amount',
         'payment_date',
         'bank_account_id',
+        'payment_type',
         'description',
         'registration_date',
         'registration_user_id',
@@ -28,6 +30,7 @@ class ActivePayments extends Model
         'registration_date' => 'date',
         'validation_date' => 'date',
         'accepted' => 'boolean',
+        'payment_type' => PaymentType::class,
     ];
 
     public function invoice()

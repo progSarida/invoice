@@ -3,6 +3,7 @@
 namespace App\Filament\Company\Resources;
 
 use App\Enums\ClientType;
+use App\Enums\PaymentType;
 use App\Enums\TaxType;
 use App\Filament\Company\Resources\NewActivePaymentsResource\Pages;
 use App\Filament\Company\Resources\NewActivePaymentsResource\RelationManagers;
@@ -29,6 +30,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Resources\Resource;
 use Filament\Notifications\Notification;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -234,6 +236,7 @@ class NewActivePaymentsResource extends Resource
 
                             if ($invoice) {
                                 $set('bank_account_id', $invoice->bank_account_id);
+                                $set('payment_type', $invoice->payment_type?->value);           // metodo di pagamento ereditato dalla fattura
                                 $set('amount', number_format($amount, 2, ",", "."));
                             }
                         }
@@ -423,13 +426,25 @@ class NewActivePaymentsResource extends Resource
                     ->validationMessages([
                         'required' => 'Il conto è obbligatorio.',
                     ])
-                    ->columnSpan(5)
+                    ->columnSpan(6)
                     ->preload(),
+                Forms\Components\Select::make('payment_type')
+                    ->label('Metodo di pagamento')
+                    ->options(
+                        collect(PaymentType::cases())
+                            ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                            ->mapWithKeys(fn (PaymentType $type) => [
+                                $type->value => $type->getLabel()
+                            ])
+                            ->toArray()
+                    )
+                    ->disabled(fn ($get, $livewire) => $livewire instanceof ViewRecord || $get('validated'))
+                    ->columnSpan(6),
                 // Forms\Components\Placeholder::make('')
                 //     ->columnSpan(7),
                 Forms\Components\Textarea::make('description')->label('Descrizione')
                     ->disabled(fn ($livewire) => $livewire instanceof ViewRecord)
-                    ->columnSpan(7),
+                    ->columnSpanFull(),
                 Forms\Components\Textarea::make('note')->label('Note')
                     ->disabled(fn ($livewire) => $livewire instanceof ViewRecord)
                     ->columnSpanFull(),
@@ -650,7 +665,8 @@ class NewActivePaymentsResource extends Resource
                         return $query;
                     })
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->columnSpan(3),
                 SelectFilter::make('invoice_client_id')
                     ->label('Cliente')
                     ->attribute(null)
@@ -678,7 +694,8 @@ class NewActivePaymentsResource extends Resource
                         return $query;
                     })
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->columnSpan(3),
                 SelectFilter::make('invoice_tax_type')
                     ->label('Entrata')
                     ->options(TaxType::class)
@@ -696,10 +713,44 @@ class NewActivePaymentsResource extends Resource
                         return $query;
                     })
                     ->searchable()
-                    ->preload(),
-                                    Filter::make('invoice_number')
+                    ->preload()
+                    ->columnSpan(3),
+
+                SelectFilter::make('bank_account_id')
+                    ->label('Conto')
+                    ->relationship(
+                        name: 'bankAccount',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn (Builder $query) =>
+                        $query->where('company_id',Filament::getTenant()->id)->orderBy('position', 'asc')
+                    )
+                    ->getOptionLabelFromRecordUsing(
+                        fn (Model $record) => "{$record->name} {$record->iban}"
+                    )
+                    ->columnSpan(3),
+
+                SelectFilter::make('payment_type')
+                    ->label('Metodo di pagamento')
+                    ->options(
+                        collect(PaymentType::cases())
+                            ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                            ->mapWithKeys(fn (PaymentType $type) => [
+                                $type->value => $type->getLabel()                            // sui pagamenti attivi è salvato il value
+                            ])
+                            ->toArray()
+                    )
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (blank($data['value'] ?? null)) {
+                            return $query;
+                        }
+                        // colonna qualificata: ordinando per fattura la query fa un join con invoices, che ha lo stesso campo
+                        return $query->where('active_payments.payment_type', $data['value']);
+                    })
+                    ->columnSpan(3),
+
+                Filter::make('invoice_number')
                     ->form([
-                TextInput::make('number')
+                        TextInput::make('number')
                             ->label('Numero Documento'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
@@ -709,7 +760,8 @@ class NewActivePaymentsResource extends Resource
                             });
                         }
                         return $query;
-                    }),
+                    })
+                    ->columnSpan(3),
                 SelectFilter::make('contract_accrual_types')
                     ->label('Gestioni')
                     ->options(function () {
@@ -732,7 +784,8 @@ class NewActivePaymentsResource extends Resource
                         return $query;
                     })
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->columnSpan(5),
                 SelectFilter::make('validated')
                     ->label('Validati')
                     ->options([
@@ -747,7 +800,81 @@ class NewActivePaymentsResource extends Resource
                         return $query->when($data['value'] === 'si', fn ($q) => $q->where('validated', true))
                                     ->when($data['value'] === 'no', fn ($q) => $q->where('validated', false));
                     })
-                    ->preload(),
+                    ->preload()
+                    ->columnSpan(1),
+                SelectFilter::make('invoice_year')
+                    ->label('Anno Documento')
+                    ->attribute(null)
+                    ->options(function () {
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
+                            ->select('year')
+                            ->distinct()
+                            ->where('flow', 'out')
+                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                            ->orderBy('year')
+                            ->pluck('year', 'year')
+                            ->toArray();
+                    })
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value) {
+                            return $query->whereHas('invoice', function ($q) use ($value) {
+                                $q->where('year', $value);
+                            });
+                        }
+                        return $query;
+                    })
+                    ->default(now()->year)
+                    ->columnSpan(2),
+                SelectFilter::make('invoice_budget_year')
+                    ->label('Anno Bilancio')
+                    ->attribute(null)
+                    ->options(function () {
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
+                            ->select('budget_year')
+                            ->distinct()
+                            ->where('flow', 'out')
+                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                            ->orderByDesc('budget_year')
+                            ->pluck('budget_year', 'budget_year')
+                            ->toArray();
+                    })
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value) {
+                            return $query->whereHas('invoice', function ($q) use ($value) {
+                                $q->where('budget_year', $value);
+                            });
+                        }
+                        return $query;
+                    })
+                    ->columnSpan(2),
+                SelectFilter::make('invoice_accrual_year')
+                    ->label('Anno Competenza')
+                    ->attribute(null)
+                    ->options(function () {
+                        $tenant = Filament::getTenant();
+                        return Invoice::query()
+                            ->select('accrual_year')
+                            ->distinct()
+                            ->where('flow', 'out')
+                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
+                            ->orderByDesc('accrual_year')
+                            ->pluck('accrual_year', 'accrual_year')
+                            ->toArray();
+                    })
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value) {
+                            return $query->whereHas('invoice', function ($q) use ($value) {
+                                $q->where('accrual_year', $value);
+                            });
+                        }
+                        return $query;
+                    })
+                    ->columnSpan(2),
                 Filter::make('payment_date_range')
                     ->columns(2)
                     ->form([
@@ -786,79 +913,9 @@ class NewActivePaymentsResource extends Resource
                         }
                         return null;
                     })
-                    ->columnSpan(2),
-                SelectFilter::make('invoice_year')
-                    ->label('Anno Documento')
-                    ->attribute(null)
-                    ->options(function () {
-                        $tenant = Filament::getTenant();
-                        return Invoice::query()
-                            ->select('year')
-                            ->distinct()
-                            ->where('flow', 'out')
-                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
-                            ->orderBy('year')
-                            ->pluck('year', 'year')
-                            ->toArray();
-                    })
-                    ->query(function (Builder $query, array $data) {
-                        $value = $data['value'] ?? null;
-                        if ($value) {
-                            return $query->whereHas('invoice', function ($q) use ($value) {
-                                $q->where('year', $value);
-                            });
-                        }
-                        return $query;
-                    })
-                    ->default(now()->year),
-                SelectFilter::make('invoice_budget_year')
-                    ->label('Anno Bilancio')
-                    ->attribute(null)
-                    ->options(function () {
-                        $tenant = Filament::getTenant();
-                        return Invoice::query()
-                            ->select('budget_year')
-                            ->distinct()
-                            ->where('flow', 'out')
-                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
-                            ->orderByDesc('budget_year')
-                            ->pluck('budget_year', 'budget_year')
-                            ->toArray();
-                    })
-                    ->query(function (Builder $query, array $data) {
-                        $value = $data['value'] ?? null;
-                        if ($value) {
-                            return $query->whereHas('invoice', function ($q) use ($value) {
-                                $q->where('budget_year', $value);
-                            });
-                        }
-                        return $query;
-                    }),
-                SelectFilter::make('invoice_accrual_year')
-                    ->label('Anno Competenza')
-                    ->attribute(null)
-                    ->options(function () {
-                        $tenant = Filament::getTenant();
-                        return Invoice::query()
-                            ->select('accrual_year')
-                            ->distinct()
-                            ->where('flow', 'out')
-                            ->when($tenant, fn ($query) => $query->where('company_id', $tenant->id))
-                            ->orderByDesc('accrual_year')
-                            ->pluck('accrual_year', 'accrual_year')
-                            ->toArray();
-                    })
-                    ->query(function (Builder $query, array $data) {
-                        $value = $data['value'] ?? null;
-                        if ($value) {
-                            return $query->whereHas('invoice', function ($q) use ($value) {
-                                $q->where('accrual_year', $value);
-                            });
-                        }
-                        return $query;
-                    }),
+                    ->columnSpan(6),
             // ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(8)
-            ])->filtersFormColumns(2)
+            ])->filtersFormColumns(6)->filtersFormWidth(MaxWidth::ThreeExtraLarge)
             ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\ViewAction::make(),

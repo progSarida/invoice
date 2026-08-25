@@ -2,8 +2,6 @@
 
 namespace App\Filament\Company\Resources;
 
-use App\Enums\PaymentMode;
-use App\Enums\PaymentType;
 use App\Enums\PiValidationStatus;
 use App\Filament\Company\Resources\PassiveInvoiceResource\Pages;
 use App\Filament\Company\Resources\PassiveInvoiceResource\RelationManagers;
@@ -17,12 +15,17 @@ use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\Payment
 use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\ReferencesSection;
 use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\SdiStatusSection;
 use App\Filament\Company\Resources\PassiveInvoiceResource\Forms\Sections\TotalsSection;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Tables\Filters\DateFilters;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Tables\Filters\DocumentFilters;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Tables\Filters\PaymentFilters;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Tables\Filters\RegistrationFilters;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Tables\Filters\SupplierFilters;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Tables\Filters\TotalFilters;
+use App\Filament\Company\Resources\PassiveInvoiceResource\Tables\Filters\ValidationFilters;
 use App\Filament\Exports\PassiveInvoiceExporter;
-use App\Models\DocType;
 use App\Models\PassiveInvoice;
 use App\Models\PiValidation;
 use App\Models\Supplier;
-use App\Services\CurrencyService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
@@ -31,23 +34,18 @@ use Filament\Forms\Components\Actions\Action as ActionsAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -281,395 +279,16 @@ class PassiveInvoiceResource extends Resource
                 //     ->sortable()
                 //     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filtersFormWidth('6xl')
-            ->filtersFormColumns(4)
+            ->filtersFormWidth(MaxWidth::SevenExtraLarge)
+            ->filtersFormColumns(24)
             ->filters([
-                SelectFilter::make('supplier_id')
-                    ->label('Fornitore')
-                    // ->multiple()
-                    ->searchable()
-                    // ->preload()
-                    ->columnSpan(3)
-                    ->options(function () {
-                        $suppliers = Supplier::select('suppliers.id', 'suppliers.denomination')
-                            ->join('passive_invoices', 'suppliers.id', '=', 'passive_invoices.supplier_id')
-                            ->distinct()
-                            ->get()
-                            ->pluck('denomination', 'id')
-                            ->toArray();
-                        return $suppliers;
-                    })
-                    ->getOptionLabelUsing(fn ($record) => $record?->description),
-                SelectFilter::make('withholdings')
-                    ->label('Ritenuta d\'acconto')
-                    ->options([
-                        'yes' => 'Con ritenuta',
-                        'no' => 'Senza ritenuta',
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (! isset($data['value'])) {
-                            return $query;
-                        }
-                        return $query->when($data['value'] === 'yes', fn ($q) => $q->withholdings())
-                                    ->when($data['value'] === 'no', fn ($q) => $q->withoutWithholdings());
-                    }),
-                SelectFilter::make('doc_type')
-                    ->label('Seleziona tipo documento')
-                    ->options(fn () => PassiveInvoice::docTypeOptions('desc'))               // tipi documento più presenti in cima
-                    ->multiple()
-                    ->searchable()
-                    ->columnSpan(3)
-                    ->preload(),
-                SelectFilter::make('attached')
-                    ->label('Con allegati')
-                    ->options([
-                        'yes' => 'Sì',
-                        'no' => 'No',
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (!isset($data['value'])) {
-                            return $query;
-                        }
-                        return $query->when($data['value'] === 'yes', fn ($q) => $q->whereNotNull('attachments_path'))
-                                    ->when($data['value'] === 'no', fn ($q) => $q->whereNull('attachments_path'));
-                    })
-                    ->columnSpan(1)
-                    ->preload(),
-                SelectFilter::make('exclude_doc_types')
-                    ->label('Escludi tipo documento')
-                    ->multiple()
-                    ->searchable()
-                    ->preload()
-                    ->columnSpanFull()
-                    ->options(fn () => PassiveInvoice::docTypeOptions('asc'))                // tipi documento meno presenti in cima
-                    ->getOptionLabelUsing(fn ($record) => $record?->description)
-                    ->default(function() {
-                        // $excludedGroups = ['Note di variazione', 'Autofatture'];
-                        $excludedGroups = ['Autofatture'];
-                        $docTypes = PassiveInvoice::select('passive_invoices.doc_type')
-                            ->join('doc_types', 'passive_invoices.doc_type', '=', 'doc_types.name')
-                            ->join('doc_groups', 'doc_types.doc_group_id', '=', 'doc_groups.id')
-                            ->whereIn('doc_groups.name', $excludedGroups)
-                            ->distinct()
-                            ->pluck('doc_type')
-                            ->toArray();
-                        return $docTypes;
-                    })
-                    ->query(function (Builder $query, array $data): Builder {
-                        // dd($data);
-                        return $query->when(
-                            $data['values'],
-                            fn (Builder $query, $values): Builder => $query->whereNotIn('doc_type', $values)
-                        );
-                    }),
-                Filter::make('total_range')
-                    ->columnSpan(2)
-                    ->columns(2)
-                    ->form([
-                        TextInput::make('total_from')
-                            ->label('Dovuto da')
-                            ->extraInputAttributes(['class' => 'text-right'])
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(function ($state, $component) {
-                                if($state === null) {
-                                    $component->state(null);
-                                    return;
-                                }
-                                $float = CurrencyService::parseNumber($state);
-                                $formatted = number_format($float, 2, ',', '.');
-                                $component->state($formatted);
-                            })
-                            ->formatStateUsing(function ($state) {
-                                if (blank($state)) return null;
-
-                                // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
-                                $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
-                                // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
-                                $floatValue = floatval($state);
-
-                                return number_format($floatValue, 2, ',', '.');
-                            })
-                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
-                            ->columnSpan(1),
-                        TextInput::make('total_to')
-                            ->label('Dovuto a')
-                            ->extraInputAttributes(['class' => 'text-right'])
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(function ($state, $component) {
-                                if($state === null) {
-                                    $component->state(null);
-                                    return;
-                                }
-                                $float = CurrencyService::parseNumber($state);
-                                $formatted = number_format($float, 2, ',', '.');
-                                $component->state($formatted);
-                            })
-                            // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                            ->formatStateUsing(function ($state) {
-                                if (blank($state)) return null;
-
-                                // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
-                                $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
-                                // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
-                                $floatValue = floatval($state);
-
-                                return number_format($floatValue, 2, ',', '.');
-                            })
-                            ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
-                            ->columnSpan(1),
-                        ])
-                        ->query(function (Builder $query, array $data): Builder {
-
-                            return $query
-                                // Applica il filtro "Da" se presente
-                                ->when(
-                                    $data['total_from'],
-                                    fn (Builder $query, $value): Builder => $query->where('total_doc', '>=', CurrencyService::parseNumber($value)),
-                                )
-                                // Applica il filtro "A" se presente
-                                ->when(
-                                    $data['total_to'],
-                                    fn (Builder $query, $value): Builder => $query->where('total_doc', '<=', CurrencyService::parseNumber($value)),
-                                );
-                        })
-                        ->indicateUsing(function (array $data): ?string {
-                            if ($data['total_from'] && $data['total_to']) {
-                                return "Dovuto da " . $data['total_from'] . "€ a " . $data['total_to'] . "€";
-                            }
-                            if ($data['total_from']) {
-                                return "Dovuto da " . $data['total_from'] . "€";
-                            }
-                            if ($data['total_to']) {
-                                return "Dovuto a " . $data['total_to'] . "€";
-                            }
-                            return null;
-                        }),
-                SelectFilter::make('pi_validation_status')
-                    ->label('Validazione')
-                    ->columnSpan(1)
-                    // ->options(PiValidationStatus::class)
-                    ->options(fn () => [
-                            'validati' => 'Tutti validati',   // La tua opzione custom
-                        ] + PiValidationStatus::class::toArray()
-                    )
-                    ->query(function (Builder $query, array $data) {
-                        $value = $data['value'] ?? null;
-
-                        switch($value){
-                            case PiValidationStatus::NO_STATUS->value:
-                                return $query->whereNull('pi_validation_id');
-                                break;
-                            case PiValidationStatus::OK->value:
-                            case PiValidationStatus::WAIT->value:
-                            case PiValidationStatus::BLOCK->value:
-                            case PiValidationStatus::VIEW->value:
-                                return $query->whereHas('piValidation', function ($q) use ($value) {
-                                        $q->where('pi_validation_status', $value);
-                                    });
-                                break;
-                            case 'validati':
-                                return $query->whereNotNull('pi_validation_id');
-                                break;
-                            default:
-                                return $query;
-                                break;
-                        }
-                    })
-                    ->searchable()
-                    ->preload(),
-                SelectFilter::make('paid')
-                    ->label('Pagamento')
-                    ->columnSpan(1)
-                    ->options([
-                        'si' => 'Totale',
-                        'par' => 'Parziale',
-                        'no' => 'Nessuno',
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (!isset($data['value'])) {
-                            return $query;
-                        }
-                        $tolerance = PassiveInvoice::paymentTolerance();                                        // tolleranza sul residuo dell'azienda di sessione
-                        $query->where('doc_type', '!=', 'TD04');                                                // escludo le note di credito
-                        return $query->when($data['value'] === 'si', fn ($q) => $q->paid($tolerance))
-                                    ->when($data['value'] === 'par', fn ($q) => $q->partiallyPaid($tolerance))
-                                    ->when($data['value'] === 'no', fn ($q) => $q->notPaid());
-                    })
-                    ->indicateUsing(function (array $data): ?string {
-                        if (! isset($data['value'])) {
-                            return null;
-                        }
-                        $labels = ['si' => 'Totale', 'par' => 'Parziale', 'no' => 'Nessuno'];
-                        $indicator = 'Pagamento: ' . ($labels[$data['value']] ?? $data['value']);
-                        $tolerance = PassiveInvoice::paymentTolerance();
-                        if ($tolerance > 0 && $data['value'] !== 'no') {
-                            $indicator .= ' (tolleranza ' . number_format($tolerance, 2, ',', '.') . ' €)';
-                        }
-                        return $indicator;
-                    })
-                    ->preload(),
-                Filter::make('invoice_date_range')
-                    ->columnSpan(2)
-                    ->columns(2)
-                    ->form([
-                        DatePicker::make('invoice_from_date')
-                            ->label('Data documento da')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
-                            ->afterStateUpdated(function ($state, Set $set) {
-                                if ($state) {
-                                    // $set('invoice_to_date', $state);
-                                }
-                            })
-                            ->default(now()->year . '-01-01')
-                            ->columnSpan(1),
-                        DatePicker::make('invoice_to_date')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->default(now()->year . '-12-31')
-                            ->label('Data documento a')
-                            ->columnSpan(1),
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        if (! empty($data['invoice_from_date'])) {
-                            $query->whereDate('invoice_date', '>=', $data['invoice_from_date']);
-                        }
-                        if (! empty($data['invoice_to_date'])) {
-                            $query->whereDate('invoice_date', '<=', $data['invoice_to_date']);
-                        }
-                    })
-                    ->indicateUsing(function (array $data): ?string {
-                        if ($data['invoice_from_date'] && $data['invoice_to_date']) {
-                            return "Data documento dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['invoice_to_date'])->format('d/m/Y');
-                        }
-                        if ($data['invoice_from_date']) {
-                            return "Data documento dal " . Carbon::parse($data['invoice_from_date'])->format('d/m/Y');
-                        }
-                        if ($data['invoice_to_date']) {
-                            return "Data documento al " . Carbon::parse($data['invoice_to_date'])->format('d/m/Y');
-                        }
-                        return null;
-                    }),
-                Filter::make('payment_date_range')
-                    ->columnSpan(2)
-                    ->columns(2)
-                    ->form([
-                        DatePicker::make('payment_from_date')
-                            ->label('Data ultimo pagamento da')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->live(debounce: 1000)
-                            ->afterStateUpdated(function ($state, Set $set) {
-                                if ($state) {
-                                    // $set('payment_to_date', $state);
-                                }
-                            })
-                            ->columnSpan(1),
-                        DatePicker::make('payment_to_date')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->label('Data ultimo pagamento a')
-                            ->columnSpan(1),
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        if (! empty($data['payment_from_date'])) {
-                            $query->whereDate('last_payment_date', '>=', $data['payment_from_date']);
-                        }
-                        if (! empty($data['payment_to_date'])) {
-                            $query->whereDate('last_payment_date', '<=', $data['payment_to_date']);
-                        }
-                    })
-                    ->indicateUsing(function (array $data): ?string {
-                        if ($data['payment_from_date'] && $data['payment_to_date']) {
-                            return "Data ultimo pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
-                        }
-                        if ($data['payment_from_date']) {
-                            return "Data ultimo pagamento dal " . Carbon::parse($data['payment_from_date'])->format('d/m/Y');
-                        }
-                        if ($data['payment_to_date']) {
-                            return "Data ultimo pagamento al " . Carbon::parse($data['payment_to_date'])->format('d/m/Y');
-                        }
-                        return null;
-                    }),
-                Filter::make('create_date_range')
-                    ->columnSpan(2)
-                    ->columns(2)
-                    ->form([
-                        DatePicker::make('create_from_date')
-                            ->label('Data registrazione da')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
-                            ->afterStateUpdated(function ($state, Set $set) {
-                                if ($state) {
-                                    // $set('create_to_date', $state);
-                                }
-                            })
-                            ->default(now()->year . '-01-01')
-                            ->columnSpan(1),
-                        DatePicker::make('create_to_date')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->default(now()->year . '-12-31')
-                            ->label('Data registrazione a')
-                            ->columnSpan(1),
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        if (! empty($data['create_from_date'])) {
-                            $query->whereDate('created_at', '>=', $data['create_from_date']);
-                        }
-                        if (! empty($data['create_to_date'])) {
-                            $query->whereDate('created_at', '<=', $data['create_to_date']);
-                        }
-                    })
-                    ->indicateUsing(function (array $data): ?string {
-                        if ($data['create_from_date'] && $data['create_to_date']) {
-                            return "Data registrazione dal " . Carbon::parse($data['create_from_date'])->format('d/m/Y') . " al " . Carbon::parse($data['create_to_date'])->format('d/m/Y');
-                        }
-                        if ($data['create_from_date']) {
-                            return "Data registrazione dal " . Carbon::parse($data['create_from_date'])->format('d/m/Y');
-                        }
-                        if ($data['create_to_date']) {
-                            return "Data registrazione al " . Carbon::parse($data['create_to_date'])->format('d/m/Y');
-                        }
-                        return null;
-                    }),
-                SelectFilter::make('user_id')
-                    ->label('Inserite da')
-                    ->placeholder('Tutti gli utenti')
-                    ->relationship('user', 'name')
-                    ->searchable()
-                    ->preload(),
-                Filter::make('dateValidation')
-                    ->columns(2)
-                    ->form([
-                        DatePicker::make('date_from')
-                            ->label('Data validazione da')
-                            ->extraInputAttributes(['class' => 'text-center'])
-                            ->live(debounce: 1000) // <--- Fondamentale per attivare afterStateUpdated
-                            ->afterStateUpdated(function ($state, Set $set) {
-                                if ($state) {
-                                    // $set('date_to', $state);
-                                }
-                            }),
-                        DatePicker::make('date_to')
-                            ->label('Data validazione a')
-                            ->extraInputAttributes(['class' => 'text-center']),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        // Modifichiamo la query per applicare i filtri in cascata senza interrompere l'esecuzione
-                        return $query
-                            ->when(
-                                filled($data['date_from']),
-                                fn (Builder $query) => $query->whereDate('pi_validation_date', '>=', $data['date_from'])
-                            )
-                            ->when(
-                                filled($data['date_to']),
-                                fn (Builder $query) => $query->whereDate('pi_validation_date', '<=', $data['date_to'])
-                            );
-                    })
-                    ->columnSpan(2),
-                SelectFilter::make('pi_validation_user_id')
-                    ->label('Validate da')
-                    ->placeholder('Tutti gli utenti')
-                    ->relationship('piValidationUser', 'name')
-                    ->searchable()
-                    ->preload(),
+                ...SupplierFilters::make(),
+                ...DocumentFilters::make(),
+                ...TotalFilters::make(),
+                ...PaymentFilters::make(),
+                ...DateFilters::make(),
+                ...ValidationFilters::make(),
+                ...RegistrationFilters::make(),
             ])
             ->persistFiltersInSession()
             ->actions([

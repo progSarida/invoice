@@ -2,6 +2,7 @@
 
 namespace App\Filament\Company\Resources\NewInvoiceResource\RelationManagers;
 
+use App\Enums\PaymentType;
 use App\Models\ActivePayments;
 use App\Models\BankAccount;
 use App\Models\Invoice;
@@ -241,10 +242,25 @@ class ActivePaymentsRelationManager extends RelationManager
                     ->default(function ($livewire) {
                         return $livewire->getOwnerRecord()->bank_account_id;
                     })
-                    ->columnSpan(5)
+                    ->columnSpan(6)
                     ->preload(),
+                Select::make('payment_type')
+                    ->label('Metodo di pagamento')
+                    ->options(
+                        collect(PaymentType::cases())
+                            ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                            ->mapWithKeys(fn (PaymentType $type) => [
+                                $type->value => $type->getLabel()
+                            ])
+                            ->toArray()
+                    )
+                    ->default(function ($livewire) {                                    // metodo di pagamento ereditato dalla fattura
+                        return $livewire->getOwnerRecord()->payment_type?->value;
+                    })
+                    ->disabled(fn ($get) => $get('validated'))
+                    ->columnSpan(6),
                 Forms\Components\Textarea::make('description')->label('Descrizione')
-                    ->columnSpan(7),
+                    ->columnSpanFull(),
                 Forms\Components\Textarea::make('note')->label('Note')
                     ->columnSpanFull(),
                 Section::make('Dati registrazione/validazione')

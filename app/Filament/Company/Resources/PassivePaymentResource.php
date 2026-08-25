@@ -23,6 +23,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Facades\Auth;
@@ -427,7 +428,7 @@ class PassivePaymentResource extends Resource
                             })
                     ),
             ])
-            ->filtersFormWidth('3xl')
+            ->filtersFormWidth(MaxWidth::FiveExtraLarge)
             ->filtersFormColumns(12)
             ->filters([
                 SelectFilter::make('supplier_id')
@@ -435,7 +436,7 @@ class PassivePaymentResource extends Resource
                     // ->multiple()
                     ->searchable()
                     // ->preload()
-                    ->columnSpanFull()
+                    ->columnSpan(10)
                     ->options(function () {
                         $suppliers = Supplier::select('suppliers.id', 'suppliers.denomination')
                             ->join('passive_invoices', 'suppliers.id', '=', 'passive_invoices.supplier_id')
@@ -467,7 +468,7 @@ class PassivePaymentResource extends Resource
                         return $query->when($data['value'] === 'si', fn ($q) => $q->where('validated', true))
                                     ->when($data['value'] === 'no', fn ($q) => $q->where('validated', false));
                     })
-                    ->columnSpan(4)
+                    ->columnSpan(2)
                     ->preload(),
                 SelectFilter::make('select_doc_type')
                     ->label('Seleziona tipo documento')
@@ -475,7 +476,7 @@ class PassivePaymentResource extends Resource
                     ->options(function () {
                         return DocType::orderBy('doc_group_id')->pluck('description', 'name')->toArray();
                     })
-                    ->columnSpan(4)
+                    ->columnSpan(6)
                     ->multiple()
                     ->searchable()
                     ->preload()
@@ -495,7 +496,7 @@ class PassivePaymentResource extends Resource
                     ->options(function () {
                         return DocType::orderBy('doc_group_id')->pluck('description', 'name')->toArray();
                     })
-                    ->columnSpan(4)
+                    ->columnSpan(6)
                     ->multiple()
                     ->searchable()
                     ->preload()
@@ -589,7 +590,7 @@ class PassivePaymentResource extends Resource
                         'yes' => 'Con ritenuta',
                         'no' => 'Senza ritenuta',
                     ])
-                    ->columnSpan(4)
+                    ->columnSpan(2)
                     ->query(function (Builder $query, array $data): Builder {
                         if (! isset($data['value'])) {
                             return $query;
@@ -598,6 +599,37 @@ class PassivePaymentResource extends Resource
                         return $query->when($data['value'] === 'yes', fn ($q) => $q->whereHas('passiveInvoice', fn (Builder $inner) => $inner->withholdings()))
                                     ->when($data['value'] === 'no', fn ($q) => $q->whereHas('passiveInvoice', fn (Builder $inner) => $inner->withoutWithholdings()));
                     }),
+
+                SelectFilter::make('bank_account_id')
+                    ->label('Conto')
+                    ->relationship(
+                        name: 'bankAccount',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn (Builder $query) =>
+                        $query->where('company_id',Filament::getTenant()->id)->orderBy('position', 'asc')
+                    )
+                    ->getOptionLabelFromRecordUsing(
+                        fn (Model $record) => "{$record->name} {$record->iban}"
+                    )
+                    ->columnSpan(5),
+
+                SelectFilter::make('payment_type')
+                    ->label('Metodo di pagamento')
+                    ->options(
+                        collect(PaymentType::cases())
+                            ->sortBy(fn (PaymentType $type) => $type->getOrder())
+                            ->mapWithKeys(fn (PaymentType $type) => [
+                                $type->getCode() => $type->getLabel()                        // sui pagamenti passivi è salvato il codice
+                            ])
+                            ->toArray()
+                    )
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (blank($data['value'] ?? null)) {
+                            return $query;
+                        }
+                        return $query->where('passive_payments.payment_type', $data['value']);
+                    })
+                    ->columnSpan(5),
             ])
             ->persistFiltersInSession()
             ->actions([
