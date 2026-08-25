@@ -168,6 +168,11 @@ class EditPassiveInvoice extends EditRecord
     {
         return [
             $this->getSaveFormAction()
+                // Le voci documento sono incorporate nel form come componente Livewire e
+                // portano con sé i modali, che sono a loro volta dei <form>: l'annidamento
+                // non è valido e il browser chiude in anticipo il form della pagina,
+                // lasciando fuori questo pulsante. L'id lo riassocia esplicitamente.
+                ->formId('form')
                 ->visible(fn($record) => !$record->downloaded)
                 ->color('success'),
             $this->getSaveAndCreateAnotherFormAction()

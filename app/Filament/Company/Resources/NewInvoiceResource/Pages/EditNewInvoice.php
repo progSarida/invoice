@@ -887,6 +887,11 @@ Log::info('Commit');
     {
         return [
             $this->getSaveFormAction()
+                // Le voci documento sono incorporate nel form come componente Livewire e
+                // portano con sé i modali, che sono a loro volta dei <form>: l'annidamento
+                // non è valido e il browser chiude in anticipo il form della pagina,
+                // lasciando fuori questo pulsante. L'id lo riassocia esplicitamente.
+                ->formId('form')
                 ->visible(fn (Invoice $record) => $record->sdi_status == SdiStatus::DA_INVIARE || $record->sdi_status == SdiStatus::PREAVVISO || $record->sdi_status == SdiStatus::QUADRATURA)
                 ->color('success'),
             $this->getSaveAndCreateAnotherFormAction()
