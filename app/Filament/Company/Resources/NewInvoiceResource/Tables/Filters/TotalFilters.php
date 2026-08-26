@@ -6,6 +6,7 @@ use App\Services\CurrencyService;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -21,58 +22,46 @@ class TotalFilters
                     TextInput::make('total_from')
                         ->label('Totale da')
                         ->extraInputAttributes(['class' => 'text-right'])
+                        ->suffix('€')
                         ->live(onBlur: true)
-                        ->afterStateUpdated(function ($state, $component) {
-                            if($state === null) {
+                        ->afterStateUpdated(function ($state, $component, Get $get, Set $set) {
+                            if (blank($state)) {
                                 $component->state(null);
+
                                 return;
                             }
-                            $float = CurrencyService::parseNumber($state);
-                            $formatted = number_format($float, 2, ',', '.');
+
+                            $formatted = number_format(CurrencyService::parseNumber($state) ?? 0, 2, ',', '.');
                             $component->state($formatted);
-                        })
-                        ->formatStateUsing(function ($state) {
-                            if (blank($state)) return null;
 
-                            // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
-                            $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
-                            // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
-                            $floatValue = floatval($state);
-
-                            return number_format($floatValue, 2, ',', '.');
+                            // Ricerca su un totale preciso: 'Totale a' viene precompilato con lo
+                            // stesso importo, così resta modificabile per ampliare il range.
+                            // if (blank($get('total_to'))) {
+                                $set('total_to', $formatted);
+                            // }
                         })
-                        ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
+                        ->formatStateUsing(fn ($state): ?string => blank($state)
+                            ? null
+                            : number_format(CurrencyService::parseNumber($state) ?? 0, 2, ',', '.'))
                         ->columnSpan(1),
                     TextInput::make('total_to')
                         ->label('Totale a')
                         ->extraInputAttributes(['class' => 'text-right'])
+                        ->suffix('€')
                         ->live(onBlur: true)
-                        ->afterStateUpdated(function ($state, $component) {
-                            if($state === null) {
-                                $component->state(null);
-                                return;
-                            }
-                            $float = CurrencyService::parseNumber($state);
-                            $formatted = number_format($float, 2, ',', '.');
-                            $component->state($formatted);
-                        })
-                        // ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
-                        ->formatStateUsing(function ($state) {
-                            if (blank($state)) return null;
-
-                            // Forza la conversione in float nel caso arrivi come stringa dal DB o dallo stato
-                            $floatValue = (float) str_replace(',', '.', str_replace('.', '', $state));
-                            // Oppure più semplicemente, se sei sicuro che il DB mandi un formato americano:
-                            $floatValue = floatval($state);
-
-                            return number_format($floatValue, 2, ',', '.');
-                        })
-                        ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
+                        ->afterStateUpdated(fn ($state, $component) => $component->state(
+                            blank($state) ? null : number_format(CurrencyService::parseNumber($state) ?? 0, 2, ',', '.')
+                        ))
+                        ->formatStateUsing(fn ($state): ?string => blank($state)
+                            ? null
+                            : number_format(CurrencyService::parseNumber($state) ?? 0, 2, ',', '.'))
                         ->columnSpan(1),
                 ])
                 ->query(function (Builder $query, array $data): Builder {
-                    $from = ! empty($data['total_from']) ? $data['total_from'] : null;
-                    $to = ! empty($data['total_to']) ? $data['total_to'] : null;
+                    // I filtri ricevono lo stato grezzo del form, quindi gli importi
+                    // arrivano nel formato italiano e vanno convertiti a mano.
+                    $from = CurrencyService::parseNumber($data['total_from'] ?? null);
+                    $to = CurrencyService::parseNumber($data['total_to'] ?? null);
 
                     if ($from === null && $to === null) {
                         return $query;
@@ -94,14 +83,17 @@ class TotalFilters
                     });
                 })
                 ->indicateUsing(function (array $data): ?string {
-                    if ($data['total_from'] && $data['total_to']) {
-                        return "Totale da " . $data['total_from'] . "€ fino a " . $data['total_to'] . '€';
+                    $from = $data['total_from'] ?? null;
+                    $to = $data['total_to'] ?? null;
+
+                    if (filled($from) && filled($to)) {
+                        return "Totale da " . $from . "€ fino a " . $to . '€';
                     }
-                    if ($data['total_from']) {
-                        return "Totale da " . $data['total_from'] . '€';
+                    if (filled($from)) {
+                        return "Totale da " . $from . '€';
                     }
-                    if ($data['total_to']) {
-                        return "Totale fino a " . $data['total_to'] . '€';
+                    if (filled($to)) {
+                        return "Totale fino a " . $to . '€';
                     }
                     return null;
                 })
