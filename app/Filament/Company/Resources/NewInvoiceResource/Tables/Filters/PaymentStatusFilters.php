@@ -16,7 +16,7 @@ class PaymentStatusFilters
         return [
             // Riga 5
             SelectFilter::make('sdi_status')->label('Stato')->options(SdiStatus::class)
-                ->multiple()->searchable()->preload()->columnSpan(10),
+                ->multiple()->searchable()->preload()->columnSpan(['default' => 'full', 'lg' => 10]),
             SelectFilter::make('paid')
                 ->label('Stato pagamento')
                 ->placeholder('Tutti gli stati')
@@ -54,7 +54,7 @@ class PaymentStatusFilters
                             return $q->whereRaw("COALESCE(total_payment, 0) = 0 AND $total - $covered > 0");
                         });
                 })
-                ->columnSpan(6)
+                ->columnSpan(['default' => 'full', 'lg' => 6])
                 ->preload(),
             Filter::make('datePayment')
                 ->columns(2)
@@ -121,7 +121,7 @@ class PaymentStatusFilters
                             })
                         );
                 })
-                ->columnSpan(8),
+                ->columnSpan(['default' => 'full', 'lg' => 8]),
         ];
     }
 }

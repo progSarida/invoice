@@ -16,7 +16,7 @@ class DocumentFilters
                 ->options(fn () => PassiveInvoice::docTypeOptions('desc'))               // tipi documento più presenti in cima
                 ->multiple()
                 ->searchable()
-                ->columnSpan(18)
+                ->columnSpan(['default' => 'full', 'lg' => 18])
                 ->preload(),
             SelectFilter::make('attached')
                 ->label('Con allegati')
@@ -31,7 +31,7 @@ class DocumentFilters
                     return $query->when($data['value'] === 'yes', fn ($q) => $q->whereNotNull('attachments_path'))
                                 ->when($data['value'] === 'no', fn ($q) => $q->whereNull('attachments_path'));
                 })
-                ->columnSpan(6)
+                ->columnSpan(['default' => 'full', 'lg' => 6])
                 ->preload(),
             SelectFilter::make('exclude_doc_types')
                 ->label('Escludi tipo documento')

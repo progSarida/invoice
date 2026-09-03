@@ -14,7 +14,7 @@ class DateFilters
     {
         return [
             Filter::make('invoice_date_range')
-                ->columnSpan(12)
+                ->columnSpan(['default' => 'full', 'lg' => 12])
                 ->columns(2)
                 ->form([
                     DatePicker::make('invoice_from_date')
@@ -55,7 +55,7 @@ class DateFilters
                     return null;
                 }),
             Filter::make('payment_date_range')
-                ->columnSpan(12)
+                ->columnSpan(['default' => 'full', 'lg' => 12])
                 ->columns(2)
                 ->form([
                     DatePicker::make('payment_from_date')

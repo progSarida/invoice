@@ -58,7 +58,7 @@ class YearFilters
                     }
                     return $query;
                 })
-                ->columnSpan(4),
+                ->columnSpan(['default' => 'full', 'lg' => 4]),
             SelectFilter::make('invoice_year_to')
                 ->label('Anno documento a')
                 ->attribute(null)
@@ -80,7 +80,7 @@ class YearFilters
                     }
                     return $query;
                 })
-                ->columnSpan(4),
+                ->columnSpan(['default' => 'full', 'lg' => 4]),
 
             SelectFilter::make('invoice_budget_year_from')
                 ->label('Anno bilancio da')
@@ -103,7 +103,7 @@ class YearFilters
                     }
                     return $query;
                 })
-                ->columnSpan(4),
+                ->columnSpan(['default' => 'full', 'lg' => 4]),
             SelectFilter::make('invoice_budget_year_to')
                 ->label('Anno bilancio a')
                 ->attribute(null)
@@ -125,7 +125,7 @@ class YearFilters
                     }
                     return $query;
                 })
-                ->columnSpan(4),
+                ->columnSpan(['default' => 'full', 'lg' => 4]),
             SelectFilter::make('invoice_accrual_year_from')
                 ->label('Anno competenza da')
                 ->attribute(null)
@@ -147,7 +147,7 @@ class YearFilters
                     }
                     return $query;
                 })
-                ->columnSpan(4),
+                ->columnSpan(['default' => 'full', 'lg' => 4]),
             SelectFilter::make('invoice_accrual_year_to')
                 ->label('Anno competenza da')
                 ->attribute(null)
@@ -169,7 +169,7 @@ class YearFilters
                     }
                     return $query;
                 })
-                ->columnSpan(4),
+                ->columnSpan(['default' => 'full', 'lg' => 4]),
         ];
     }
 }

@@ -436,7 +436,7 @@ class PassivePaymentResource extends Resource
                     // ->multiple()
                     ->searchable()
                     // ->preload()
-                    ->columnSpan(10)
+                    ->columnSpan(['default' => 'full', 'lg' => 10])
                     ->options(function () {
                         $suppliers = Supplier::select('suppliers.id', 'suppliers.denomination')
                             ->join('passive_invoices', 'suppliers.id', '=', 'passive_invoices.supplier_id')
@@ -468,7 +468,7 @@ class PassivePaymentResource extends Resource
                         return $query->when($data['value'] === 'si', fn ($q) => $q->where('validated', true))
                                     ->when($data['value'] === 'no', fn ($q) => $q->where('validated', false));
                     })
-                    ->columnSpan(2)
+                    ->columnSpan(['default' => 'full', 'lg' => 2])
                     ->preload(),
                 SelectFilter::make('select_doc_type')
                     ->label('Seleziona tipo documento')
@@ -476,7 +476,7 @@ class PassivePaymentResource extends Resource
                     ->options(function () {
                         return DocType::orderBy('doc_group_id')->pluck('description', 'name')->toArray();
                     })
-                    ->columnSpan(6)
+                    ->columnSpan(['default' => 'full', 'lg' => 6])
                     ->multiple()
                     ->searchable()
                     ->preload()
@@ -496,7 +496,7 @@ class PassivePaymentResource extends Resource
                     ->options(function () {
                         return DocType::orderBy('doc_group_id')->pluck('description', 'name')->toArray();
                     })
-                    ->columnSpan(6)
+                    ->columnSpan(['default' => 'full', 'lg' => 6])
                     ->multiple()
                     ->searchable()
                     ->preload()
@@ -530,7 +530,7 @@ class PassivePaymentResource extends Resource
                             ->default(now()->year . '-12-31')
                             ->columnSpan(1),
                     ])
-                    ->columnSpan(6)
+                    ->columnSpan(['default' => 'full', 'lg' => 6])
                     ->query(function (Builder $query, array $data) {
                         if (! empty($data['payment_from_date'])) {
                             $query->whereDate('payment_date', '>=', $data['payment_from_date']);
@@ -563,7 +563,7 @@ class PassivePaymentResource extends Resource
                             ->extraInputAttributes(['class' => 'text-center'])
                             ->columnSpan(1),
                     ])
-                    ->columnSpan(6)
+                    ->columnSpan(['default' => 'full', 'lg' => 6])
                     ->query(function (Builder $query, array $data) {
                         if (! empty($data['registration_from_date'])) {
                             $query->whereDate('registration_date', '>=', $data['registration_from_date']);
@@ -590,7 +590,7 @@ class PassivePaymentResource extends Resource
                         'yes' => 'Con ritenuta',
                         'no' => 'Senza ritenuta',
                     ])
-                    ->columnSpan(2)
+                    ->columnSpan(['default' => 'full', 'lg' => 2])
                     ->query(function (Builder $query, array $data): Builder {
                         if (! isset($data['value'])) {
                             return $query;
@@ -611,7 +611,7 @@ class PassivePaymentResource extends Resource
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->name} {$record->iban}"
                     )
-                    ->columnSpan(5),
+                    ->columnSpan(['default' => 'full', 'lg' => 5]),
 
                 SelectFilter::make('payment_type')
                     ->label('Metodo di pagamento')
@@ -629,7 +629,7 @@ class PassivePaymentResource extends Resource
                         }
                         return $query->where('passive_payments.payment_type', $data['value']);
                     })
-                    ->columnSpan(5),
+                    ->columnSpan(['default' => 'full', 'lg' => 5]),
             ])
             ->persistFiltersInSession()
             ->actions([

@@ -24,7 +24,7 @@ class PaymentDataFilters
                 ->getOptionLabelFromRecordUsing(
                     fn (Model $record) => "{$record->name} {$record->iban}"
                 )
-                ->columnSpan(8),
+                ->columnSpan(['default' => 'full', 'lg' => 8]),
 
             SelectFilter::make('payment_type')
                 ->label('Metodo di pagamento')
@@ -42,7 +42,7 @@ class PaymentDataFilters
                     }
                     return $query->where('invoices.payment_type', $data['value']);
                 })
-                ->columnSpan(6),
+                ->columnSpan(['default' => 'full', 'lg' => 6]),
         ];
     }
 }

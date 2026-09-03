@@ -16,7 +16,7 @@ class SupplierFilters
                 // ->multiple()
                 ->searchable()
                 // ->preload()
-                ->columnSpan(18)
+                ->columnSpan(['default' => 'full', 'lg' => 18])
                 ->options(function () {
                     $suppliers = Supplier::select('suppliers.id', 'suppliers.denomination')
                         ->join('passive_invoices', 'suppliers.id', '=', 'passive_invoices.supplier_id')
@@ -40,7 +40,7 @@ class SupplierFilters
                     return $query->when($data['value'] === 'yes', fn ($q) => $q->withholdings())
                                 ->when($data['value'] === 'no', fn ($q) => $q->withoutWithholdings());
                 })
-                ->columnSpan(6),
+                ->columnSpan(['default' => 'full', 'lg' => 6]),
         ];
     }
 }

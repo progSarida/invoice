@@ -187,14 +187,14 @@ class PostalExpenseResource extends Resource
                                     ->searchable()
                                     ->placeholder('')
                                     ->preload()
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\Select::make('notify_type')
                                     ->label('Tipo notifica')
                                     ->options(NotifyType::class)
                                     ->searchable()
                                     ->placeholder('')
                                     ->preload()
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\Select::make('new_contract_id')
                                     ->label('Contratto')
                                     ->relationship(name: 'contract', titleAttribute: 'office_name')
@@ -205,14 +205,14 @@ class PostalExpenseResource extends Resource
                                     ->placeholder('')
                                     ->preload()
                                     ->optionsLimit(5)
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\Select::make('tax_type')
                                     ->label('Tipo entrata')
                                     ->options(TaxType::class)
                                     ->searchable()
                                     ->placeholder('')
                                     ->preload()
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                             ]),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
@@ -232,63 +232,63 @@ class PostalExpenseResource extends Resource
                                 Forms\Components\TextInput::make('send_protocol_number')
                                     ->label('Numero protocollo invio')
                                     ->maxLength(255)
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('send_protocol_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data protocollo invio da')
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\DatePicker::make('send_protocol_date_to')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data protocollo invio a')
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\Select::make('shipment_type_id')
                                     ->label('Modalità di invio')
                                     ->relationship('shipmentType', 'name')
                                     ->searchable()
                                     ->preload()
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\TextInput::make('manage_year')
                                     ->label('Anno di gestione')
                                     ->numeric()
                                     ->rules(['digits:4'])
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\Select::make('supplier_id')
                                     ->label('Fornitore')
                                     ->relationship('supplier', 'denomination')
                                     ->searchable()
                                     ->preload()
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\TextInput::make('recipient')
                                     ->label('Destinatario notifica/trasgressore')
                                     ->maxLength(255)
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\TextInput::make('supplier_name')
                                     ->label('Ente da rimborsare')
                                     ->maxLength(255)
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\Select::make('act_type_id')
                                     ->label('Tipo atto')
                                     ->relationship('actType', 'name')
                                     ->searchable()
                                     ->preload()
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\TextInput::make('act_id')
                                     ->label('ID atto')
                                     ->maxLength(255)
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\TextInput::make('act_year')
                                     ->label('Anno atto')
                                     ->numeric()
                                     ->rules(['digits:4'])
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\DatePicker::make('act_attachment_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data allegato atto da')
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\DatePicker::make('act_attachment_date_to')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data allegato atto a')
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\Select::make('shipment_insert_user_id')
                                     ->label('Utente inserimento dati')
                                     ->relationship('shipmentInsertUser', 'name')
@@ -297,19 +297,19 @@ class PostalExpenseResource extends Resource
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
                                     ->preload()
                                     ->optionsLimit(5)
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\DatePicker::make('shipment_insert_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data inserimento dati')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('shipment_insert_date_to')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data inserimento dati')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                             ]),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
@@ -341,7 +341,7 @@ class PostalExpenseResource extends Resource
                                 Forms\Components\TextInput::make('order_rif')
                                     ->label('Riferimento')
                                     ->maxLength(255)
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 // Forms\Components\TextInput::make('list_rif')
                                 //     ->label('Riferimento distinta')
                                 //     ->maxLength(255)
@@ -349,26 +349,26 @@ class PostalExpenseResource extends Resource
                                 Forms\Components\TextInput::make('receive_protocol_number')
                                     ->label('Numero prot. ricezione')
                                     ->maxLength(255)
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\DatePicker::make('receive_protocol_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data prot. ricezione da')
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\DatePicker::make('receive_protocol_date_to')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data prot. ricezione a')
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\Select::make('notify_month')
                                     ->label('Mese ricezione')
                                     ->options(Month::class)
                                     ->searchable()
                                     ->preload()
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\TextInput::make('notify_year')
                                     ->label('Anno ricezione')
                                     ->numeric()
                                     ->rules(['digits:4'])
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
 
                                 Forms\Components\TextInput::make('notify_amount')
                                     ->label('Importo notifica')
@@ -399,20 +399,20 @@ class PostalExpenseResource extends Resource
                                     ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                                     ->suffix('€')
                                     ->visible(false)
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\DatePicker::make('amount_registration_date')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data registrazione importo')
                                     ->visible(false)
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\DatePicker::make('notify_attachment_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data allegato notifica da')
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('notify_attachment_date_to')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data allegato notifica a')
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\Select::make('notify_insert_user_id')
                                     ->label('Utente inserimento notifica')
                                     ->relationship('notifyInsertUser', 'name')
@@ -421,19 +421,19 @@ class PostalExpenseResource extends Resource
                                     ->optionsLimit(5)
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\DatePicker::make('notify_insert_date')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data inserimento notifica')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('notify_insert_date')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data inserimento notifica')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                             ]),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
@@ -467,7 +467,7 @@ class PostalExpenseResource extends Resource
                                     ->label('Tipo rifatturazione')
                                     ->options(ReinvoiceType::class)
                                     ->preload()
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\Select::make('passive_invoice_id')
                                     ->label('Fattura passiva')
                                     ->options(function (Get $get): array {
@@ -481,7 +481,7 @@ class PostalExpenseResource extends Resource
                                     })
                                     ->searchable()
                                     ->preload()
-                                    ->columnSpan(8),
+                                    ->columnSpan(['default' => 'full', 'lg' => 8]),
                                 Forms\Components\TextInput::make('notify_expense_amount')
                                     ->label('Importo spese notifica')
                                     ->numeric()
@@ -511,7 +511,7 @@ class PostalExpenseResource extends Resource
                                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                                     ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                                     ->suffix('€')
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\TextInput::make('mark_expense_amount')
                                     ->label('Importo spese contrassegno')
                                     ->numeric()
@@ -541,30 +541,30 @@ class PostalExpenseResource extends Resource
                                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                                     ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                                     ->suffix('€')
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
 
                                 Forms\Components\Select::make('shipment_doc_type')
                                     ->label('Tipo documento spedizione')
                                     ->options(ShipmentDocType::class)
                                     ->searchable()
                                     ->preload()
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\TextInput::make('shipment_doc_number')
                                     ->label('Numero documento')
                                     ->maxLength(255)
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('shipment_doc_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data documento da')
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('shipment_doc_date to')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data documento a')
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\TextInput::make('iban')
                                     ->label('IBAN')
                                     ->maxLength(255)
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\Select::make('expense_insert_user_id')
                                     ->label('Utente inserimento spese')
                                     ->relationship('expenseInsertUser', 'name')
@@ -573,19 +573,19 @@ class PostalExpenseResource extends Resource
                                     ->optionsLimit(5)
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('expense_insert_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data inserimento spese da')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('expense_insert_date_to')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data inserimento spese a')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                             ]),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
@@ -612,15 +612,15 @@ class PostalExpenseResource extends Resource
                             ->schema([
                                 Forms\Components\Toggle::make('payed')
                                     ->label('Spese pagate')
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\DatePicker::make('payment_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data pagamento da')
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\DatePicker::make('payment_date_to')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data pagamento a')
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\TextInput::make('payment_total')
                                     ->label('Totale pagamenti')
                                     ->numeric()
@@ -650,7 +650,7 @@ class PostalExpenseResource extends Resource
                                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                                     ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                                     ->suffix('€')
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\Select::make('payment_insert_user_id')
                                     ->label('Utente inserimento pagamento')
                                     ->relationship('paymentInsertUser', 'name')
@@ -659,19 +659,19 @@ class PostalExpenseResource extends Resource
                                     ->optionsLimit(5)
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\DatePicker::make('payment_insert_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data inserimento pagamento da')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('payment_insert_date_to')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data inserimento pagamento a')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                             ]),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
@@ -701,19 +701,19 @@ class PostalExpenseResource extends Resource
                                     })
                                     ->searchable()
                                     ->preload()
-                                    ->columnSpan(6),
+                                    ->columnSpan(['default' => 'full', 'lg' => 6]),
                                 Forms\Components\TextInput::make('reinvoice_number')
                                     ->label('Numero fattura emessa')
                                     ->maxLength(255)
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\DatePicker::make('reinvoice_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data fattura emessa da')
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\DatePicker::make('reinvoice_date_tm')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data fattura emessa a')
-                                    ->columnSpan(2),
+                                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                                 Forms\Components\TextInput::make('reinvoice_amount')
                                     ->label('Importo fattura emessa')
                                     ->numeric()
@@ -743,7 +743,7 @@ class PostalExpenseResource extends Resource
                                     ->formatStateUsing(fn ($state): ?string => $state !== null ? number_format($state, 2, ',', '.') : null)
                                     ->dehydrateStateUsing(fn ($state): ?float => CurrencyService::parseNumber($state))
                                     ->suffix('€')
-                                    ->columnSpan(4),
+                                    ->columnSpan(['default' => 'full', 'lg' => 4]),
                                 Forms\Components\Select::make('reinvoice_insert_user_id')
                                     ->label('Utente inserimento rifatturazione')
                                     ->relationship('reinvoiceInsertUser', 'name')
@@ -752,19 +752,19 @@ class PostalExpenseResource extends Resource
                                     ->optionsLimit(5)
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('reinvoice_insert_date_from')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data inserimento rifatturazione da')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                                 Forms\Components\DatePicker::make('reinvoice_insert_date_to')
                                     ->extraInputAttributes(['class' => 'text-center'])
                                     ->label('Data inserimento rifatturazione a')
                                     // ->visible(fn (): bool => Auth::user()->is_admin)
                                     ->visible(fn (): bool => Auth::user()->isSuperAdmin())
-                                    ->columnSpan(3),
+                                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                             ]),
                     ])
                     ->query(function (Builder $query, array $data): Builder {

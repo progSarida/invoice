@@ -764,7 +764,7 @@ class BailResource extends Resource
                     ->options(\App\Enums\BailType::class)
                     ->multiple()
                     ->label('Tipo')
-                    ->columnSpan(2)
+                    ->columnSpan(['default' => 'full', 'lg' => 2])
                     ->query(function (Builder $query, array $data) {
                         if (!empty($data['values'])) {
                             foreach ($data as $taxType) {
@@ -773,7 +773,7 @@ class BailResource extends Resource
                         }
                     }),
                 Tables\Filters\Filter::make('active_at_date') // Cambiato il nome per coerenza
-                    ->columnSpan(2)
+                    ->columnSpan(['default' => 'full', 'lg' => 2])
                     ->form([
                         Forms\Components\DatePicker::make('selected_date')
                             ->label('Attive al'),
@@ -796,7 +796,7 @@ class BailResource extends Resource
                     ->options(\App\Enums\TaxType::class)
                     ->multiple()
                     ->label('Entrata')
-                    ->columnSpan(2)
+                    ->columnSpan(['default' => 'full', 'lg' => 2])
                     ->query(function (Builder $query, array $data) {
                         if (!empty($data['values'])) {
                             foreach ($data as $taxType) {
@@ -815,7 +815,7 @@ class BailResource extends Resource
                 //         }
                 //     }),
                 Tables\Filters\Filter::make('insurance_agency')
-                    ->columnSpan(6)
+                    ->columnSpan(['default' => 'full', 'lg' => 6])
                     ->columns(2)
                     ->form([
                         // Campo Assicurazione
@@ -862,7 +862,7 @@ class BailResource extends Resource
                 Tables\Filters\SelectFilter::make('bail_status')
                     ->options(\App\Enums\BailStatus::class)
                     ->label('Stato')
-                    ->columnSpan(3)
+                    ->columnSpan(['default' => 'full', 'lg' => 3])
                     ->query(function (Builder $query, array $data) {
                         if (!empty($data['value'])) {
                             // Utilizziamo doveHas per entrare nella relazione lastDetail
@@ -889,7 +889,7 @@ class BailResource extends Resource
                 //     }),
                 Tables\Filters\SelectFilter::make('expiration_status')
                     ->label('Stato Scadenza')
-                    ->columnSpan(3)
+                    ->columnSpan(['default' => 'full', 'lg' => 3])
                     ->options([
                         'expired' => 'Scadute',
                         'expired_not_paid' => 'Scadute e non pagate',
@@ -933,7 +933,7 @@ class BailResource extends Resource
                         Forms\Components\Checkbox::make('not_paid')
                             ->label('Senza data di pagamento'),
                     ])
-                    ->columnSpan(3)
+                    ->columnSpan(['default' => 'full', 'lg' => 3])
                     ->query(function (Builder $query, array $data): Builder {
                         // Se la checkbox non è spuntata, non applichiamo filtri
                         if (!$data['not_paid']) {
@@ -959,7 +959,7 @@ class BailResource extends Resource
                         Forms\Components\Checkbox::make('not_receipt')
                             ->label('Senza allegato quietanza'),
                     ])
-                    ->columnSpan(3)
+                    ->columnSpan(['default' => 'full', 'lg' => 3])
                     ->query(function (Builder $query, array $data): Builder {
                         if (!$data['not_receipt']) {
                             return $query;

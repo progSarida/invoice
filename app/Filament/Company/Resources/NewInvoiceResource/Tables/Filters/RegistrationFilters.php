@@ -41,14 +41,14 @@ class RegistrationFilters
                             fn (Builder $query) => $query->whereDate('created_at', '<=', $data['date_to'])
                         );
                 })
-                ->columnSpan(12),
+                ->columnSpan(['default' => 'full', 'lg' => 12]),
             SelectFilter::make('user_id')
                 ->label('Registrate da')
                 ->placeholder('Tutti gli utenti')
                 ->relationship('user', 'name')
                 ->searchable()
                 ->preload()
-                ->columnSpan(6),
+                ->columnSpan(['default' => 'full', 'lg' => 6]),
         ];
     }
 }

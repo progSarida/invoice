@@ -15,7 +15,7 @@ class RegistrationFilters
     {
         return [
             Filter::make('create_date_range')
-                ->columnSpan(12)
+                ->columnSpan(['default' => 'full', 'lg' => 12])
                 ->columns(2)
                 ->form([
                     DatePicker::make('create_from_date')
@@ -60,7 +60,7 @@ class RegistrationFilters
                 ->placeholder('Tutti gli utenti')
                 ->relationship('user', 'name')
                 ->searchable()
-                ->columnSpan(6)
+                ->columnSpan(['default' => 'full', 'lg' => 6])
                 ->preload(),
         ];
     }

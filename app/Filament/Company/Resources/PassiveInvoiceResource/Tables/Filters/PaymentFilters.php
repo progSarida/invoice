@@ -16,7 +16,7 @@ class PaymentFilters
         return [
             SelectFilter::make('paid')
                 ->label('Pagamento')
-                ->columnSpan(3)
+                ->columnSpan(['default' => 'full', 'lg' => 3])
                 ->options([
                     'si' => 'Totale',
                     'par' => 'Parziale',
@@ -63,7 +63,7 @@ class PaymentFilters
                         fn (Builder $q): Builder => $q->where('bank_account_id', $data['value'])
                     );
                 })
-                ->columnSpan(8),
+                ->columnSpan(['default' => 'full', 'lg' => 8]),
             SelectFilter::make('payment_type')
                 ->label('Metodo di pagamento')
                 ->options(
@@ -80,7 +80,7 @@ class PaymentFilters
                     }
                     return $query->where('passive_invoices.payment_type', $data['value']);
                 })
-                ->columnSpan(7),
+                ->columnSpan(['default' => 'full', 'lg' => 7]),
         ];
     }
 }

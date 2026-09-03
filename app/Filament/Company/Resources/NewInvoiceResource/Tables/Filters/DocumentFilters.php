@@ -28,14 +28,14 @@ class DocumentFilters
                 })
                 ->multiple()
                 ->searchable()
-                ->columnSpan(12)
+                ->columnSpan(['default' => 'full', 'lg' => 12])
                 ->preload(),
             Tables\Filters\SelectFilter::make('exclude_doc_types')
                 ->label('Escludi tipo documento')
                 ->multiple()
                 ->searchable()
                 ->preload()
-                ->columnSpan(12)
+                ->columnSpan(['default' => 'full', 'lg' => 12])
                 // 1. Carichiamo le opzioni dal Tenant
                 ->options(function () {
                     $tenant = Filament::getTenant();

@@ -666,7 +666,7 @@ class NewActivePaymentsResource extends Resource
                     })
                     ->searchable()
                     ->preload()
-                    ->columnSpan(3),
+                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                 SelectFilter::make('invoice_client_id')
                     ->label('Cliente')
                     ->attribute(null)
@@ -695,7 +695,7 @@ class NewActivePaymentsResource extends Resource
                     })
                     ->searchable()
                     ->preload()
-                    ->columnSpan(3),
+                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                 SelectFilter::make('invoice_tax_type')
                     ->label('Entrata')
                     ->options(TaxType::class)
@@ -714,7 +714,7 @@ class NewActivePaymentsResource extends Resource
                     })
                     ->searchable()
                     ->preload()
-                    ->columnSpan(3),
+                    ->columnSpan(['default' => 'full', 'lg' => 3]),
 
                 SelectFilter::make('bank_account_id')
                     ->label('Conto')
@@ -727,7 +727,7 @@ class NewActivePaymentsResource extends Resource
                     ->getOptionLabelFromRecordUsing(
                         fn (Model $record) => "{$record->name} {$record->iban}"
                     )
-                    ->columnSpan(3),
+                    ->columnSpan(['default' => 'full', 'lg' => 3]),
 
                 SelectFilter::make('payment_type')
                     ->label('Metodo di pagamento')
@@ -746,7 +746,7 @@ class NewActivePaymentsResource extends Resource
                         // colonna qualificata: ordinando per fattura la query fa un join con invoices, che ha lo stesso campo
                         return $query->where('active_payments.payment_type', $data['value']);
                     })
-                    ->columnSpan(3),
+                    ->columnSpan(['default' => 'full', 'lg' => 3]),
 
                 Filter::make('invoice_number')
                     ->form([
@@ -761,7 +761,7 @@ class NewActivePaymentsResource extends Resource
                         }
                         return $query;
                     })
-                    ->columnSpan(3),
+                    ->columnSpan(['default' => 'full', 'lg' => 3]),
                 SelectFilter::make('contract_accrual_types')
                     ->label('Gestioni')
                     ->options(function () {
@@ -785,7 +785,7 @@ class NewActivePaymentsResource extends Resource
                     })
                     ->searchable()
                     ->preload()
-                    ->columnSpan(5),
+                    ->columnSpan(['default' => 'full', 'lg' => 5]),
                 SelectFilter::make('validated')
                     ->label('Validati')
                     ->options([
@@ -826,7 +826,7 @@ class NewActivePaymentsResource extends Resource
                         return $query;
                     })
                     ->default(now()->year)
-                    ->columnSpan(2),
+                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                 SelectFilter::make('invoice_budget_year')
                     ->label('Anno Bilancio')
                     ->attribute(null)
@@ -850,7 +850,7 @@ class NewActivePaymentsResource extends Resource
                         }
                         return $query;
                     })
-                    ->columnSpan(2),
+                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                 SelectFilter::make('invoice_accrual_year')
                     ->label('Anno Competenza')
                     ->attribute(null)
@@ -874,7 +874,7 @@ class NewActivePaymentsResource extends Resource
                         }
                         return $query;
                     })
-                    ->columnSpan(2),
+                    ->columnSpan(['default' => 'full', 'lg' => 2]),
                 Filter::make('payment_date_range')
                     ->columns(2)
                     ->form([
@@ -913,7 +913,7 @@ class NewActivePaymentsResource extends Resource
                         }
                         return null;
                     })
-                    ->columnSpan(6),
+                    ->columnSpan(['default' => 'full', 'lg' => 6]),
             // ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(8)
             ])->filtersFormColumns(6)->filtersFormWidth(MaxWidth::ThreeExtraLarge)
             ->persistFiltersInSession()

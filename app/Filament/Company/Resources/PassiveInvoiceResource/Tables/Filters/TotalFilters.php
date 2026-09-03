@@ -13,7 +13,7 @@ class TotalFilters
     {
         return [
             Filter::make('total_range')
-                ->columnSpan(6)
+                ->columnSpan(['default' => 'full', 'lg' => 6])
                 ->columns(2)
                 ->form([
                     TextInput::make('total_from')

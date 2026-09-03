@@ -29,7 +29,7 @@ class ValidationFilters
                 //     "<strong>Tutti i validati</strong> mostra le fatture che hanno avuto un qualsiasi tipo di validazione;<br>"
                 //     . "le voci successive a <strong>Da validare</strong> sono i singoli casi di validazione"
                 // )))
-                ->columnSpan(6)
+                ->columnSpan(['default' => 'full', 'lg' => 6])
                 // ->options(PiValidationStatus::class)
                 ->options(fn () => [
                         'validati' => 'Tutti i validati',   // La tua opzione custom
@@ -88,13 +88,13 @@ class ValidationFilters
                             fn (Builder $query) => $query->whereDate('pi_validation_date', '<=', $data['date_to'])
                         );
                 })
-                ->columnSpan(12),
+                ->columnSpan(['default' => 'full', 'lg' => 12]),
             SelectFilter::make('pi_validation_user_id')
                 ->label('Validate da')
                 ->placeholder('Tutti gli utenti')
                 ->relationship('piValidationUser', 'name')
                 ->searchable()
-                ->columnSpan(6)
+                ->columnSpan(['default' => 'full', 'lg' => 6])
                 ->preload(),
         ];
     }

@@ -97,14 +97,14 @@ class TotalFilters
                     }
                     return null;
                 })
-                ->columnSpan(8),
+                ->columnSpan(['default' => 'full', 'lg' => 8]),
             Filter::make('ignore_limit')
                 ->columns(18)
                 ->form([
                     Toggle::make('filter_residue')
                         ->label("Ignora 'Dovuto' inferiore a")
                         ->live()
-                        ->columnSpan(12),
+                        ->columnSpan(['default' => 'full', 'lg' => 12]),
                     TextInput::make('ignore_limit')
                         ->label('Importo')
                         ->live(onBlur: true)
@@ -114,7 +114,7 @@ class TotalFilters
                         ->formatStateUsing(fn ($state): ?string => $state === null ? null : number_format(CurrencyService::parseNumber($state) ?? 0, 2, ',', '.'))
                         ->extraInputAttributes(['class' => 'text-right'])
                         ->suffix('€')
-                        ->columnSpan(6)
+                        ->columnSpan(['default' => 'full', 'lg' => 6])
                         ->disabled(fn (Get $get) => $get('filter_residue') == false)
                         ->default(5),
                 ])
@@ -149,7 +149,7 @@ class TotalFilters
                         return null;
                     }
                 })
-                ->columnSpan(8),
+                ->columnSpan(['default' => 'full', 'lg' => 8]),
             // Tables\Filters\SelectFilter::make('balance')
             //     ->label('Quadratura saldi')
             //     ->options([

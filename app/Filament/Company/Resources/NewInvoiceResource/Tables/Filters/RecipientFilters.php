@@ -31,7 +31,7 @@ class RecipientFilters
                     }
                     return $query;
                 })
-                ->columnSpan(4)
+                ->columnSpan(['default' => 'full', 'lg' => 4])
                 ->searchable()
                 ->preload(),
             SelectFilter::make('client_id')->label('Cliente')
@@ -94,7 +94,7 @@ class RecipientFilters
                 )
                 ->searchable()
                 // ->preload()
-                ->columnSpan(12)
+                ->columnSpan(['default' => 'full', 'lg' => 12])
                 ->optionsLimit(5),
             SelectFilter::make('contract_id')->label('Contratto')
                 ->relationship('contract','office_name')
@@ -137,7 +137,7 @@ class RecipientFilters
                     return "Contratto: {$label}";
                 })
                 ->searchable()
-                ->columnSpan(8)
+                ->columnSpan(['default' => 'full', 'lg' => 8])
                 ->preload()
                 ->optionsLimit(5),
 
@@ -146,7 +146,7 @@ class RecipientFilters
                 ->options(TaxType::class)
                 ->placeholder('Tutte')
                 ->searchable()
-                ->columnSpan(4)
+                ->columnSpan(['default' => 'full', 'lg' => 4])
                 ->multiple()
                 ->preload(),
             SelectFilter::make('accrual_type_id')
@@ -156,7 +156,7 @@ class RecipientFilters
                     return AccrualType::pluck('name', 'id')->toArray();
                 })
                 ->multiple()
-                ->columnSpan(10)
+                ->columnSpan(['default' => 'full', 'lg' => 10])
                 ->preload(),
             SelectFilter::make('manage_type_id')
                 ->label('Servizio')
@@ -164,7 +164,7 @@ class RecipientFilters
                     return ManageType::pluck('name', 'id')->toArray();
                 })
                 ->multiple()
-                ->columnSpan(10)
+                ->columnSpan(['default' => 'full', 'lg' => 10])
                 ->preload(),
         ];
     }

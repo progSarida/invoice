@@ -42,7 +42,7 @@ class NumberAndDateFilters
                             fn (Builder $query) => $query->where('number', '<=', $data['number_to'])
                         );
                 })
-                ->columnSpan(12),
+                ->columnSpan(['default' => 'full', 'lg' => 12]),
             Filter::make('dateInvoice')
                 ->columns(2)
                 ->form([
@@ -71,7 +71,7 @@ class NumberAndDateFilters
                             fn (Builder $query) => $query->whereDate('invoice_date', '<=', $data['date_to'])
                         );
                 })
-                ->columnSpan(12),
+                ->columnSpan(['default' => 'full', 'lg' => 12]),
         ];
     }
 }
