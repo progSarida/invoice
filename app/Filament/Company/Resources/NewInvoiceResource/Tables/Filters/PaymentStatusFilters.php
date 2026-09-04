@@ -15,7 +15,7 @@ class PaymentStatusFilters
     {
         return [
             // Riga 5
-            SelectFilter::make('sdi_status')->label('Stato')->options(SdiStatus::class)
+            SelectFilter::make('sdi_status')->label('Stato Sdi')->options(SdiStatus::class)
                 ->multiple()->searchable()->preload()->columnSpan(['default' => 'full', 'lg' => 10]),
             SelectFilter::make('paid')
                 ->label('Stato pagamento')
