@@ -19,13 +19,13 @@ class PassiveDownloadResource extends Resource
 {
     protected static ?string $model = PassiveDownload::class;
 
-    public static ?string $pluralModelLabel = 'Scarichi fatture';
+    public static ?string $pluralModelLabel = 'Scarichi fatture passive';
 
-    public static ?string $modelLabel = 'Scarico fattura';
+    public static ?string $modelLabel = 'Scarico fattura passiva';
 
     protected static ?string $navigationIcon = 'tabler-list-search';
 
-    protected static ?string $navigationGroup = 'Fatture passive';
+    protected static ?string $navigationGroup = 'Fatturazione passiva';
 
     protected static ?int $navigationSort = 3;
 

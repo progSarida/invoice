@@ -36,7 +36,7 @@ class SupplierResource extends Resource
 
     protected static ?string $navigationIcon = 'ri-user-2-line';
 
-    protected static ?string $navigationGroup = 'Fatture passive';
+    protected static ?string $navigationGroup = 'Fatturazione passiva';
 
     protected static ?int $navigationSort = 5;
 

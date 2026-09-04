@@ -47,9 +47,9 @@ class NewActivePaymentsResource extends Resource
 {
     protected static ?string $model = ActivePayments::class;
 
-    public static ?string $pluralModelLabel = 'Pagamenti';
+    public static ?string $pluralModelLabel = 'Pagamenti attivi';
 
-    public static ?string $modelLabel = 'Pagamento';
+    public static ?string $modelLabel = 'Pagamento attivo';
 
     protected static ?string $navigationIcon = 'fluentui-payment-20-o';
 

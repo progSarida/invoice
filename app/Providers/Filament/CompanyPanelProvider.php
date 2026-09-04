@@ -47,7 +47,7 @@ class CompanyPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Company/Resources'), for: 'App\\Filament\\Company\\Resources')
             ->navigationGroups([
                 NavigationGroup::make('Fatturazione attiva'),
-                NavigationGroup::make('Fatture passive'),
+                NavigationGroup::make('Fatturazione passiva'),
                 NavigationGroup::make('Prima nota'),
                 NavigationGroup::make('Costi di notifica'),
                 NavigationGroup::make('Polizze'),

@@ -61,9 +61,9 @@ class NewInvoiceResource extends Resource
 {
     protected static ?string $model = Invoice::class;
 
-    public static ?string $pluralModelLabel = 'Fatture';
+    public static ?string $pluralModelLabel = 'Fatture attive';
 
-    public static ?string $modelLabel = 'Fattura';
+    public static ?string $modelLabel = 'Fattura attiva';
 
     protected static ?string $navigationIcon = 'phosphor-invoice-duotone';
 
