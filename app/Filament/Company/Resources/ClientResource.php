@@ -291,6 +291,14 @@ class ClientResource extends Resource
                 SelectFilter::make('subtype')->label('Sottotipo')->options(ClientSubType::class)->multiple()
             // ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
             ])
+            ->deferFilters()                                    // i filtri si applicano solo cliccando il pulsante
+            ->filtersApplyAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->label('Applica filtri')
+                    ->icon('heroicon-m-magnifying-glass')
+                    // allineo il pulsante a destra del pannello dei filtri
+                    ->extraAttributes(['style' => 'display: flex; width: fit-content; margin-inline-start: auto;']),
+            )
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),

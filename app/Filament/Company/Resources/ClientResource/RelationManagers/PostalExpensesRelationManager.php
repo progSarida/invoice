@@ -109,6 +109,14 @@ class PostalExpensesRelationManager extends RelationManager
                 Tables\Filters\TernaryFilter::make('payed')->label('Pagato'),
                 // Tables\Filters\TernaryFilter::make('reinvoice')->label('Rifatturazione'),
             ])
+            ->deferFilters()                                    // i filtri si applicano solo cliccando il pulsante
+            ->filtersApplyAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->label('Applica filtri')
+                    ->icon('heroicon-m-magnifying-glass')
+                    // allineo il pulsante a destra del pannello dei filtri
+                    ->extraAttributes(['style' => 'display: flex; width: fit-content; margin-inline-start: auto;']),
+            )
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->modalWidth(MaxWidth::SevenExtraLarge)

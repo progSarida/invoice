@@ -503,6 +503,14 @@ class InvoiceResource extends Resource
 
 
             ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(4)
+            ->deferFilters()                                    // i filtri si applicano solo cliccando il pulsante
+            ->filtersApplyAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->label('Applica filtri')
+                    ->icon('heroicon-m-magnifying-glass')
+                    // allineo il pulsante a destra del pannello dei filtri
+                    ->extraAttributes(['style' => 'display: flex; width: fit-content; margin-inline-start: auto;']),
+            )
             ->persistFiltersInSession()
             ->actions([
                 // Tables\Actions\EditAction::make(),

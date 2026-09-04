@@ -73,6 +73,14 @@ class DocTypeResource extends Resource
             ->filters([
                 SelectFilter::make('doc_group_id')->label('Gruppo documenti')->relationship('docGroup', 'name'),
             ])
+            ->deferFilters()                                    // i filtri si applicano solo cliccando il pulsante
+            ->filtersApplyAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->label('Applica filtri')
+                    ->icon('heroicon-m-magnifying-glass')
+                    // allineo il pulsante a destra del pannello dei filtri
+                    ->extraAttributes(['style' => 'display: flex; width: fit-content; margin-inline-start: auto;']),
+            )
             ->recordUrl(function ($record) {
                 return null;
             })

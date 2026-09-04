@@ -916,6 +916,14 @@ class NewActivePaymentsResource extends Resource
                     ->columnSpan(['default' => 'full', 'lg' => 6]),
             // ],layout: FiltersLayout::AboveContentCollapsible)->filtersFormColumns(8)
             ])->filtersFormColumns(6)->filtersFormWidth(MaxWidth::ThreeExtraLarge)
+            ->deferFilters()                                    // i filtri si applicano solo cliccando il pulsante
+            ->filtersApplyAction(
+                fn (Tables\Actions\Action $action) => $action
+                    ->label('Applica filtri')
+                    ->icon('heroicon-m-magnifying-glass')
+                    // allineo il pulsante a destra del pannello dei filtri
+                    ->extraAttributes(['style' => 'display: flex; width: fit-content; margin-inline-start: auto;']),
+            )
             ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\ViewAction::make(),
