@@ -65,37 +65,45 @@ class ListNewInvoices extends ListRecords
     {
         parent::mount();
 
-        // if (!session()->has('checked_invoicing_' . Auth::id())) {
-            // Recupero i dati
-            $activeContracts = $this->getActiveContractsData();                                                                     // recupero contratti attivi con dati ultima fattura
+        // Recupero i dati
+        $activeContracts = $this->getActiveContractsData();                                                                     // recupero contratti attivi con dati ultima fattura
 
-            $invoicingContracts = $this->getInvoicingContracts($activeContracts);                                                   // recupero i contratti da fatturare
+        $invoicingContracts = $this->getInvoicingContracts($activeContracts);                                                   // recupero i contratti da fatturare
 
-            // Eseguo il ciclo una sola volta all'accesso alla pagina
-            foreach ($invoicingContracts['to_invoice'] as $contract) {
-                Log::info("Contratto da fatturare: {$contract->id}");
+        $this->forgetStaleNotifications('to_invoice_', $invoicingContracts['to_invoice']                                        // dimentico i contratti non più da fatturare
+            ->map(fn ($contract) => 'to_invoice_' . $contract->id)->all());
 
-                Notification::make('to_invoice_' . $contract->id)
-                    ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
-                    ->icon('heroicon-o-exclamation-triangle')
-                    ->warning()
-                    // ->sendToDatabase(Auth::user());
-                    ->persistent()
-                    ->send();
-            }
+        $this->forgetStaleNotifications('to_partial_', $invoicingContracts['partial']                                           // dimentico gli storni non più parziali
+            ->map(fn ($partial) => 'to_partial_' . $partial->id)->all());
 
-            foreach($invoicingContracts['partial'] as $partial) {
-                Notification::make('to_partial_' . $contract->id)
-                    ->title('Il contratto con ' . $partial->client->denomination . ' (' . implode('-', $partial->tax_types) . ' - ' . $partial->cig_code . ') ' . 'ha una fattura parzialmente stornata')
-                    ->icon('heroicon-o-exclamation-triangle')
-                    ->warning()
-                    // ->sendToDatabase(auth::user());
-                    ->persistent()
-                    ->send();
-            }
+        // Eseguo il ciclo una sola volta all'accesso alla pagina
+        foreach ($invoicingContracts['to_invoice'] as $contract) {
+            Log::info("Contratto da fatturare: {$contract->id}");
 
-            // session(['checked_invoicing_' . Auth::id() => true]);
-        // }
+            if (! $this->shouldNotify('to_invoice_' . $contract->id)) { continue; }                                             // già segnalato in questa sessione
+
+            $notification = Notification::make('to_invoice_' . $contract->id)
+                ->title('Il contratto con ' . $contract->client->denomination . ' (' . implode('-', $contract->tax_types) . ' - ' . $contract->cig_code . ') ' . 'deve essere fatturato')
+                ->icon('heroicon-o-exclamation-triangle')
+                ->warning()
+                // ->sendToDatabase(Auth::user());
+                ->persistent();
+
+            $this->sendAlert($notification);                                                                                   // a video e nella campanella
+        }
+
+        foreach($invoicingContracts['partial'] as $partial) {
+            if (! $this->shouldNotify('to_partial_' . $partial->id)) { continue; }                                              // già segnalato in questa sessione
+
+            $notification = Notification::make('to_partial_' . $partial->id)
+                ->title('Il contratto con ' . $partial->client->denomination . ' (' . implode('-', $partial->tax_types) . ' - ' . $partial->cig_code . ') ' . 'ha una fattura parzialmente stornata')
+                ->icon('heroicon-o-exclamation-triangle')
+                ->warning()
+                // ->sendToDatabase(auth::user());
+                ->persistent();
+
+            $this->sendAlert($notification);                                                                                   // a video e nella campanella
+        }
     }
 
     protected function getHeaderActions(): array
@@ -689,24 +697,31 @@ class ListNewInvoices extends ListRecords
         }
 
         if ($refusedE->count() > 0) {                                                           // link fatture rifiutate
-            $invoicesR = $refusedE->get();
             $refused = false;
-            foreach ($invoicesR as $index => $el) {
-                if (!Invoice::where('parent_id', $el->id)->exists()) {
-                    Notification::make('refused_credit_note_' . $el->id)
-                        ->title('Emettere la nota di credito per la fattura ' . str_pad($el->number, 3, '0', STR_PAD_LEFT) . "/" . $el->sectional->description . "/" . $el->year)
-                        ->color('gray')
-                        ->icon('phosphor-warning-circle-light')
-                        ->persistent()
-                        ->actions([
-                            \Filament\Notifications\Actions\Action::make('edit')
-                                ->label('Vai alla fattura')
-                                ->url(NewInvoiceResource::getUrl('view', ['record' => $el->id]))
-                                ->color('warning'),
-                        ])
-                        ->send();
-                    // $refused = true;
-                }
+
+            $pending = $refusedE->get()                                                             // rifiuti ancora senza nota di credito collegata
+                ->reject(fn ($el) => Invoice::where('parent_id', $el->id)->exists());
+
+            $this->forgetStaleNotifications('refused_credit_note_', $pending                        // dimentico quelli ormai gestiti
+                ->map(fn ($el) => 'refused_credit_note_' . $el->id)->all());
+
+            foreach ($pending as $el) {
+                if (! $this->shouldNotify('refused_credit_note_' . $el->id)) { continue; }           // già segnalato in questa sessione
+
+                $notification = Notification::make('refused_credit_note_' . $el->id)
+                    ->title('Emettere la nota di credito per la fattura ' . str_pad($el->number, 3, '0', STR_PAD_LEFT) . "/" . $el->sectional->description . "/" . $el->year)
+                    ->color('gray')
+                    ->icon('phosphor-warning-circle-light')
+                    ->persistent()
+                    ->actions([
+                        \Filament\Notifications\Actions\Action::make('edit')
+                            ->label('Vai alla fattura')
+                            ->url(NewInvoiceResource::getUrl('view', ['record' => $el->id]))
+                            ->color('warning'),
+                    ]);
+
+                $this->sendAlert($notification);                                                    // a video e nella campanella
+                // $refused = true;
             }
             if ($refused) return $refused;
         }
@@ -797,6 +812,56 @@ class ListNewInvoices extends ListRecords
         }
 
         return false;
+    }
+
+    /**
+     * Mostra l'avviso a video e lo salva nella campanella, saltando il salvataggio se l'utente
+     * ha già lo stesso avviso non letto, per non accumulare righe identiche a ogni sessione.
+     */
+    private function sendAlert(Notification $notification): void
+    {
+        $user = Auth::user();
+
+        if ($user && ! $user->unreadNotifications()->where('data->title', $notification->getTitle())->exists()) {
+            $notification->sendToDatabase($user);                                               // elenco notifiche in alto a destra
+        }
+
+        $notification->send();                                                                  // popup a video
+    }
+
+    private function notifiedSessionKey(): string                                               // chiave di sessione degli avvisi già mostrati, distinta per utente
+    {
+        return 'notified_alerts_' . Auth::id();
+    }
+
+    /**
+     * Vero se l'avviso non è ancora stato mostrato in questa sessione: lo registra, così al
+     * prossimo ingresso nella pagina non ricompare.
+     */
+    private function shouldNotify(string $key): bool
+    {
+        $shown = session($this->notifiedSessionKey(), []);
+
+        if (in_array($key, $shown, true)) { return false; }                                     // già visto: niente notifica
+
+        $shown[] = $key;
+        session([$this->notifiedSessionKey() => $shown]);
+
+        return true;
+    }
+
+    /**
+     * Dimentica gli avvisi di un gruppo che non sono più pertinenti (prefisso della chiave e
+     * chiavi attualmente valide), così se il caso si ripresenta torna a essere segnalato.
+     */
+    private function forgetStaleNotifications(string $prefix, array $currentKeys): void
+    {
+        $shown = collect(session($this->notifiedSessionKey(), []))
+            ->reject(fn ($key) => str_starts_with($key, $prefix) && ! in_array($key, $currentKeys, true))
+            ->values()
+            ->all();
+
+        session([$this->notifiedSessionKey() => $shown]);
     }
 
     private function getActiveContractsOld()                                                       // recupera i contratti ancora attivi
