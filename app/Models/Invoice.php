@@ -740,24 +740,29 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
             $free = 0;
             $insert = true;
             foreach($vats as $key => $vat){
-                if($key == 'vc06a') $insert = false;
+                if($key == 'vc06a') {                                       // bollo già presente: non va reinserito né conteggiato negli importi esenti
+                    $insert = false;
+                    continue;
+                }
                 if($vat['free']) $free += $vat['taxable'];
             }
             // Log::info('Controllo imposta di bollo___________________________________________________________________________________________');
             // Log::info('Importo esente da IVA: ' . $free);
             // Log::info('Limite bollo: ' . $stampDuty->value);
-            if($insert && $free >= $stampDuty->value){
-                $a = [
-                    'invoice_id' => $this->id,
-                    'invoice_element_id' => null,
-                    'description' => $stampDuty->row_description,
-                    'amount' => (string) $stampDuty->amount,
-                    'vat_code_type' => 'vc06a'
-                ];
-                $item = InvoiceItem::create($a);
-                $item->calculateTotal();
-                $item->save();
-                return $item;
+            if($free >= $stampDuty->value){
+                if($insert){                                                // inserisce il bollo solo se non è già presente
+                    $a = [
+                        'invoice_id' => $this->id,
+                        'invoice_element_id' => null,
+                        'description' => $stampDuty->row_description,
+                        'amount' => (string) $stampDuty->amount,
+                        'vat_code_type' => 'vc06a'
+                    ];
+                    $item = InvoiceItem::create($a);
+                    $item->calculateTotal();
+                    $item->save();
+                    return $item;
+                }
             } else {
                 // Le condizioni NON sono soddisfatte: elimina l'eventuale voce di bollo
                 InvoiceItem::where('invoice_id', $this->id)
