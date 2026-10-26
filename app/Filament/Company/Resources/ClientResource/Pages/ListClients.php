@@ -92,6 +92,7 @@ class ListClients extends ListRecords
                             Select::make('client_id')
                                 ->label('Cliente')
                                 ->placeholder('Tutti')
+                                ->multiple()
                                 ->columnSpan(6)
                                 ->getSearchResultsUsing(function (string $search) {
                                     // Rimuovi spazi multipli e trim
@@ -138,6 +139,9 @@ class ListClients extends ListRecords
                                     // return strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination";
                                     return $record->denomination;
                                 })
+                                ->getOptionLabelsUsing(function (array $values) {                                 // etichette dei clienti selezionati (select multipla)
+                                    return Client::whereIn('id', $values)->pluck('denomination', 'id')->toArray();
+                                })
                                 ->getOptionLabelFromRecordUsing(
                                     // fn (Model $record) => strtoupper("{$record->subtype->getLabel()}") . " - $record->denomination"
                                     fn (Model $record) => $record->denomination
@@ -153,12 +157,14 @@ class ListClients extends ListRecords
                             DatePicker::make('from_date')
                                 ->label('Da data')
                                 ->extraInputAttributes(['class' => 'text-center'])
-                                ->default(now()->startOfYear())
+                                // ->default(now()->startOfYear())
+                                ->default('1901-01-01')
                                 ->columnSpan(3),
                             DatePicker::make('to_date')
                                 ->label('A data')
                                 ->extraInputAttributes(['class' => 'text-center'])
-                                ->default(today())
+                                // ->default(today())
+                                ->default(now()->subYear()->endOfYear()->toDateString())
                                 ->columnSpan(3),
                             Radio::make('type')
                                 ->label('Partitario per')
@@ -221,6 +227,13 @@ class ListClients extends ListRecords
                         ]),
                 ])
                 ->action(function ($data) {
+                    $clientIds = array_values(array_filter((array) ($data['client_id'] ?? [])));                // clienti selezionati
+
+                    if (count($clientIds) > 1) {
+                        return $this->printMultipleLedger($data, $clientIds);                                       // più clienti: zip con un file per cliente
+                    }
+
+                    $data['client_id'] = $clientIds[0] ?? null;                                                     // nessun cliente (tutti) o cliente singolo
                     return $this->printLedger($data);
                 }),
             ExportAction::make('esporta')
@@ -292,6 +305,38 @@ class ListClients extends ListRecords
         } else {
             return $this->generatePdfOutput($data, $residue, $param, $tenant);
         }
+    }
+
+    private function printMultipleLedger(array $data, array $clientIds)
+    {
+        $zipPath = tempnam(sys_get_temp_dir(), 'ledger_');
+        $zip = new \ZipArchive();
+        $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        foreach ($clientIds as $clientId) {
+            $response = $this->printLedger(array_merge($data, ['client_id' => $clientId]));                // partitario del singolo cliente
+
+            ob_start();                                                                                     // catturo il contenuto del file generato
+            $response->sendContent();
+            $content = ob_get_clean();
+
+            preg_match('/filename="([^"]+)"/', $response->headers->get('Content-Disposition') ?? '', $matches); // recupero il nome del file
+            $zip->addFromString($matches[1] ?? "Partitario_{$clientId}", $content);
+        }
+
+        $zip->close();
+        $zipContent = file_get_contents($zipPath);
+        unlink($zipPath);
+
+        $from_formatted = $data['from_date'] ? '_' . (new DateTime($data['from_date']))->format('d-m-Y') : '';
+        $to_formatted = $data['to_date'] ? '_' . (new DateTime($data['to_date']))->format('d-m-Y') : '';
+        $type = $data['type'] === 'accrual' ? '_Competenza' : '_Esercizio';
+
+        return response()->streamDownload(function () use ($zipContent) {
+            echo $zipContent;
+        }, "Partitari{$from_formatted}{$to_formatted}{$type}.zip", [
+            'Content-Type' => 'application/zip',
+        ]);
     }
 
     private function createAccrualLedgerOld(array $input): array
@@ -779,7 +824,8 @@ class ListClients extends ListRecords
         foreach ($payments as $payment) {
             $param[] = [
                 'order' => \Carbon\Carbon::parse($payment->payment_date)->valueOf(),
-                'reg' => \Carbon\Carbon::parse($payment->created_at)->format('d/m/Y'),
+                // 'reg' => \Carbon\Carbon::parse($payment->created_at)->format('d/m/Y'),
+                'reg' => \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y'),
                 'cliente' => [
                     'nome' => $payment->invoice->client->denomination,
                     'pi' => $payment->invoice->client->vat_code,
@@ -787,7 +833,7 @@ class ListClients extends ListRecords
                 ],
                 'num_doc' => $payment->invoice->invoiceNumber(),
                 'data_doc' => $payment->invoice->invoice_date->format('d/m/Y'),
-                'desc' => ($invoice->is_total_with_vat ? 'INCASSO' : 'INCASSO IVA SOSPESA') . 
+                'desc' => ($payment->invoice->is_total_with_vat ? 'INCASSO' : 'INCASSO IVA SOSPESA') .
                                     ' | FAT ' . $payment->invoice->invoiceNumber(). ' ' . \Carbon\Carbon::parse($payment->invoice->invoice_date)->format('d/m/Y'),
                 'dare' => 0,
                 'avere' => $payment->amount ?? 0,
@@ -827,23 +873,45 @@ class ListClients extends ListRecords
             $totalDare += $invoice->is_total_with_vat ? $invoice->total : $invoice->no_vat_total;
         }
 
-        // 2. Note di credito (TD04) con invoice_date < from_date: avere pregresso
-        $creditNotesQuery = $tenant
+        // 2. Note di credito (TD04): avere pregresso, note di debito (TD05): dare pregresso
+        //    la logica CAMBIA in base al tipo di partitario
+        $notesQuery = $tenant
             ->invoices()
-            ->whereHas('docType', fn($q) => $q->where('name', 'TD04'))
-            ->where('invoices.invoice_date', '<', $data['from_date'])
+            ->with('docType')
+            ->whereHas('docType', fn($q) => $q->whereIn('name', ['TD04', 'TD05']))
             ->when($data['client_id'], fn($q) => $q->where('invoices.client_id', $data['client_id']));
 
+        if ($type === 'accrual') {
+            // Competenza: contano le note collegate alle fatture pregresse, indipendentemente dalla loro data,
+            // perché nel partitario compaiono solo insieme alla fattura a cui sono collegate
+            $notesQuery->whereIn('invoices.parent_id', (clone $invoicesQuery)->select('invoices.id'));
+        } else {
+            // Esercizio: contano le note con invoice_date < from_date,
+            // perché le note dopo from_date compariranno come righe indipendenti
+            $notesQuery->where('invoices.invoice_date', '<', $data['from_date']);
+        }
+
         $totalAvereNote = 0;
-        foreach ($creditNotesQuery->get() as $note) {
-            $totalAvereNote += $note->is_total_with_vat ? $note->total : $note->no_vat_total;
+        $totalDareNote = 0;
+        foreach ($notesQuery->get() as $note) {
+            $noteAmount = $note->is_total_with_vat ? $note->total : $note->no_vat_total;
+            if ($note->docType->name === 'TD04') {
+                $totalAvereNote += $noteAmount;
+            } else {
+                $totalDareNote += $noteAmount;
+            }
         }
 
         // 3. Pagamenti: la logica CAMBIA in base al tipo di partitario
         if ($type === 'accrual') {
             // Competenza: contano TUTTI i pagamenti collegati alle fatture pregresse,
             // indipendentemente da payment_date (non compariranno mai come riga separata)
-            $totalPayment = (float) (clone $invoicesQuery)->sum('total_payment');
+            // $totalPayment = (float) (clone $invoicesQuery)->sum('total_payment');
+            // somma dei pagamenti registrati (stessa fonte delle righe del partitario) e non della colonna total_payment
+            $totalPayment = (float) \App\Models\ActivePayments::query()
+                ->where('company_id', $tenant->id)
+                ->whereIn('invoice_id', (clone $invoicesQuery)->select('invoices.id'))
+                ->sum('amount');
         } else {
             // Esercizio: contano solo i pagamenti con payment_date < from_date, su QUALSIASI fattura,
             // perché i pagamenti dopo from_date compariranno come righe indipendenti
@@ -854,7 +922,7 @@ class ListClients extends ListRecords
                 ->sum('amount');
         }
 
-        $residue = $historicResidue + $totalDare - $totalAvereNote - $totalPayment;
+        $residue = $historicResidue + $totalDare + $totalDareNote - $totalAvereNote - $totalPayment;
 
         return (float) $residue;
     }
