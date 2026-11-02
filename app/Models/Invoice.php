@@ -590,7 +590,7 @@ Log::info('Aggiornamento stato SDI fattura stornata a "Emessa nota di credito"')
                                 // ? 'ART. 15 DPR 633/72'
                                 ? $item->vat_code_type->getNorm()
                                 // : (($this->client?->type?->value == 'public' && $notRound)                          // VECCHIO CONTROLLO
-                                : ((!$this->in_total_with_vat)                                                      // NUOVO CONTROLLO USANDO is_total_with_vat
+                                : ((!$this->is_total_with_vat)                                                      // NUOVO CONTROLLO USANDO is_total_with_vat
                                     ? 'S (scissione dei pagamenti)'
                                     : (($this->company->fiscalProfile->tax_regime->value == 'rf16' || $this->company->fiscalProfile->tax_regime->value == 'rf17')
                                         ? 'D (esigibilità differita)'
